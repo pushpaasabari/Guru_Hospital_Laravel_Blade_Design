@@ -4,12 +4,24 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <title>Guru Hospital — {{ $admission->patient_name }} ({{ $admission->ip_no }})</title>
     <style>
+        @font-face {
+            font-family: 'Nirmala';
+            font-style: normal;
+            font-weight: normal;
+            src: url('{{ str_replace('\\', '/', public_path('fonts/Nirmala.ttf')) }}') format('truetype');
+        }
+        @font-face {
+            font-family: 'Nirmala';
+            font-style: normal;
+            font-weight: bold;
+            src: url('{{ str_replace('\\', '/', public_path('fonts/NirmalaB.ttf')) }}') format('truetype');
+        }
         @page {
             size: A4 portrait;
             margin: 12mm 15mm 18mm 15mm;
         }
         body {
-            font-family: 'DejaVu Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-family: 'Nirmala', 'DejaVu Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
             font-size: 10.5px;
             line-height: 1.45;
             color: #111;
