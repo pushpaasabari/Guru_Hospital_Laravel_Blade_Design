@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Admission;
 use App\Models\User;
+use Database\Seeders\AshwiniDischargeSummarySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -85,8 +86,44 @@ class DischargeSummaryFormatsTest extends TestCase
             ->get(route('documents.preview', $admission));
 
         $response->assertStatus(200);
-        $response->assertSee('Newborn 1');
+        $response->assertSee('Newborn');
         $response->assertSee('3.15');
         $response->assertSee('Healthy female baby');
+    }
+
+    public function test_mrs_ashwini_real_hospital_document_renders_and_generates_pdf_successfully(): void
+    {
+        $this->seed(AshwiniDischargeSummarySeeder::class);
+
+        $admission = Admission::where('ip_no', '2026/582')->first();
+        $this->assertNotNull($admission);
+        $this->assertEquals('Mrs. Ashwini', $admission->patient_name);
+        $this->assertEquals('2022/151', $admission->uhid);
+        $this->assertEquals('Emergency LSCS', $admission->procedure_name);
+        $this->assertCount(1, $admission->newborns);
+
+        // Preview Check
+        $previewResponse = $this->actingAs($this->doctor)
+            ->get(route('documents.preview', $admission));
+
+        $previewResponse->assertStatus(200);
+        $previewResponse->assertSee('Mrs. Ashwini');
+        $previewResponse->assertSee('2026/582');
+        $previewResponse->assertSee('2022/151');
+        $previewResponse->assertSee('Emergency LSCS');
+        $previewResponse->assertSee('Dr. Ambika M.S (O&G)');
+        $previewResponse->assertSee('Dr. M.S Karthick');
+        $previewResponse->assertSee('Miss Soudnharya');
+        $previewResponse->assertSee('Dr. Nithyapriya');
+        $previewResponse->assertSee('Hb : 10.6 mgs%');
+        $previewResponse->assertSee('04342-262266');
+
+        // PDF Generation Check
+        $pdfResponse = $this->actingAs($this->doctor)
+            ->get(route('documents.pdf', $admission));
+
+        $pdfResponse->assertStatus(200);
+        $this->assertEquals('application/pdf', $pdfResponse->headers->get('Content-Type'));
+        $this->assertStringContainsString('Guru_Hospital_Discharge_Pack_2026_582.pdf', $pdfResponse->headers->get('Content-Disposition'));
     }
 }

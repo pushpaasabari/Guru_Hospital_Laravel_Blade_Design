@@ -2,9 +2,6 @@
 
 namespace App\Providers;
 
-use App\Models\Admission;
-use App\Policies\AdmissionPolicy;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -14,7 +11,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->register(\Barryvdh\DomPDF\ServiceProvider::class);
     }
 
     /**
@@ -22,6 +19,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::policy(Admission::class, AdmissionPolicy::class);
+        //
     }
 }

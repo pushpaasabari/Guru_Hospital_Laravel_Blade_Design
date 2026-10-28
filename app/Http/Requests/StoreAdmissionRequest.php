@@ -40,7 +40,7 @@ class StoreAdmissionRequest extends FormRequest
             // Clinical Summary
             'clinical_history' => ['nullable', 'string', 'max:10000'],
             'examination' => ['nullable', 'string', 'max:10000'],
-            'investigations' => ['nullable', 'array'],
+            'investigations' => ['nullable'],
             'treatment_course' => ['nullable', 'string', 'max:10000'],
             'discharge_condition' => ['nullable', 'string', 'max:5000'],
             'medication_orders' => ['nullable', 'string', 'max:10000'],
@@ -50,8 +50,10 @@ class StoreAdmissionRequest extends FormRequest
             // Operation Theatre Fields
             'procedure_name' => ['nullable', 'string', 'max:300'],
             'surgeon' => ['nullable', 'string', 'max:160'],
+            'pediatrician_name' => ['nullable', 'string', 'max:160'],
             'anaesthetist' => ['nullable', 'string', 'max:160'],
             'assistant' => ['nullable', 'string', 'max:160'],
+            'assisted_by' => ['nullable', 'string', 'max:160'],
             'anaesthesia_type' => ['nullable', 'string', 'max:160'],
             'procedure_note' => ['nullable', 'string', 'max:15000'],
             'incision' => ['nullable', 'string', 'max:5000'],

@@ -132,6 +132,9 @@ class DatabaseSeeder extends Seeder
         foreach ($templates as $tpl) {
             TemplateVersion::firstOrCreate(['template_code' => $tpl['template_code']], $tpl);
         }
+
+        // 3. Seed Guru Hospital Real Patient Case (Mrs. Ashwini)
+        $this->call(AshwiniDischargeSummarySeeder::class);
     }
 }
 

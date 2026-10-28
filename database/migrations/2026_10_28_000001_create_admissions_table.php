@@ -21,12 +21,13 @@ return new class extends Migration {
             $table->dateTime('discharge_at');
             $table->string('consultant', 160)->nullable();
             $table->string('department', 160)->nullable();
+            $table->string('ward_room_no', 100)->nullable();
             $table->text('diagnosis');
             $table->enum('format', ['general','cmchistn','private','employee']);
             $table->enum('surgery_type', ['delivery','other']);
             $table->longText('clinical_history')->nullable();
             $table->longText('examination')->nullable();
-            $table->json('investigations')->nullable();
+            $table->longText('investigations')->nullable();
             $table->longText('treatment_course')->nullable();
             $table->longText('discharge_condition')->nullable();
             $table->longText('medication_orders')->nullable();
@@ -34,8 +35,10 @@ return new class extends Migration {
             $table->longText('follow_up')->nullable();
             $table->string('procedure_name',300)->nullable();
             $table->string('surgeon',160)->nullable();
+            $table->string('pediatrician_name',160)->nullable();
             $table->string('anaesthetist',160)->nullable();
             $table->string('assistant',160)->nullable();
+            $table->string('assisted_by',160)->nullable();
             $table->string('anaesthesia_type',160)->nullable();
             $table->longText('procedure_note')->nullable();
             $table->longText('incision')->nullable();

@@ -151,6 +151,10 @@
                     <textarea name="discharge_advice" class="form-control" rows="3">{{ old('discharge_advice', $admission->discharge_advice) }}</textarea>
                 </div>
                 <div class="col-12">
+                    <label class="form-label">Investigations (Lab Reports, Pathology & Diagnostics)</label>
+                    <textarea name="investigations" class="form-control" rows="3">{{ old('investigations', is_array($admission->investigations) ? json_encode($admission->investigations, JSON_PRETTY_PRINT) : $admission->investigations) }}</textarea>
+                </div>
+                <div class="col-12">
                     <label class="form-label">Follow-up Instructions</label>
                     <textarea name="follow_up" class="form-control" rows="2">{{ old('follow_up', $admission->follow_up) }}</textarea>
                 </div>
@@ -174,12 +178,20 @@
                     <input type="text" name="surgeon" class="form-control" value="{{ old('surgeon', $admission->surgeon) }}">
                 </div>
                 <div class="col-md-4">
+                    <label class="form-label">Consultant Pediatrician</label>
+                    <input type="text" name="pediatrician_name" class="form-control" value="{{ old('pediatrician_name', $admission->pediatrician_name) }}">
+                </div>
+                <div class="col-md-4">
                     <label class="form-label">Anesthetist</label>
                     <input type="text" name="anaesthetist" class="form-control" value="{{ old('anaesthetist', $admission->anaesthetist) }}">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Surgical Assistant</label>
                     <input type="text" name="assistant" class="form-control" value="{{ old('assistant', $admission->assistant) }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Assisted By S/N</label>
+                    <input type="text" name="assisted_by" class="form-control" value="{{ old('assisted_by', $admission->assisted_by) }}">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Type of Anesthesia</label>
