@@ -50,7 +50,9 @@ return new class extends Migration {
             $table->string('handover_name',160)->nullable();
             $table->string('floor_incharge_name',160)->nullable();
             $table->string('mrd_incharge_name',160)->nullable();
-            $table->enum('status',['draft','awaiting_review','approved','superseded'])->default('draft');
+            $table->enum('status',['draft','ready_for_review','returned_for_correction','approved','generated','superseded'])->default('draft');
+            $table->text('rejection_reason')->nullable();
+            $table->string('reprint_reason')->nullable();
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('approved_by')->nullable()->constrained('users');
             $table->dateTime('approved_at')->nullable();

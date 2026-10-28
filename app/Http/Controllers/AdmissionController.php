@@ -2,79 +2,60 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreAdmissionRequest;
+use App\Http\Requests\UpdateAdmissionRequest;
 use App\Models\Admission;
+use App\Models\DocumentRevision;
+use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class AdmissionController extends Controller
 {
+    public function index(Request $request): View
+    {
+        $this->authorize('viewAny', Admission::class);
+
+        $query = Admission::with(['creator', 'approver', 'newborns'])
+            ->latest('id');
+
+        if ($search = $request->input('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('patient_name', 'like', "%{$search}%")
+                  ->orWhere('uhid', 'like', "%{$search}%")
+                  ->orWhere('ip_no', 'like', "%{$search}%");
+            });
+        }
+
+        if ($status = $request->input('status')) {
+            $query->where('status', $status);
+        }
+
+        $admissions = $query->paginate(20)->withQueryString();
+
+        return view('admissions.index', compact('admissions'));
+    }
+
     public function create(): View
     {
+        $this->authorize('create', Admission::class);
         return view('admissions.create');
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreAdmissionRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'patient_name' => ['required', 'string', 'max:160'],
-            'uhid' => ['required', 'string', 'max:60'],
-            'ip_no' => ['required', 'string', 'max:60'],
-            'age' => ['nullable', 'string', 'max:30'],
-            'sex' => ['nullable', Rule::in(['Female', 'Male', 'Other', 'Not recorded'])],
-            'address' => ['nullable', 'string', 'max:1000'],
-            'contact' => ['nullable', 'string', 'max:50'],
-            'admission_at' => ['required', 'date'],
-            'procedure_at' => ['nullable', 'date'],
-            'discharge_at' => ['required', 'date', 'after_or_equal:admission_at'],
-            'consultant' => ['nullable', 'string', 'max:160'],
-            'department' => ['nullable', 'string', 'max:160'],
-            'diagnosis' => ['required', 'string', 'max:3000'],
-            'format' => ['required', Rule::in(['general', 'cmchistn', 'private', 'employee'])],
-            'surgery_type' => ['required', Rule::in(['delivery', 'other'])],
-            'clinical_history' => ['nullable', 'string', 'max:10000'],
-            'examination' => ['nullable', 'string', 'max:10000'],
-            'investigations' => ['nullable', 'array'],
-            'treatment_course' => ['nullable', 'string', 'max:10000'],
-            'discharge_condition' => ['nullable', 'string', 'max:5000'],
-            'medication_orders' => ['nullable', 'string', 'max:10000'],
-            'discharge_advice' => ['nullable', 'string', 'max:10000'],
-            'follow_up' => ['nullable', 'string', 'max:5000'],
-            'procedure_name' => ['nullable', 'string', 'max:300'],
-            'surgeon' => ['nullable', 'string', 'max:160'],
-            'anaesthetist' => ['nullable', 'string', 'max:160'],
-            'assistant' => ['nullable', 'string', 'max:160'],
-            'anaesthesia_type' => ['nullable', 'string', 'max:160'],
-            'procedure_note' => ['nullable', 'string', 'max:15000'],
-            'incision' => ['nullable', 'string', 'max:5000'],
-            'findings' => ['nullable', 'string', 'max:10000'],
-            'complications' => ['nullable', 'string', 'max:5000'],
-            'blood_loss_ml' => ['nullable', 'numeric', 'min:0'],
-            'specimen' => ['nullable', 'string', 'max:2000'],
-            'drain' => ['nullable', 'string', 'max:2000'],
-            'postoperative_orders' => ['nullable', 'string', 'max:10000'],
-            'mrd_no' => ['nullable', 'string', 'max:60'],
-            'payment_mode' => ['nullable', 'string', 'max:100'],
-            'newborns' => ['required_if:surgery_type,delivery', 'array'],
-            'newborns.*.sex' => ['nullable', Rule::in(['Female', 'Male', 'Other', 'Not recorded'])],
-            'newborns.*.birth_at' => ['nullable', 'date'],
-            'newborns.*.birth_weight_kg' => ['nullable', 'numeric', 'min:0.1', 'max:8'],
-            'newborns.*.apgar_1_min' => ['nullable', 'integer', 'min:0', 'max:10'],
-            'newborns.*.apgar_5_min' => ['nullable', 'integer', 'min:0', 'max:10'],
-            'newborns.*.neonatal_care' => ['nullable', 'string', 'max:3000'],
-            'newborns.*.notes' => ['nullable', 'string', 'max:3000'],
-        ]);
+        $validated = $request->validated();
+        $newborns = $validated['newborns'] ?? [];
+        unset($validated['newborns']);
 
-        // Do not trust the browser's user ID; use the authenticated session.
         $validated['created_by'] = $request->user()->id;
         $validated['status'] = 'draft';
 
-        $admission = DB::transaction(function () use ($validated) {
-            $newborns = $validated['newborns'] ?? [];
-            unset($validated['newborns']);
+        $admission = DB::transaction(function () use ($validated, $newborns) {
             $admission = Admission::create($validated);
+
             if ($admission->isDelivery()) {
                 foreach ($newborns as $newborn) {
                     if (collect($newborn)->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty()) {
@@ -82,10 +63,117 @@ class AdmissionController extends Controller
                     }
                 }
             }
+
+            AuditService::log(
+                'admission.created',
+                'Admission',
+                $admission->id,
+                "New admission created for {$admission->patient_name} (UHID: {$admission->uhid}, IP: {$admission->ip_no})",
+                null,
+                $admission->toArray()
+            );
+
             return $admission;
         });
 
         return redirect()->route('documents.preview', $admission)
-            ->with('status', 'Draft saved. Review all three documents before approval.');
+            ->with('status', 'Draft admission saved successfully. Review all three documents before submitting for approval.');
+    }
+
+    public function show(Admission $admission): View
+    {
+        $this->authorize('view', $admission);
+        $admission->load(['newborns', 'approvals.performer', 'revisions.approver', 'creator', 'approver']);
+
+        return view('admissions.show', compact('admission'));
+    }
+
+    public function edit(Admission $admission): View
+    {
+        $this->authorize('update', $admission);
+        $admission->load('newborns');
+
+        return view('admissions.edit', compact('admission'));
+    }
+
+    public function update(UpdateAdmissionRequest $request, Admission $admission): RedirectResponse
+    {
+        $validated = $request->validated();
+        $newborns = $validated['newborns'] ?? [];
+        unset($validated['newborns']);
+
+        $oldData = $admission->toArray();
+
+        DB::transaction(function () use ($admission, $validated, $newborns, $oldData) {
+            $admission->update($validated);
+
+            // Synchronize newborns if delivery
+            if ($admission->isDelivery()) {
+                $admission->newborns()->delete();
+                foreach ($newborns as $newborn) {
+                    if (collect($newborn)->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty()) {
+                        $admission->newborns()->create($newborn);
+                    }
+                }
+            } else {
+                $admission->newborns()->delete();
+            }
+
+            AuditService::log(
+                'admission.updated',
+                'Admission',
+                $admission->id,
+                "Admission updated for {$admission->patient_name}",
+                $oldData,
+                $admission->fresh()->toArray()
+            );
+        });
+
+        return redirect()->route('documents.preview', $admission)
+            ->with('status', 'Admission details updated successfully.');
+    }
+
+    public function createRevision(Request $request, Admission $admission): RedirectResponse
+    {
+        $this->authorize('createRevision', $admission);
+
+        $request->validate([
+            'revision_reason' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $reason = $request->input('revision_reason');
+
+        DB::transaction(function () use ($admission, $reason, $request) {
+            // Save current state as an immutable revision before unlocking
+            $currentRevisionCount = $admission->revisions()->count();
+            $newRevisionNumber = $currentRevisionCount + 1;
+
+            DocumentRevision::create([
+                'admission_id' => $admission->id,
+                'revision_number' => $newRevisionNumber,
+                'snapshot_data' => $admission->load('newborns')->toArray(),
+                'approved_by' => $admission->approved_by ?? $request->user()->id,
+                'approved_at' => $admission->approved_at ?? now(),
+                'created_at' => now(),
+            ]);
+
+            // Reset status to draft for corrections
+            $admission->update([
+                'status' => 'draft',
+                'rejection_reason' => "Correction requested: {$reason}",
+                'approved_by' => null,
+                'approved_at' => null,
+            ]);
+
+            AuditService::log(
+                'admission.revision_started',
+                'Admission',
+                $admission->id,
+                "New revision #{$newRevisionNumber} started by {$request->user()->name}. Reason: {$reason}"
+            );
+        });
+
+        return redirect()->route('admissions.edit', $admission)
+            ->with('status', 'New revision created. You may now modify the clinical records and submit for re-approval.');
     }
 }
