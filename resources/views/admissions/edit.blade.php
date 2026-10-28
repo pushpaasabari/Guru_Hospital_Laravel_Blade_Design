@@ -174,6 +174,14 @@
                     <input type="text" name="procedure_name" class="form-control" value="{{ old('procedure_name', $admission->procedure_name) }}">
                 </div>
                 <div class="col-md-4">
+                    <label class="form-label">Procedure Done</label>
+                    <input type="text" name="procedure_done" class="form-control" value="{{ old('procedure_done', $admission->procedure_done) }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">ICD Code</label>
+                    <input type="text" name="icd_code" class="form-control" value="{{ old('icd_code', $admission->icd_code) }}">
+                </div>
+                <div class="col-md-4">
                     <label class="form-label">Operating Surgeon</label>
                     <input type="text" name="surgeon" class="form-control" value="{{ old('surgeon', $admission->surgeon) }}">
                 </div>

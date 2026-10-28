@@ -167,4 +167,47 @@ class DischargeSummaryFormatsTest extends TestCase
         $this->assertEquals('application/pdf', $pdfResponse->headers->get('Content-Type'));
         $this->assertStringContainsString('Guru_Hospital_Discharge_Pack_2026_488.pdf', $pdfResponse->headers->get('Content-Disposition'));
     }
+
+    public function test_mrs_manjupriya_exact_operation_theatre_notes_renders_and_generates_pdf_faithfully(): void
+    {
+        $this->seed(\Database\Seeders\ManjupriyaOperationNotesSeeder::class);
+
+        $admission = Admission::where('ip_no', '2026/778')->first();
+        $this->assertNotNull($admission);
+        $this->assertEquals('Mrs. MANJUPRIYA', $admission->patient_name);
+        $this->assertEquals('2026/2952', $admission->uhid);
+        $this->assertEquals('ELECTIVE LSCS', $admission->procedure_name);
+
+        // Preview Check
+        $previewResponse = $this->actingAs($this->doctor)
+            ->get(route('documents.preview', $admission));
+
+        $previewResponse->assertStatus(200);
+        $previewResponse->assertSee('OPERATION THEATRE NOTES');
+        $previewResponse->assertSee('Mrs. MANJUPRIYA');
+        $previewResponse->assertSee('2026/778');
+        $previewResponse->assertSee('2026/2952');
+        $previewResponse->assertSee('Dr.Ambika MS(OG)');
+        $previewResponse->assertSee('9677371431');
+        $previewResponse->assertSee('W/O KAMALGANESH');
+        $previewResponse->assertSee('ELECTIVE LSCS');
+        $previewResponse->assertSee('Dr.S.G.Arun kumar');
+        $previewResponse->assertSee('Mr. Vijayakumar');
+        $previewResponse->assertSee('Spinal');
+        $previewResponse->assertSee('Under SA, abdomen opened in layers by SPT incision');
+        $previewResponse->assertSee('BLOOD LOSS (ML) :');
+        $previewResponse->assertSee('SPECIMEN :');
+        $previewResponse->assertSee('DRAIN :');
+        $previewResponse->assertSee('BABY');
+        $previewResponse->assertSee('2.650Kg');
+        $previewResponse->assertSee('SURGEON SEAL &amp; SIGNATURE', false);
+
+        // PDF Generation Check
+        $pdfResponse = $this->actingAs($this->doctor)
+            ->get(route('documents.pdf', $admission));
+
+        $pdfResponse->assertStatus(200);
+        $this->assertEquals('application/pdf', $pdfResponse->headers->get('Content-Type'));
+        $this->assertStringContainsString('Guru_Hospital_Discharge_Pack_2026_778.pdf', $pdfResponse->headers->get('Content-Disposition'));
+    }
 }

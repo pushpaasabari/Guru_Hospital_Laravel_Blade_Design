@@ -32,6 +32,8 @@
 </div></div>
 <div class="card mb-3"><div class="card-header bg-white fw-bold">3. Operation Theatre Notes</div><div class="card-body row g-3">
 <div class="col-md-4"><label class="form-label">Procedure / surgery</label><input class="form-control" name="procedure_name" value="{{ old('procedure_name') }}"></div>
+<div class="col-md-4"><label class="form-label">Procedure done</label><input class="form-control" name="procedure_done" value="{{ old('procedure_done') }}"></div>
+<div class="col-md-4"><label class="form-label">ICD Code</label><input class="form-control" name="icd_code" value="{{ old('icd_code') }}"></div>
 <div class="col-md-4"><label class="form-label">Surgeon</label><input class="form-control" name="surgeon" value="{{ old('surgeon') }}"></div>
 <div class="col-md-4"><label class="form-label">Consultant Pediatrician</label><input class="form-control" name="pediatrician_name" value="{{ old('pediatrician_name') }}" placeholder="e.g. Dr. Nithyapriya (Paediatrician)"></div>
 <div class="col-md-4"><label class="form-label">Anaesthetist</label><input class="form-control" name="anaesthetist" value="{{ old('anaesthetist') }}"></div>

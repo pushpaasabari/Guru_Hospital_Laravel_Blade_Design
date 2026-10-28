@@ -49,6 +49,8 @@ class StoreAdmissionRequest extends FormRequest
 
             // Operation Theatre Fields
             'procedure_name' => ['nullable', 'string', 'max:300'],
+            'procedure_done' => ['nullable', 'string', 'max:300'],
+            'icd_code' => ['nullable', 'string', 'max:60'],
             'surgeon' => ['nullable', 'string', 'max:160'],
             'pediatrician_name' => ['nullable', 'string', 'max:160'],
             'anaesthetist' => ['nullable', 'string', 'max:160'],

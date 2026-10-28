@@ -14,7 +14,7 @@ class Admission extends Model
         'department', 'diagnosis', 'format', 'surgery_type', 'clinical_history',
         'examination', 'investigations', 'treatment_course', 'discharge_condition',
         'medication_orders', 'discharge_advice', 'follow_up',
-        'procedure_name', 'surgeon', 'pediatrician_name', 'anaesthetist', 'assistant', 'assisted_by', 'anaesthesia_type',
+        'procedure_name', 'procedure_done', 'icd_code', 'surgeon', 'pediatrician_name', 'anaesthetist', 'assistant', 'assisted_by', 'anaesthesia_type',
         'procedure_note', 'incision', 'findings', 'complications', 'blood_loss_ml',
         'specimen', 'drain', 'postoperative_orders', 'mrd_no', 'payment_mode',
         'handover_name', 'floor_incharge_name', 'mrd_incharge_name', 'status',

@@ -76,3 +76,4 @@ class AjithKumarDischargeSummarySeeder extends Seeder
         ]);
     }
 }
+

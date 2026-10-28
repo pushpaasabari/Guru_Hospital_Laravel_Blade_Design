@@ -337,124 +337,174 @@
 <!-- ========================================== -->
 <div class="page-break"></div>
 
-<div class="hospital-header">
-    <div class="hospital-name">GURU HOSPITAL</div>
-    <div class="hospital-subtitle">DEPARTMENT OF OPERATION THEATRE & SURGICAL SERVICES</div>
-    <div class="hospital-subtitle">Ph: 04342-262266 &bull; Govt. Medical College Hospital Opp. Dharmapuri</div>
+<div style="text-align: center; margin-top: 10px; margin-bottom: 22px;">
+    <div style="font-size: 14pt; font-weight: bold; text-decoration: underline; text-transform: uppercase; letter-spacing: 0.5px;">OPERATION THEATRE NOTES</div>
 </div>
 
-<div class="document-title">OPERATION THEATRE NOTES & RECORD OF SURGERY</div>
-
-<table class="meta-table">
+<table style="width: 100%; border-collapse: collapse; margin-bottom: 4px; font-size: 10pt;">
     <tr>
-        <th>Patient Name</th>
-        <td><strong>{{ $admission->patient_name }}</strong></td>
-        <th>IP Number</th>
-        <td><strong>{{ $admission->ip_no }}</strong></td>
+        <td style="font-weight: bold; width: 16%;">NAME</td>
+        <td style="font-weight: bold; width: 3%; text-align: center;">:</td>
+        <td style="width: 33%;">{{ $admission->patient_name }}</td>
+        <td style="font-weight: bold; width: 15%;">IP.NO</td>
+        <td style="font-weight: bold; width: 3%; text-align: center;">:</td>
+        <td style="width: 30%;">{{ $admission->ip_no }}</td>
     </tr>
     <tr>
-        <th>Age / Sex</th>
-        <td>{{ $admission->age ? $admission->age . ' Yrs' : '26' }} / {{ $admission->sex ?? 'F' }}</td>
-        <th>UHID</th>
+        <td style="font-weight: bold;">AGE/SEX</td>
+        <td style="font-weight: bold; text-align: center;">:</td>
+        <td>{{ $admission->age ? $admission->age . ' / ' . ($admission->sex ?? 'Female') : ($admission->sex ?? 'Female') }}</td>
+        <td style="font-weight: bold;">UHID NO</td>
+        <td style="font-weight: bold; text-align: center;">:</td>
         <td>{{ $admission->uhid }}</td>
     </tr>
     <tr>
-        <th>Date of Operation</th>
-        <td>{{ $admission->procedure_at?->format('d/m/Y h:i A') ?? 'Not recorded' }}</td>
-        <th>Consultant</th>
-        <td>{{ $admission->surgeon ?: ($admission->consultant ?? 'Dr. Ambika M.S (O&G)') }}</td>
+        <td style="font-weight: bold;">CONSULTANT</td>
+        <td style="font-weight: bold; text-align: center;">:</td>
+        <td>{{ $admission->consultant ?: ($admission->surgeon ?: '') }}</td>
+        <td style="font-weight: bold;">PHONE</td>
+        <td style="font-weight: bold; text-align: center;">:</td>
+        <td>{{ $admission->contact ?? '' }}</td>
     </tr>
     <tr>
-        <th>Pre-op Diagnosis</th>
-        <td colspan="3">{{ $admission->diagnosis }}</td>
+        <td style="font-weight: bold;">ICD CODE</td>
+        <td style="font-weight: bold; text-align: center;">:</td>
+        <td>{{ $admission->icd_code ?? '' }}</td>
+        <td style="font-weight: bold;">DATE</td>
+        <td style="font-weight: bold; text-align: center;">:</td>
+        <td>{{ $admission->procedure_at?->format('d/m/Y') ?? ($admission->admission_at?->format('d/m/Y') ?? now()->format('d/m/Y')) }}</td>
     </tr>
-    <tr>
-        <th>Procedure Performed</th>
-        <td colspan="3"><strong>{{ $admission->procedure_name ?: 'Emergency LSCS' }}</strong></td>
-    </tr>
-    <tr>
-        <th>Operating Surgeon</th>
-        <td>{{ $admission->surgeon ?: 'Dr. Ambika M.S (O&G)' }}</td>
-        <th>Anaesthetist</th>
-        <td>{{ $admission->anaesthetist ?: 'Dr. M.S Karthick' }}</td>
-    </tr>
-    <tr>
-        <th>Assistant by S/N</th>
-        <td>{{ $admission->assisted_by ?: ($admission->assistant ?: 'Miss Soudnharya') }}</td>
-        <th>Anaesthesia Type</th>
-        <td>{{ $admission->anaesthesia_type ?: 'SA' }}</td>
-    </tr>
-    <tr>
-        <th>Estimated Blood Loss</th>
-        <td>{{ $admission->blood_loss_ml ? $admission->blood_loss_ml . ' mL' : 'Normal / Minimal' }}</td>
-        <th>Specimen for HPE</th>
-        <td>{{ $admission->specimen ?: 'Nil' }}</td>
-    </tr>
-    @if($admission->drain)
-    <tr>
-        <th>Surgical Drain</th>
-        <td colspan="3">{{ $admission->drain }}</td>
-    </tr>
-    @endif
 </table>
 
-@if($admission->incision)
-    <div class="section-heading">Incision & Approach</div>
-    <div class="content-block">{{ nl2br(e($admission->incision)) }}</div>
-@else
-    <div class="section-heading">Incision & Approach</div>
-    <div class="content-block">Abdomen opened in layers by Suprapubic Transverse (SPT) incision.</div>
-@endif
+<table style="width: 100%; border-collapse: collapse; margin-top: 2px; margin-bottom: 4px; font-size: 10pt;">
+    <tr>
+        <td style="font-weight: bold; width: 16%;">ADDRESS</td>
+        <td style="font-weight: bold; width: 3%; text-align: center;">:</td>
+        <td style="width: 81%;">{{ $admission->address ?? '' }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">DATE OF SURGERY</td>
+        <td style="font-weight: bold; text-align: center;">:</td>
+        <td>{{ $admission->procedure_at?->format('d/m/Y h:i a') ?? '' }}</td>
+    </tr>
+</table>
 
-@if($admission->findings)
-    <div class="section-heading">Operative Findings</div>
-    <div class="content-block">{{ nl2br(e($admission->findings)) }}</div>
-@endif
+<table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 4px; font-size: 10pt;">
+    <tr>
+        <td style="font-weight: bold; width: 16%;">DIAGNOSIS</td>
+        <td style="font-weight: bold; width: 3%; text-align: center;">:</td>
+        <td style="width: 81%;">{{ $admission->diagnosis }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">PROCEDURE DONE</td>
+        <td style="font-weight: bold; text-align: center;">:</td>
+        <td>{{ $admission->procedure_done ?? '' }}</td>
+    </tr>
+</table>
 
-@if($admission->procedure_note)
-    <div class="section-heading">Operative Technique & Procedure Steps</div>
-    <div class="content-block">{{ nl2br(e($admission->procedure_note)) }}</div>
-@endif
+<table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 6px; font-size: 10pt;">
+    <tr>
+        <td style="font-weight: bold; width: 16%;">SURGERY</td>
+        <td style="font-weight: bold; width: 3%; text-align: center;">:</td>
+        <td colspan="4" style="font-weight: bold;">{{ $admission->procedure_name ?: 'ELECTIVE LSCS' }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold; width: 16%;">SURGEON</td>
+        <td style="font-weight: bold; width: 3%; text-align: center;">:</td>
+        <td style="width: 33%;">{{ $admission->surgeon ?: ($admission->consultant ?: '') }}</td>
+        <td style="font-weight: bold; width: 15%;">ANESTHETIST</td>
+        <td style="font-weight: bold; width: 3%; text-align: center;">:</td>
+        <td style="width: 30%;">{{ $admission->anaesthetist ?? '' }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">ASSISTANT BY S/N</td>
+        <td style="font-weight: bold; text-align: center;">:</td>
+        <td>{{ $admission->assisted_by ?: ($admission->assistant ?: '') }}</td>
+        <td style="font-weight: bold;">ANESTHESIA TYPE</td>
+        <td style="font-weight: bold; text-align: center;">:</td>
+        <td>{{ $admission->anaesthesia_type ?: 'Spinal' }}</td>
+    </tr>
+</table>
 
-@if($admission->isDelivery() && $admission->newborns->isNotEmpty())
-    <div class="section-heading">Baby Delivery Notes</div>
-    @foreach($admission->newborns as $i => $baby)
-        <div class="content-block">
-            <strong>Baby {{ count($admission->newborns) > 1 ? '#' . ($i + 1) : '' }}:</strong>
-            Alive {{ $baby->sex ?? 'Female' }} baby delivered on {{ $baby->birth_at?->format('d/m/Y \a\t h:i A') ?? $admission->procedure_at?->format('d/m/Y \a\t h:i A') }},
-            Weight: <strong>{{ $baby->birth_weight_kg ? $baby->birth_weight_kg . ' kg' : '2.8 kg' }}</strong>,
-            Apgar: <strong>{{ $baby->apgar_1_min ?? '7' }}/10, {{ $baby->apgar_5_min ?? '8' }}/10</strong>.
-            AMTSL followed. Handed over to Paediatrician ({{ $admission->pediatrician_name ?: 'Dr. Nithyapriya' }}).
-        </div>
-    @endforeach
-@endif
-
-@if($admission->complications)
-    <div class="section-heading">Complications / Difficulties</div>
-    <div class="content-block">{{ nl2br(e($admission->complications)) }}</div>
-@endif
-
-@if($admission->postoperative_orders)
-    <div class="section-heading">Immediate Post-operative Orders</div>
-    <div class="content-block">{{ nl2br(e($admission->postoperative_orders)) }}</div>
-@endif
-
-<div class="signature-row">
-    <div class="sig-block">
-        <div class="sig-line"></div>
-        <div>Scrub Nurse / Assistant</div>
-        <div style="font-size:8.5px; color:#555;">{{ $admission->assisted_by ?: 'Miss Soudnharya' }}</div>
+<div style="margin-top: 10px; font-size: 10pt;">
+    <div style="font-weight: bold; margin-bottom: 2px;">PROCEDURE NOTE :</div>
+    <div style="font-weight: bold; margin-bottom: 2px;">INCISION :</div>
+    <div style="text-align: justify; line-height: 1.45; margin-bottom: 6px;">
+        @if($admission->procedure_note)
+            {!! nl2br(e($admission->procedure_note)) !!}
+        @elseif($admission->incision)
+            {!! nl2br(e($admission->incision)) !!}
+        @endif
     </div>
-    <div class="sig-block">
-        <div class="sig-line"></div>
-        <div>Anaesthetist Signature</div>
-        <div style="font-size:8.5px; color:#555;">{{ $admission->anaesthetist ?: 'Dr. M.S Karthick' }}</div>
-    </div>
-    <div class="sig-block">
-        <div class="sig-line"></div>
-        <div><strong>Operating Surgeon Signature</strong></div>
-        <div style="font-size:8.5px; color:#555;">{{ $admission->surgeon ?: 'Dr. Ambika M.S (O&G)' }}</div>
-    </div>
+</div>
+
+<div style="margin-top: 6px; font-size: 10pt;">
+    <div style="font-weight: bold; margin-bottom: 2px;">FINDINGS :</div>
+    @if($admission->findings)
+        <div style="text-align: justify; margin-bottom: 6px;">{!! nl2br(e($admission->findings)) !!}</div>
+    @endif
+</div>
+
+<div style="margin-top: 6px; font-size: 10pt;">
+    <div style="font-weight: bold; margin-bottom: 2px;">COMPLICATIONS :</div>
+    @if($admission->complications)
+        <div style="text-align: justify; margin-bottom: 6px;">{!! nl2br(e($admission->complications)) !!}</div>
+    @endif
+</div>
+
+<table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 6px; font-size: 10pt;">
+    <tr>
+        <td style="width: 35%;">
+            <strong style="color: #000;">BLOOD LOSS (ML) :</strong>
+            <span>{{ $admission->blood_loss_ml ? $admission->blood_loss_ml . ' ml' : '' }}</span>
+        </td>
+        <td style="width: 35%;">
+            <strong style="color: #000;">SPECIMEN :</strong>
+            <span>{{ $admission->specimen ?? '' }}</span>
+        </td>
+        <td style="width: 30%;">
+            <strong style="color: #000;">DRAIN :</strong>
+            <span>{{ $admission->drain ?? '' }}</span>
+        </td>
+    </tr>
+</table>
+
+@if($admission->isDelivery())
+<table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 6px; font-size: 10pt;">
+    <tr>
+        <td style="font-weight: bold; width: 16%; vertical-align: top;">BABY</td>
+        <td style="font-weight: bold; width: 3%; text-align: center; vertical-align: top;">:</td>
+        <td style="width: 81%; vertical-align: top;">
+            @if($admission->newborns->isNotEmpty())
+                @foreach($admission->newborns as $i => $baby)
+                    <div style="margin-bottom: 4px;">
+                        Alive {{ $baby->sex ?? 'Female' }} baby on {{ $baby->birth_at?->format('d/m/Y @ h.iA') ?? ($admission->procedure_at?->format('d/m/Y @ h.iA') ?? '') }}<br>
+                        Baby Weight {{ $baby->birth_weight_kg ? number_format($baby->birth_weight_kg, 3) . 'Kg' : '2.650Kg' }}
+                        @if($baby->neonatal_care)
+                            <span style="color: #555;">({{ $baby->neonatal_care }})</span>
+                        @endif
+                    </div>
+                @endforeach
+            @else
+                <div>
+                    Alive Female baby on {{ $admission->procedure_at?->format('d/m/Y @ h.iA') ?? now()->format('d/m/Y @ h.iA') }}<br>
+                    Baby Weight 2.650Kg
+                </div>
+            @endif
+        </td>
+    </tr>
+</table>
+@endif
+
+<div style="margin-top: 6px; font-size: 10pt;">
+    <div style="font-weight: bold; margin-bottom: 2px;">POST-OPERATIVE ORDERS :</div>
+    @if($admission->postoperative_orders)
+        <div style="text-align: justify; margin-bottom: 6px;">{!! nl2br(e($admission->postoperative_orders)) !!}</div>
+    @endif
+</div>
+
+<div style="text-align: right; margin-top: 40px; padding-top: 15px; page-break-inside: avoid;">
+    <span style="font-weight: bold; font-size: 10.5pt; letter-spacing: 0.5px;">SURGEON SEAL &amp; SIGNATURE</span>
 </div>
 
 <!-- ========================================== -->

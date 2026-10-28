@@ -34,6 +34,8 @@ return new class extends Migration {
             $table->longText('discharge_advice')->nullable();
             $table->longText('follow_up')->nullable();
             $table->string('procedure_name',300)->nullable();
+            $table->string('procedure_done',300)->nullable();
+            $table->string('icd_code',60)->nullable();
             $table->string('surgeon',160)->nullable();
             $table->string('pediatrician_name',160)->nullable();
             $table->string('anaesthetist',160)->nullable();

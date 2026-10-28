@@ -136,6 +136,7 @@ class DatabaseSeeder extends Seeder
         // 3. Seed Guru Hospital Real Patient Cases
         $this->call(AshwiniDischargeSummarySeeder::class);
         $this->call(AjithKumarDischargeSummarySeeder::class);
+        $this->call(ManjupriyaOperationNotesSeeder::class);
     }
 }
 
