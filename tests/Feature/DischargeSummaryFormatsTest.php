@@ -210,4 +210,41 @@ class DischargeSummaryFormatsTest extends TestCase
         $this->assertEquals('application/pdf', $pdfResponse->headers->get('Content-Type'));
         $this->assertStringContainsString('Guru_Hospital_Discharge_Pack_2026_778.pdf', $pdfResponse->headers->get('Content-Disposition'));
     }
+
+    public function test_mrs_anitha_twin_delivery_renders_and_generates_pdf_successfully(): void
+    {
+        $this->seed(\Database\Seeders\AnithaTwinDeliverySeeder::class);
+
+        $admission = Admission::where('ip_no', '2026/567')->first();
+        $this->assertNotNull($admission);
+        $this->assertEquals('Mrs. Anitha', $admission->patient_name);
+        $this->assertEquals('2023/3931', $admission->uhid);
+        $this->assertEquals('G3P1L1A1 / TWINS / Preterm / PROM', $admission->diagnosis);
+        $this->assertCount(2, $admission->newborns);
+
+        // Preview Check
+        $previewResponse = $this->actingAs($this->doctor)
+            ->get(route('documents.preview', $admission));
+
+        $previewResponse->assertStatus(200);
+        $previewResponse->assertSee('Mrs. Anitha');
+        $previewResponse->assertSee('2026/567');
+        $previewResponse->assertSee('2023/3931');
+        $previewResponse->assertSee('BABY TWIN A');
+        $previewResponse->assertSee('BABY TWIN B');
+        $previewResponse->assertSee('2.250 kg');
+        $previewResponse->assertSee('RDS(+)');
+        $previewResponse->assertSee('NICU');
+        $previewResponse->assertSee('Dr. Ambika MS OG');
+        $previewResponse->assertSee('Hb : 12.9 mgs %');
+        $previewResponse->assertSee('04342-262266');
+
+        // PDF Generation Check
+        $pdfResponse = $this->actingAs($this->doctor)
+            ->get(route('documents.pdf', $admission));
+
+        $pdfResponse->assertStatus(200);
+        $this->assertEquals('application/pdf', $pdfResponse->headers->get('Content-Type'));
+        $this->assertStringContainsString('Guru_Hospital_Discharge_Pack_2026_567.pdf', $pdfResponse->headers->get('Content-Disposition'));
+    }
 }

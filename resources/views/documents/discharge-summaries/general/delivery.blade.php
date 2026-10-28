@@ -85,20 +85,43 @@
         @if($admission->newborns->isEmpty())
             <p class="mb-0 text-muted small">No newborn records documented.</p>
         @else
-            @foreach($admission->newborns as $i => $baby)
-                <div class="small mb-1">
-                    <strong>Newborn {{ count($admission->newborns) > 1 ? '#' . ($i + 1) : '' }} :</strong>
-                    Alive {{ $baby->sex ?? 'Female' }} baby on {{ $baby->birth_at?->format('d.m.Y \a\t h:i A') ?? $admission->procedure_at?->format('d.m.Y \a\t h:i A') }},
-                    WT: <strong>{{ $baby->birth_weight_kg ? $baby->birth_weight_kg . ' kgs' : '2.8 kgs' }}</strong>,
-                    Apgar: <strong>{{ $baby->apgar_1_min ?? '7' }}/10, {{ $baby->apgar_5_min ?? '8' }}/10</strong>.
-                    @if($baby->neonatal_care)
-                        <span>{{ $baby->neonatal_care }}</span>
-                    @endif
-                    @if($baby->notes)
-                        <span>({{ $baby->notes }})</span>
-                    @endif
+            @if($admission->newborns->count() > 1)
+                <div class="row g-2">
+                    @foreach($admission->newborns as $i => $baby)
+                        <div class="col-md-6">
+                            <div class="p-2 border rounded bg-white h-100 small">
+                                <div class="fw-bold text-dark border-bottom pb-1 mb-1">
+                                    {{ $i === 0 ? 'BABY TWIN A (Newborn #1)' : ($i === 1 ? 'BABY TWIN B (Newborn #2)' : 'Newborn #' . ($i + 1)) }}
+                                </div>
+                                <div>: Alive {{ $baby->sex ?? 'Male' }} baby on {{ $baby->birth_at?->format('d/m/Y') ?? $admission->procedure_at?->format('d/m/Y') }}</div>
+                                <div>: Wt : <strong>{{ $baby->birth_weight_kg ? number_format($baby->birth_weight_kg, 3) . ' kg' : '2.250 kg' }}</strong> at {{ $baby->birth_at?->format('h.i A') }}</div>
+                                <div>- Apgar : <strong>{{ $baby->apgar_1_min ?? '7' }}/10, {{ $baby->apgar_5_min ?? '8' }}/10</strong></div>
+                                @if($baby->neonatal_care)
+                                    <div class="text-danger fw-semibold mt-1">{{ $baby->neonatal_care }}</div>
+                                @endif
+                                @if($baby->notes)
+                                    <div class="text-muted mt-1 small">{{ $baby->notes }}</div>
+                                @endif
+                            </div>
+                        </div>
+                    @endforeach
                 </div>
-            @endforeach
+            @else
+                @foreach($admission->newborns as $i => $baby)
+                    <div class="small mb-1">
+                        <strong>Newborn {{ count($admission->newborns) > 1 ? '#' . ($i + 1) : '' }} :</strong>
+                        Alive {{ $baby->sex ?? 'Female' }} baby on {{ $baby->birth_at?->format('d.m.Y \a\t h:i A') ?? $admission->procedure_at?->format('d.m.Y \a\t h:i A') }},
+                        WT: <strong>{{ $baby->birth_weight_kg ? $baby->birth_weight_kg . ' kgs' : '2.8 kgs' }}</strong>,
+                        Apgar: <strong>{{ $baby->apgar_1_min ?? '7' }}/10, {{ $baby->apgar_5_min ?? '8' }}/10</strong>.
+                        @if($baby->neonatal_care)
+                            <span>{{ $baby->neonatal_care }}</span>
+                        @endif
+                        @if($baby->notes)
+                            <span>({{ $baby->notes }})</span>
+                        @endif
+                    </div>
+                @endforeach
+            @endif
         @endif
     </div>
 
