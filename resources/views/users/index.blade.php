@@ -2,9 +2,9 @@
 @section('title', 'Staff User Management — Guru Hospital')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <h1 class="h3 fw-bold mb-1 text-dark">Hospital Staff & Role Management</h1>
+        <h1 class="h3 fw-bold mb-1 text-dark" style="letter-spacing: -0.02em;">Hospital Staff & Role Management</h1>
         <p class="text-muted mb-0">Manage authorized users, doctor medical council registration numbers, and role-based permissions.</p>
     </div>
     <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
@@ -12,7 +12,7 @@
     </button>
 </div>
 
-<div class="card shadow-sm">
+<div class="card shadow-sm border-0">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
             <thead class="table-light text-muted small text-uppercase">
@@ -29,7 +29,7 @@
                 @foreach($users as $user)
                 <tr>
                     <td>
-                        <div class="fw-bold">{{ $user->name }}</div>
+                        <div class="fw-bold text-dark">{{ $user->name }}</div>
                         <div class="text-muted small">{{ $user->email }}</div>
                     </td>
                     <td>
@@ -49,9 +49,9 @@
                     </td>
                     <td>
                         @if($user->is_active)
-                            <span class="badge bg-success">Active</span>
+                            <span class="badge badge-approved">Active</span>
                         @else
-                            <span class="badge bg-danger">Deactivated</span>
+                            <span class="badge badge-returned_for_correction">Deactivated</span>
                         @endif
                     </td>
                     <td class="text-end">
@@ -80,10 +80,10 @@
         <form method="POST" action="{{ route('users.store') }}" class="modal-content">
             @csrf
             <div class="modal-header">
-                <h5 class="modal-title fw-bold">Add Hospital Staff User</h5>
+                <h5 class="modal-title fw-bold" style="letter-spacing: -0.01em;">Add Hospital Staff User</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <div class="mb-3">
                     <label class="form-label required">Full Name</label>
                     <input type="text" name="name" class="form-control" placeholder="e.g. Dr. Ramesh Kumar MS" required>
@@ -117,11 +117,10 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-primary">Create User Account</button>
             </div>
         </form>
     </div>
 </div>
 @endsection
-

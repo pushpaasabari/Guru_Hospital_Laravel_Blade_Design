@@ -2,9 +2,9 @@
 @section('title', 'Clinical Workflow Dashboard — Guru Hospital')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <h1 class="h3 fw-bold mb-1 text-dark">Clinical Document Workflow Dashboard</h1>
+        <h1 class="h3 fw-bold mb-1 text-dark" style="letter-spacing: -0.02em;">Clinical Document Workflow Dashboard</h1>
         <p class="text-muted mb-0">Overview of inpatient discharge summaries, OT records, and MRD archives</p>
     </div>
     @if(auth()->user()->canEditAdmissions())
@@ -17,59 +17,71 @@
 <!-- Workflow KPI Cards -->
 <div class="row g-3 mb-4">
     <div class="col-md-2 col-6">
-        <div class="card h-100 border-start border-4 border-secondary">
-            <div class="card-body p-3">
-                <span class="text-muted small fw-semibold text-uppercase">Drafts</span>
-                <h3 class="fw-bold mb-0 mt-1 text-secondary">{{ $counts['draft'] }}</h3>
+        <div class="fg-kpi-card">
+            <div class="fg-kpi-top">
+                <span class="fg-kpi-label">Drafts</span>
+                <span class="fg-kpi-dot" style="background: #94a3b8;"></span>
             </div>
+            <div class="fg-kpi-number text-secondary">{{ $counts['draft'] }}</div>
+            <p class="fg-kpi-desc">In progress</p>
         </div>
     </div>
     <div class="col-md-2 col-6">
-        <div class="card h-100 border-start border-4 border-info">
-            <div class="card-body p-3">
-                <span class="text-muted small fw-semibold text-uppercase">Ready for Review</span>
-                <h3 class="fw-bold mb-0 mt-1 text-info">{{ $counts['ready_for_review'] }}</h3>
+        <div class="fg-kpi-card">
+            <div class="fg-kpi-top">
+                <span class="fg-kpi-label">Review</span>
+                <span class="fg-kpi-dot" style="background: #0284c7;"></span>
             </div>
+            <div class="fg-kpi-number text-info">{{ $counts['ready_for_review'] }}</div>
+            <p class="fg-kpi-desc">Awaiting doctor</p>
         </div>
     </div>
     <div class="col-md-2 col-6">
-        <div class="card h-100 border-start border-4 border-danger">
-            <div class="card-body p-3">
-                <span class="text-muted small fw-semibold text-uppercase">Returned</span>
-                <h3 class="fw-bold mb-0 mt-1 text-danger">{{ $counts['returned_for_correction'] }}</h3>
+        <div class="fg-kpi-card">
+            <div class="fg-kpi-top">
+                <span class="fg-kpi-label">Returned</span>
+                <span class="fg-kpi-dot" style="background: #dc2626;"></span>
             </div>
+            <div class="fg-kpi-number text-danger">{{ $counts['returned_for_correction'] }}</div>
+            <p class="fg-kpi-desc">Needs correction</p>
         </div>
     </div>
     <div class="col-md-2 col-6">
-        <div class="card h-100 border-start border-4 border-success">
-            <div class="card-body p-3">
-                <span class="text-muted small fw-semibold text-uppercase">Approved</span>
-                <h3 class="fw-bold mb-0 mt-1 text-success">{{ $counts['approved'] }}</h3>
+        <div class="fg-kpi-card">
+            <div class="fg-kpi-top">
+                <span class="fg-kpi-label">Approved</span>
+                <span class="fg-kpi-dot" style="background: #059669;"></span>
             </div>
+            <div class="fg-kpi-number text-success">{{ $counts['approved'] }}</div>
+            <p class="fg-kpi-desc">Clinically signed</p>
         </div>
     </div>
     <div class="col-md-2 col-6">
-        <div class="card h-100 border-start border-4 border-primary">
-            <div class="card-body p-3">
-                <span class="text-muted small fw-semibold text-uppercase">Generated</span>
-                <h3 class="fw-bold mb-0 mt-1 text-primary">{{ $counts['generated'] }}</h3>
+        <div class="fg-kpi-card">
+            <div class="fg-kpi-top">
+                <span class="fg-kpi-label">Generated</span>
+                <span class="fg-kpi-dot" style="background: #7c3aed;"></span>
             </div>
+            <div class="fg-kpi-number text-primary">{{ $counts['generated'] }}</div>
+            <p class="fg-kpi-desc">Official PDF pack</p>
         </div>
     </div>
     <div class="col-md-2 col-6">
-        <div class="card h-100 border-start border-4 border-dark">
-            <div class="card-body p-3">
-                <span class="text-muted small fw-semibold text-uppercase">Total Cases</span>
-                <h3 class="fw-bold mb-0 mt-1 text-dark">{{ $counts['total'] }}</h3>
+        <div class="fg-kpi-card">
+            <div class="fg-kpi-top">
+                <span class="fg-kpi-label">Total Cases</span>
+                <span class="fg-kpi-dot" style="background: #080808;"></span>
             </div>
+            <div class="fg-kpi-number text-dark">{{ $counts['total'] }}</div>
+            <p class="fg-kpi-desc">All admissions</p>
         </div>
     </div>
 </div>
 
 <!-- Filter Bar -->
-<div class="card mb-4">
+<div class="card mb-4 border-0">
     <div class="card-body p-3">
-        <form method="GET" action="{{ route('dashboard') }}" class="row g-2">
+        <form method="GET" action="{{ route('dashboard') }}" class="row g-2 align-items-center">
             <div class="col-md-3">
                 <div class="input-group input-group-sm">
                     <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
@@ -113,9 +125,9 @@
 </div>
 
 <!-- Admissions Table -->
-<div class="card shadow-sm">
+<div class="card shadow-sm border-0">
     <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-        <h5 class="card-title mb-0 fw-bold">Recent Inpatient Admissions</h5>
+        <h5 class="card-title mb-0 fw-bold" style="letter-spacing: -0.01em;">Recent Inpatient Admissions</h5>
         <span class="text-muted small">Showing {{ $admissions->count() }} of {{ $admissions->total() }} records</span>
     </div>
     <div class="table-responsive">
@@ -144,11 +156,11 @@
                     <td>
                         <div>
                             @if($admission->isDelivery())
-                                <span class="badge bg-pink text-danger bg-opacity-10 border border-danger small">
+                                <span class="badge" style="background:#fdf2f8; color:#be185d; border:1px solid #fbcfe8;">
                                     <i class="bi bi-gender-female"></i> Delivery ({{ $admission->newborns->count() }} baby)
                                 </span>
                             @else
-                                <span class="badge bg-info text-primary bg-opacity-10 border border-primary small">
+                                <span class="badge" style="background:#f0f9ff; color:#0369a1; border:1px solid #bae6fd;">
                                     <i class="bi bi-heart-pulse"></i> Surgery
                                 </span>
                             @endif
@@ -162,15 +174,15 @@
                     <td>
                         @php
                             $badgeClass = match($admission->status) {
-                                'draft' => 'bg-secondary',
-                                'ready_for_review' => 'bg-info text-dark',
-                                'returned_for_correction' => 'bg-danger',
-                                'approved' => 'bg-success',
-                                'generated' => 'bg-primary',
-                                default => 'bg-warning text-dark'
+                                'draft' => 'badge-draft',
+                                'ready_for_review' => 'badge-ready_for_review',
+                                'returned_for_correction' => 'badge-returned_for_correction',
+                                'approved' => 'badge-approved',
+                                'generated' => 'badge-generated',
+                                default => 'badge-superseded'
                             };
                         @endphp
-                        <span class="badge {{ $badgeClass }} text-uppercase" style="font-size:0.7rem;">
+                        <span class="badge {{ $badgeClass }} text-uppercase">
                             {{ str_replace('_', ' ', $admission->status) }}
                         </span>
                         @if($admission->isReturned() && $admission->rejection_reason)
@@ -181,7 +193,7 @@
                     </td>
                     <td class="text-end">
                         <div class="btn-group btn-group-sm">
-                            <a href="{{ route('documents.preview', $admission) }}" class="btn btn-outline-primary" title="Review Document Pack">
+                            <a href="{{ route('documents.preview', $admission) }}" class="btn btn-outline-secondary" title="Review Document Pack">
                                 <i class="bi bi-eye"></i> Preview
                             </a>
                             @if($admission->canBeEdited() && auth()->user()->canEditAdmissions())
@@ -189,11 +201,11 @@
                                 <i class="bi bi-pencil"></i>
                             </a>
                             @endif
-                            <a href="{{ route('documents.history', $admission) }}" class="btn btn-outline-info" title="Audit & Revision History">
+                            <a href="{{ route('documents.history', $admission) }}" class="btn btn-outline-secondary" title="Audit & Revision History">
                                 <i class="bi bi-clock-history"></i>
                             </a>
                             @if(in_array($admission->status, ['approved', 'generated']) && auth()->user()->canGeneratePdfs())
-                            <a href="{{ route('documents.pdf', $admission) }}" target="_blank" class="btn btn-success" title="Download Official PDF">
+                            <a href="{{ route('documents.pdf', $admission) }}" target="_blank" class="btn btn-primary" title="Download Official PDF">
                                 <i class="bi bi-file-earmark-pdf"></i> PDF
                             </a>
                             @endif
@@ -202,8 +214,8 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-4 text-muted">
-                        <i class="bi bi-inbox fs-2 d-block mb-1"></i>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-2 text-muted"></i>
                         No admissions found matching the selected criteria.
                     </td>
                 </tr>
@@ -212,10 +224,9 @@
         </table>
     </div>
     @if($admissions->hasPages())
-    <div class="card-footer bg-white py-2">
+    <div class="card-footer bg-white py-3 border-top">
         {{ $admissions->links() }}
     </div>
     @endif
 </div>
 @endsection
-

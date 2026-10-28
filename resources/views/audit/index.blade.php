@@ -2,9 +2,9 @@
 @section('title', 'System Audit Trail — Guru Hospital')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <h1 class="h3 fw-bold mb-1 text-dark">Tamper-Resistant System Audit Trail</h1>
+        <h1 class="h3 fw-bold mb-1 text-dark" style="letter-spacing: -0.02em;">Tamper-Resistant System Audit Trail</h1>
         <p class="text-muted mb-0">Immutable tracking of user authentication, patient creation, clinical edits, approvals, and PDF exports.</p>
     </div>
     <span class="badge bg-secondary py-2 px-3">
@@ -12,9 +12,9 @@
     </span>
 </div>
 
-<div class="card mb-4">
+<div class="card mb-4 border-0">
     <div class="card-body p-3">
-        <form method="GET" action="{{ route('audit.index') }}" class="row g-2">
+        <form method="GET" action="{{ route('audit.index') }}" class="row g-2 align-items-center">
             <div class="col-md-3">
                 <input type="text" name="action" class="form-control form-control-sm" placeholder="Action (e.g. admission.created, document.approved)" value="{{ request('action') }}">
             </div>
@@ -35,7 +35,7 @@
     </div>
 </div>
 
-<div class="card shadow-sm">
+<div class="card shadow-sm border-0">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0" style="font-size:0.9rem;">
             <thead class="table-light text-muted small text-uppercase">
@@ -55,7 +55,7 @@
                         {{ $log->created_at?->format('d/m/Y H:i:s') }}
                     </td>
                     <td>
-                        <div class="fw-semibold">{{ $log->user_name }}</div>
+                        <div class="fw-semibold text-dark">{{ $log->user_name }}</div>
                         <span class="badge bg-light text-dark border text-uppercase" style="font-size:0.65rem;">{{ $log->user_role }}</span>
                     </td>
                     <td>
@@ -77,17 +77,19 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-4 text-muted">No audit events found.</td>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-shield-x fs-2 d-block mb-2 text-muted"></i>
+                        No audit events found matching the selected parameters.
+                    </td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
     @if($auditLogs->hasPages())
-    <div class="card-footer bg-white py-2">
+    <div class="card-footer bg-white py-3 border-top">
         {{ $auditLogs->links() }}
     </div>
     @endif
 </div>
 @endsection
-

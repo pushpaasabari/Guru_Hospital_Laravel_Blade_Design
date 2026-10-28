@@ -2,9 +2,9 @@
 @section('title', 'Document History & Revisions — ' . $admission->patient_name)
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <h1 class="h3 fw-bold mb-1">Audit & Revision Trail</h1>
+        <h1 class="h3 fw-bold mb-1 text-dark" style="letter-spacing: -0.02em;">Audit & Revision Trail</h1>
         <p class="text-muted mb-0">Complete lifecycle history for <strong>{{ $admission->patient_name }}</strong> (UHID: {{ $admission->uhid }}, IP: {{ $admission->ip_no }})</p>
     </div>
     <a href="{{ route('documents.preview', $admission) }}" class="btn btn-outline-secondary">
@@ -15,19 +15,19 @@
 <div class="row g-4">
     <!-- Left Column: Approval Lifecycle Events -->
     <div class="col-md-6">
-        <div class="card shadow-sm h-100">
+        <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-white py-3">
-                <h5 class="card-title mb-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i> Document Lifecycle Transitions</h5>
+                <h5 class="card-title mb-0 fw-bold" style="letter-spacing: -0.01em;"><i class="bi bi-clock-history text-primary me-2"></i> Document Lifecycle Transitions</h5>
             </div>
             <div class="card-body">
                 @if($admission->approvals->isEmpty())
-                    <p class="text-muted text-center py-4">No approval transitions recorded yet.</p>
+                    <p class="text-muted text-center py-5">No approval transitions recorded yet.</p>
                 @else
                     <div class="timeline">
                         @foreach($admission->approvals as $approval)
-                        <div class="border-start border-3 border-primary ps-3 pb-3 mb-2">
+                        <div class="border-start border-2 border-dark ps-3 pb-3 mb-2" style="border-color: #e2e8f0 !important;">
                             <div class="d-flex justify-content-between">
-                                <span class="badge bg-primary text-uppercase">{{ str_replace('_', ' ', $approval->action) }}</span>
+                                <span class="badge bg-secondary text-uppercase">{{ str_replace('_', ' ', $approval->action) }}</span>
                                 <span class="text-muted small">{{ $approval->created_at?->format('d M Y, h:i A') }}</span>
                             </div>
                             <div class="mt-1 small">
@@ -49,13 +49,13 @@
 
     <!-- Right Column: Historical Revisions -->
     <div class="col-md-6">
-        <div class="card shadow-sm h-100">
+        <div class="card shadow-sm border-0 h-100">
             <div class="card-header bg-white py-3">
-                <h5 class="card-title mb-0 fw-bold"><i class="bi bi-file-earmark-lock text-success me-2"></i> Immutable Approved Revisions</h5>
+                <h5 class="card-title mb-0 fw-bold" style="letter-spacing: -0.01em;"><i class="bi bi-file-earmark-lock text-success me-2"></i> Immutable Approved Revisions</h5>
             </div>
             <div class="card-body">
                 @if($admission->revisions->isEmpty())
-                    <p class="text-muted text-center py-4">No archived revisions exist yet. Revisions are created when approved documents are modified or officially issued.</p>
+                    <p class="text-muted text-center py-5">No archived revisions exist yet. Revisions are created when approved documents are modified or officially issued.</p>
                 @else
                     @foreach($admission->revisions as $rev)
                     <div class="card border mb-3">
@@ -80,4 +80,3 @@
     </div>
 </div>
 @endsection
-

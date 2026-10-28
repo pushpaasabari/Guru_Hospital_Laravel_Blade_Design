@@ -2,9 +2,9 @@
 @section('title', 'Inpatient Admissions — Guru Hospital')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <h1 class="h3 fw-bold mb-1 text-dark">Inpatient Admissions Archive</h1>
+        <h1 class="h3 fw-bold mb-1 text-dark" style="letter-spacing: -0.02em;">Inpatient Admissions Archive</h1>
         <p class="text-muted mb-0">Search and manage patient admission records, discharge summaries, and MRD dossiers.</p>
     </div>
     @if(auth()->user()->canEditAdmissions())
@@ -14,11 +14,14 @@
     @endif
 </div>
 
-<div class="card mb-4">
+<div class="card mb-4 border-0">
     <div class="card-body p-3">
-        <form method="GET" action="{{ route('admissions.index') }}" class="row g-2">
+        <form method="GET" action="{{ route('admissions.index') }}" class="row g-2 align-items-center">
             <div class="col-md-4">
-                <input type="text" name="search" class="form-control form-control-sm" placeholder="Search Patient, UHID, IP No..." value="{{ request('search') }}">
+                <div class="input-group input-group-sm">
+                    <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                    <input type="text" name="search" class="form-control" placeholder="Search Patient, UHID, IP No..." value="{{ request('search') }}">
+                </div>
             </div>
             <div class="col-md-3">
                 <select name="status" class="form-select form-select-sm">
@@ -41,7 +44,7 @@
     </div>
 </div>
 
-<div class="card shadow-sm">
+<div class="card shadow-sm border-0">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
             <thead class="table-light text-muted small text-uppercase">
@@ -58,12 +61,12 @@
                 @forelse($admissions as $admission)
                 <tr>
                     <td>
-                        <div class="fw-bold">{{ $admission->patient_name }}</div>
+                        <div class="fw-bold text-dark">{{ $admission->patient_name }}</div>
                         <div class="text-muted small">{{ $admission->age ? $admission->age . ' yrs' : 'Age N/A' }} / {{ $admission->sex ?? 'N/A' }}</div>
                     </td>
                     <td>
-                        <div class="small">UHID: {{ $admission->uhid }}</div>
-                        <div class="small fw-semibold text-primary">IP: {{ $admission->ip_no }}</div>
+                        <div class="small"><span class="text-muted">UHID:</span> {{ $admission->uhid }}</div>
+                        <div class="small fw-semibold text-primary"><span class="text-muted">IP:</span> {{ $admission->ip_no }}</div>
                     </td>
                     <td>
                         <span class="badge bg-secondary text-uppercase">{{ $admission->format }}</span>
@@ -74,34 +77,48 @@
                         <div class="small text-muted">Dis: {{ $admission->discharge_at?->format('d/m/Y') }}</div>
                     </td>
                     <td>
-                        <span class="badge bg-dark text-uppercase" style="font-size:0.7rem;">{{ str_replace('_', ' ', $admission->status) }}</span>
+                        @php
+                            $badgeClass = match($admission->status) {
+                                'draft' => 'badge-draft',
+                                'ready_for_review' => 'badge-ready_for_review',
+                                'returned_for_correction' => 'badge-returned_for_correction',
+                                'approved' => 'badge-approved',
+                                'generated' => 'badge-generated',
+                                default => 'badge-superseded'
+                            };
+                        @endphp
+                        <span class="badge {{ $badgeClass }} text-uppercase">
+                            {{ str_replace('_', ' ', $admission->status) }}
+                        </span>
                     </td>
                     <td class="text-end">
                         <div class="btn-group btn-group-sm">
-                            <a href="{{ route('documents.preview', $admission) }}" class="btn btn-outline-primary">Preview</a>
+                            <a href="{{ route('documents.preview', $admission) }}" class="btn btn-outline-secondary" title="Preview Pack">Preview</a>
                             @if($admission->canBeEdited() && auth()->user()->canEditAdmissions())
-                            <a href="{{ route('admissions.edit', $admission) }}" class="btn btn-outline-secondary">Edit</a>
+                            <a href="{{ route('admissions.edit', $admission) }}" class="btn btn-outline-secondary" title="Edit">Edit</a>
                             @endif
-                            <a href="{{ route('documents.history', $admission) }}" class="btn btn-outline-info">History</a>
+                            <a href="{{ route('documents.history', $admission) }}" class="btn btn-outline-secondary" title="History">History</a>
                             @if(in_array($admission->status, ['approved', 'generated']) && auth()->user()->canGeneratePdfs())
-                            <a href="{{ route('documents.pdf', $admission) }}" target="_blank" class="btn btn-success">PDF</a>
+                            <a href="{{ route('documents.pdf', $admission) }}" target="_blank" class="btn btn-primary" title="PDF">PDF</a>
                             @endif
                         </div>
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="6" class="text-center py-4 text-muted">No records found.</td>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-inbox fs-2 d-block mb-2 text-muted"></i>
+                        No records found matching the filter criteria.
+                    </td>
                 </tr>
                 @endforelse
             </tbody>
         </table>
     </div>
     @if($admissions->hasPages())
-    <div class="card-footer bg-white">
+    <div class="card-footer bg-white py-3 border-top">
         {{ $admissions->links() }}
     </div>
     @endif
 </div>
 @endsection
-
