@@ -133,8 +133,9 @@ class DatabaseSeeder extends Seeder
             TemplateVersion::firstOrCreate(['template_code' => $tpl['template_code']], $tpl);
         }
 
-        // 3. Seed Guru Hospital Real Patient Case (Mrs. Ashwini)
+        // 3. Seed Guru Hospital Real Patient Cases
         $this->call(AshwiniDischargeSummarySeeder::class);
+        $this->call(AjithKumarDischargeSummarySeeder::class);
     }
 }
 

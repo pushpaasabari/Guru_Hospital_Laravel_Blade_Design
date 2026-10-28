@@ -84,3 +84,4 @@ class AshwiniDischargeSummarySeeder extends Seeder
         ]);
     }
 }
+

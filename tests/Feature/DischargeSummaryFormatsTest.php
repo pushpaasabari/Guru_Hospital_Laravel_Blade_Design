@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Admission;
 use App\Models\User;
+use Database\Seeders\AjithKumarDischargeSummarySeeder;
 use Database\Seeders\AshwiniDischargeSummarySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -125,5 +126,45 @@ class DischargeSummaryFormatsTest extends TestCase
         $pdfResponse->assertStatus(200);
         $this->assertEquals('application/pdf', $pdfResponse->headers->get('Content-Type'));
         $this->assertStringContainsString('Guru_Hospital_Discharge_Pack_2026_582.pdf', $pdfResponse->headers->get('Content-Disposition'));
+    }
+
+    public function test_mr_ajith_kumar_other_surgery_document_renders_and_generates_pdf_successfully(): void
+    {
+        $this->seed(AjithKumarDischargeSummarySeeder::class);
+
+        $admission = Admission::where('ip_no', '2026/488')->first();
+        $this->assertNotNull($admission);
+        $this->assertEquals('Mr. Ajith kumar', $admission->patient_name);
+        $this->assertEquals('2026/2892', $admission->uhid);
+        $this->assertEquals('Lap Appendectomy', $admission->procedure_name);
+        $this->assertCount(0, $admission->newborns);
+
+        // Preview Check
+        $previewResponse = $this->actingAs($this->doctor)
+            ->get(route('documents.preview', $admission));
+
+        $previewResponse->assertStatus(200);
+        $previewResponse->assertSee('Mr. Ajith kumar');
+        $previewResponse->assertSee('2026/488');
+        $previewResponse->assertSee('2026/2892');
+        $previewResponse->assertSee('Lap Appendectomy');
+        $previewResponse->assertSee('Dr. Jayaprakash M.S');
+        $previewResponse->assertSee('Dr. S.G. ArunKumar');
+        $previewResponse->assertSee('Mr. Vijaykumar');
+        $previewResponse->assertSee('GA');
+        $previewResponse->assertSee('10 mm Supra Umbilical');
+        $previewResponse->assertSee('Hb : 13.8mgs %');
+        $previewResponse->assertSee('04342-262266');
+
+        // Verify Newborn section is NOT present for 'other' surgery workflow
+        $previewResponse->assertDontSee('Baby / Newborn Details');
+
+        // PDF Generation Check
+        $pdfResponse = $this->actingAs($this->doctor)
+            ->get(route('documents.pdf', $admission));
+
+        $pdfResponse->assertStatus(200);
+        $this->assertEquals('application/pdf', $pdfResponse->headers->get('Content-Type'));
+        $this->assertStringContainsString('Guru_Hospital_Discharge_Pack_2026_488.pdf', $pdfResponse->headers->get('Content-Disposition'));
     }
 }
