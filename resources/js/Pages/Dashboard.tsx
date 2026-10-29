@@ -250,7 +250,7 @@ export default function Dashboard({ counts, admissions, filters = {}, auth }: Pr
                 Monthly Admissions
               </h5>
               <span className="badge bg-light text-dark border fw-medium" style={{ fontSize: '11px' }}>
-                This Year &dtrif;
+                This Year ▾
               </span>
             </div>
 

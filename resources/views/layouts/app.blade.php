@@ -46,11 +46,10 @@
                     </div>
                 </a>
                 <div class="d-flex align-items-center">
-                    <!-- Left Menu Hide / Expand Button for Desktop -->
-                    <button class="fg-sidebar-hide-btn d-none d-lg-inline-flex" id="hideSidebarBtn" type="button" title="Collapse to icon menu" aria-label="Collapse to icon menu">
+                    <!-- Left Menu Hide / Expand Button -->
+                    <button class="fg-sidebar-hide-btn" id="hideSidebarBtn" type="button" title="Collapse to icon menu" aria-label="Collapse to icon menu">
                         <i class="bi bi-layout-sidebar-inset" id="hideSidebarIcon"></i>
                     </button>
-                    <button class="btn btn-sm btn-close d-lg-none ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSidebar" aria-label="Close"></button>
                 </div>
             </div>
 

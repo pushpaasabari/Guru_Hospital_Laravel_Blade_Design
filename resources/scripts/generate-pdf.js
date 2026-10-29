@@ -87,3 +87,4 @@ main().catch((err) => {
   console.error('Error generating PDF with Playwright:', err);
   process.exit(1);
 });
+

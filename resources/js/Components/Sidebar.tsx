@@ -103,10 +103,10 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
             </Link>
 
             <div className="d-flex align-items-center">
-              {/* Left Menu Hide / Expand Button for Desktop */}
+              {/* Left Menu Hide / Expand Button */}
               {onToggleCollapse && (
                 <button
-                  className="fg-sidebar-hide-btn d-none d-lg-inline-flex"
+                  className="fg-sidebar-hide-btn"
                   type="button"
                   onClick={onToggleCollapse}
                   title={collapsed ? "Expand sidebar menu" : "Collapse to icon menu"}
@@ -115,14 +115,6 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                   <i className={`bi ${collapsed ? 'bi-chevron-right' : 'bi-layout-sidebar-inset'}`}></i>
                 </button>
               )}
-
-              {/* Mobile close button inside sidebar */}
-              <button
-                className="btn btn-sm btn-close d-lg-none ms-2"
-                type="button"
-                onClick={closeMobile}
-                aria-label="Close"
-              ></button>
             </div>
           </div>
 
