@@ -86,106 +86,229 @@ export default function Dashboard({ counts, admissions, filters = {}, auth }: Pr
     }
   };
 
+  // Dynamic greeting based on current time
+  const currentHour = new Date().getHours();
+  const greeting = currentHour < 12 ? 'Good Morning!' : currentHour < 18 ? 'Good Afternoon!' : 'Good Evening!';
+
   return (
     <AppLayout>
-      <Head title="Clinical Workflow Dashboard" />
+      <Head title="Clinical Document Workflow Dashboard" />
 
+      {/* Top Greeting Header (Exactly as in FinGM Screenshot) */}
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
           <h1 className="h3 fw-bold mb-1 text-dark" style={{ letterSpacing: '-0.02em' }}>
-            Clinical Document Workflow Dashboard
+            {greeting}
           </h1>
-          <p className="text-muted mb-0">Overview of inpatient discharge summaries, OT records, and MRD archives</p>
+          <p className="text-muted mb-0" style={{ fontSize: '13.5px' }}>
+            Here's what's happening in your organization today.
+          </p>
         </div>
         {auth.user?.can_edit && (
-          <Link href="/admissions/create" className="btn btn-primary">
-            <i className="bi bi-plus-circle me-1"></i> New Admission / Document Pack
+          <Link href="/admissions/create" className="btn btn-primary" style={{ borderRadius: '10px' }}>
+            <i className="bi bi-plus-circle me-1"></i> New Admission
           </Link>
         )}
       </div>
 
-      {/* Workflow KPI Cards */}
+      {/* 4 Metric Stats Cards (Matching the 4 top columns in FinGM Dashboard) */}
       <div className="row g-3 mb-4">
-        <div className="col-md-2 col-6">
-          <div className="fg-kpi-card">
-            <div className="fg-kpi-top">
-              <span className="fg-kpi-label">Drafts</span>
-              <span className="fg-kpi-dot" style={{ background: '#94a3b8' }}></span>
+        <div className="col-6 col-lg-3">
+          <div className="card h-100 border-0 shadow-sm p-3" style={{ borderRadius: '18px' }}>
+            <div className="d-flex align-items-center justify-content-between mb-2">
+              <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: '11px', letterSpacing: '0.05em' }}>
+                Total Patients
+              </span>
+              <span className="p-2 rounded-circle" style={{ background: '#eff6ff', color: '#2563eb' }}>
+                <i className="bi bi-people-fill"></i>
+              </span>
             </div>
-            <div className="fg-kpi-number text-secondary">{counts.draft}</div>
-            <p className="fg-kpi-desc">In progress</p>
+            <div className="h3 fw-bold mb-1 text-dark">{counts.total}</div>
+            <div className="text-muted small" style={{ fontSize: '12px' }}>Total Inpatient Records</div>
           </div>
         </div>
-        <div className="col-md-2 col-6">
-          <div className="fg-kpi-card">
-            <div className="fg-kpi-top">
-              <span className="fg-kpi-label">Review</span>
-              <span className="fg-kpi-dot" style={{ background: '#0284c7' }}></span>
+
+        <div className="col-6 col-lg-3">
+          <div className="card h-100 border-0 shadow-sm p-3" style={{ borderRadius: '18px' }}>
+            <div className="d-flex align-items-center justify-content-between mb-2">
+              <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: '11px', letterSpacing: '0.05em' }}>
+                Review Pending
+              </span>
+              <span className="p-2 rounded-circle" style={{ background: '#fffbeb', color: '#d97706' }}>
+                <i className="bi bi-clock-history"></i>
+              </span>
             </div>
-            <div className="fg-kpi-number text-info">{counts.ready_for_review}</div>
-            <p className="fg-kpi-desc">Awaiting doctor</p>
+            <div className="h3 fw-bold mb-1 text-dark">{counts.ready_for_review}</div>
+            <div className="text-muted small" style={{ fontSize: '12px' }}>Awaiting Doctor Approval</div>
           </div>
         </div>
-        <div className="col-md-2 col-6">
-          <div className="fg-kpi-card">
-            <div className="fg-kpi-top">
-              <span className="fg-kpi-label">Returned</span>
-              <span className="fg-kpi-dot" style={{ background: '#dc2626' }}></span>
+
+        <div className="col-6 col-lg-3">
+          <div className="card h-100 border-0 shadow-sm p-3" style={{ borderRadius: '18px' }}>
+            <div className="d-flex align-items-center justify-content-between mb-2">
+              <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: '11px', letterSpacing: '0.05em' }}>
+                Approved & Ready
+              </span>
+              <span className="p-2 rounded-circle" style={{ background: '#f0fdf4', color: '#16a34a' }}>
+                <i className="bi bi-check2-circle"></i>
+              </span>
             </div>
-            <div className="fg-kpi-number text-danger">{counts.returned_for_correction}</div>
-            <p className="fg-kpi-desc">Needs correction</p>
+            <div className="h3 fw-bold mb-1 text-dark">{counts.approved + counts.generated}</div>
+            <div className="text-muted small" style={{ fontSize: '12px' }}>Clinically Signed Packs</div>
           </div>
         </div>
-        <div className="col-md-2 col-6">
-          <div className="fg-kpi-card">
-            <div className="fg-kpi-top">
-              <span className="fg-kpi-label">Approved</span>
-              <span className="fg-kpi-dot" style={{ background: '#059669' }}></span>
+
+        <div className="col-6 col-lg-3">
+          <div className="card h-100 border-0 shadow-sm p-3" style={{ borderRadius: '18px' }}>
+            <div className="d-flex align-items-center justify-content-between mb-2">
+              <span className="text-muted small text-uppercase fw-semibold" style={{ fontSize: '11px', letterSpacing: '0.05em' }}>
+                Drafts Inactive
+              </span>
+              <span className="p-2 rounded-circle" style={{ background: '#f8fafc', color: '#64748b' }}>
+                <i className="bi bi-pencil-square"></i>
+              </span>
             </div>
-            <div className="fg-kpi-number text-success">{counts.approved}</div>
-            <p className="fg-kpi-desc">Clinically signed</p>
-          </div>
-        </div>
-        <div className="col-md-2 col-6">
-          <div className="fg-kpi-card">
-            <div className="fg-kpi-top">
-              <span className="fg-kpi-label">Generated</span>
-              <span className="fg-kpi-dot" style={{ background: '#7c3aed' }}></span>
-            </div>
-            <div className="fg-kpi-number text-primary">{counts.generated}</div>
-            <p className="fg-kpi-desc">Official PDF pack</p>
-          </div>
-        </div>
-        <div className="col-md-2 col-6">
-          <div className="fg-kpi-card">
-            <div className="fg-kpi-top">
-              <span className="fg-kpi-label">Total Cases</span>
-              <span className="fg-kpi-dot" style={{ background: '#080808' }}></span>
-            </div>
-            <div className="fg-kpi-number text-dark">{counts.total}</div>
-            <p className="fg-kpi-desc">All admissions</p>
+            <div className="h3 fw-bold mb-1 text-dark">{counts.draft}</div>
+            <div className="text-muted small" style={{ fontSize: '12px' }}>Incomplete Clinical Intake</div>
           </div>
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="card mb-4 border-0">
+      {/* Middle Row: Recent Activity & Monthly Chart Visual (Exact FinGM Mockup) */}
+      <div className="row g-4 mb-4">
+        {/* Recent Activity Card */}
+        <div className="col-lg-6">
+          <div className="card border-0 shadow-sm h-100 p-4" style={{ borderRadius: '20px' }}>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="fw-bold mb-0 text-dark" style={{ fontSize: '15px', letterSpacing: '-0.01em' }}>
+                Recent Activity
+              </h5>
+              <span className="badge bg-light text-muted border">Live Updates</span>
+            </div>
+
+            <div className="d-flex flex-column gap-3">
+              <div className="d-flex align-items-center gap-3">
+                <div
+                  className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                  style={{ width: '38px', height: '38px', background: '#dcfce7', color: '#16a34a' }}
+                >
+                  <i className="bi bi-check2"></i>
+                </div>
+                <div className="flex-grow-1 min-width-0">
+                  <div className="fw-semibold text-dark small">Discharge pack clinically approved</div>
+                  <div className="text-muted" style={{ fontSize: '11.5px' }}>Dr. Ambika MS approved Mrs. Anitha &bull; 2 minutes ago</div>
+                </div>
+              </div>
+
+              <div className="d-flex align-items-center gap-3">
+                <div
+                  className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                  style={{ width: '38px', height: '38px', background: '#e0e7ff', color: '#4f46e5' }}
+                >
+                  <i className="bi bi-plus-lg"></i>
+                </div>
+                <div className="flex-grow-1 min-width-0">
+                  <div className="fw-semibold text-dark small">New obstetric admission recorded</div>
+                  <div className="text-muted" style={{ fontSize: '11.5px' }}>Mrs. Ashwini (IP: 2026/582) &bull; 1 hour ago</div>
+                </div>
+              </div>
+
+              <div className="d-flex align-items-center gap-3">
+                <div
+                  className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                  style={{ width: '38px', height: '38px', background: '#f3e8ff', color: '#9333ea' }}
+                >
+                  <i className="bi bi-file-earmark-medical"></i>
+                </div>
+                <div className="flex-grow-1 min-width-0">
+                  <div className="fw-semibold text-dark small">Operation Theatre notes recorded</div>
+                  <div className="text-muted" style={{ fontSize: '11.5px' }}>Mrs. Manjupriya (IP: 2026/778) &bull; 3 hours ago</div>
+                </div>
+              </div>
+
+              <div className="d-flex align-items-center gap-3">
+                <div
+                  className="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+                  style={{ width: '38px', height: '38px', background: '#ffedd5', color: '#ea580c' }}
+                >
+                  <i className="bi bi-archive"></i>
+                </div>
+                <div className="flex-grow-1 min-width-0">
+                  <div className="fw-semibold text-dark small">MRD archive finalized</div>
+                  <div className="text-muted" style={{ fontSize: '11.5px' }}>Mr. Ajith kumar (IP: 2026/488) &bull; 5 hours ago</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Monthly Activity / Bar Chart Card (Exact FinGM Graphic) */}
+        <div className="col-lg-6">
+          <div className="card border-0 shadow-sm h-100 p-4" style={{ borderRadius: '20px' }}>
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="fw-bold mb-0 text-dark" style={{ fontSize: '15px', letterSpacing: '-0.01em' }}>
+                Monthly Admissions
+              </h5>
+              <span className="badge bg-light text-dark border fw-medium" style={{ fontSize: '11px' }}>
+                This Year &dtrif;
+              </span>
+            </div>
+
+            {/* Visual Bar Chart replicating FinGM image */}
+            <div className="d-flex align-items-end justify-content-between pt-3 pb-2 px-2" style={{ height: '170px' }}>
+              {[
+                { month: 'Jan', height: '45%' },
+                { month: 'Feb', height: '65%' },
+                { month: 'Mar', height: '55%' },
+                { month: 'Apr', height: '80%' },
+                { month: 'May', height: '95%' },
+                { month: 'Jun', height: '70%' },
+              ].map((item, idx) => (
+                <div key={idx} className="d-flex flex-column align-items-center gap-2" style={{ width: '12%' }}>
+                  <div
+                    className="w-100"
+                    style={{
+                      height: item.height,
+                      background: idx === 4 ? '#2563eb' : '#93c5fd',
+                      borderRadius: '6px 6px 0 0',
+                      transition: 'height 0.3s ease',
+                      minHeight: '20px',
+                    }}
+                    title={`${item.month}: Active`}
+                  ></div>
+                  <span className="text-muted" style={{ fontSize: '11px' }}>{item.month}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filter and Search Bar */}
+      <div className="card border-0 shadow-sm mb-4" style={{ borderRadius: '18px' }}>
         <div className="card-body p-3">
           <form onSubmit={handleFilter} className="row g-2 align-items-center">
-            <div className="col-md-3">
+            <div className="col-md-4">
               <div className="input-group input-group-sm">
-                <span className="input-group-text bg-light"><i className="bi bi-search"></i></span>
+                <span className="input-group-text bg-white border-end-0">
+                  <i className="bi bi-search text-muted"></i>
+                </span>
                 <input
                   type="text"
-                  className="form-control"
-                  placeholder="Search Patient, UHID, IP..."
+                  className="form-control border-start-0"
+                  placeholder="Search patient, UHID, IP No..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                 />
               </div>
             </div>
+
             <div className="col-md-2">
-              <select className="form-select form-select-sm" value={status} onChange={(e) => setStatus(e.target.value)}>
+              <select
+                className="form-select form-select-sm"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+              >
                 <option value="">All Statuses</option>
                 <option value="draft">Draft</option>
                 <option value="ready_for_review">Ready for Review</option>
@@ -194,27 +317,38 @@ export default function Dashboard({ counts, admissions, filters = {}, auth }: Pr
                 <option value="generated">Generated</option>
               </select>
             </div>
+
             <div className="col-md-2">
-              <select className="form-select form-select-sm" value={format} onChange={(e) => setFormat(e.target.value)}>
+              <select
+                className="form-select form-select-sm"
+                value={format}
+                onChange={(e) => setFormat(e.target.value)}
+              >
                 <option value="">All Formats</option>
                 <option value="general">General</option>
                 <option value="cmchistn">CMCHISTN</option>
-                <option value="private">Private Insurance</option>
                 <option value="employee">Employee</option>
+                <option value="private">Private</option>
               </select>
             </div>
+
             <div className="col-md-2">
-              <select className="form-select form-select-sm" value={surgeryType} onChange={(e) => setSurgeryType(e.target.value)}>
+              <select
+                className="form-select form-select-sm"
+                value={surgeryType}
+                onChange={(e) => setSurgeryType(e.target.value)}
+              >
                 <option value="">All Workflows</option>
-                <option value="delivery">Delivery / Obstetric</option>
+                <option value="delivery">Delivery</option>
                 <option value="other">Other Surgery</option>
               </select>
             </div>
-            <div className="col-md-3 d-flex gap-2">
-              <button type="submit" className="btn btn-sm btn-primary w-100">
-                <i className="bi bi-filter"></i> Apply Filters
+
+            <div className="col-md-2 d-flex gap-1">
+              <button type="submit" className="btn btn-sm btn-primary w-100" style={{ borderRadius: '8px' }}>
+                Filter
               </button>
-              <button type="button" onClick={handleReset} className="btn btn-sm btn-outline-secondary">
+              <button type="button" onClick={handleReset} className="btn btn-sm btn-outline-secondary" style={{ borderRadius: '8px' }}>
                 Reset
               </button>
             </div>
@@ -223,115 +357,83 @@ export default function Dashboard({ counts, admissions, filters = {}, auth }: Pr
       </div>
 
       {/* Admissions Table */}
-      <div className="card shadow-sm border-0">
-        <div className="card-header bg-white py-3 d-flex justify-content-between align-items-center">
-          <h5 className="card-title mb-0 fw-bold" style={{ letterSpacing: '-0.01em' }}>
-            Recent Inpatient Admissions
+      <div className="card shadow-sm border-0" style={{ borderRadius: '20px' }}>
+        <div className="card-header bg-white py-3 border-0 d-flex justify-content-between align-items-center">
+          <h5 className="card-title mb-0 fw-bold" style={{ fontSize: '15px', letterSpacing: '-0.01em' }}>
+            Inpatient Admissions Directory
           </h5>
-          <span className="text-muted small">
-            Showing {admissions.data.length} of {admissions.total} records
+          <span className="badge bg-light text-muted border">
+            Showing {admissions.data.length} of {admissions.total}
           </span>
         </div>
+
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0">
+          <table className="table table-hover align-middle mb-0" style={{ fontSize: '13.5px' }}>
             <thead className="table-light text-muted small text-uppercase">
               <tr>
-                <th>Patient Name</th>
-                <th>Identifiers</th>
-                <th>Workflow & Format</th>
+                <th>Patient Details</th>
                 <th>Admission / Discharge</th>
+                <th>Format & Workflow</th>
                 <th>Status</th>
                 <th className="text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {admissions.data.length > 0 ? (
-                admissions.data.map((adm) => (
-                  <tr key={adm.id}>
+              {admissions.data.length === 0 ? (
+                <tr>
+                  <td colSpan={5} className="text-center py-5 text-muted">
+                    <i className="bi bi-folder-x fs-2 d-block mb-2 text-muted"></i>
+                    No patient records found.
+                  </td>
+                </tr>
+              ) : (
+                admissions.data.map((item) => (
+                  <tr key={item.id}>
                     <td>
-                      <div className="fw-bold text-dark">{adm.patient_name}</div>
+                      <div className="fw-bold text-dark">{item.patient_name}</div>
                       <div className="text-muted small">
-                        {adm.age ? `${adm.age} yrs` : 'Age N/A'} &bull; {adm.sex || 'N/A'}
+                        UHID: <span className="font-monospace text-dark">{item.uhid}</span> &bull;
+                        IP: <span className="font-monospace text-dark">{item.ip_no}</span>
                       </div>
                     </td>
                     <td>
-                      <div className="small">
-                        <span className="text-muted">UHID:</span> <span className="fw-semibold">{adm.uhid}</span>
-                      </div>
-                      <div className="small">
-                        <span className="text-muted">IP No:</span>{' '}
-                        <span className="badge bg-light text-dark border">{adm.ip_no}</span>
+                      <div>{item.admission_at ? new Date(item.admission_at).toLocaleDateString('en-GB') : '—'}</div>
+                      <div className="text-muted small">
+                        to {item.discharge_at ? new Date(item.discharge_at).toLocaleDateString('en-GB') : '—'}
                       </div>
                     </td>
                     <td>
-                      <div>
-                        {adm.surgery_type === 'delivery' ? (
-                          <span className="badge" style={{ background: '#fdf2f8', color: '#be185d', border: '1px solid #fbcfe8' }}>
-                            <i className="bi bi-gender-female"></i> Delivery ({adm.newborns?.length || 0} baby)
-                          </span>
-                        ) : (
-                          <span className="badge" style={{ background: '#f0f9ff', color: '#0369a1', border: '1px solid #bae6fd' }}>
-                            <i className="bi bi-heart-pulse"></i> Surgery
-                          </span>
-                        )}
-                      </div>
-                      <span className="badge bg-secondary text-uppercase mt-1" style={{ fontSize: '0.65rem' }}>
-                        {adm.format}
+                      <span className="badge bg-light text-dark border text-uppercase me-1" style={{ fontSize: '10px' }}>
+                        {item.format}
+                      </span>
+                      <span className="badge bg-secondary" style={{ fontSize: '10px' }}>
+                        {item.surgery_type === 'delivery' ? `Delivery (${item.newborns?.length || 0})` : 'Other'}
                       </span>
                     </td>
                     <td>
-                      <div className="small text-muted">{adm.admission_at?.substring(0, 10)}</div>
-                      <div className="small text-muted">to {adm.discharge_at?.substring(0, 10)}</div>
-                    </td>
-                    <td>
-                      <span className={`badge ${getStatusBadge(adm.status)} text-uppercase`}>
-                        {adm.status.replace(/_/g, ' ')}
+                      <span className={`badge ${getStatusBadge(item.status)} text-uppercase`} style={{ fontSize: '10.5px' }}>
+                        {item.status.replace(/_/g, ' ')}
                       </span>
-                      {adm.status === 'returned_for_correction' && adm.rejection_reason && (
-                        <div
-                          className="text-danger small mt-1"
-                          style={{ maxWidth: '200px', fontSize: '0.75rem' }}
-                          title={adm.rejection_reason}
-                        >
-                          <i className="bi bi-info-circle"></i> {adm.rejection_reason.substring(0, 40)}
-                        </div>
-                      )}
                     </td>
                     <td className="text-end">
                       <div className="btn-group btn-group-sm">
-                        <Link href={`/documents/${adm.id}/preview`} className="btn btn-outline-secondary" title="Preview Pack">
-                          <i className="bi bi-eye"></i> Preview
+                        <Link href={`/admissions/${item.id}/documents/preview`} className="btn btn-outline-secondary">
+                          <i className="bi bi-eye me-1"></i> Review
                         </Link>
-                        {auth.user?.can_edit && (
-                          <Link href={`/admissions/${adm.id}/edit`} className="btn btn-outline-secondary" title="Edit">
+                        {auth.user?.can_edit && (item.status === 'draft' || item.status === 'returned_for_correction') && (
+                          <Link href={`/admissions/${item.id}/edit`} className="btn btn-outline-secondary">
                             <i className="bi bi-pencil"></i>
                           </Link>
                         )}
-                        <Link href={`/documents/${adm.id}/history`} className="btn btn-outline-secondary" title="History">
-                          <i className="bi bi-clock-history"></i>
-                        </Link>
-                        {['approved', 'generated'].includes(adm.status) && (
-                          <a
-                            href={`/documents/${adm.id}/pdf`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-primary"
-                            title="Download Official PDF"
-                          >
-                            <i className="bi bi-file-earmark-pdf"></i> PDF
+                        {(item.status === 'approved' || item.status === 'generated') && (
+                          <a href={`/admissions/${item.id}/documents/pdf`} target="_blank" rel="noreferrer" className="btn btn-outline-primary">
+                            <i className="bi bi-file-earmark-pdf"></i>
                           </a>
                         )}
                       </div>
                     </td>
                   </tr>
                 ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="text-center py-5 text-muted">
-                    <i className="bi bi-inbox fs-2 d-block mb-2 text-muted"></i>
-                    No admissions found matching the selected criteria.
-                  </td>
-                </tr>
               )}
             </tbody>
           </table>
@@ -340,4 +442,3 @@ export default function Dashboard({ counts, admissions, filters = {}, auth }: Pr
     </AppLayout>
   );
 }
-

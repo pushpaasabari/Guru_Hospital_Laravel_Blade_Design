@@ -41,16 +41,15 @@ export default function Sidebar() {
     <>
       {/* Mobile Topbar for screens < 992px */}
       <div className="fg-mobile-topbar no-print">
-        <Link href="/dashboard" className="hospital-brand-logo">
-          <span className="hospital-brand-badge">
-            <i className="bi bi-hospital"></i>
-          </span>
-          <div>
-            <div className="hospital-brand-title" style={{ fontSize: '0.95rem' }}>
-              GURU HOSPITAL
-            </div>
-            <div className="hospital-brand-subtitle">Clinical Workflow</div>
+        <Link href="/dashboard" className="d-flex align-items-center text-decoration-none">
+          <div className="fg-brand-mark">
+            <span className="bar bar-1"></span>
+            <span className="bar bar-2"></span>
+            <span className="bar bar-3"></span>
           </div>
+          <span className="fw-bold text-dark ms-1" style={{ fontSize: '1rem', letterSpacing: '-0.02em' }}>
+            Guru Hospital
+          </span>
         </Link>
 
         <button
@@ -75,15 +74,21 @@ export default function Sidebar() {
       {/* Left Sidebar (Desktop + Mobile Drawer) */}
       <aside className={`fg-sidebar no-print ${mobileOpen ? 'mobile-open' : ''}`}>
         <div>
-          {/* Sidebar Header: Hospital Brand */}
+          {/* Sidebar Header: Hospital Brand with FinGM 3-Bar Logo */}
           <div className="fg-sidebar-header">
-            <Link href="/dashboard" className="hospital-brand-logo" onClick={closeMobile}>
-              <span className="hospital-brand-badge">
-                <i className="bi bi-hospital"></i>
-              </span>
+            <Link href="/dashboard" className="d-flex align-items-center text-decoration-none" onClick={closeMobile}>
+              <div className="fg-brand-mark">
+                <span className="bar bar-1"></span>
+                <span className="bar bar-2"></span>
+                <span className="bar bar-3"></span>
+              </div>
               <div>
-                <div className="hospital-brand-title">GURU HOSPITAL</div>
-                <div className="hospital-brand-subtitle">Clinical Workflow</div>
+                <div className="hospital-brand-title" style={{ fontSize: '1.05rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
+                  Guru Hospital
+                </div>
+                <div className="hospital-brand-subtitle" style={{ fontSize: '9.5px', color: '#94a3b8' }}>
+                  Clinical Workflow
+                </div>
               </div>
             </Link>
 
@@ -107,7 +112,7 @@ export default function Sidebar() {
                 className={`fg-sidebar-link ${isLinkActive('/dashboard', true) ? 'active' : ''}`}
                 onClick={closeMobile}
               >
-                <i className="bi bi-grid"></i>
+                <i className="bi bi-grid icon-dashboard"></i>
                 <span>Dashboard</span>
               </Link>
 
@@ -116,7 +121,7 @@ export default function Sidebar() {
                 className={`fg-sidebar-link ${isLinkActive('/admissions') ? 'active' : ''}`}
                 onClick={closeMobile}
               >
-                <i className="bi bi-folder2-open"></i>
+                <i className="bi bi-folder2-open icon-admissions"></i>
                 <span>Admissions</span>
               </Link>
 
@@ -126,7 +131,7 @@ export default function Sidebar() {
                   className={`fg-sidebar-link ${isLinkActive('/admissions/create', true) ? 'active' : ''}`}
                   onClick={closeMobile}
                 >
-                  <i className="bi bi-plus-circle"></i>
+                  <i className="bi bi-plus-circle icon-create"></i>
                   <span>New Admission</span>
                 </Link>
               )}
@@ -144,7 +149,7 @@ export default function Sidebar() {
                       className={`fg-sidebar-link ${isLinkActive('/templates') ? 'active' : ''}`}
                       onClick={closeMobile}
                     >
-                      <i className="bi bi-file-earmark-code"></i>
+                      <i className="bi bi-file-earmark-code icon-templates"></i>
                       <span>Templates</span>
                     </Link>
 
@@ -153,7 +158,7 @@ export default function Sidebar() {
                       className={`fg-sidebar-link ${isLinkActive('/users') ? 'active' : ''}`}
                       onClick={closeMobile}
                     >
-                      <i className="bi bi-people"></i>
+                      <i className="bi bi-people icon-users"></i>
                       <span>Staff Users</span>
                     </Link>
                   </>
@@ -165,7 +170,7 @@ export default function Sidebar() {
                     className={`fg-sidebar-link ${isLinkActive('/audit-logs') ? 'active' : ''}`}
                     onClick={closeMobile}
                   >
-                    <i className="bi bi-shield-check"></i>
+                    <i className="bi bi-shield-check icon-audit"></i>
                     <span>Audit Trail</span>
                   </Link>
                 )}

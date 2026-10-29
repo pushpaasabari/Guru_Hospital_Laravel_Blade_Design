@@ -1,38 +1,56 @@
 export default function OrbitalBackground() {
   return (
     <div className="fg-orbital-rings-bg" aria-hidden="true">
-      <div className="fg-ambient-glow" />
-      <div className="fg-orbit-ring ring-1" />
-      <div className="fg-orbit-ring ring-2" />
-      <div className="fg-orbit-ring ring-3" />
-      <div className="fg-orbit-ring ring-4" />
+      {/* Concentric faint orbital rings matching FinGM reference */}
+      <div className="fg-orbit-ring ring-1" style={{ width: '380px', height: '380px', borderColor: '#e2e8f0' }} />
+      <div className="fg-orbit-ring ring-2" style={{ width: '560px', height: '560px', borderColor: 'rgba(226, 232, 240, 0.7)' }} />
+      <div className="fg-orbit-ring ring-3" style={{ width: '740px', height: '740px', borderColor: 'rgba(226, 232, 240, 0.45)' }} />
 
-      <svg className="fg-orbit-arcs-svg" viewBox="0 0 1000 1000" fill="none">
-        <circle cx="500" cy="500" r="280" stroke="#245dff" strokeWidth="1.5" strokeDasharray="30 450" strokeLinecap="round" opacity="0.6" />
-        <circle cx="500" cy="500" r="390" stroke="#38bdf8" strokeWidth="1.5" strokeDasharray="45 600" strokeLinecap="round" opacity="0.7" />
-        <circle cx="500" cy="500" r="480" stroke="#245dff" strokeWidth="1.5" strokeDasharray="60 800" strokeLinecap="round" opacity="0.5" />
-      </svg>
+      {/* Floating circular chips positioned on the orbital lines as in FinGM */}
+      {/* Top Left: Purple Users chip */}
+      <div
+        className="fg-orbit-badge"
+        style={{ top: '18%', left: '22%', color: '#7c3aed' }}
+        title="Staff & Patients"
+      >
+        <i className="bi bi-people-fill"></i>
+      </div>
 
-      {/* Floating Healthcare & Governance Badges */}
-      <div className="fg-orbit-badge badge-top-left" style={{ color: '#0d9488' }} title="Clinical Diagnosis">
-        <i className="bi bi-heart-pulse-fill"></i>
+      {/* Mid Left: Blue Database / Storage chip */}
+      <div
+        className="fg-orbit-badge"
+        style={{ top: '48%', left: '12%', transform: 'translateY(-50%)', color: '#2563eb' }}
+        title="Clinical Database"
+      >
+        <i className="bi bi-database-fill"></i>
       </div>
-      <div className="fg-orbit-badge badge-top-right" style={{ color: '#2563eb' }} title="Operation Theatre">
-        <i className="bi bi-hospital"></i>
+
+      {/* Top Right: Orange Currency / Vitals chip */}
+      <div
+        className="fg-orbit-badge"
+        style={{ top: '18%', right: '22%', color: '#f59e0b', fontWeight: 'bold' }}
+        title="Vitals & Billing"
+      >
+        <span style={{ fontSize: '15px' }}>₹</span>
       </div>
-      <div className="fg-orbit-badge badge-mid-left" style={{ color: '#16a34a' }} title="Discharge Summary">
-        <i className="bi bi-file-earmark-medical"></i>
+
+      {/* Mid Right: Red Document / Summary chip */}
+      <div
+        className="fg-orbit-badge"
+        style={{ top: '48%', right: '12%', transform: 'translateY(-50%)', color: '#ef4444' }}
+        title="Discharge Summaries"
+      >
+        <i className="bi bi-file-earmark-medical-fill"></i>
       </div>
-      <div className="fg-orbit-badge badge-mid-right" style={{ color: '#7c3aed' }} title="MRD Records">
-        <i className="bi bi-folder-check"></i>
-      </div>
-      <div className="fg-orbit-badge badge-bottom-left" style={{ color: '#e11d48' }} title="Tamper-Resistant Audit">
-        <i className="bi bi-shield-check"></i>
-      </div>
-      <div className="fg-orbit-badge badge-bottom-right" style={{ color: '#f59e0b' }} title="Bilingual Formats">
-        <i className="bi bi-translate"></i>
+
+      {/* Bottom Right: Blue Bar Chart chip */}
+      <div
+        className="fg-orbit-badge"
+        style={{ bottom: '16%', right: '20%', color: '#3b82f6' }}
+        title="Hospital Analytics"
+      >
+        <i className="bi bi-bar-chart-fill"></i>
       </div>
     </div>
   );
 }
-

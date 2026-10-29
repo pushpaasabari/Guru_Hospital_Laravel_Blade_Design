@@ -7,41 +7,45 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
-  --fg-page: #f1f1f1;
+  --fg-page: #f4f5f7;
   --fg-surface: #ffffff;
   --fg-surface-soft: #fafbfc;
 
-  --fg-text: #111111;
-  --fg-text-secondary: #686868;
-  --fg-text-muted: #929292;
+  --fg-text: #0f172a;
+  --fg-text-secondary: #475569;
+  --fg-text-muted: #94a3b8;
 
-  --fg-border: #e9e9e9;
-  --fg-border-strong: #dddddd;
+  --fg-border: #e2e8f0;
+  --fg-border-strong: #cbd5e1;
+  --fg-border-light: #ebecee;
 
   --fg-primary: #080808;
-  --fg-primary-hover: #262626;
-  --fg-link: #245dff;
+  --fg-primary-hover: #1e293b;
+  --fg-link: #2563eb;
+  --fg-brand-blue: #2563eb;
+  --fg-brand-blue-soft: #eff6ff;
 
-  --fg-blue-glow: rgba(87, 166, 255, 0.15);
-  --fg-cyan-glow: rgba(91, 218, 255, 0.12);
+  --fg-blue-glow: rgba(37, 99, 235, 0.12);
+  --fg-cyan-glow: rgba(56, 189, 248, 0.10);
 
   --fg-radius-sm: 10px;
   --fg-radius-md: 16px;
   --fg-radius-lg: 24px;
-  --fg-radius-xl: 32px;
+  --fg-radius-xl: 30px;
 
-  --fg-shadow-card: 0 8px 28px rgba(20, 30, 50, 0.035);
-  --fg-shadow-float: 0 12px 32px rgba(30, 50, 80, 0.08);
+  --fg-shadow-card: 0 4px 20px rgba(0, 0, 0, 0.03);
+  --fg-shadow-float: 0 20px 60px rgba(0, 0, 0, 0.05);
   --fg-shadow-nav: 0 4px 20px rgba(0, 0, 0, 0.04);
 
-  --fg-content-width: 1240px;
+  --fg-sidebar-width: 260px;
+  --fg-content-width: 1320px;
   --fg-font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 /* ─── Global Canvas & Base Resets ─────────────────────────────────────────── */
 body {
-  background-color: var(--fg-page, #f1f1f1);
-  color: var(--fg-text, #111111);
+  background-color: var(--fg-page, #f4f5f7);
+  color: var(--fg-text, #0f172a);
   font-family: var(--fg-font);
   font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   min-height: 100vh;
@@ -672,45 +676,68 @@ body {
 .fg-orbit-badge.badge-bottom-left { bottom: 18%; left: 16%; }
 .fg-orbit-badge.badge-bottom-right { bottom: 18%; right: 16%; }
 
-.fg-auth-card {
-  width: 100%;
-  max-width: 450px;
-  background: #ffffff;
-  border: 1px solid var(--fg-border, #e9e9e9);
-  border-radius: var(--fg-radius-lg, 28px);
-  padding: 40px 36px;
-  box-shadow: var(--fg-shadow-float, 0 12px 32px rgba(30, 50, 80, 0.08));
-  position: relative;
-  z-index: 10;
+/* ─── Exact FinGM Brand Mark (3 Blue Vertical Pills) ───────────────────────── */
+.fg-brand-mark {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 20px;
+  margin-right: 6px;
 }
 
+.fg-brand-mark .bar {
+  width: 3.5px;
+  border-radius: 9999px;
+  background: var(--fg-brand-blue, #2563eb);
+}
+
+.fg-brand-mark .bar-1 { height: 9px; }
+.fg-brand-mark .bar-2 { height: 14px; }
+.fg-brand-mark .bar-3 { height: 20px; }
+
 .fg-auth-badge-top {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 50%;
-  background: #080808;
-  color: #ffffff;
-  margin: 0 auto 18px;
+  background: #ffffff;
+  border: 1px solid var(--fg-border, #e2e8f0);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  color: #16a34a;
+  margin: -62px auto 18px auto;
   display: grid;
   place-items: center;
   font-size: 22px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 20;
+}
+
+.fg-auth-card {
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  border: 1px solid var(--fg-border, #e2e8f0);
+  border-radius: 28px;
+  padding: 40px 36px 36px 36px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 10;
+  margin-top: 30px;
 }
 
 .fg-auth-title {
   font-size: 24px;
-  font-weight: 800;
-  color: var(--fg-text, #111111);
+  font-weight: 700;
+  color: var(--fg-text, #0f172a);
   text-align: center;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   margin-bottom: 6px;
 }
 
 .fg-auth-subtitle {
   font-size: 13.5px;
-  color: var(--fg-text-secondary, #686868);
+  color: var(--fg-text-secondary, #64748b);
   text-align: center;
-  margin-bottom: 26px;
+  margin-bottom: 24px;
   line-height: 1.5;
 }
 
@@ -718,35 +745,63 @@ body {
   position: relative;
   display: flex;
   align-items: center;
+  margin-bottom: 14px;
 }
 
 .fg-auth-input-group .form-control {
   padding-left: 42px !important;
-  height: 46px;
+  padding-right: 42px !important;
+  height: 48px;
   border-radius: 12px !important;
+  border: 1px solid var(--fg-border, #e2e8f0);
+  background: #ffffff;
+  font-size: 13.5px;
+  color: var(--fg-text, #0f172a);
+  transition: all 0.15s ease;
+}
+
+.fg-auth-input-group .form-control:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
 }
 
 .fg-auth-input-icon {
   position: absolute;
   left: 14px;
-  color: var(--fg-text-muted, #929292);
+  color: var(--fg-text-muted, #94a3b8);
   pointer-events: none;
+  font-size: 16px;
+}
+
+.fg-auth-input-toggle {
+  position: absolute;
+  right: 14px;
+  color: var(--fg-text-muted, #94a3b8);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
   font-size: 16px;
 }
 
 .btn-auth-black {
   width: 100%;
-  height: 46px;
+  height: 48px;
   background: var(--fg-primary, #080808);
   color: #ffffff;
   border: none;
-  border-radius: 9999px;
+  border-radius: 12px;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
   margin-top: 10px;
+}
+
+.btn-auth-black:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
 }
 
 .btn-auth-black:hover {
@@ -888,11 +943,11 @@ body {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 14px;
+  padding: 9px 12px;
   font-size: 13.5px;
   font-weight: 500;
-  color: var(--fg-text-secondary, #686868);
-  border-radius: 12px;
+  color: var(--fg-text-secondary, #475569);
+  border-radius: 10px;
   text-decoration: none;
   transition: all 0.15s ease;
   position: relative;
@@ -901,11 +956,14 @@ body {
 .fg-sidebar-link i {
   font-size: 16px;
   transition: transform 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .fg-sidebar-link:hover {
-  color: var(--fg-text, #111111);
-  background: var(--fg-surface-soft, #fafbfc);
+  color: var(--fg-text, #0f172a);
+  background: var(--fg-surface-soft, #f8fafc);
 }
 
 .fg-sidebar-link:hover i {
@@ -913,15 +971,21 @@ body {
 }
 
 .fg-sidebar-link.active {
-  color: #ffffff !important;
-  background: var(--fg-primary, #080808) !important;
+  color: var(--fg-brand-blue, #2563eb) !important;
+  background: var(--fg-brand-blue-soft, #eff6ff) !important;
   font-weight: 600;
-  box-shadow: 0 4px 12px rgba(8, 8, 8, 0.15);
 }
 
 .fg-sidebar-link.active i {
-  color: #ffffff !important;
+  color: var(--fg-brand-blue, #2563eb) !important;
 }
+
+.fg-sidebar-link .icon-dashboard { color: #2563eb; }
+.fg-sidebar-link .icon-admissions { color: #7c3aed; }
+.fg-sidebar-link .icon-create { color: #16a34a; }
+.fg-sidebar-link .icon-templates { color: #d97706; }
+.fg-sidebar-link .icon-users { color: #db2777; }
+.fg-sidebar-link .icon-audit { color: #0891b2; }
 
 .fg-sidebar-link .badge {
   margin-left: auto;
