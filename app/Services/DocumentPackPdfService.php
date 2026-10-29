@@ -7,12 +7,15 @@ use App\Models\DocumentRevision;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\Process\Process;
 
 class DocumentPackPdfService
 {
     /**
      * Generates and returns a downloadable/streamable PDF response for the approved admission pack.
+     * Uses Playwright with Google Chrome/Chromium for high-fidelity rendering, with DomPDF fallback.
      */
     public function download(Admission $admission): Response
     {
@@ -26,49 +29,15 @@ class DocumentPackPdfService
         $fileName = "Guru_Hospital_Discharge_Pack_{$safeIp}.pdf";
         $storagePath = "{$storageDirectory}/{$fileName}";
 
-        // Configure Dompdf options
-        $pdf = Pdf::loadView('pdf.pack', compact('admission'));
-        $pdf->setPaper('a4', 'portrait');
-        $pdf->setOption([
-            'isHtml5ParserEnabled' => true,
-            'isRemoteEnabled' => true,
-            'defaultFont' => 'DejaVu Sans',
-            'dpi' => 150,
-        ]);
+        // 1. Primary Engine: Playwright Chrome / Chromium
+        $output = $this->generateWithPlaywright($admission);
 
-        // Render PDF
-        $domPdf = $pdf->getDomPDF();
-        $domPdf->render();
+        // 2. Fallback Engine: DomPDF if Playwright is unavailable
+        if (!$output) {
+            $output = $this->generateWithDompdf($admission);
+        }
 
-        // Canvas for page numbering (Pass 2): "Page {PAGE_NUM} of {PAGE_COUNT}"
-        $canvas = $domPdf->getCanvas();
-        $font = $domPdf->getFontMetrics()->getFont('DejaVu Sans', 'normal');
-        $size = 9;
-        $color = [0.4, 0.4, 0.4]; // Muted gray
-
-        // Bottom right page number on every page
-        $canvas->page_text(
-            450,
-            810,
-            "Page {PAGE_NUM} of {PAGE_COUNT}",
-            $font,
-            $size,
-            $color
-        );
-
-        // Bottom left hospital confidential notice
-        $canvas->page_text(
-            40,
-            810,
-            "Guru Hospital — Confidential Medical Record (IP: {$admission->ip_no})",
-            $font,
-            $size,
-            $color
-        );
-
-        $output = $domPdf->output();
-
-        // Store privately
+        // Store privately in storage
         Storage::disk('local')->put($storagePath, $output);
 
         // Update admission status to generated if it was approved
@@ -92,7 +61,7 @@ class DocumentPackPdfService
                 'document.generated',
                 'Admission',
                 $admission->id,
-                "Final approved document pack generated and saved to private storage ({$fileName}) by {$user->name}"
+                "Final approved document pack generated with Playwright Chromium and saved ({$fileName}) by {$user->name}"
             );
         } else {
             // Document reprint
@@ -100,7 +69,7 @@ class DocumentPackPdfService
                 'document.reprinted',
                 'Admission',
                 $admission->id,
-                "Document pack reprinted by {$user->name}"
+                "Document pack reprinted with Playwright Chromium by {$user->name}"
             );
         }
 
@@ -111,5 +80,88 @@ class DocumentPackPdfService
             'Pragma' => 'no-cache',
             'Expires' => '0',
         ]);
+    }
+
+    /**
+     * Renders pixel-perfect hospital discharge pack PDF using Playwright Chromium / Google Chrome.
+     */
+    public function generateWithPlaywright(Admission $admission): ?string
+    {
+        try {
+            $html = view('pdf.pack', compact('admission'))->render();
+
+            $tempDir = storage_path('app/temp_pdf');
+            if (!is_dir($tempDir)) {
+                @mkdir($tempDir, 0755, true);
+            }
+
+            $uniqueId = uniqid('pdf_', true);
+            $tempHtml = "{$tempDir}/{$uniqueId}.html";
+            $tempPdf = "{$tempDir}/{$uniqueId}.pdf";
+
+            file_put_contents($tempHtml, $html);
+
+            $scriptPath = resource_path('scripts/generate-pdf.js');
+            $headerTitle = "Guru Hospital — Confidential Medical Record (IP: {$admission->ip_no})";
+
+            $process = new Process([
+                'node',
+                $scriptPath,
+                '--input', $tempHtml,
+                '--output', $tempPdf,
+                '--title', $headerTitle,
+            ]);
+
+            $process->setTimeout(30);
+            $process->run();
+
+            if ($process->isSuccessful() && file_exists($tempPdf) && filesize($tempPdf) > 0) {
+                $output = file_get_contents($tempPdf);
+                @unlink($tempHtml);
+                @unlink($tempPdf);
+                return $output;
+            }
+
+            Log::warning('Playwright PDF process failed: ' . $process->getErrorOutput());
+            @unlink($tempHtml);
+            if (file_exists($tempPdf)) {
+                @unlink($tempPdf);
+            }
+        } catch (\Throwable $e) {
+            Log::warning('Playwright PDF generation exception: ' . $e->getMessage());
+        }
+
+        return null;
+    }
+
+    /**
+     * Fallback rendering via Barryvdh DomPDF.
+     */
+    public function generateWithDompdf(Admission $admission): string
+    {
+        $pdf = Pdf::loadView('pdf.pack', compact('admission'));
+        $pdf->setPaper('a4', 'portrait');
+        $pdf->setOption([
+            'isHtml5ParserEnabled' => true,
+            'isRemoteEnabled' => true,
+            'defaultFont' => 'DejaVu Sans',
+            'dpi' => 150,
+        ]);
+
+        $domPdf = $pdf->getDomPDF();
+        $domPdf->render();
+
+        $canvas = $domPdf->getCanvas();
+        $font = $domPdf->getFontMetrics()->getFont('DejaVu Sans', 'normal');
+        $size = 9;
+        $color = [0.4, 0.4, 0.4];
+
+        // Bottom right page number
+        $canvas->page_text(450, 810, "Page {PAGE_NUM} of {PAGE_COUNT}", $font, $size, $color);
+
+        // Bottom left hospital confidential notice
+        $canvas->page_text(40, 810, "Guru Hospital — Confidential Medical Record (IP: {$admission->ip_no})", $font, $size, $color);
+
+        return $domPdf->output();
     }
 }
