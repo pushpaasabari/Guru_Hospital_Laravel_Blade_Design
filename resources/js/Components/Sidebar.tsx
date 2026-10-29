@@ -81,13 +81,18 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
         <div>
           {/* Sidebar Header: Hospital Brand with FinGM 3-Bar Logo & Hide Button */}
           <div className="fg-sidebar-header">
-            <Link href="/dashboard" className="d-flex align-items-center text-decoration-none" onClick={closeMobile}>
+            <Link
+              href="/dashboard"
+              className="d-flex align-items-center text-decoration-none"
+              onClick={closeMobile}
+              title="Guru Hospital Dashboard"
+            >
               <div className="fg-brand-mark">
                 <span className="bar bar-1"></span>
                 <span className="bar bar-2"></span>
                 <span className="bar bar-3"></span>
               </div>
-              <div>
+              <div className="fg-sidebar-brand-text">
                 <div className="hospital-brand-title" style={{ fontSize: '1.05rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
                   Guru Hospital
                 </div>
@@ -98,16 +103,16 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
             </Link>
 
             <div className="d-flex align-items-center">
-              {/* Left Menu Hide Button for Desktop */}
+              {/* Left Menu Hide / Expand Button for Desktop */}
               {onToggleCollapse && (
                 <button
                   className="fg-sidebar-hide-btn d-none d-lg-inline-flex"
                   type="button"
                   onClick={onToggleCollapse}
-                  title="Hide left menu"
-                  aria-label="Hide left menu"
+                  title={collapsed ? "Expand sidebar menu" : "Collapse to icon menu"}
+                  aria-label={collapsed ? "Expand sidebar menu" : "Collapse to icon menu"}
                 >
-                  <i className="bi bi-layout-sidebar-inset"></i>
+                  <i className={`bi ${collapsed ? 'bi-chevron-right' : 'bi-layout-sidebar-inset'}`}></i>
                 </button>
               )}
 
@@ -121,7 +126,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
             </div>
           </div>
 
-          {/* Navigation Links */}
+          {/* Navigation Links (With full titles for Icon-Only mode) */}
           <div className="fg-sidebar-body">
             {/* Group 1: Clinical Management */}
             <div className="fg-sidebar-group">
@@ -131,6 +136,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                 href="/dashboard"
                 className={`fg-sidebar-link ${isLinkActive('/dashboard', true) ? 'active' : ''}`}
                 onClick={closeMobile}
+                title="Dashboard"
               >
                 <i className="bi bi-grid icon-dashboard"></i>
                 <span>Dashboard</span>
@@ -140,6 +146,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                 href="/admissions"
                 className={`fg-sidebar-link ${isLinkActive('/admissions') ? 'active' : ''}`}
                 onClick={closeMobile}
+                title="Admissions Archive"
               >
                 <i className="bi bi-folder2-open icon-admissions"></i>
                 <span>Admissions</span>
@@ -150,6 +157,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                   href="/admissions/create"
                   className={`fg-sidebar-link ${isLinkActive('/admissions/create', true) ? 'active' : ''}`}
                   onClick={closeMobile}
+                  title="New Admission"
                 >
                   <i className="bi bi-plus-circle icon-create"></i>
                   <span>New Admission</span>
@@ -168,6 +176,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                       href="/templates"
                       className={`fg-sidebar-link ${isLinkActive('/templates') ? 'active' : ''}`}
                       onClick={closeMobile}
+                      title="Document Templates"
                     >
                       <i className="bi bi-file-earmark-code icon-templates"></i>
                       <span>Templates</span>
@@ -177,6 +186,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                       href="/users"
                       className={`fg-sidebar-link ${isLinkActive('/users') ? 'active' : ''}`}
                       onClick={closeMobile}
+                      title="Staff Users Management"
                     >
                       <i className="bi bi-people icon-users"></i>
                       <span>Staff Users</span>
@@ -189,6 +199,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                     href="/audit-logs"
                     className={`fg-sidebar-link ${isLinkActive('/audit-logs') ? 'active' : ''}`}
                     onClick={closeMobile}
+                    title="Audit Trail Logs"
                   >
                     <i className="bi bi-shield-check icon-audit"></i>
                     <span>Audit Trail</span>
@@ -202,7 +213,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
         {/* Sidebar Footer: Staff User Card & Logout */}
         {user && (
           <div className="fg-sidebar-footer">
-            <div className="fg-sidebar-user-card">
+            <div className="fg-sidebar-user-card" title={`${user.name} (${user.role?.replace(/_/g, ' ')})`}>
               <span className="fg-sidebar-user-avatar">
                 {user.name.charAt(0).toUpperCase()}
               </span>
@@ -225,7 +236,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
             </div>
 
             <form onSubmit={handleLogout}>
-              <button type="submit" className="fg-sidebar-logout-btn">
+              <button type="submit" className="fg-sidebar-logout-btn" title="Sign Out">
                 <i className="bi bi-box-arrow-right"></i>
                 <span>Sign Out</span>
               </button>

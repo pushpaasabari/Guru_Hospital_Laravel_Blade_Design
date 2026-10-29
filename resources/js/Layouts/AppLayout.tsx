@@ -40,21 +40,6 @@ export default function AppLayout({ children }: Props) {
       <Sidebar collapsed={collapsed} onToggleCollapse={toggleSidebar} />
 
       <div className="fg-main-wrapper">
-        {/* Toggle bar shown when left menu is collapsed/hidden */}
-        {collapsed && (
-          <div className="fg-collapsed-bar no-print">
-            <button
-              className="fg-unhide-btn"
-              type="button"
-              onClick={toggleSidebar}
-              title="Show left menu"
-            >
-              <i className="bi bi-layout-sidebar"></i>
-              <span>Show Menu</span>
-            </button>
-          </div>
-        )}
-
         <main className="fg-main-content">
           {flash?.status && (
             <div
