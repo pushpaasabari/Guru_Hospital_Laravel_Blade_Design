@@ -340,3 +340,4 @@ export default function Dashboard({ counts, admissions, filters = {}, auth }: Pr
     </AppLayout>
   );
 }
+

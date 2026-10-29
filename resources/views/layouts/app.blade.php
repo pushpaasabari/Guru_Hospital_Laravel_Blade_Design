@@ -12,148 +12,136 @@
     <link rel="stylesheet" href="{{ asset('css/guru-theme.css') }}">
 </head>
 <body>
-<header class="fg-floating-nav-wrap no-print">
-    <nav class="fg-floating-nav">
+<div class="fg-app-shell">
+    @auth
+    <!-- Mobile Topbar for screens < 992px -->
+    <div class="fg-mobile-topbar no-print">
         <a class="hospital-brand-logo" href="{{ route('dashboard') }}">
             <span class="hospital-brand-badge">
                 <i class="bi bi-hospital"></i>
             </span>
             <div>
-                <div class="hospital-brand-title">GURU HOSPITAL</div>
+                <div class="hospital-brand-title" style="font-size: 0.95rem;">GURU HOSPITAL</div>
                 <div class="hospital-brand-subtitle">Clinical Workflow</div>
             </div>
         </a>
 
-        @auth
-        <ul class="fg-nav-links d-none d-lg-flex">
-            <li>
-                <a class="fg-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                    <i class="bi bi-grid"></i> Dashboard
-                </a>
-            </li>
-            <li>
-                <a class="fg-nav-link {{ request()->routeIs('admissions.index') ? 'active' : '' }}" href="{{ route('admissions.index') }}">
-                    <i class="bi bi-folder2-open"></i> Admissions
-                </a>
-            </li>
-            @if(auth()->user()->canEditAdmissions())
-            <li>
-                <a class="fg-nav-link {{ request()->routeIs('admissions.create') ? 'active' : '' }}" href="{{ route('admissions.create') }}">
-                    <i class="bi bi-plus-circle"></i> New Admission
-                </a>
-            </li>
-            @endif
-            @if(auth()->user()->isAdmin())
-            <li>
-                <a class="fg-nav-link {{ request()->routeIs('templates.*') ? 'active' : '' }}" href="{{ route('templates.index') }}">
-                    <i class="bi bi-file-earmark-code"></i> Templates
-                </a>
-            </li>
-            <li>
-                <a class="fg-nav-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
-                    <i class="bi bi-people"></i> Staff Users
-                </a>
-            </li>
-            @endif
-            @if(auth()->user()->canViewAuditLogs())
-            <li>
-                <a class="fg-nav-link {{ request()->routeIs('audit.*') ? 'active' : '' }}" href="{{ route('audit.index') }}">
-                    <i class="bi bi-shield-check"></i> Audit Trail
-                </a>
-            </li>
-            @endif
-        </ul>
+        <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSidebar" aria-label="Toggle navigation">
+            <i class="bi bi-list fs-5"></i>
+        </button>
+    </div>
 
-        <div class="d-flex align-items-center gap-2">
-            <div class="fg-user-chip d-none d-sm-inline-flex">
-                <span class="fg-user-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
-                <div class="fg-user-info">
-                    <div class="fg-user-name">{{ auth()->user()->name }}</div>
-                    <div class="fg-user-role">{{ str_replace('_', ' ', auth()->user()->role) }}</div>
+    <!-- Left Sidebar -->
+    <aside class="fg-sidebar no-print collapse d-lg-flex" id="mobileSidebar">
+        <div>
+            <div class="fg-sidebar-header">
+                <a class="hospital-brand-logo" href="{{ route('dashboard') }}">
+                    <span class="hospital-brand-badge">
+                        <i class="bi bi-hospital"></i>
+                    </span>
+                    <div>
+                        <div class="hospital-brand-title">GURU HOSPITAL</div>
+                        <div class="hospital-brand-subtitle">Clinical Workflow</div>
+                    </div>
+                </a>
+                <button class="btn btn-sm btn-close d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSidebar" aria-label="Close"></button>
+            </div>
+
+            <div class="fg-sidebar-body">
+                <div class="fg-sidebar-group">
+                    <div class="fg-sidebar-group-title">Clinical Management</div>
+                    <a class="fg-sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
+                        <i class="bi bi-grid"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a class="fg-sidebar-link {{ request()->routeIs('admissions.index') ? 'active' : '' }}" href="{{ route('admissions.index') }}">
+                        <i class="bi bi-folder2-open"></i>
+                        <span>Admissions</span>
+                    </a>
+                    @if(auth()->user()->canEditAdmissions())
+                    <a class="fg-sidebar-link {{ request()->routeIs('admissions.create') ? 'active' : '' }}" href="{{ route('admissions.create') }}">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>New Admission</span>
+                    </a>
+                    @endif
+                </div>
+
+                @if(auth()->user()->isAdmin() || auth()->user()->canViewAuditLogs())
+                <div class="fg-sidebar-group">
+                    <div class="fg-sidebar-group-title">Administration</div>
+                    @if(auth()->user()->isAdmin())
+                    <a class="fg-sidebar-link {{ request()->routeIs('templates.*') ? 'active' : '' }}" href="{{ route('templates.index') }}">
+                        <i class="bi bi-file-earmark-code"></i>
+                        <span>Templates</span>
+                    </a>
+                    <a class="fg-sidebar-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
+                        <i class="bi bi-people"></i>
+                        <span>Staff Users</span>
+                    </a>
+                    @endif
+                    @if(auth()->user()->canViewAuditLogs())
+                    <a class="fg-sidebar-link {{ request()->routeIs('audit.*') ? 'active' : '' }}" href="{{ route('audit.index') }}">
+                        <i class="bi bi-shield-check"></i>
+                        <span>Audit Trail</span>
+                    </a>
+                    @endif
+                </div>
+                @endif
+            </div>
+        </div>
+
+        <div class="fg-sidebar-footer">
+            <div class="fg-sidebar-user-card">
+                <span class="fg-sidebar-user-avatar">{{ strtoupper(substr(auth()->user()->name, 0, 1)) }}</span>
+                <div class="fg-sidebar-user-meta">
+                    <div class="fg-sidebar-user-name" title="{{ auth()->user()->name }}">{{ auth()->user()->name }}</div>
+                    <div class="fg-sidebar-user-role">{{ str_replace('_', ' ', auth()->user()->role) }}</div>
+                    @if(auth()->user()->doctor_reg_no)
+                        <div class="text-muted font-monospace" style="font-size: 9.5px; margin-top: 1px;">{{ auth()->user()->doctor_reg_no }}</div>
+                    @endif
                 </div>
             </div>
-            <form method="POST" action="{{ route('logout') }}" class="d-inline">
+
+            <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" class="btn btn-sm btn-outline-danger" title="Logout">
-                    <i class="bi bi-box-arrow-right"></i> <span class="d-none d-md-inline">Logout</span>
+                <button type="submit" class="fg-sidebar-logout-btn">
+                    <i class="bi bi-box-arrow-right"></i>
+                    <span>Sign Out</span>
                 </button>
             </form>
-            <button class="btn btn-sm btn-outline-secondary d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileNav" aria-label="Toggle navigation">
-                <i class="bi bi-list fs-6"></i>
-            </button>
         </div>
-        @endauth
-    </nav>
-    @auth
-    <div class="collapse d-lg-none mt-2 card p-3 shadow-sm border" id="mobileNav">
-        <ul class="nav flex-column gap-1">
-            <li class="nav-item">
-                <a class="nav-link py-2 {{ request()->routeIs('dashboard') ? 'active fw-bold' : '' }}" href="{{ route('dashboard') }}">
-                    <i class="bi bi-grid me-2"></i> Dashboard
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link py-2 {{ request()->routeIs('admissions.index') ? 'active fw-bold' : '' }}" href="{{ route('admissions.index') }}">
-                    <i class="bi bi-folder2-open me-2"></i> Admissions
-                </a>
-            </li>
-            @if(auth()->user()->canEditAdmissions())
-            <li class="nav-item">
-                <a class="nav-link py-2 {{ request()->routeIs('admissions.create') ? 'active fw-bold' : '' }}" href="{{ route('admissions.create') }}">
-                    <i class="bi bi-plus-circle me-2"></i> New Admission
-                </a>
-            </li>
-            @endif
-            @if(auth()->user()->isAdmin())
-            <li class="nav-item">
-                <a class="nav-link py-2 {{ request()->routeIs('templates.*') ? 'active fw-bold' : '' }}" href="{{ route('templates.index') }}">
-                    <i class="bi bi-file-earmark-code me-2"></i> Templates
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link py-2 {{ request()->routeIs('users.*') ? 'active fw-bold' : '' }}" href="{{ route('users.index') }}">
-                    <i class="bi bi-people me-2"></i> Staff Users
-                </a>
-            </li>
-            @endif
-            @if(auth()->user()->canViewAuditLogs())
-            <li class="nav-item">
-                <a class="nav-link py-2 {{ request()->routeIs('audit.*') ? 'active fw-bold' : '' }}" href="{{ route('audit.index') }}">
-                    <i class="bi bi-shield-check me-2"></i> Audit Trail
-                </a>
-            </li>
-            @endif
-        </ul>
-    </div>
+    </aside>
     @endauth
-</header>
 
-<main class="container pb-5">
-    @if(session('status'))
-        <div class="alert alert-success alert-dismissible fade show no-print shadow-sm" role="alert">
-            <i class="bi bi-check-circle-fill me-2"></i> {{ session('status') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show no-print shadow-sm" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-    @if($errors->any())
-        <div class="alert alert-danger no-print shadow-sm">
-            <strong class="d-flex align-items-center mb-1"><i class="bi bi-x-octagon-fill me-2"></i> Please review and correct the following:</strong>
-            <ul class="mb-0 ps-3">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    <div class="fg-main-wrapper">
+        <main class="fg-main-content">
+            @if(session('status'))
+                <div class="alert alert-success alert-dismissible fade show no-print shadow-sm" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i> {{ session('status') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+            @if(session('error'))
+                <div class="alert alert-danger alert-dismissible fade show no-print shadow-sm" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i> {{ session('error') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
+            @if($errors->any())
+                <div class="alert alert-danger no-print shadow-sm">
+                    <strong class="d-flex align-items-center mb-1"><i class="bi bi-x-octagon-fill me-2"></i> Please review and correct the following:</strong>
+                    <ul class="mb-0 ps-3">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-    @yield('content')
-</main>
+            @yield('content')
+        </main>
+    </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 @yield('scripts')

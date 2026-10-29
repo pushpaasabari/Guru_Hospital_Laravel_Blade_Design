@@ -207,3 +207,4 @@ export default function AdmissionsIndex({ admissions, filters = {}, auth }: Prop
     </AppLayout>
   );
 }
+

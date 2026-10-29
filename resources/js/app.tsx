@@ -18,3 +18,4 @@ createInertiaApp({
     color: '#080808',
   },
 });
+

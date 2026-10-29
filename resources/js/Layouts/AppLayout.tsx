@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { usePage } from '@inertiajs/react';
-import Navbar from '../Components/Navbar';
+import Sidebar from '../Components/Sidebar';
 
 interface Props {
   children: ReactNode;
@@ -15,37 +15,45 @@ export default function AppLayout({ children }: Props) {
   const hasErrors = Object.keys(errors || {}).length > 0;
 
   return (
-    <>
-      <Navbar />
+    <div className="fg-app-shell">
+      <Sidebar />
 
-      <main className="container pb-5">
-        {flash?.status && (
-          <div className="alert alert-success alert-dismissible fade show no-print shadow-sm" role="alert">
-            <i className="bi bi-check-circle-fill me-2"></i> {flash.status}
-          </div>
-        )}
+      <div className="fg-main-wrapper">
+        <main className="fg-main-content">
+          {flash?.status && (
+            <div
+              className="alert alert-success alert-dismissible fade show no-print shadow-sm"
+              role="alert"
+            >
+              <i className="bi bi-check-circle-fill me-2"></i> {flash.status}
+            </div>
+          )}
 
-        {flash?.error && (
-          <div className="alert alert-danger alert-dismissible fade show no-print shadow-sm" role="alert">
-            <i className="bi bi-exclamation-triangle-fill me-2"></i> {flash.error}
-          </div>
-        )}
+          {flash?.error && (
+            <div
+              className="alert alert-danger alert-dismissible fade show no-print shadow-sm"
+              role="alert"
+            >
+              <i className="bi bi-exclamation-triangle-fill me-2"></i> {flash.error}
+            </div>
+          )}
 
-        {hasErrors && (
-          <div className="alert alert-danger no-print shadow-sm">
-            <strong className="d-flex align-items-center mb-1">
-              <i className="bi bi-x-octagon-fill me-2"></i> Please review and correct the following:
-            </strong>
-            <ul className="mb-0 ps-3">
-              {Object.values(errors).map((err, i) => (
-                <li key={i}>{err}</li>
-              ))}
-            </ul>
-          </div>
-        )}
+          {hasErrors && (
+            <div className="alert alert-danger no-print shadow-sm">
+              <strong className="d-flex align-items-center mb-1">
+                <i className="bi bi-x-octagon-fill me-2"></i> Please review and correct the following:
+              </strong>
+              <ul className="mb-0 ps-3">
+                {Object.values(errors).map((err, i) => (
+                  <li key={i}>{err}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
-        {children}
-      </main>
-    </>
+          {children}
+        </main>
+      </div>
+    </div>
   );
 }
