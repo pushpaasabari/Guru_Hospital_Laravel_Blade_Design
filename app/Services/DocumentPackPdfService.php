@@ -42,6 +42,9 @@ class DocumentPackPdfService
 
         // Update admission status to generated if it was approved
         $user = Auth::user();
+        $userName = $user ? $user->name : 'Clinical System';
+        $userId = $user ? $user->id : ($admission->approved_by ?? $admission->created_by);
+
         if ($admission->status === 'approved') {
             $admission->update(['status' => 'generated']);
 
@@ -52,7 +55,7 @@ class DocumentPackPdfService
                 'revision_number' => $revisionCount + 1,
                 'snapshot_data' => $admission->toArray(),
                 'pdf_storage_path' => $storagePath,
-                'approved_by' => $admission->approved_by ?? $user->id,
+                'approved_by' => $admission->approved_by ?? $userId,
                 'approved_at' => $admission->approved_at ?? now(),
                 'created_at' => now(),
             ]);
@@ -61,7 +64,7 @@ class DocumentPackPdfService
                 'document.generated',
                 'Admission',
                 $admission->id,
-                "Final approved document pack generated with Playwright Chromium and saved ({$fileName}) by {$user->name}"
+                "Final approved document pack generated with Playwright Chromium and saved ({$fileName}) by {$userName}"
             );
         } else {
             // Document reprint
@@ -69,7 +72,7 @@ class DocumentPackPdfService
                 'document.reprinted',
                 'Admission',
                 $admission->id,
-                "Document pack reprinted with Playwright Chromium by {$user->name}"
+                "Document pack reprinted with Playwright Chromium by {$userName}"
             );
         }
 
