@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { usePage } from '@inertiajs/react';
 import Sidebar from '../Components/Sidebar';
 
@@ -12,13 +12,49 @@ export default function AppLayout({ children }: Props) {
     errors: Record<string, string>;
   }>().props;
 
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        return localStorage.getItem('guru_sidebar_collapsed') === 'true';
+      } catch {
+        return false;
+      }
+    }
+    return false;
+  });
+
+  const toggleSidebar = () => {
+    setCollapsed((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('guru_sidebar_collapsed', String(next));
+      } catch {}
+      return next;
+    });
+  };
+
   const hasErrors = Object.keys(errors || {}).length > 0;
 
   return (
-    <div className="fg-app-shell">
-      <Sidebar />
+    <div className={`fg-app-shell ${collapsed ? 'sidebar-collapsed' : ''}`}>
+      <Sidebar collapsed={collapsed} onToggleCollapse={toggleSidebar} />
 
       <div className="fg-main-wrapper">
+        {/* Toggle bar shown when left menu is collapsed/hidden */}
+        {collapsed && (
+          <div className="fg-collapsed-bar no-print">
+            <button
+              className="fg-unhide-btn"
+              type="button"
+              onClick={toggleSidebar}
+              title="Show left menu"
+            >
+              <i className="bi bi-layout-sidebar"></i>
+              <span>Show Menu</span>
+            </button>
+          </div>
+        )}
+
         <main className="fg-main-content">
           {flash?.status && (
             <div

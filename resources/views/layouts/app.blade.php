@@ -12,18 +12,17 @@
     <link rel="stylesheet" href="{{ asset('css/guru-theme.css') }}">
 </head>
 <body>
-<div class="fg-app-shell">
+<div class="fg-app-shell" id="appShell">
     @auth
     <!-- Mobile Topbar for screens < 992px -->
     <div class="fg-mobile-topbar no-print">
-        <a class="hospital-brand-logo" href="{{ route('dashboard') }}">
-            <span class="hospital-brand-badge">
-                <i class="bi bi-hospital"></i>
-            </span>
-            <div>
-                <div class="hospital-brand-title" style="font-size: 0.95rem;">GURU HOSPITAL</div>
-                <div class="hospital-brand-subtitle">Clinical Workflow</div>
+        <a class="d-flex align-items-center text-decoration-none" href="{{ route('dashboard') }}">
+            <div class="fg-brand-mark">
+                <span class="bar bar-1"></span>
+                <span const class="bar bar-2"></span>
+                <span class="bar bar-3"></span>
             </div>
+            <span class="fw-bold text-dark ms-1" style="font-size: 1rem; letter-spacing: -0.02em;">Guru Hospital</span>
         </a>
 
         <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSidebar" aria-label="Toggle navigation">
@@ -35,32 +34,40 @@
     <aside class="fg-sidebar no-print collapse d-lg-flex" id="mobileSidebar">
         <div>
             <div class="fg-sidebar-header">
-                <a class="hospital-brand-logo" href="{{ route('dashboard') }}">
-                    <span class="hospital-brand-badge">
-                        <i class="bi bi-hospital"></i>
-                    </span>
+                <a class="d-flex align-items-center text-decoration-none" href="{{ route('dashboard') }}">
+                    <div class="fg-brand-mark">
+                        <span class="bar bar-1"></span>
+                        <span class="bar bar-2"></span>
+                        <span class="bar bar-3"></span>
+                    </div>
                     <div>
-                        <div class="hospital-brand-title">GURU HOSPITAL</div>
-                        <div class="hospital-brand-subtitle">Clinical Workflow</div>
+                        <div class="hospital-brand-title" style="font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em;">Guru Hospital</div>
+                        <div class="hospital-brand-subtitle" style="font-size: 9.5px; color: #94a3b8;">Clinical Workflow</div>
                     </div>
                 </a>
-                <button class="btn btn-sm btn-close d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSidebar" aria-label="Close"></button>
+                <div class="d-flex align-items-center">
+                    <!-- Left Menu Hide Button for Desktop -->
+                    <button class="fg-sidebar-hide-btn d-none d-lg-inline-flex" id="hideSidebarBtn" type="button" title="Hide left menu" aria-label="Hide left menu">
+                        <i class="bi bi-layout-sidebar-inset"></i>
+                    </button>
+                    <button class="btn btn-sm btn-close d-lg-none ms-2" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSidebar" aria-label="Close"></button>
+                </div>
             </div>
 
             <div class="fg-sidebar-body">
                 <div class="fg-sidebar-group">
                     <div class="fg-sidebar-group-title">Clinical Management</div>
                     <a class="fg-sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
-                        <i class="bi bi-grid"></i>
+                        <i class="bi bi-grid icon-dashboard"></i>
                         <span>Dashboard</span>
                     </a>
                     <a class="fg-sidebar-link {{ request()->routeIs('admissions.index') ? 'active' : '' }}" href="{{ route('admissions.index') }}">
-                        <i class="bi bi-folder2-open"></i>
+                        <i class="bi bi-folder2-open icon-admissions"></i>
                         <span>Admissions</span>
                     </a>
                     @if(auth()->user()->canEditAdmissions())
                     <a class="fg-sidebar-link {{ request()->routeIs('admissions.create') ? 'active' : '' }}" href="{{ route('admissions.create') }}">
-                        <i class="bi bi-plus-circle"></i>
+                        <i class="bi bi-plus-circle icon-create"></i>
                         <span>New Admission</span>
                     </a>
                     @endif
@@ -71,17 +78,17 @@
                     <div class="fg-sidebar-group-title">Administration</div>
                     @if(auth()->user()->isAdmin())
                     <a class="fg-sidebar-link {{ request()->routeIs('templates.*') ? 'active' : '' }}" href="{{ route('templates.index') }}">
-                        <i class="bi bi-file-earmark-code"></i>
+                        <i class="bi bi-file-earmark-code icon-templates"></i>
                         <span>Templates</span>
                     </a>
                     <a class="fg-sidebar-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}">
-                        <i class="bi bi-people"></i>
+                        <i class="bi bi-people icon-users"></i>
                         <span>Staff Users</span>
                     </a>
                     @endif
                     @if(auth()->user()->canViewAuditLogs())
                     <a class="fg-sidebar-link {{ request()->routeIs('audit.*') ? 'active' : '' }}" href="{{ route('audit.index') }}">
-                        <i class="bi bi-shield-check"></i>
+                        <i class="bi bi-shield-check icon-audit"></i>
                         <span>Audit Trail</span>
                     </a>
                     @endif
@@ -114,6 +121,16 @@
     @endauth
 
     <div class="fg-main-wrapper">
+        @auth
+        <!-- Unhide bar when sidebar is collapsed -->
+        <div class="fg-collapsed-bar no-print d-none" id="unhideBar">
+            <button class="fg-unhide-btn" id="showSidebarBtn" type="button" title="Show left menu">
+                <i class="bi bi-layout-sidebar"></i>
+                <span>Show Menu</span>
+            </button>
+        </div>
+        @endauth
+
         <main class="fg-main-content">
             @if(session('status'))
                 <div class="alert alert-success alert-dismissible fade show no-print shadow-sm" role="alert">
@@ -144,6 +161,38 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    (function() {
+        const shell = document.getElementById('appShell');
+        const hideBtn = document.getElementById('hideSidebarBtn');
+        const showBtn = document.getElementById('showSidebarBtn');
+        const unhideBar = document.getElementById('unhideBar');
+        if (!shell || !hideBtn || !showBtn || !unhideBar) return;
+
+        function updateUI(collapsed) {
+            if (collapsed) {
+                shell.classList.add('sidebar-collapsed');
+                unhideBar.classList.remove('d-none');
+            } else {
+                shell.classList.remove('sidebar-collapsed');
+                unhideBar.classList.add('d-none');
+            }
+        }
+
+        const isCollapsed = localStorage.getItem('guru_sidebar_collapsed') === 'true';
+        updateUI(isCollapsed);
+
+        hideBtn.addEventListener('click', function() {
+            localStorage.setItem('guru_sidebar_collapsed', 'true');
+            updateUI(true);
+        });
+
+        showBtn.addEventListener('click', function() {
+            localStorage.setItem('guru_sidebar_collapsed', 'false');
+            updateUI(false);
+        });
+    })();
+</script>
 @yield('scripts')
 </body>
 </html>

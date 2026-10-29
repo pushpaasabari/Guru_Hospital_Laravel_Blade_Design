@@ -15,7 +15,12 @@ interface AuthUser {
   can_generate_pdf?: boolean;
 }
 
-export default function Sidebar() {
+interface SidebarProps {
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
+}
+
+export default function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
   const { auth } = usePage<{ auth: { user: AuthUser | null } }>().props;
   const user = auth.user;
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -74,7 +79,7 @@ export default function Sidebar() {
       {/* Left Sidebar (Desktop + Mobile Drawer) */}
       <aside className={`fg-sidebar no-print ${mobileOpen ? 'mobile-open' : ''}`}>
         <div>
-          {/* Sidebar Header: Hospital Brand with FinGM 3-Bar Logo */}
+          {/* Sidebar Header: Hospital Brand with FinGM 3-Bar Logo & Hide Button */}
           <div className="fg-sidebar-header">
             <Link href="/dashboard" className="d-flex align-items-center text-decoration-none" onClick={closeMobile}>
               <div className="fg-brand-mark">
@@ -92,13 +97,28 @@ export default function Sidebar() {
               </div>
             </Link>
 
-            {/* Mobile close button inside sidebar */}
-            <button
-              className="btn btn-sm btn-close d-lg-none"
-              type="button"
-              onClick={closeMobile}
-              aria-label="Close"
-            ></button>
+            <div className="d-flex align-items-center">
+              {/* Left Menu Hide Button for Desktop */}
+              {onToggleCollapse && (
+                <button
+                  className="fg-sidebar-hide-btn d-none d-lg-inline-flex"
+                  type="button"
+                  onClick={onToggleCollapse}
+                  title="Hide left menu"
+                  aria-label="Hide left menu"
+                >
+                  <i className="bi bi-layout-sidebar-inset"></i>
+                </button>
+              )}
+
+              {/* Mobile close button inside sidebar */}
+              <button
+                className="btn btn-sm btn-close d-lg-none ms-2"
+                type="button"
+                onClick={closeMobile}
+                aria-label="Close"
+              ></button>
+            </div>
           </div>
 
           {/* Navigation Links */}
