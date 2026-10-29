@@ -6,7 +6,10 @@ use App\Models\Admission;
 use App\Models\User;
 use Database\Seeders\AjithKumarDischargeSummarySeeder;
 use Database\Seeders\AshwiniDischargeSummarySeeder;
+use Database\Seeders\ManjupriyaOperationNotesSeeder;
+use Database\Seeders\AnithaTwinDeliverySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class DischargeSummaryFormatsTest extends TestCase
@@ -51,10 +54,12 @@ class DischargeSummaryFormatsTest extends TestCase
                 ->get(route('documents.preview', $admission));
 
             $response->assertStatus(200);
-            $response->assertSee("Patient {$format}");
-            $response->assertSee("IP-{$format}");
-            $response->assertSee('OPERATION THEATRE NOTES');
-            $response->assertSee('MEDICAL RECORDS DEPARTMENT');
+            $response->assertInertia(fn (Assert $page) => $page
+                ->component('Documents/Pack')
+                ->where('admission.patient_name', "Patient {$format}")
+                ->where('admission.ip_no', "IP-{$format}")
+                ->where('admission.format', $format)
+            );
         }
     }
 
@@ -87,9 +92,13 @@ class DischargeSummaryFormatsTest extends TestCase
             ->get(route('documents.preview', $admission));
 
         $response->assertStatus(200);
-        $response->assertSee('Newborn');
-        $response->assertSee('3.15');
-        $response->assertSee('Healthy female baby');
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('Documents/Pack')
+            ->where('admission.surgery_type', 'delivery')
+            ->has('admission.newborns', 1)
+            ->where('admission.newborns.0.birth_weight_kg', 3.15)
+            ->where('admission.newborns.0.notes', 'Healthy female baby')
+        );
     }
 
     public function test_mrs_ashwini_real_hospital_document_renders_and_generates_pdf_successfully(): void
@@ -103,21 +112,23 @@ class DischargeSummaryFormatsTest extends TestCase
         $this->assertEquals('Emergency LSCS', $admission->procedure_name);
         $this->assertCount(1, $admission->newborns);
 
-        // Preview Check
+        // Preview Check via Inertia
         $previewResponse = $this->actingAs($this->doctor)
             ->get(route('documents.preview', $admission));
 
         $previewResponse->assertStatus(200);
-        $previewResponse->assertSee('Mrs. Ashwini');
-        $previewResponse->assertSee('2026/582');
-        $previewResponse->assertSee('2022/151');
-        $previewResponse->assertSee('Emergency LSCS');
-        $previewResponse->assertSee('Dr. Ambika M.S (O&G)');
-        $previewResponse->assertSee('Dr. M.S Karthick');
-        $previewResponse->assertSee('Miss Soudnharya');
-        $previewResponse->assertSee('Dr. Nithyapriya');
-        $previewResponse->assertSee('Hb : 10.6 mgs%');
-        $previewResponse->assertSee('04342-262266');
+        $previewResponse->assertInertia(fn (Assert $page) => $page
+            ->component('Documents/Pack')
+            ->where('admission.patient_name', 'Mrs. Ashwini')
+            ->where('admission.ip_no', '2026/582')
+            ->where('admission.uhid', '2022/151')
+            ->where('admission.procedure_name', 'Emergency LSCS')
+            ->where('admission.surgeon', 'Dr. Ambika M.S (O&G)')
+            ->where('admission.anaesthetist', 'Dr. M.S Karthick')
+            ->where('admission.assisted_by', 'Miss Soudnharya')
+            ->where('admission.pediatrician_name', 'Dr. Nithyapriya (Paediatrician)')
+            ->where('admission.investigations', fn ($inv) => str_contains($inv, '10.6'))
+        );
 
         // PDF Generation Check
         $pdfResponse = $this->actingAs($this->doctor)
@@ -139,25 +150,24 @@ class DischargeSummaryFormatsTest extends TestCase
         $this->assertEquals('Lap Appendectomy', $admission->procedure_name);
         $this->assertCount(0, $admission->newborns);
 
-        // Preview Check
+        // Preview Check via Inertia
         $previewResponse = $this->actingAs($this->doctor)
             ->get(route('documents.preview', $admission));
 
         $previewResponse->assertStatus(200);
-        $previewResponse->assertSee('Mr. Ajith kumar');
-        $previewResponse->assertSee('2026/488');
-        $previewResponse->assertSee('2026/2892');
-        $previewResponse->assertSee('Lap Appendectomy');
-        $previewResponse->assertSee('Dr. Jayaprakash M.S');
-        $previewResponse->assertSee('Dr. S.G. ArunKumar');
-        $previewResponse->assertSee('Mr. Vijaykumar');
-        $previewResponse->assertSee('GA');
-        $previewResponse->assertSee('10 mm Supra Umbilical');
-        $previewResponse->assertSee('Hb : 13.8mgs %');
-        $previewResponse->assertSee('04342-262266');
-
-        // Verify Newborn section is NOT present for 'other' surgery workflow
-        $previewResponse->assertDontSee('Baby / Newborn Details');
+        $previewResponse->assertInertia(fn (Assert $page) => $page
+            ->component('Documents/Pack')
+            ->where('admission.patient_name', 'Mr. Ajith kumar')
+            ->where('admission.ip_no', '2026/488')
+            ->where('admission.uhid', '2026/2892')
+            ->where('admission.procedure_name', 'Lap Appendectomy')
+            ->where('admission.surgeon', 'Dr. Jayaprakash M.S')
+            ->where('admission.anaesthetist', 'Dr. S.G. ArunKumar')
+            ->where('admission.assisted_by', 'Mr. Vijaykumar')
+            ->where('admission.anaesthesia_type', 'GA')
+            ->where('admission.surgery_type', 'other')
+            ->has('admission.newborns', 0)
+        );
 
         // PDF Generation Check
         $pdfResponse = $this->actingAs($this->doctor)
@@ -170,7 +180,7 @@ class DischargeSummaryFormatsTest extends TestCase
 
     public function test_mrs_manjupriya_exact_operation_theatre_notes_renders_and_generates_pdf_faithfully(): void
     {
-        $this->seed(\Database\Seeders\ManjupriyaOperationNotesSeeder::class);
+        $this->seed(ManjupriyaOperationNotesSeeder::class);
 
         $admission = Admission::where('ip_no', '2026/778')->first();
         $this->assertNotNull($admission);
@@ -178,29 +188,23 @@ class DischargeSummaryFormatsTest extends TestCase
         $this->assertEquals('2026/2952', $admission->uhid);
         $this->assertEquals('ELECTIVE LSCS', $admission->procedure_name);
 
-        // Preview Check
+        // Preview Check via Inertia
         $previewResponse = $this->actingAs($this->doctor)
             ->get(route('documents.preview', $admission));
 
         $previewResponse->assertStatus(200);
-        $previewResponse->assertSee('OPERATION THEATRE NOTES');
-        $previewResponse->assertSee('Mrs. MANJUPRIYA');
-        $previewResponse->assertSee('2026/778');
-        $previewResponse->assertSee('2026/2952');
-        $previewResponse->assertSee('Dr.Ambika MS(OG)');
-        $previewResponse->assertSee('9677371431');
-        $previewResponse->assertSee('W/O KAMALGANESH');
-        $previewResponse->assertSee('ELECTIVE LSCS');
-        $previewResponse->assertSee('Dr.S.G.Arun kumar');
-        $previewResponse->assertSee('Mr. Vijayakumar');
-        $previewResponse->assertSee('Spinal');
-        $previewResponse->assertSee('Under SA, abdomen opened in layers by SPT incision');
-        $previewResponse->assertSee('BLOOD LOSS (ML) :');
-        $previewResponse->assertSee('SPECIMEN :');
-        $previewResponse->assertSee('DRAIN :');
-        $previewResponse->assertSee('BABY');
-        $previewResponse->assertSee('2.650Kg');
-        $previewResponse->assertSee('SURGEON SEAL &amp; SIGNATURE', false);
+        $previewResponse->assertInertia(fn (Assert $page) => $page
+            ->component('Documents/Pack')
+            ->where('admission.patient_name', 'Mrs. MANJUPRIYA')
+            ->where('admission.ip_no', '2026/778')
+            ->where('admission.uhid', '2026/2952')
+            ->where('admission.procedure_name', 'ELECTIVE LSCS')
+            ->where('admission.surgeon', 'Dr.Ambika MS(OG)')
+            ->where('admission.contact', '9677371431')
+            ->where('admission.anaesthetist', 'Dr.S.G.Arun kumar')
+            ->where('admission.assisted_by', 'Mr. Vijayakumar')
+            ->where('admission.anaesthesia_type', 'Spinal')
+        );
 
         // PDF Generation Check
         $pdfResponse = $this->actingAs($this->doctor)
@@ -213,7 +217,7 @@ class DischargeSummaryFormatsTest extends TestCase
 
     public function test_mrs_anitha_twin_delivery_renders_and_generates_pdf_successfully(): void
     {
-        $this->seed(\Database\Seeders\AnithaTwinDeliverySeeder::class);
+        $this->seed(AnithaTwinDeliverySeeder::class);
 
         $admission = Admission::where('ip_no', '2026/567')->first();
         $this->assertNotNull($admission);
@@ -222,22 +226,21 @@ class DischargeSummaryFormatsTest extends TestCase
         $this->assertEquals('G3P1L1A1 / TWINS / Preterm / PROM', $admission->diagnosis);
         $this->assertCount(2, $admission->newborns);
 
-        // Preview Check
+        // Preview Check via Inertia
         $previewResponse = $this->actingAs($this->doctor)
             ->get(route('documents.preview', $admission));
 
         $previewResponse->assertStatus(200);
-        $previewResponse->assertSee('Mrs. Anitha');
-        $previewResponse->assertSee('2026/567');
-        $previewResponse->assertSee('2023/3931');
-        $previewResponse->assertSee('BABY TWIN A');
-        $previewResponse->assertSee('BABY TWIN B');
-        $previewResponse->assertSee('2.250 kg');
-        $previewResponse->assertSee('RDS(+)');
-        $previewResponse->assertSee('NICU');
-        $previewResponse->assertSee('Dr. Ambika MS OG');
-        $previewResponse->assertSee('Hb : 12.9 mgs %');
-        $previewResponse->assertSee('04342-262266');
+        $previewResponse->assertInertia(fn (Assert $page) => $page
+            ->component('Documents/Pack')
+            ->where('admission.patient_name', 'Mrs. Anitha')
+            ->where('admission.ip_no', '2026/567')
+            ->where('admission.uhid', '2023/3931')
+            ->where('admission.diagnosis', 'G3P1L1A1 / TWINS / Preterm / PROM')
+            ->has('admission.newborns', 2)
+            ->where('admission.newborns.0.neonatal_care', fn ($care) => str_contains($care, 'NICU'))
+            ->where('admission.newborns.1.birth_weight_kg', 2.25)
+        );
 
         // PDF Generation Check
         $pdfResponse = $this->actingAs($this->doctor)

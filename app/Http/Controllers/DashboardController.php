@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Admission;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class DashboardController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): Response
     {
         $counts = [
             'total' => Admission::count(),
@@ -57,7 +58,7 @@ class DashboardController extends Controller
 
         $admissions = $query->paginate(15)->withQueryString();
 
-        return view('dashboard', compact('counts', 'admissions'));
+        return Inertia::render('Dashboard', compact('counts', 'admissions'));
     }
 }
 

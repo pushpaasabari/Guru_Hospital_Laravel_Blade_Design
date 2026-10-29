@@ -96,3 +96,4 @@ class AnithaTwinDeliverySeeder extends Seeder
         ]);
     }
 }
+

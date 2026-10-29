@@ -10,11 +10,12 @@ use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class AdmissionController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): Response
     {
         $this->authorize('viewAny', Admission::class);
 
@@ -35,13 +36,13 @@ class AdmissionController extends Controller
 
         $admissions = $query->paginate(20)->withQueryString();
 
-        return view('admissions.index', compact('admissions'));
+        return Inertia::render('Admissions/Index', compact('admissions'));
     }
 
-    public function create(): View
+    public function create(): Response
     {
         $this->authorize('create', Admission::class);
-        return view('admissions.create');
+        return Inertia::render('Admissions/Create');
     }
 
     public function store(StoreAdmissionRequest $request): RedirectResponse
@@ -80,20 +81,20 @@ class AdmissionController extends Controller
             ->with('status', 'Draft admission saved successfully. Review all three documents before submitting for approval.');
     }
 
-    public function show(Admission $admission): View
+    public function show(Admission $admission): Response
     {
         $this->authorize('view', $admission);
         $admission->load(['newborns', 'approvals.performer', 'revisions.approver', 'creator', 'approver']);
 
-        return view('admissions.show', compact('admission'));
+        return Inertia::render('Documents/Pack', compact('admission'));
     }
 
-    public function edit(Admission $admission): View
+    public function edit(Admission $admission): Response
     {
         $this->authorize('update', $admission);
         $admission->load('newborns');
 
-        return view('admissions.edit', compact('admission'));
+        return Inertia::render('Admissions/Edit', compact('admission'));
     }
 
     public function update(UpdateAdmissionRequest $request, Admission $admission): RedirectResponse

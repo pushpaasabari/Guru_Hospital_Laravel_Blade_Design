@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class AuditLogController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): Response
     {
         $user = $request->user();
         if (!$user->canViewAuditLogs()) {
@@ -35,7 +36,7 @@ class AuditLogController extends Controller
 
         $auditLogs = $query->paginate(30)->withQueryString();
 
-        return view('audit.index', compact('auditLogs'));
+        return Inertia::render('Audit/Index', compact('auditLogs'));
     }
 }
 

@@ -8,11 +8,12 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class UserController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): Response
     {
         $user = $request->user();
         if (!$user->isAdmin()) {
@@ -21,7 +22,7 @@ class UserController extends Controller
 
         $users = User::orderBy('name')->get();
 
-        return view('users.index', compact('users'));
+        return Inertia::render('Users/Index', compact('users'));
     }
 
     public function store(Request $request): RedirectResponse

@@ -6,11 +6,12 @@ use App\Models\TemplateVersion;
 use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class TemplateController extends Controller
 {
-    public function index(Request $request): View
+    public function index(Request $request): Response
     {
         $user = $request->user();
         if (!$user->isAdmin()) {
@@ -19,7 +20,7 @@ class TemplateController extends Controller
 
         $templates = TemplateVersion::with('updater')->orderBy('template_code')->get();
 
-        return view('templates.index', compact('templates'));
+        return Inertia::render('Templates/Index', compact('templates'));
     }
 
     public function update(Request $request, TemplateVersion $template): RedirectResponse
