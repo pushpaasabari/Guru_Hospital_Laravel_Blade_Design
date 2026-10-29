@@ -426,9 +426,49 @@ export default function Dashboard({ counts, admissions, filters = {}, auth }: Pr
                           </Link>
                         )}
                         {(item.status === 'approved' || item.status === 'generated') && (
-                          <a href={`/admissions/${item.id}/documents/pdf`} target="_blank" rel="noreferrer" className="btn btn-outline-primary">
-                            <i className="bi bi-file-earmark-pdf"></i>
-                          </a>
+                          <div className="btn-group btn-group-sm">
+                            <a
+                              href={`/admissions/${item.id}/documents/pdf/discharge-summary`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="btn btn-outline-primary"
+                              title="Download Discharge Summary PDF"
+                            >
+                              <i className="bi bi-file-earmark-pdf"></i>
+                            </a>
+                            <button
+                              type="button"
+                              className="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
+                              data-bs-toggle="dropdown"
+                              aria-expanded="false"
+                              title="Download Separate PDFs"
+                            >
+                              <span className="visually-hidden">Toggle PDF Options</span>
+                            </button>
+                            <ul className="dropdown-menu dropdown-menu-end shadow-sm border-0" style={{ fontSize: '12px' }}>
+                              <li>
+                                <a className="dropdown-item py-1" href={`/admissions/${item.id}/documents/pdf/discharge-summary`} target="_blank" rel="noreferrer">
+                                  <i className="bi bi-file-earmark-text text-primary me-2"></i>1. Discharge Summary
+                                </a>
+                              </li>
+                              <li>
+                                <a className="dropdown-item py-1" href={`/admissions/${item.id}/documents/pdf/operation-notes`} target="_blank" rel="noreferrer">
+                                  <i className="bi bi-journal-medical text-success me-2"></i>2. Operation Theatre Notes
+                                </a>
+                              </li>
+                              <li>
+                                <a className="dropdown-item py-1" href={`/admissions/${item.id}/documents/pdf/mrd-form`} target="_blank" rel="noreferrer">
+                                  <i className="bi bi-file-earmark-check text-warning me-2"></i>3. MRD Inpatient Form
+                                </a>
+                              </li>
+                              <li><hr className="dropdown-divider my-1" /></li>
+                              <li>
+                                <a className="dropdown-item py-1 fw-semibold" href={`/admissions/${item.id}/documents/pdf/pack`} target="_blank" rel="noreferrer">
+                                  <i className="bi bi-collection text-dark me-2"></i>Complete 3-in-1 Pack
+                                </a>
+                              </li>
+                            </ul>
+                          </div>
                         )}
                       </div>
                     </td>

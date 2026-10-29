@@ -287,14 +287,77 @@ export default function Pack({ admission }: Props) {
 
               {(isApproved || isGenerated) && (
                 <>
-                  <a
-                    href={`/documents/${admission.id}/pdf`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="btn btn-primary fw-semibold"
-                  >
-                    <i className="bi bi-file-earmark-pdf me-1"></i> Download Official PDF Pack
-                  </a>
+                  <div className="btn-group">
+                    <a
+                      href={`/admissions/${admission.id}/documents/pdf/discharge-summary`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="btn btn-primary fw-semibold"
+                      title="Generate and download Discharge Summary PDF"
+                    >
+                      <i className="bi bi-file-earmark-medical me-1"></i> 1. Discharge Summary PDF
+                    </a>
+                    <button
+                      type="button"
+                      className="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                      data-bs-toggle="dropdown"
+                      aria-expanded="false"
+                    >
+                      <span className="visually-hidden">Toggle PDF Options</span>
+                    </button>
+                    <ul className="dropdown-menu dropdown-menu-end shadow-sm border-0" style={{ borderRadius: '12px', fontSize: '13px' }}>
+                      <li>
+                        <h6 className="dropdown-header text-uppercase fw-bold" style={{ fontSize: '10.5px' }}>
+                          Separate PDF Documents
+                        </h6>
+                      </li>
+                      <li>
+                        <a
+                          className="dropdown-item py-2"
+                          href={`/admissions/${admission.id}/documents/pdf/discharge-summary`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <i className="bi bi-file-earmark-text text-primary me-2"></i>
+                          1. Discharge Summary PDF
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          className="dropdown-item py-2"
+                          href={`/admissions/${admission.id}/documents/pdf/operation-notes`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <i className="bi bi-journal-medical text-success me-2"></i>
+                          2. Operation Theatre Notes PDF
+                        </a>
+                      </li>
+                      <li>
+                        <a
+                          className="dropdown-item py-2"
+                          href={`/admissions/${admission.id}/documents/pdf/mrd-form`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <i className="bi bi-file-earmark-check text-warning me-2"></i>
+                          3. MRD Inpatient Form PDF
+                        </a>
+                      </li>
+                      <li><hr className="dropdown-divider" /></li>
+                      <li>
+                        <a
+                          className="dropdown-item py-2 fw-semibold"
+                          href={`/admissions/${admission.id}/documents/pdf/pack`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          <i className="bi bi-collection text-dark me-2"></i>
+                          Complete 3-in-1 Pack PDF
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
 
                   {(user?.is_admin || user?.role === 'doctor') && (
                     <button

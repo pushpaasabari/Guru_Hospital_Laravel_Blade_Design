@@ -19,7 +19,7 @@ class DocumentPackController extends Controller
         return Inertia::render('Documents/Pack', compact('admission'));
     }
 
-    public function pdf(Request $request, Admission $admission, DocumentPackPdfService $pdfService): Response
+    public function pdf(Request $request, Admission $admission, DocumentPackPdfService $pdfService, ?string $type = null): Response
     {
         $this->authorize('generateDocuments', $admission);
 
@@ -30,7 +30,9 @@ class DocumentPackController extends Controller
             'Clinician approval is required before final PDF generation.'
         );
 
-        return $pdfService->download($admission);
+        $documentType = $type ?: $request->query('type', 'pack');
+
+        return $pdfService->download($admission, $documentType);
     }
 
     public function history(Admission $admission): InertiaResponse

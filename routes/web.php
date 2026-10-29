@@ -34,11 +34,14 @@ Route::middleware('auth')->group(function () {
 
     // Document Review, Approval & PDF Generation
     Route::get('/admissions/{admission}/documents/preview', [DocumentPackController::class, 'preview'])->name('documents.preview');
+    Route::get('/documents/{admission}/preview', [DocumentPackController::class, 'preview']);
     Route::post('/admissions/{admission}/documents/submit-review', [DocumentApprovalController::class, 'submitForReview'])->name('documents.submit-review');
     Route::post('/admissions/{admission}/documents/approve', [DocumentApprovalController::class, 'approve'])->name('documents.approve');
     Route::post('/admissions/{admission}/documents/return', [DocumentApprovalController::class, 'returnForCorrection'])->name('documents.return');
-    Route::match(['get', 'post'], '/admissions/{admission}/documents/pdf', [DocumentPackController::class, 'pdf'])->name('documents.pdf');
+    Route::match(['get', 'post'], '/admissions/{admission}/documents/pdf/{type?}', [DocumentPackController::class, 'pdf'])->name('documents.pdf');
+    Route::match(['get', 'post'], '/documents/{admission}/pdf/{type?}', [DocumentPackController::class, 'pdf']);
     Route::get('/admissions/{admission}/history', [DocumentPackController::class, 'history'])->name('documents.history');
+    Route::get('/documents/{admission}/history', [DocumentPackController::class, 'history']);
 
     // Audit Logs (Admins & Auditors)
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index');

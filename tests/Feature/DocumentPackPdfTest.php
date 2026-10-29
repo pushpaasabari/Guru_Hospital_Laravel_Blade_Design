@@ -71,6 +71,30 @@ class DocumentPackPdfTest extends TestCase
         ]);
     }
 
+    public function test_can_download_3_separate_pdfs_individually(): void
+    {
+        // 1. Discharge Summary
+        $resDischarge = $this->actingAs($this->doctor)
+            ->get("/admissions/{$this->approvedAdmission->id}/documents/pdf/discharge-summary");
+        $resDischarge->assertStatus(200);
+        $this->assertEquals('application/pdf', $resDischarge->headers->get('Content-Type'));
+        $this->assertStringContainsString('Guru_Hospital_Discharge_Summary_IP-7701.pdf', $resDischarge->headers->get('Content-Disposition'));
+
+        // 2. Operation Theatre Notes
+        $resOt = $this->actingAs($this->doctor)
+            ->get("/admissions/{$this->approvedAdmission->id}/documents/pdf/operation-notes");
+        $resOt->assertStatus(200);
+        $this->assertEquals('application/pdf', $resOt->headers->get('Content-Type'));
+        $this->assertStringContainsString('Guru_Hospital_Operation_Theatre_Notes_IP-7701.pdf', $resOt->headers->get('Content-Disposition'));
+
+        // 3. MRD Inpatient Form
+        $resMrd = $this->actingAs($this->doctor)
+            ->get("/admissions/{$this->approvedAdmission->id}/documents/pdf/mrd-form");
+        $resMrd->assertStatus(200);
+        $this->assertEquals('application/pdf', $resMrd->headers->get('Content-Type'));
+        $this->assertStringContainsString('Guru_Hospital_MRD_Form_IP-7701.pdf', $resMrd->headers->get('Content-Disposition'));
+    }
+
     public function test_unapproved_admission_cannot_generate_pdf(): void
     {
         $this->approvedAdmission->update(['status' => 'draft']);

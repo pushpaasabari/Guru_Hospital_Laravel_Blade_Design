@@ -13,28 +13,80 @@ use Symfony\Component\Process\Process;
 
 class DocumentPackPdfService
 {
+    public const TYPE_DISCHARGE_SUMMARY = 'discharge_summary';
+    public const TYPE_OPERATION_NOTES = 'operation_notes';
+    public const TYPE_MRD_FORM = 'mrd_form';
+    public const TYPE_PACK = 'pack';
+
     /**
-     * Generates and returns a downloadable/streamable PDF response for the approved admission pack.
+     * Resolves normalized document type and metadata.
+     */
+    public function resolveDocumentMetadata(string $type, Admission $admission): array
+    {
+        $type = strtolower(trim($type));
+        $safeIp = preg_replace('/[^A-Za-z0-9_\-]/', '_', $admission->ip_no);
+
+        if (in_array($type, ['discharge_summary', 'discharge-summary', 'discharge', 'summary', '1'], true)) {
+            return [
+                'type' => self::TYPE_DISCHARGE_SUMMARY,
+                'view' => 'pdf.discharge-summary',
+                'title' => 'Discharge Summary',
+                'fileName' => "Guru_Hospital_Discharge_Summary_{$safeIp}.pdf",
+                'headerTitle' => "Guru Hospital — Discharge Summary (IP: {$admission->ip_no})",
+            ];
+        }
+
+        if (in_array($type, ['operation_notes', 'operation-notes', 'operation', 'ot', 'ot_notes', '2'], true)) {
+            return [
+                'type' => self::TYPE_OPERATION_NOTES,
+                'view' => 'pdf.operation-notes',
+                'title' => 'Operation Theatre Notes',
+                'fileName' => "Guru_Hospital_Operation_Theatre_Notes_{$safeIp}.pdf",
+                'headerTitle' => "Guru Hospital — Operation Theatre Notes (IP: {$admission->ip_no})",
+            ];
+        }
+
+        if (in_array($type, ['mrd_form', 'mrd-form', 'mrd', 'archive', '3'], true)) {
+            return [
+                'type' => self::TYPE_MRD_FORM,
+                'view' => 'pdf.mrd-form',
+                'title' => 'MRD Inpatient Form',
+                'fileName' => "Guru_Hospital_MRD_Form_{$safeIp}.pdf",
+                'headerTitle' => "Guru Hospital — MRD Inpatient Form (IP: {$admission->ip_no})",
+            ];
+        }
+
+        return [
+            'type' => self::TYPE_PACK,
+            'view' => 'pdf.pack',
+            'title' => 'Complete Document Dossier Pack',
+            'fileName' => "Guru_Hospital_Discharge_Pack_{$safeIp}.pdf",
+            'headerTitle' => "Guru Hospital — Confidential Medical Record (IP: {$admission->ip_no})",
+        ];
+    }
+
+    /**
+     * Generates and returns a downloadable/streamable PDF response for the admission document.
      * Uses Playwright with Google Chrome/Chromium for high-fidelity rendering, with DomPDF fallback.
      */
-    public function download(Admission $admission): Response
+    public function download(Admission $admission, string $type = 'pack'): Response
     {
         $admission->load(['newborns', 'creator', 'approver']);
+        $meta = $this->resolveDocumentMetadata($type, $admission);
 
         // Ensure private directory exists
         $storageDirectory = 'documents/' . date('Y/m');
         Storage::disk('local')->makeDirectory($storageDirectory);
 
-        $safeIp = preg_replace('/[^A-Za-z0-9_\-]/', '_', $admission->ip_no);
-        $fileName = "Guru_Hospital_Discharge_Pack_{$safeIp}.pdf";
+        $fileName = $meta['fileName'];
         $storagePath = "{$storageDirectory}/{$fileName}";
 
         // 1. Primary Engine: Playwright Chrome / Chromium
-        $output = $this->generateWithPlaywright($admission);
+        $output = $this->generateWithPlaywright($admission, $type);
 
         // 2. Fallback Engine: DomPDF if Playwright is unavailable
         if (!$output) {
-            $output = $this->generateWithDompdf($admission);
+            $output = $this->generateWithDompdf($admission, $type);
         }
 
         // Store privately in storage
@@ -64,7 +116,7 @@ class DocumentPackPdfService
                 'document.generated',
                 'Admission',
                 $admission->id,
-                "Final approved document pack generated with Playwright Chromium and saved ({$fileName}) by {$userName}"
+                "Final approved {$meta['title']} generated with Playwright Chromium and saved ({$fileName}) by {$userName}"
             );
         } else {
             // Document reprint
@@ -72,7 +124,7 @@ class DocumentPackPdfService
                 'document.reprinted',
                 'Admission',
                 $admission->id,
-                "Document pack reprinted with Playwright Chromium by {$userName}"
+                "{$meta['title']} reprinted with Playwright Chromium by {$userName}"
             );
         }
 
@@ -88,10 +140,11 @@ class DocumentPackPdfService
     /**
      * Renders pixel-perfect hospital discharge pack PDF using Playwright Chromium / Google Chrome.
      */
-    public function generateWithPlaywright(Admission $admission): ?string
+    public function generateWithPlaywright(Admission $admission, string $type = 'pack'): ?string
     {
         try {
-            $html = view('pdf.pack', compact('admission'))->render();
+            $meta = $this->resolveDocumentMetadata($type, $admission);
+            $html = view($meta['view'], compact('admission'))->render();
 
             $tempDir = storage_path('app/temp_pdf');
             if (!is_dir($tempDir)) {
@@ -105,7 +158,7 @@ class DocumentPackPdfService
             file_put_contents($tempHtml, $html);
 
             $scriptPath = resource_path('scripts/generate-pdf.js');
-            $headerTitle = "Guru Hospital — Confidential Medical Record (IP: {$admission->ip_no})";
+            $headerTitle = $meta['headerTitle'];
 
             $process = new Process([
                 'node',
@@ -140,9 +193,10 @@ class DocumentPackPdfService
     /**
      * Fallback rendering via Barryvdh DomPDF.
      */
-    public function generateWithDompdf(Admission $admission): string
+    public function generateWithDompdf(Admission $admission, string $type = 'pack'): string
     {
-        $pdf = Pdf::loadView('pdf.pack', compact('admission'));
+        $meta = $this->resolveDocumentMetadata($type, $admission);
+        $pdf = Pdf::loadView($meta['view'], compact('admission'));
         $pdf->setPaper('a4', 'portrait');
         $pdf->setOption([
             'isHtml5ParserEnabled' => true,
@@ -163,7 +217,7 @@ class DocumentPackPdfService
         $canvas->page_text(450, 810, "Page {PAGE_NUM} of {PAGE_COUNT}", $font, $size, $color);
 
         // Bottom left hospital confidential notice
-        $canvas->page_text(40, 810, "Guru Hospital — Confidential Medical Record (IP: {$admission->ip_no})", $font, $size, $color);
+        $canvas->page_text(40, 810, $meta['headerTitle'], $font, $size, $color);
 
         return $domPdf->output();
     }
