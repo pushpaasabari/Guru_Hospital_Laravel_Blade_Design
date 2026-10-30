@@ -1,12 +1,12 @@
 <div class="discharge-summary-document">
-    <div class="text-center mb-3">
-        <h2 class="fw-bold mb-0 text-dark" style="letter-spacing: 1px;">GURU HOSPITAL</h2>
-        <div class="small text-muted">32, A/2, Antony Street, Nethaji Bypass Road, Govt. Medical College Hospital Opp. Dharmapuri - 636 701</div>
-        <div class="small text-muted">Ph: 04342-262266 &bull; Cell: +91 7418084266</div>
+    {{-- Space for Pre-printed Letterhead (First page only) --}}
+    <div style="height: 35mm;"></div>
+
+    <div class="text-center mb-4 pt-2">
         <div class="badge bg-dark text-uppercase px-3 py-1 my-2" style="font-size: 0.85rem; letter-spacing: 0.5px;">
             Private Inpatient / Mediclaim TPA
         </div>
-        <h4 class="fw-bold mt-1 text-decoration-underline text-uppercase">DISCHARGE SUMMARY — OBSTETRIC DELIVERY</h4>
+        <h3 class="fw-bold text-decoration-underline text-uppercase mb-0" style="letter-spacing: 0.5px; font-size: 14pt;">DISCHARGE SUMMARY — OBSTETRIC DELIVERY</h3>
     </div>
 
     <div class="alert alert-secondary py-1 px-3 mb-2 small d-flex justify-content-between">

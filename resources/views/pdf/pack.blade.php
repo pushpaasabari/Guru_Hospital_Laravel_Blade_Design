@@ -31,35 +31,20 @@
         .page-break {
             page-break-before: always;
         }
-        .hospital-header {
-            text-align: center;
-            border-bottom: 2px solid #17365d;
-            padding-bottom: 6px;
-            margin-bottom: 12px;
-        }
-        .hospital-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #17365d;
-            letter-spacing: 1px;
-            margin: 0;
-        }
-        .hospital-subtitle {
-            font-size: 9.5px;
-            color: #444;
-            margin: 2px 0;
+        .letterhead-space {
+            height: 35mm;
+            width: 100%;
         }
         .document-title {
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            background-color: #f0f4f8;
-            border: 1px solid #17365d;
-            color: #17365d;
             text-align: center;
-            padding: 4px;
-            margin: 8px 0 12px 0;
+            margin-top: 4px;
+            margin-bottom: 18px;
+            font-size: 13pt;
+            font-weight: bold;
+            text-decoration: underline;
+            text-transform: uppercase;
             letter-spacing: 0.5px;
+            color: #000;
         }
         .meta-table {
             width: 100%;
@@ -146,11 +131,7 @@
 <!-- ========================================== -->
 <!-- DOCUMENT 1: DISCHARGE SUMMARY              -->
 <!-- ========================================== -->
-<div class="hospital-header">
-    <div class="hospital-name">GURU HOSPITAL</div>
-    <div class="hospital-subtitle">32, A/2, Antony Street, Nethaji Bypass Road, Govt. Medical College Hospital Opp. Dharmapuri - 636 701</div>
-    <div class="hospital-subtitle">Ph: 04342-262266 &bull; Emergency / Cell: +91 7418084266</div>
-</div>
+<div class="letterhead-space"></div>
 
 <div class="document-title">
     @if($admission->format === 'cmchistn')
@@ -226,17 +207,17 @@
 
 @if($admission->clinical_history)
     <div class="section-heading">Presenting Complaints</div>
-    <div class="content-block">{{ nl2br(e($admission->clinical_history)) }}</div>
+    <div class="content-block">{!! nl2br(e($admission->clinical_history)) !!}</div>
 @endif
 
 @if($admission->examination)
     <div class="section-heading">Clinical Examination</div>
-    <div class="content-block">{{ nl2br(e($admission->examination)) }}</div>
+    <div class="content-block">{!! nl2br(e($admission->examination)) !!}</div>
 @endif
 
 @if($admission->procedure_note)
     <div class="section-heading">Procedure Note</div>
-    <div class="content-block">{{ nl2br(e($admission->procedure_note)) }}</div>
+    <div class="content-block">{!! nl2br(e($admission->procedure_note)) !!}</div>
 @endif
 
 <!-- Delivery Workflow Specific Details -->
@@ -270,7 +251,7 @@
 
 @if($admission->treatment_course)
     <div class="section-heading">Treatment Given</div>
-    <div class="content-block">{{ nl2br(e($admission->treatment_course)) }}</div>
+    <div class="content-block">{!! nl2br(e($admission->treatment_course)) !!}</div>
 @endif
 
 @if($admission->investigations)
@@ -288,16 +269,16 @@
 
 @if($admission->discharge_condition)
     <div class="section-heading">Condition on Discharge</div>
-    <div class="content-block">{{ nl2br(e($admission->discharge_condition)) }}</div>
+    <div class="content-block">{!! nl2br(e($admission->discharge_condition)) !!}</div>
 @endif
 
 @if($admission->medication_orders || $admission->discharge_advice)
     <div class="section-heading">Discharge Advice & Medications</div>
     @if($admission->medication_orders)
-        <div class="content-block">{{ nl2br(e($admission->medication_orders)) }}</div>
+        <div class="content-block">{!! nl2br(e($admission->medication_orders)) !!}</div>
     @endif
     @if($admission->discharge_advice)
-        <div class="content-block">{{ nl2br(e($admission->discharge_advice)) }}</div>
+        <div class="content-block">{!! nl2br(e($admission->discharge_advice)) !!}</div>
     @endif
 @endif
 

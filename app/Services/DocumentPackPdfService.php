@@ -44,7 +44,7 @@ class DocumentPackPdfService
                 'type' => self::TYPE_DISCHARGE_SUMMARY,
                 'view' => 'pdf.discharge-summary',
                 'title' => 'Discharge Summary',
-                'fileName' => "Guru_Hospital_Discharge_Summary_{$safeIp}.pdf",
+                'fileName' => "{$safeUhid}_{$safeName}_Discharge_Summary.pdf",
                 'headerTitle' => "Guru Hospital — Discharge Summary (IP: {$admission->ip_no})",
             ];
         }

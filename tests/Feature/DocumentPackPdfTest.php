@@ -80,12 +80,12 @@ class DocumentPackPdfTest extends TestCase
 
     public function test_can_download_3_separate_pdfs_individually(): void
     {
-        // 1. Discharge Summary
+        // 1. Discharge Summary (UHID_Patientname_Discharge_Summary)
         $resDischarge = $this->actingAs($this->doctor)
             ->get("/admissions/{$this->approvedAdmission->id}/documents/pdf/discharge-summary");
         $resDischarge->assertStatus(200);
         $this->assertEquals('application/pdf', $resDischarge->headers->get('Content-Type'));
-        $this->assertStringContainsString('attachment; filename="Guru_Hospital_Discharge_Summary_IP-7701.pdf"', $resDischarge->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('attachment; filename="GH-7701_Ramesh_Natarajan_Discharge_Summary.pdf"', $resDischarge->headers->get('Content-Disposition'));
 
         // 2. Operation Theatre Notes (UHID_Patentname_OPerationtype)
         $resOt = $this->actingAs($this->doctor)

@@ -598,18 +598,16 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
         </div>
 
         <div className="discharge-summary-document">
-          <div className="text-center mb-3">
-            <h2 className="fw-bold mb-0 text-dark" style={{ letterSpacing: '1px' }}>
-              GURU HOSPITAL
-            </h2>
-            <div className="small text-muted">
-              32, A/2, Antony Street, Nethaji Bypass Road, Govt. Medical College Hospital Opp.
-              Dharmapuri - 636 701
-            </div>
-            <div className="small text-muted">Ph: 04342-262266 &bull; Cell: +91 7418084266</div>
-            <h4 className="fw-bold mt-2 text-decoration-underline text-uppercase">
+          {/* Space for Pre-printed Letterhead (First page only) */}
+          <div style={{ height: '35mm' }}></div>
+
+          <div className="text-center mb-4 pt-2">
+            <h3
+              className="fw-bold text-decoration-underline text-uppercase mb-0"
+              style={{ letterSpacing: '0.5px', fontSize: '14pt' }}
+            >
               DISCHARGE SUMMARY
-            </h4>
+            </h3>
           </div>
 
           <table className="table table-sm table-bordered mb-3">
