@@ -6,7 +6,7 @@
     <style>
         @page {
             size: A4 portrait;
-            margin: 15mm 20mm 15mm 20mm;
+            margin: 12mm 20mm 15mm 20mm;
         }
         body {
             font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
@@ -18,28 +18,19 @@
         }
         .header-container {
             text-align: center;
-            margin-top: 10px;
-            margin-bottom: 25px;
+            margin-top: 5px;
+            margin-bottom: 20px;
         }
         .logo-wrapper {
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
         .logo-img {
-            width: 72px;
+            width: 76px;
             height: auto;
             display: inline-block;
         }
-        .logo-caption {
-            font-size: 8pt;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
-            color: #333;
-            margin-top: 2px;
-            margin-bottom: 8px;
-        }
         .hospital-title {
-            font-size: 20pt;
+            font-size: 21pt;
             font-weight: 800;
             letter-spacing: 1px;
             text-transform: uppercase;
@@ -47,25 +38,25 @@
             margin: 0 0 4px 0;
         }
         .address-line {
-            font-size: 9.5pt;
+            font-size: 10pt;
             color: #222;
             line-height: 1.4;
             margin: 1px 0;
         }
         .phone-line {
-            font-size: 9.5pt;
+            font-size: 10pt;
             font-weight: 600;
             color: #111;
             margin-top: 2px;
         }
         .mrd-title-wrapper {
             text-align: center;
-            margin-top: 24px;
-            margin-bottom: 35px;
+            margin-top: 20px;
+            margin-bottom: 25px;
         }
         .mrd-title {
             font-family: 'Times New Roman', Times, Georgia, serif;
-            font-size: 15.5pt;
+            font-size: 16.5pt;
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 0.5px;
@@ -80,28 +71,28 @@
             margin-top: 10px;
         }
         .mrd-form-table td {
-            padding: 13px 4px;
+            padding: 21px 4px;
             vertical-align: middle;
-            font-size: 11.5pt;
+            font-size: 14pt;
+            line-height: 1.35;
         }
         .field-label {
-            width: 230px;
+            width: 270px;
             font-weight: bold;
             color: #111;
             white-space: nowrap;
+            font-size: 14pt;
         }
         .colon-col {
-            width: 30px;
+            width: 35px;
             font-weight: bold;
             text-align: center;
             color: #111;
+            font-size: 14pt;
         }
         .field-value {
             color: #111;
-            font-weight: normal;
-        }
-        .sig-value {
-            color: #222;
+            font-size: 14pt;
             font-weight: normal;
         }
         .watermark {
@@ -134,7 +125,6 @@
         @if($logoBase64)
             <img src="{{ $logoBase64 }}" alt="Guru Hospital Logo" class="logo-img" />
         @endif
-        <div class="logo-caption">GURU HOSPITAL</div>
     </div>
 
     <div class="hospital-title">GURU HOSPITAL</div>
@@ -148,7 +138,7 @@
     <span class="mrd-title">MEDICAL RECORDS DEPARTMENT</span>
 </div>
 
-<!-- EXACT FIELD LIST -->
+<!-- EXACT 9 FORM FIELDS COVERING ENTIRE PAGE -->
 <table class="mrd-form-table">
     <tbody>
         <tr>
@@ -204,29 +194,17 @@
         <tr>
             <td class="field-label">Hand Over Sign</td>
             <td class="colon-col">:</td>
-            <td class="sig-value">
-                @if($admission->handover_name)
-                    {{ $admission->handover_name }}
-                @elseif($admission->creator)
-                    {{ $admission->creator->name }} (Staff Nurse)
-                @else
-                    Staff Nurse
-                @endif
-            </td>
+            <td class="field-value"></td>
         </tr>
         <tr>
             <td class="field-label">Floor Incharge Sign</td>
             <td class="colon-col">:</td>
-            <td class="sig-value">
-                {{ $admission->floor_incharge_name ?: 'Nursing Supervisor' }}
-            </td>
+            <td class="field-value"></td>
         </tr>
         <tr>
             <td class="field-label">MRD Incharge Sign</td>
             <td class="colon-col">:</td>
-            <td class="sig-value">
-                {{ $admission->mrd_incharge_name ?: 'Medical Records Officer' }}
-            </td>
+            <td class="field-value"></td>
         </tr>
     </tbody>
 </table>

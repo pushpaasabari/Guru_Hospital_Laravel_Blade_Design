@@ -517,21 +517,20 @@
     $logoBase64 = file_exists($logoPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath)) : '';
 @endphp
 
-<div style="text-align: center; margin-top: 15px; margin-bottom: 25px;">
+<div style="text-align: center; margin-top: 10px; margin-bottom: 20px;">
     @if($logoBase64)
-        <div style="margin-bottom: 2px;">
-            <img src="{{ $logoBase64 }}" alt="Guru Hospital Logo" style="width: 68px; height: auto; display: inline-block;" />
-            <div style="font-size: 8pt; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; color: #333; margin-top: 2px; margin-bottom: 6px;">GURU HOSPITAL</div>
+        <div style="margin-bottom: 6px;">
+            <img src="{{ $logoBase64 }}" alt="Guru Hospital Logo" style="width: 76px; height: auto; display: inline-block;" />
         </div>
     @endif
-    <div style="font-size: 20pt; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #111; margin: 0 0 4px 0;">GURU HOSPITAL</div>
-    <div style="font-size: 9.5pt; color: #222; line-height: 1.4; margin: 1px 0;">32, A/2, Antony Street, Nethaji Bypass Road,</div>
-    <div style="font-size: 9.5pt; color: #222; line-height: 1.4; margin: 1px 0;">Govt. Medical College Hospital Opp. Dharmapuri - 636 701.</div>
-    <div style="font-size: 9.5pt; font-weight: 600; color: #111; margin-top: 2px;">Ph : 04342-262266, Cell : 9418084266</div>
+    <div style="font-size: 21pt; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #111; margin: 0 0 4px 0;">GURU HOSPITAL</div>
+    <div style="font-size: 10pt; color: #222; line-height: 1.4; margin: 1px 0;">32, A/2, Antony Street, Nethaji Bypass Road,</div>
+    <div style="font-size: 10pt; color: #222; line-height: 1.4; margin: 1px 0;">Govt. Medical College Hospital Opp. Dharmapuri - 636 701.</div>
+    <div style="font-size: 10pt; font-weight: 600; color: #111; margin-top: 2px;">Ph : 04342-262266, Cell : 9418084266</div>
 </div>
 
-<div style="text-align: center; margin-top: 25px; margin-bottom: 35px;">
-    <span style="font-family: 'Times New Roman', Times, Georgia, serif; font-size: 15.5pt; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #111; display: inline-block; border-bottom: 3px double #111; padding-bottom: 3px;">
+<div style="text-align: center; margin-top: 20px; margin-bottom: 25px;">
+    <span style="font-family: 'Times New Roman', Times, Georgia, serif; font-size: 16.5pt; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #111; display: inline-block; border-bottom: 3px double #111; padding-bottom: 3px;">
         MEDICAL RECORDS DEPARTMENT
     </span>
 </div>
@@ -539,42 +538,42 @@
 <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
     <tbody>
         <tr>
-            <td style="width: 230px; font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">Patient Name</td>
-            <td style="width: 30px; font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
-            <td style="color: #111; padding: 13px 4px; font-size: 11.5pt;"><strong>{{ $admission->patient_name }}</strong></td>
+            <td style="width: 270px; font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">Patient Name</td>
+            <td style="width: 35px; font-weight: bold; text-align: center; color: #111; padding: 21px 4px; font-size: 14pt;">:</td>
+            <td style="color: #111; padding: 21px 4px; font-size: 14pt;"><strong>{{ $admission->patient_name }}</strong></td>
         </tr>
         <tr>
-            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">Discharge Date &amp; Time</td>
-            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
-            <td style="color: #111; padding: 13px 4px; font-size: 11.5pt;">
+            <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">Discharge Date &amp; Time</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 21px 4px; font-size: 14pt;">:</td>
+            <td style="color: #111; padding: 21px 4px; font-size: 14pt;">
                 {{ $admission->discharge_at ? $admission->discharge_at->format('d.m.Y') . ' @ ' . $admission->discharge_at->format('h.i A') : '29.08.2026 @ 04.00 PM' }}
             </td>
         </tr>
         <tr>
-            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">MRD No.</td>
-            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
-            <td style="color: #111; padding: 13px 4px; font-size: 11.5pt;">
+            <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">MRD No.</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 21px 4px; font-size: 14pt;">:</td>
+            <td style="color: #111; padding: 21px 4px; font-size: 14pt;">
                 {{ $admission->mrd_no ?: ($admission->ip_no ?: '2026/567') }}
             </td>
         </tr>
         <tr>
-            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">IP No.</td>
-            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
-            <td style="color: #111; padding: 13px 4px; font-size: 11.5pt;">
+            <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">IP No.</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 21px 4px; font-size: 14pt;">:</td>
+            <td style="color: #111; padding: 21px 4px; font-size: 14pt;">
                 <strong>{{ $admission->ip_no }}</strong>
             </td>
         </tr>
         <tr>
-            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">No of pages</td>
-            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
-            <td style="color: #111; padding: 13px 4px; font-size: 11.5pt;">
+            <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">No of pages</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 21px 4px; font-size: 14pt;">:</td>
+            <td style="color: #111; padding: 21px 4px; font-size: 14pt;">
                 {{ $admission->no_of_pages ?? ($admission->isDelivery() ? 3 : 2) }}
             </td>
         </tr>
         <tr>
-            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">Payment Mode</td>
-            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
-            <td style="color: #111; padding: 13px 4px; font-size: 11.5pt;">
+            <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">Payment Mode</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 21px 4px; font-size: 14pt;">:</td>
+            <td style="color: #111; padding: 21px 4px; font-size: 14pt;">
                 @if($admission->payment_mode)
                     {{ $admission->payment_mode }}
                 @elseif($admission->format === 'cmchistn')
@@ -589,31 +588,19 @@
             </td>
         </tr>
         <tr>
-            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">Hand Over Sign</td>
-            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
-            <td style="color: #222; padding: 13px 4px; font-size: 11.5pt;">
-                @if($admission->handover_name)
-                    {{ $admission->handover_name }}
-                @elseif($admission->creator)
-                    {{ $admission->creator->name }} (Staff Nurse)
-                @else
-                    Staff Nurse
-                @endif
-            </td>
+            <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">Hand Over Sign</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 21px 4px; font-size: 14pt;">:</td>
+            <td style="color: #111; padding: 21px 4px; font-size: 14pt;"></td>
         </tr>
         <tr>
-            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">Floor Incharge Sign</td>
-            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
-            <td style="color: #222; padding: 13px 4px; font-size: 11.5pt;">
-                {{ $admission->floor_incharge_name ?: 'Nursing Supervisor' }}
-            </td>
+            <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">Floor Incharge Sign</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 21px 4px; font-size: 14pt;">:</td>
+            <td style="color: #111; padding: 21px 4px; font-size: 14pt;"></td>
         </tr>
         <tr>
-            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">MRD Incharge Sign</td>
-            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
-            <td style="color: #222; padding: 13px 4px; font-size: 11.5pt;">
-                {{ $admission->mrd_incharge_name ?: 'Medical Records Officer' }}
-            </td>
+            <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">MRD Incharge Sign</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 21px 4px; font-size: 14pt;">:</td>
+            <td style="color: #111; padding: 21px 4px; font-size: 14pt;"></td>
         </tr>
     </tbody>
 </table>

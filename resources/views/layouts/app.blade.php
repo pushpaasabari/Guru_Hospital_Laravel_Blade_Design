@@ -45,12 +45,6 @@
                         <div class="hospital-brand-subtitle" style="font-size: 9.5px; color: #94a3b8;">Clinical Workflow</div>
                     </div>
                 </a>
-                <div class="d-flex align-items-center">
-                    <!-- Left Menu Hide / Expand Button -->
-                    <button class="fg-sidebar-hide-btn" id="hideSidebarBtn" type="button" title="Collapse to icon menu" aria-label="Collapse to icon menu">
-                        <i class="bi bi-layout-sidebar-inset" id="hideSidebarIcon"></i>
-                    </button>
-                </div>
             </div>
 
             <div class="fg-sidebar-body">

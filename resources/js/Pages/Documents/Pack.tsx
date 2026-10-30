@@ -1119,35 +1119,23 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
               <img
                 src="/images/guru-hospital-logo.png"
                 alt="Guru Hospital Logo"
-                style={{ width: '68px', height: 'auto', display: 'inline-block' }}
+                style={{ width: '76px', height: 'auto', display: 'inline-block' }}
               />
-              <div
-                style={{
-                  fontSize: '8pt',
-                  fontWeight: 'bold',
-                  letterSpacing: '0.5px',
-                  textTransform: 'uppercase',
-                  color: '#333',
-                  marginTop: '2px',
-                }}
-              >
-                GURU HOSPITAL
-              </div>
             </div>
 
             <h2
               className="fw-bold mb-1 text-dark text-uppercase"
-              style={{ fontSize: '20pt', letterSpacing: '1px', fontWeight: 800 }}
+              style={{ fontSize: '21pt', letterSpacing: '1px', fontWeight: 800 }}
             >
               GURU HOSPITAL
             </h2>
-            <div style={{ fontSize: '9.5pt', color: '#222', lineHeight: '1.4' }}>
+            <div style={{ fontSize: '10pt', color: '#222', lineHeight: '1.4' }}>
               32, A/2, Antony Street, Nethaji Bypass Road,
             </div>
-            <div style={{ fontSize: '9.5pt', color: '#222', lineHeight: '1.4' }}>
+            <div style={{ fontSize: '10pt', color: '#222', lineHeight: '1.4' }}>
               Govt. Medical College Hospital Opp. Dharmapuri - 636 701.
             </div>
-            <div style={{ fontSize: '9.5pt', fontWeight: 600, color: '#111', marginTop: '2px' }}>
+            <div style={{ fontSize: '10pt', fontWeight: 600, color: '#111', marginTop: '2px' }}>
               Ph : 04342-262266, Cell : 9418084266
             </div>
           </div>
@@ -1157,7 +1145,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
             <span
               style={{
                 fontFamily: "'Times New Roman', Times, Georgia, serif",
-                fontSize: '15.5pt',
+                fontSize: '16.5pt',
                 fontWeight: 'bold',
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
@@ -1171,71 +1159,65 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
             </span>
           </div>
 
-          {/* 9 Clean Unbordered Fields */}
-          <table className="table table-borderless my-4" style={{ fontSize: '11.5pt' }}>
+          {/* 9 Clean Form Fields covering the page */}
+          <table className="table table-borderless my-4" style={{ fontSize: '14pt' }}>
             <tbody>
               <tr>
-                <td style={{ width: '230px', fontWeight: 'bold', padding: '12px 4px' }}>Patient Name</td>
-                <td style={{ width: '30px', fontWeight: 'bold', textAlign: 'center', padding: '12px 4px' }}>:</td>
-                <td style={{ padding: '12px 4px' }}><strong>{admission.patient_name}</strong></td>
+                <td style={{ width: '270px', fontWeight: 'bold', padding: '20px 4px' }}>Patient Name</td>
+                <td style={{ width: '35px', fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
+                <td style={{ padding: '20px 4px' }}><strong>{admission.patient_name}</strong></td>
               </tr>
               <tr>
-                <td style={{ fontWeight: 'bold', padding: '12px 4px' }}>Discharge Date &amp; Time</td>
-                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '12px 4px' }}>:</td>
-                <td style={{ padding: '12px 4px' }}>
+                <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>Discharge Date &amp; Time</td>
+                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
+                <td style={{ padding: '20px 4px' }}>
                   {admission.discharge_at
                     ? `${formatDate(admission.discharge_at)} @ ${new Date(admission.discharge_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`
                     : '29.08.2026 @ 04.00 PM'}
                 </td>
               </tr>
               <tr>
-                <td style={{ fontWeight: 'bold', padding: '12px 4px' }}>MRD No.</td>
-                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '12px 4px' }}>:</td>
-                <td style={{ padding: '12px 4px' }}>
+                <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>MRD No.</td>
+                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
+                <td style={{ padding: '20px 4px' }}>
                   {admission.mrd_no || admission.ip_no || '2026/567'}
                 </td>
               </tr>
               <tr>
-                <td style={{ fontWeight: 'bold', padding: '12px 4px' }}>IP No.</td>
-                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '12px 4px' }}>:</td>
-                <td style={{ padding: '12px 4px' }}>
+                <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>IP No.</td>
+                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
+                <td style={{ padding: '20px 4px' }}>
                   <strong>{admission.ip_no}</strong>
                 </td>
               </tr>
               <tr>
-                <td style={{ fontWeight: 'bold', padding: '12px 4px' }}>No of pages</td>
-                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '12px 4px' }}>:</td>
-                <td style={{ padding: '12px 4px' }}>
+                <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>No of pages</td>
+                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
+                <td style={{ padding: '20px 4px' }}>
                   {admission.surgery_type === 'delivery' ? 3 : 2}
                 </td>
               </tr>
               <tr>
-                <td style={{ fontWeight: 'bold', padding: '12px 4px' }}>Payment Mode</td>
-                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '12px 4px' }}>:</td>
-                <td style={{ padding: '12px 4px' }}>
+                <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>Payment Mode</td>
+                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
+                <td style={{ padding: '20px 4px' }}>
                   {admission.payment_mode || (admission.format === 'cmchistn' ? 'Chief Minister Scheme' : 'Cash')}
                 </td>
               </tr>
               <tr>
-                <td style={{ fontWeight: 'bold', padding: '12px 4px' }}>Hand Over Sign</td>
-                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '12px 4px' }}>:</td>
-                <td style={{ padding: '12px 4px', color: '#444' }}>
-                  {admission.handover_name || (admission.creator ? `${admission.creator.name} (Staff Nurse)` : 'Staff Nurse')}
-                </td>
+                <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>Hand Over Sign</td>
+                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
+                <td style={{ padding: '20px 4px' }}></td>
               </tr>
               <tr>
-                <td style={{ fontWeight: 'bold', padding: '12px 4px' }}>Floor Incharge Sign</td>
-                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '12px 4px' }}>:</td>
-                <td style={{ padding: '12px 4px', color: '#444' }}>
-                  {admission.floor_incharge_name || 'Nursing Supervisor'}
-                </td>
+                <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>Floor Incharge Sign</td>
+                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
+                <td style={{ padding: '20px 4px' }}></td>
               </tr>
               <tr>
-                <td style={{ fontWeight: 'bold', padding: '12px 4px' }}>MRD Incharge Sign</td>
-                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '12px 4px' }}>:</td>
-                <td style={{ padding: '12px 4px', color: '#444' }}>
-                  {admission.mrd_incharge_name || 'Medical Records Officer'}
-                </td>
+                <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>MRD Incharge Sign</td>
+                <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
+                <td style={{ padding: '20px 4px' }}></td>
               </tr>
             </tbody>
           </table>

@@ -79,7 +79,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
       {/* Left Sidebar (Desktop + Mobile Drawer) */}
       <aside className={`fg-sidebar no-print ${mobileOpen ? 'mobile-open' : ''}`}>
         <div>
-          {/* Sidebar Header: Hospital Brand with FinGM 3-Bar Logo & Hide Button */}
+          {/* Sidebar Header: Hospital Brand with FinGM 3-Bar Logo */}
           <div className="fg-sidebar-header">
             <Link
               href="/dashboard"
@@ -101,21 +101,6 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                 </div>
               </div>
             </Link>
-
-            <div className="d-flex align-items-center">
-              {/* Left Menu Hide / Expand Button */}
-              {onToggleCollapse && (
-                <button
-                  className="fg-sidebar-hide-btn"
-                  type="button"
-                  onClick={onToggleCollapse}
-                  title={collapsed ? "Expand sidebar menu" : "Collapse to icon menu"}
-                  aria-label={collapsed ? "Expand sidebar menu" : "Collapse to icon menu"}
-                >
-                  <i className={`bi ${collapsed ? 'bi-chevron-right' : 'bi-layout-sidebar-inset'}`}></i>
-                </button>
-              )}
-            </div>
           </div>
 
           {/* Navigation Links (With full titles for Icon-Only mode) */}
