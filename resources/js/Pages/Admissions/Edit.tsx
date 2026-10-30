@@ -146,6 +146,21 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [], anesthes
         ],
   });
 
+  const isFemale = data.sex?.toLowerCase() === 'female';
+
+  const handleSexChange = (newSex: string) => {
+    const isNewFemale = newSex?.toLowerCase() === 'female';
+    if (!isNewFemale && data.surgery_type === 'delivery') {
+      setData((prev) => ({
+        ...prev,
+        sex: newSex,
+        surgery_type: 'other',
+      }));
+    } else {
+      setData('sex', newSex);
+    }
+  };
+
   const addBaby = () => {
     setData('newborns', [
       ...data.newborns,
@@ -260,7 +275,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [], anesthes
               </div>
               <div className="col-md-2">
                 <label className="form-label">Sex</label>
-                <select className="form-select" value={data.sex} onChange={(e) => setData('sex', e.target.value)}>
+                <select className="form-select" value={data.sex} onChange={(e) => handleSexChange(e.target.value)}>
                   <option value="">Select</option>
                   <option value="Female">Female</option>
                   <option value="Male">Male</option>
@@ -368,16 +383,36 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [], anesthes
                 </select>
               </div>
               <div className="col-md-6">
-                <label className="form-label required">Surgery Workflow</label>
+                <div className="d-flex justify-content-between align-items-center mb-1">
+                  <label className="form-label required mb-0">Surgery / Clinical Workflow</label>
+                  {!isFemale && (
+                    <span className="badge bg-secondary-subtle text-secondary" style={{ fontSize: '0.72rem' }}>
+                      Female only for Delivery
+                    </span>
+                  )}
+                </div>
                 <select
-                  className="form-select"
+                  id="surgeryType"
+                  className={`form-select ${errors.surgery_type ? 'is-invalid' : ''}`}
                   value={data.surgery_type}
                   onChange={(e) => setData('surgery_type', e.target.value)}
                   required
                 >
-                  <option value="delivery">Delivery / Obstetric</option>
-                  <option value="other">Other Surgery</option>
+                  <option value="delivery" disabled={!isFemale}>
+                    Delivery / Obstetric {!isFemale ? '— (Female patients only)' : ''}
+                  </option>
+                  <option value="other">Other Surgery / Non-Obstetric</option>
                 </select>
+                {!isFemale ? (
+                  <div className="form-text text-muted small">
+                    <i className="bi bi-info-circle me-1"></i> Delivery / obstetric workflow is only available when patient sex is set to <strong>Female</strong>.
+                  </div>
+                ) : (
+                  <div className="form-text text-muted small">
+                    Select <strong>Delivery / Obstetric</strong> for maternal delivery &amp; birth details, or <strong>Other Surgery</strong> for general operations.
+                  </div>
+                )}
+                {errors.surgery_type && <div className="invalid-feedback">{errors.surgery_type}</div>}
               </div>
 
               <div className="col-12">

@@ -177,5 +177,47 @@ class AdmissionWorkflowTest extends TestCase
         $this->assertNotNull($admission);
         $this->assertCount(0, $admission->newborns);
     }
+
+    public function test_male_patient_cannot_use_delivery_surgery_workflow(): void
+    {
+        $response = $this->actingAs($this->nurse)->post(route('admissions.store'), [
+            'patient_name' => 'Ramesh Kumar',
+            'uhid' => 'GH-2026-9901',
+            'ip_no' => 'IP-MALE-DEL-01',
+            'age' => '40',
+            'sex' => 'Male',
+            'admission_at' => '2026-10-21 07:00:00',
+            'discharge_at' => '2026-10-23 12:00:00',
+            'diagnosis' => 'Inguinal Hernia',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+        ]);
+
+        $response->assertSessionHasErrors(['surgery_type']);
+        $this->assertDatabaseMissing('admissions', ['ip_no' => 'IP-MALE-DEL-01']);
+    }
+
+    public function test_female_patient_can_use_delivery_surgery_workflow(): void
+    {
+        $response = $this->actingAs($this->nurse)->post(route('admissions.store'), [
+            'patient_name' => 'Kavitha S',
+            'uhid' => 'GH-2026-9902',
+            'ip_no' => 'IP-FEM-DEL-01',
+            'age' => '27',
+            'sex' => 'Female',
+            'admission_at' => '2026-10-21 07:00:00',
+            'discharge_at' => '2026-10-23 12:00:00',
+            'diagnosis' => 'Full Term Normal Delivery',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('admissions', [
+            'ip_no' => 'IP-FEM-DEL-01',
+            'surgery_type' => 'delivery',
+            'sex' => 'Female',
+        ]);
+    }
 }
 

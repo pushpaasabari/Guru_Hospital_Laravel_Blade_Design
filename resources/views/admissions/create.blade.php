@@ -15,13 +15,22 @@
 @foreach($shared as [$name,$label,$type,$required])
 <div class="col-md-4"><label class="form-label {{ $required?'required':'' }}">{{ $label }}</label>
 @if($type==='select')
-<select name="{{ $name }}" class="form-select"><option value="">Select</option>@foreach(['Female','Male','Other','Not recorded'] as $v)<option value="{{ $v }}" @selected(old($name)===$v)>{{ $v }}</option>@endforeach</select>
+<select name="{{ $name }}" class="form-select" {{ $name==='sex' ? 'id=patientSex' : '' }}><option value="">Select</option>@foreach(['Female','Male','Other','Not recorded'] as $v)<option value="{{ $v }}" @selected(old($name)===$v)>{{ $v }}</option>@endforeach</select>
 @else
 <input class="form-control" name="{{ $name }}" type="{{ $type }}" value="{{ old($name) }}" {{ $required?'required':'' }}>
 @endif</div>
 @endforeach
 <div class="col-md-6"><label class="form-label required">Discharge summary format</label><select name="format" class="form-select" required>@foreach(['general'=>'General','cmchistn'=>'CMCHISTN','private'=>'Private','employee'=>'Employee'] as $v=>$label)<option value="{{ $v }}" @selected(old('format','general')===$v)>{{ $label }}</option>@endforeach</select><div class="form-text">Layouts are draft placeholders until the hospital supplies/approves each exact format.</div></div>
-<div class="col-md-6"><label class="form-label required">Surgery workflow</label><select name="surgery_type" id="surgeryType" class="form-select" required><option value="delivery" @selected(old('surgery_type','delivery')==='delivery')>Delivery / Obstetric</option><option value="other" @selected(old('surgery_type')==='other')>Other surgery</option></select></div>
+<div class="col-md-6">
+    <label class="form-label required">Surgery workflow</label>
+    <select name="surgery_type" id="surgeryType" class="form-select" required>
+        <option value="delivery" id="deliveryOption" @selected(old('surgery_type')==='delivery')>Delivery / Obstetric</option>
+        <option value="other" @selected(old('surgery_type', 'other')==='other')>Other surgery</option>
+    </select>
+    <div id="sexWarning" class="form-text text-muted small" style="display:none;">
+        <i class="bi bi-info-circle me-1"></i> Delivery / Obstetric workflow is only enabled when patient sex is set to <strong>Female</strong>.
+    </div>
+</div>
 <div class="col-12"><label class="form-label required">Diagnosis</label><textarea name="diagnosis" class="form-control" rows="2" required>{{ old('diagnosis') }}</textarea></div>
 </div></div></div>
 <div class="card mb-3"><div class="card-header bg-white fw-bold">2. Discharge summary clinical details</div><div class="card-body row g-3">
@@ -106,8 +115,24 @@
 <script>
 (() => {
  const type=document.getElementById('surgeryType'), fields=document.getElementById('deliveryFields');
- function toggle(){ fields.hidden = type.value !== 'delivery'; }
- type.addEventListener('change',toggle); toggle();
+ const sexSelect=document.getElementById('patientSex'), deliveryOption=document.getElementById('deliveryOption'), sexWarning=document.getElementById('sexWarning');
+ function updateSurgeryWorkflow(){
+   const isFemale = sexSelect && sexSelect.value.toLowerCase() === 'female';
+   if (deliveryOption) {
+     deliveryOption.disabled = !isFemale;
+     deliveryOption.textContent = isFemale ? 'Delivery / Obstetric' : 'Delivery / Obstetric (Female only)';
+   }
+   if (sexWarning) {
+     sexWarning.style.display = isFemale ? 'none' : 'block';
+   }
+   if (!isFemale && type.value === 'delivery') {
+     type.value = 'other';
+   }
+   fields.hidden = type.value !== 'delivery';
+ }
+ if (sexSelect) sexSelect.addEventListener('change', updateSurgeryWorkflow);
+ type.addEventListener('change', () => { fields.hidden = type.value !== 'delivery'; });
+ updateSurgeryWorkflow();
  const list=document.getElementById('newbornRows'), tmpl=document.getElementById('newbornTemplate');
  function renumber(){ [...list.querySelectorAll('.newborn-row')].forEach((r,i)=>r.querySelector('.baby-number').textContent=i+1); }
  document.getElementById('addBaby').addEventListener('click',()=>{

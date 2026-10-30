@@ -91,5 +91,20 @@ class UpdateAdmissionRequest extends FormRequest
             'newborns.*.notes' => ['nullable', 'string', 'max:3000'],
         ];
     }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator) {
+            $surgeryType = $this->input('surgery_type');
+            $sex = $this->input('sex');
+
+            if ($surgeryType === 'delivery' && strtolower((string) $sex) !== 'female') {
+                $validator->errors()->add(
+                    'surgery_type',
+                    'Delivery / Obstetric workflow is only enabled for female patients.'
+                );
+            }
+        });
+    }
 }
 

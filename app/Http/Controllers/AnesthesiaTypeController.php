@@ -146,3 +146,4 @@ class AnesthesiaTypeController extends Controller
             ->with('status', "Anesthesia type '{$anesthesiaType->name}' " . ($anesthesiaType->is_active ? 'activated' : 'deactivated') . " successfully.");
     }
 }
+

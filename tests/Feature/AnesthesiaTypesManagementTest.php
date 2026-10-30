@@ -150,3 +150,4 @@ class AnesthesiaTypesManagementTest extends TestCase
         );
     }
 }
+

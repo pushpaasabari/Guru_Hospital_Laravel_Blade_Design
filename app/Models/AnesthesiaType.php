@@ -38,3 +38,4 @@ class AnesthesiaType extends Model
             ->orderBy('name');
     }
 }
+

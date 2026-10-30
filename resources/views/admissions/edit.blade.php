@@ -52,7 +52,7 @@
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Sex</label>
-                    <select name="sex" class="form-select">
+                    <select name="sex" id="patientSex" class="form-select">
                         <option value="">Select</option>
                         @foreach(['Female', 'Male', 'Other', 'Not recorded'] as $gender)
                             <option value="{{ $gender }}" @selected(old('sex', $admission->sex) === $gender)>{{ $gender }}</option>
@@ -106,9 +106,12 @@
                 <div class="col-md-6">
                     <label class="form-label required">Clinical Surgery Workflow</label>
                     <select name="surgery_type" id="surgeryType" class="form-select" required>
-                        <option value="delivery" @selected(old('surgery_type', $admission->surgery_type) === 'delivery')>Delivery / Obstetric Workflow</option>
+                        <option value="delivery" id="deliveryOption" @selected(old('surgery_type', $admission->surgery_type) === 'delivery')>Delivery / Obstetric Workflow</option>
                         <option value="other" @selected(old('surgery_type', $admission->surgery_type) === 'other')>Other Surgery / Procedural Workflow</option>
                     </select>
+                    <div id="sexWarning" class="form-text text-muted small" style="display:none;">
+                        <i class="bi bi-info-circle me-1"></i> Delivery / Obstetric workflow is only enabled when patient sex is set to <strong>Female</strong>.
+                    </div>
                 </div>
 
                 <div class="col-12">
@@ -426,11 +429,32 @@
 (() => {
     const type = document.getElementById('surgeryType');
     const fields = document.getElementById('deliveryFields');
-    function toggleDelivery() {
-        fields.style.display = (type.value === 'delivery') ? 'block' : 'none';
+    const sexSelect = document.getElementById('patientSex');
+    const deliveryOption = document.getElementById('deliveryOption');
+    const sexWarning = document.getElementById('sexWarning');
+
+    function updateSurgeryWorkflow() {
+        const isFemale = sexSelect && sexSelect.value.toLowerCase() === 'female';
+        if (deliveryOption) {
+            deliveryOption.disabled = !isFemale;
+            deliveryOption.textContent = isFemale ? 'Delivery / Obstetric Workflow' : 'Delivery / Obstetric Workflow (Female only)';
+        }
+        if (sexWarning) {
+            sexWarning.style.display = isFemale ? 'none' : 'block';
+        }
+        if (!isFemale && type.value === 'delivery') {
+            type.value = 'other';
+        }
+        if (fields) {
+            fields.style.display = (type.value === 'delivery') ? 'block' : 'none';
+        }
     }
-    type.addEventListener('change', toggleDelivery);
-    toggleDelivery();
+
+    if (sexSelect) sexSelect.addEventListener('change', updateSurgeryWorkflow);
+    type.addEventListener('change', () => {
+        if (fields) fields.style.display = (type.value === 'delivery') ? 'block' : 'none';
+    });
+    updateSurgeryWorkflow();
 
     const list = document.getElementById('newbornRows');
     const tmpl = document.getElementById('newbornTemplate');
