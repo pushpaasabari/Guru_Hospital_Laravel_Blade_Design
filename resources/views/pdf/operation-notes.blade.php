@@ -29,7 +29,7 @@
             padding: 0;
         }
         .letterhead-space {
-            height: 35mm;
+            height: 40mm;
             width: 100%;
         }
         .ot-title {

@@ -32,7 +32,7 @@
             page-break-before: always;
         }
         .letterhead-space {
-            height: 35mm;
+            height: 40mm;
             width: 100%;
         }
         .document-title {
@@ -323,7 +323,7 @@
 <div class="page-break"></div>
 
 {{-- Letterhead Space (First page of OT notes only) --}}
-<div style="height: 35mm;"></div>
+<div style="height: 40mm;"></div>
 
 <div style="text-align: center; margin-top: 4px; margin-bottom: 22px;">
     <div style="font-size: 14pt; font-weight: bold; text-decoration: underline; text-transform: uppercase; letter-spacing: 0.5px;">OPERATION THEATRE NOTES</div>

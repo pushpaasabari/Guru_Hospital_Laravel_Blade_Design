@@ -1,6 +1,6 @@
 <div class="discharge-summary-document" style="font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 11pt; line-height: 1.45; color: #000;">
     {{-- Space for Pre-printed Letterhead (First page only) --}}
-    <div style="height: 35mm;"></div>
+    <div style="height: 40mm;"></div>
 
     <div class="text-center mb-4 pt-2">
         <div class="badge bg-success text-uppercase px-3 py-1 my-2" style="font-size: 0.85rem; letter-spacing: 0.5px;">

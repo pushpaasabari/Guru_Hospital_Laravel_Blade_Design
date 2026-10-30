@@ -607,7 +607,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
           }}
         >
           {/* Space for Pre-printed Letterhead (First page only) */}
-          <div style={{ height: '35mm' }}></div>
+          <div style={{ height: '40mm' }}></div>
 
           <div className="text-center mb-4 pt-2">
             <h3
@@ -878,7 +878,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
           }}
         >
           {/* Space for Pre-printed Letterhead (First page only) */}
-          <div style={{ height: '35mm' }}></div>
+          <div style={{ height: '40mm' }}></div>
 
           <div className="text-center mb-4 pt-2">
             <h3
