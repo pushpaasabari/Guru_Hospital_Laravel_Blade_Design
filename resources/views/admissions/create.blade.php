@@ -40,9 +40,28 @@
 <div class="col-md-4"><label class="form-label">Assisted Anaesthetist</label><input class="form-control" name="assisted_anaesthetist" value="{{ old('assisted_anaesthetist') }}"></div>
 <div class="col-md-4"><label class="form-label">Staff Nurse</label><input class="form-control" name="staff_nurse" value="{{ old('staff_nurse') }}" placeholder="e.g. Miss Soudnharya"></div>
 <div class="col-md-4"><label class="form-label">OT Technician</label><input class="form-control" name="ot_technician" value="{{ old('ot_technician') }}" placeholder="e.g. OT Tech Selvam"></div>
-<div class="col-md-4"><label class="form-label">Consultant Pediatrician</label><input class="form-control" name="pediatrician_name" value="{{ old('pediatrician_name') }}" placeholder="e.g. Dr. Nithyapriya (Paediatrician)"></div>
+<div class="col-md-4">
+    <label class="form-label">Consultant Pediatrician</label>
+    <input class="form-control" list="pediatrician_options" name="pediatrician_name" value="{{ old('pediatrician_name') }}" placeholder="e.g. Dr. Nithyapriya (Paediatrician)">
+    <datalist id="pediatrician_options">
+        @foreach(\App\Models\ClinicalStaff::active()->forRole('consultant_pediatrician')->get() as $p)
+            <option value="{{ $p->name }}">{{ $p->qualification ? "{$p->name} ({$p->qualification})" : $p->name }}</option>
+        @endforeach
+    </datalist>
+</div>
 <div class="col-md-4"><label class="form-label">Assistant by S/N</label><input class="form-control" name="assisted_by" value="{{ old('assisted_by') }}" placeholder="e.g. Miss Soudnharya"></div>
-<div class="col-md-4"><label class="form-label">Anaesthesia type</label><input class="form-control" name="anaesthesia_type" value="{{ old('anaesthesia_type') }}" placeholder="e.g. SA, GA"></div>
+<div class="col-md-4">
+    <label class="form-label">Anaesthesia type</label>
+    <input class="form-control" list="anesthesia_type_options" name="anaesthesia_type" value="{{ old('anaesthesia_type') }}" placeholder="e.g. SA, GA, Spinal">
+    <datalist id="anesthesia_type_options">
+        @foreach(\App\Models\AnesthesiaType::active()->get() as $at)
+            <option value="{{ $at->name }}">{{ $at->code ? "{$at->name} [{$at->code}]" : $at->name }}</option>
+            @if($at->code && $at->code !== $at->name)
+                <option value="{{ $at->code }}">{{ $at->code }} ({{ $at->name }})</option>
+            @endif
+        @endforeach
+    </datalist>
+</div>
 @foreach(['procedure_note'=>'Procedure note','incision'=>'Incision','findings'=>'Findings','complications'=>'Complications','blood_loss_ml'=>'Blood loss (mL)','specimen'=>'Specimen','drain'=>'Drain','postoperative_orders'=>'Post-operative orders'] as $name=>$label)
 <div class="{{ in_array($name,['procedure_note','incision','findings','complications','postoperative_orders'])?'col-md-6':'col-md-4' }}"><label class="form-label">{{ $label }}</label>
 @if(in_array($name,['procedure_note','incision','findings','complications','postoperative_orders']))<textarea class="form-control" rows="2" name="{{ $name }}">{{ old($name) }}</textarea>@else<input class="form-control" name="{{ $name }}" value="{{ old($name) }}" type="{{ $name==='blood_loss_ml'?'number':'text' }}" {{ $name==='blood_loss_ml'?'min=0 step=0.1':'' }}>@endif

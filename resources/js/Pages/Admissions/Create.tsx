@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
+import AnesthesiaSelect, { AnesthesiaTypeItem } from '../../Components/AnesthesiaSelect';
 
 interface NewbornInput {
   sex: string;
@@ -15,9 +16,10 @@ interface NewbornInput {
 
 interface Props {
   clinicalStaff?: ClinicalStaffMember[];
+  anesthesiaTypes?: AnesthesiaTypeItem[];
 }
 
-export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
+export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes = [] }: Props) {
   const { data, setData, post, processing, errors } = useForm({
     patient_name: '',
     uhid: '',
@@ -509,7 +511,7 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
               <div className="col-md-4">
                 <StaffSelect
                   label="Consultant Pediatrician"
-                  role="consultant_doctor"
+                  role="consultant_pediatrician"
                   value={data.pediatrician_name}
                   onChange={(val) => setData('pediatrician_name', val)}
                   staffList={clinicalStaff}
@@ -517,12 +519,12 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Anaesthesia Type</label>
-                <input
-                  className="form-control"
+                <AnesthesiaSelect
+                  label="Anaesthesia Type"
                   value={data.anaesthesia_type}
-                  onChange={(e) => setData('anaesthesia_type', e.target.value)}
-                  placeholder="e.g. SA, GA"
+                  onChange={(val) => setData('anaesthesia_type', val)}
+                  types={anesthesiaTypes}
+                  placeholder="-- Select Anaesthesia Type --"
                 />
               </div>
               <div className="col-md-4">

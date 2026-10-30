@@ -20,6 +20,7 @@
 /storage/pail
 /storage/fonts/*.ufm
 /storage/fonts/*.afm
+/storage/fonts/*.json
 /storage/fonts/installed-fonts.json
 /vendor
 Homestead.json

@@ -185,6 +185,16 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                     </Link>
 
                     <Link
+                      href="/anesthesia-types"
+                      className={`fg-sidebar-link ${isLinkActive('/anesthesia-types') ? 'active' : ''}`}
+                      onClick={closeMobile}
+                      title="Anesthesia Types"
+                    >
+                      <i className="bi bi-capsule icon-anesthesia"></i>
+                      <span>Anesthesia Types</span>
+                    </Link>
+
+                    <Link
                       href="/users"
                       className={`fg-sidebar-link ${isLinkActive('/users') ? 'active' : ''}`}
                       onClick={closeMobile}

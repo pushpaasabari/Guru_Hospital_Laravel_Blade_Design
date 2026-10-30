@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreAdmissionRequest;
 use App\Http\Requests\UpdateAdmissionRequest;
 use App\Models\Admission;
+use App\Models\AnesthesiaType;
 use App\Models\ClinicalStaff;
 use App\Models\DocumentRevision;
 use App\Services\AuditService;
@@ -44,8 +45,9 @@ class AdmissionController extends Controller
     {
         $this->authorize('create', Admission::class);
         $clinicalStaff = ClinicalStaff::active()->orderBy('name')->get();
+        $anesthesiaTypes = AnesthesiaType::active()->get();
 
-        return Inertia::render('Admissions/Create', compact('clinicalStaff'));
+        return Inertia::render('Admissions/Create', compact('clinicalStaff', 'anesthesiaTypes'));
     }
 
     public function store(StoreAdmissionRequest $request): RedirectResponse
@@ -101,8 +103,9 @@ class AdmissionController extends Controller
         $this->authorize('update', $admission);
         $admission->load('newborns');
         $clinicalStaff = ClinicalStaff::active()->orderBy('name')->get();
+        $anesthesiaTypes = AnesthesiaType::active()->get();
 
-        return Inertia::render('Admissions/Edit', compact('admission', 'clinicalStaff'));
+        return Inertia::render('Admissions/Edit', compact('admission', 'clinicalStaff', 'anesthesiaTypes'));
     }
 
     public function update(UpdateAdmissionRequest $request, Admission $admission): RedirectResponse

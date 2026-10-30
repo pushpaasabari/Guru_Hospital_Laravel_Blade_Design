@@ -133,10 +133,13 @@ class DatabaseSeeder extends Seeder
             TemplateVersion::firstOrCreate(['template_code' => $tpl['template_code']], $tpl);
         }
 
-        // 3. Seed Clinical Staff (Doctors, Surgeons, Anaesthetists, Nurses, OT Techs)
+        // 3. Seed Clinical Staff (Doctors, Surgeons, Anaesthetists, Nurses, OT Techs, Pediatricians)
         $this->call(ClinicalStaffSeeder::class);
 
-        // 4. Seed Guru Hospital Real Patient Cases
+        // 4. Seed Anesthesia Types
+        $this->call(AnesthesiaTypeSeeder::class);
+
+        // 5. Seed Guru Hospital Real Patient Cases
         $this->call(AshwiniDischargeSummarySeeder::class);
         $this->call(AjithKumarDischargeSummarySeeder::class);
         $this->call(ManjupriyaOperationNotesSeeder::class);

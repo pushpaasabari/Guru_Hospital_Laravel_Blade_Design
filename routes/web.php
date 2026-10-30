@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdmissionController;
+use App\Http\Controllers\AnesthesiaTypeController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClinicalStaffController;
@@ -53,6 +54,13 @@ Route::middleware('auth')->group(function () {
     Route::put('/clinical-staff/{clinicalStaff}', [ClinicalStaffController::class, 'update'])->name('clinical-staff.update');
     Route::delete('/clinical-staff/{clinicalStaff}', [ClinicalStaffController::class, 'destroy'])->name('clinical-staff.destroy');
     Route::patch('/clinical-staff/{clinicalStaff}/toggle', [ClinicalStaffController::class, 'toggleActive'])->name('clinical-staff.toggle');
+
+    // Anesthesia Types Management (Admins)
+    Route::get('/anesthesia-types', [AnesthesiaTypeController::class, 'index'])->name('anesthesia-types.index');
+    Route::post('/anesthesia-types', [AnesthesiaTypeController::class, 'store'])->name('anesthesia-types.store');
+    Route::put('/anesthesia-types/{anesthesiaType}', [AnesthesiaTypeController::class, 'update'])->name('anesthesia-types.update');
+    Route::delete('/anesthesia-types/{anesthesiaType}', [AnesthesiaTypeController::class, 'destroy'])->name('anesthesia-types.destroy');
+    Route::patch('/anesthesia-types/{anesthesiaType}/toggle', [AnesthesiaTypeController::class, 'toggleActive'])->name('anesthesia-types.toggle');
 
     // Templates Management (Admins)
     Route::get('/templates', [TemplateController::class, 'index'])->name('templates.index');

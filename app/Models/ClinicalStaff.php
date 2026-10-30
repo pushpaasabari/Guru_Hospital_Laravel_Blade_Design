@@ -20,6 +20,7 @@ class ClinicalStaff extends Model
         'assisted_anaesthetist' => 'Assisted Anaesthetist',
         'staff_nurse' => 'Staff Nurse',
         'ot_technician' => 'OT Technician',
+        'consultant_pediatrician' => 'Consultant Pediatrician',
     ];
 
     protected $fillable = [

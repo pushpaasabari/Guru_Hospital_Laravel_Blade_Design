@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 
 interface StaffMember {
@@ -30,6 +30,7 @@ const roleBadgeColor: Record<string, { bg: string; text: string; border: string 
   assisted_anaesthetist: { bg: '#ecfeff', text: '#0e7490', border: '#a5f3fc' },
   staff_nurse: { bg: '#fdf2f8', text: '#be185d', border: '#fbcfe8' },
   ot_technician: { bg: '#fffbeb', text: '#b45309', border: '#fde68a' },
+  consultant_pediatrician: { bg: '#fef3c7', text: '#92400e', border: '#fde68a' },
 };
 
 export default function Index({ staff, availableRoles, currentFilter }: Props) {
@@ -138,20 +139,50 @@ export default function Index({ staff, availableRoles, currentFilter }: Props) {
       {/* Header */}
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
+          <div className="d-flex align-items-center gap-2 mb-1">
+            <span className="badge bg-primary-subtle text-primary border border-primary-subtle px-2 py-1">
+              Admin Configuration
+            </span>
+          </div>
           <h1 className="h3 fw-bold mb-1 text-dark" style={{ letterSpacing: '-0.02em' }}>
             Clinical Staff & Doctors Directory
           </h1>
           <p className="text-muted mb-0">
-            Manage Consultant Doctors, Surgeons, Assisted Surgeons, Anaesthetists, Assisted Anaesthetists, Staff Nurses, and OT Technicians for admission form dropdowns.
+            Manage Consultant Doctors, Surgeons, Assisted Surgeons, Anaesthetists, Assisted Anaesthetists, Staff Nurses, OT Technicians, and Consultant Pediatricians for form dropdowns.
           </p>
         </div>
-        <button
-          type="button"
-          className="btn btn-primary shadow-sm"
-          onClick={openCreateModal}
-        >
-          <i className="bi bi-person-plus-fill me-1"></i> Add Clinical Staff
-        </button>
+        <div className="d-flex gap-2">
+          <Link href="/anesthesia-types" className="btn btn-outline-secondary">
+            <i className="bi bi-capsule me-1"></i> Anesthesia Types Directory
+          </Link>
+          <button
+            type="button"
+            className="btn btn-primary shadow-sm"
+            onClick={openCreateModal}
+          >
+            <i className="bi bi-person-plus-fill me-1"></i> Add Clinical Staff
+          </button>
+        </div>
+      </div>
+
+      {/* Navigation Sub-Tabs */}
+      <div className="card shadow-sm border-0 mb-3" style={{ borderRadius: '14px' }}>
+        <div className="card-body p-2 d-flex flex-wrap gap-2 align-items-center">
+          <button
+            type="button"
+            className="btn btn-sm btn-primary"
+            style={{ borderRadius: '8px', fontWeight: 500 }}
+          >
+            <i className="bi bi-heart-pulse me-1"></i> Clinical Staff & Doctors ({staff.length})
+          </button>
+          <Link
+            href="/anesthesia-types"
+            className="btn btn-sm btn-light border-0 text-muted"
+            style={{ borderRadius: '8px', fontWeight: 500 }}
+          >
+            <i className="bi bi-capsule me-1"></i> Anesthesia Types
+          </Link>
+        </div>
       </div>
 
       {/* Filter Tabs */}

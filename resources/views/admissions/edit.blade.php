@@ -207,7 +207,12 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Consultant Pediatrician</label>
-                    <input type="text" name="pediatrician_name" class="form-control" value="{{ old('pediatrician_name', $admission->pediatrician_name) }}">
+                    <input type="text" list="pediatrician_options_edit" name="pediatrician_name" class="form-control" value="{{ old('pediatrician_name', $admission->pediatrician_name) }}" placeholder="e.g. Dr. Nithyapriya (Paediatrician)">
+                    <datalist id="pediatrician_options_edit">
+                        @foreach(\App\Models\ClinicalStaff::active()->forRole('consultant_pediatrician')->get() as $p)
+                            <option value="{{ $p->name }}">{{ $p->qualification ? "{$p->name} ({$p->qualification})" : $p->name }}</option>
+                        @endforeach
+                    </datalist>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Surgical Assistant</label>
@@ -219,7 +224,15 @@
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Type of Anesthesia</label>
-                    <input type="text" name="anaesthesia_type" class="form-control" value="{{ old('anaesthesia_type', $admission->anaesthesia_type) }}" placeholder="e.g. Spinal, General, Local">
+                    <input type="text" list="anesthesia_options_edit" name="anaesthesia_type" class="form-control" value="{{ old('anaesthesia_type', $admission->anaesthesia_type) }}" placeholder="e.g. SA, GA, Spinal">
+                    <datalist id="anesthesia_options_edit">
+                        @foreach(\App\Models\AnesthesiaType::active()->get() as $at)
+                            <option value="{{ $at->name }}">{{ $at->code ? "{$at->name} [{$at->code}]" : $at->name }}</option>
+                            @if($at->code && $at->code !== $at->name)
+                                <option value="{{ $at->code }}">{{ $at->code }} ({{ $at->name }})</option>
+                            @endif
+                        @endforeach
+                    </datalist>
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Blood Loss (mL)</label>

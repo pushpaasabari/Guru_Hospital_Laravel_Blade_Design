@@ -80,13 +80,13 @@ class ClinicalStaffManagementTest extends TestCase
     public function test_admin_can_add_clinical_staff_member(): void
     {
         $payload = [
-            'name' => 'Dr. M.S Karthick',
-            'category' => 'anaesthetist',
-            'roles' => ['anaesthetist', 'assisted_anaesthetist'],
-            'qualification' => 'MD (Anaesthesia)',
-            'doctor_reg_no' => 'TNMC-53109',
-            'department' => 'Anaesthesiology',
-            'phone' => '9789012345',
+            'name' => 'Dr. Nithyapriya (Paediatrician)',
+            'category' => 'consultant_pediatrician',
+            'roles' => ['consultant_pediatrician', 'consultant_doctor'],
+            'qualification' => 'MD (Paediatrics)',
+            'doctor_reg_no' => 'TNMC-58210',
+            'department' => 'Paediatrics & Neonatology',
+            'phone' => '9944112233',
             'is_active' => true,
         ];
 
@@ -94,9 +94,9 @@ class ClinicalStaffManagementTest extends TestCase
         $response->assertRedirect('/clinical-staff');
 
         $this->assertDatabaseHas('clinical_staff', [
-            'name' => 'Dr. M.S Karthick',
-            'category' => 'anaesthetist',
-            'doctor_reg_no' => 'TNMC-53109',
+            'name' => 'Dr. Nithyapriya (Paediatrician)',
+            'category' => 'consultant_pediatrician',
+            'doctor_reg_no' => 'TNMC-58210',
         ]);
     }
 
@@ -179,6 +179,8 @@ class ClinicalStaffManagementTest extends TestCase
             'assisted_anaesthetist' => 'Dr. R. Vignesh MBBS, DA',
             'staff_nurse' => 'Staff Nurse Anitha',
             'ot_technician' => 'OT Tech Selvam',
+            'pediatrician_name' => 'Dr. Nithyapriya (Paediatrician)',
+            'anaesthesia_type' => 'Spinal Anesthesia (SA)',
         ];
 
         $response = $this->actingAs($this->nurse)->post('/admissions', $payload);
@@ -193,6 +195,8 @@ class ClinicalStaffManagementTest extends TestCase
             'assisted_anaesthetist' => 'Dr. R. Vignesh MBBS, DA',
             'staff_nurse' => 'Staff Nurse Anitha',
             'ot_technician' => 'OT Tech Selvam',
+            'pediatrician_name' => 'Dr. Nithyapriya (Paediatrician)',
+            'anaesthesia_type' => 'Spinal Anesthesia (SA)',
         ]);
     }
 }
