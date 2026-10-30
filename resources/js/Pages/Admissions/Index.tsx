@@ -166,9 +166,53 @@ export default function AdmissionsIndex({ admissions, filters = {}, auth }: Prop
                     </td>
                     <td className="text-end">
                       <div className="btn-group btn-group-sm">
-                        <Link href={`/documents/${adm.id}/preview`} className="btn btn-outline-secondary" title="Preview Pack">
-                          Preview
-                        </Link>
+                        <div className="btn-group btn-group-sm">
+                          <Link href={`/admissions/${adm.id}/documents/preview`} className="btn btn-outline-secondary" title="Preview Pack">
+                            Preview
+                          </Link>
+                          <button
+                            type="button"
+                            className="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            title="Preview separate documents"
+                          >
+                            <span className="visually-hidden">Preview options</span>
+                          </button>
+                          <ul className="dropdown-menu shadow-sm border-0" style={{ fontSize: '12px' }}>
+                            <li>
+                              <h6 className="dropdown-header text-uppercase fw-bold" style={{ fontSize: '10px' }}>
+                                Separate Document Previews
+                              </h6>
+                            </li>
+                            <li>
+                              <Link className="dropdown-item py-1" href={`/admissions/${adm.id}/documents/preview?doc=discharge_summary`}>
+                                <i className="bi bi-file-earmark-text text-primary me-2"></i>1. Discharge Summary
+                              </Link>
+                            </li>
+                            <li>
+                              <Link className="dropdown-item py-1" href={`/admissions/${adm.id}/documents/preview?doc=operation_notes`}>
+                                <i className="bi bi-journal-medical text-success me-2"></i>2. Operation Theatre Notes
+                              </Link>
+                            </li>
+                            <li>
+                              <Link className="dropdown-item py-1" href={`/admissions/${adm.id}/documents/preview?doc=mrd_form`}>
+                                <i className="bi bi-file-earmark-check text-warning me-2"></i>3. MRD Inpatient Form
+                              </Link>
+                            </li>
+                            <li><hr className="dropdown-divider my-1" /></li>
+                            <li>
+                              <Link className="dropdown-item py-1 fw-semibold" href={`/admissions/${adm.id}/documents/preview?doc=all`}>
+                                <i className="bi bi-collection text-dark me-2"></i>All Documents (Pack)
+                              </Link>
+                            </li>
+                            <li>
+                              <Link className="dropdown-item py-1 text-danger fw-semibold" href={`/admissions/${adm.id}/documents/preview?mode=pdf`}>
+                                <i className="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Playwright PDF Preview
+                              </Link>
+                            </li>
+                          </ul>
+                        </div>
                         {auth.user?.can_edit && (
                           <Link href={`/admissions/${adm.id}/edit`} className="btn btn-outline-secondary" title="Edit">
                             Edit

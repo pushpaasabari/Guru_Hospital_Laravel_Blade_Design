@@ -94,18 +94,48 @@ interface Admission {
 
 interface Props {
   admission: Admission;
+  initialDoc?: string;
+  initialMode?: 'sheet' | 'pdf';
 }
 
-export default function Pack({ admission }: Props) {
+export default function Pack({ admission, initialDoc = 'all', initialMode = 'sheet' }: Props) {
   const { auth } = usePage<{ auth: { user: any } }>().props;
   const user = auth.user;
 
+  const [activeDoc, setActiveDoc] = useState<string>(initialDoc);
+  const [viewMode, setViewMode] = useState<'sheet' | 'pdf'>(initialMode);
   const [returnModalOpen, setReturnModalOpen] = useState(false);
   const [revisionModalOpen, setRevisionModalOpen] = useState(false);
   const [correctionReason, setCorrectionReason] = useState('');
   const [revisionReason, setRevisionReason] = useState('');
   const [submittingReturn, setSubmittingReturn] = useState(false);
   const [submittingRevision, setSubmittingRevision] = useState(false);
+
+  const getDocTitle = (doc: string) => {
+    switch (doc) {
+      case 'discharge_summary':
+        return '1. Discharge Summary';
+      case 'operation_notes':
+        return '2. Operation Theatre Notes';
+      case 'mrd_form':
+        return '3. MRD Inpatient Form';
+      default:
+        return 'Complete 3-in-1 Dossier Pack';
+    }
+  };
+
+  const getPdfRouteType = (doc: string) => {
+    switch (doc) {
+      case 'discharge_summary':
+        return 'discharge-summary';
+      case 'operation_notes':
+        return 'operation-notes';
+      case 'mrd_form':
+        return 'mrd-form';
+      default:
+        return 'pack';
+    }
+  };
 
   const isDraft = admission.status === 'draft';
   const isReturned = admission.status === 'returned_for_correction';
@@ -410,8 +440,154 @@ export default function Pack({ admission }: Props) {
         </div>
       </div>
 
-      {/* DOCUMENT 1: DISCHARGE SUMMARY */}
-      <div className="document-sheet mb-4">
+      {/* Document Selector & Preview Engine Bar */}
+      <div className="card mb-4 no-print shadow-sm border-0" style={{ borderRadius: '20px' }}>
+        <div className="card-body p-3">
+          <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">
+            {/* Tabs for Separate Previews */}
+            <div className="d-flex flex-wrap align-items-center gap-2">
+              <span className="text-muted small fw-bold text-uppercase me-1" style={{ fontSize: '10.5px', letterSpacing: '0.04em' }}>
+                Preview Document:
+              </span>
+              <div className="btn-group btn-group-sm" role="group">
+                <button
+                  type="button"
+                  className={`btn py-2 px-3 fw-semibold ${activeDoc === 'all' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                  onClick={() => setActiveDoc('all')}
+                >
+                  <i className="bi bi-collection me-1"></i> All Documents
+                </button>
+                <button
+                  type="button"
+                  className={`btn py-2 px-3 fw-semibold ${activeDoc === 'discharge_summary' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                  onClick={() => setActiveDoc('discharge_summary')}
+                >
+                  <i className="bi bi-file-earmark-medical me-1"></i> 1. Discharge Summary
+                </button>
+                <button
+                  type="button"
+                  className={`btn py-2 px-3 fw-semibold ${activeDoc === 'operation_notes' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                  onClick={() => setActiveDoc('operation_notes')}
+                >
+                  <i className="bi bi-journal-medical me-1"></i> 2. OT Notes
+                </button>
+                <button
+                  type="button"
+                  className={`btn py-2 px-3 fw-semibold ${activeDoc === 'mrd_form' ? 'btn-primary' : 'btn-outline-secondary'}`}
+                  onClick={() => setActiveDoc('mrd_form')}
+                >
+                  <i className="bi bi-file-earmark-check me-1"></i> 3. MRD Form
+                </button>
+              </div>
+            </div>
+
+            {/* View Engine Toggle: Sheet View vs Real Playwright PDF */}
+            <div className="d-flex align-items-center gap-2">
+              <span className="text-muted small fw-bold text-uppercase me-1" style={{ fontSize: '10.5px', letterSpacing: '0.04em' }}>
+                Engine:
+              </span>
+              <div className="btn-group btn-group-sm" role="group">
+                <button
+                  type="button"
+                  className={`btn py-2 px-3 fw-semibold ${viewMode === 'sheet' ? 'btn-dark' : 'btn-outline-secondary'}`}
+                  onClick={() => setViewMode('sheet')}
+                >
+                  <i className="bi bi-file-text me-1"></i> Formatted Sheet
+                </button>
+                <button
+                  type="button"
+                  className={`btn py-2 px-3 fw-semibold ${viewMode === 'pdf' ? 'btn-danger text-white' : 'btn-outline-danger'}`}
+                  onClick={() => setViewMode('pdf')}
+                >
+                  <i className="bi bi-file-earmark-pdf-fill me-1"></i> Playwright PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {viewMode === 'pdf' ? (
+        <div className="card shadow-sm border-0 mb-4" style={{ borderRadius: '20px', overflow: 'hidden' }}>
+          <div className="card-header bg-white p-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div className="d-flex align-items-center gap-2">
+              <span className="badge bg-primary text-white text-uppercase" style={{ fontSize: '11px' }}>
+                Playwright Chromium Preview
+              </span>
+              <strong className="text-dark small">
+                {getDocTitle(activeDoc)}
+              </strong>
+              <span className="badge bg-light text-muted border" style={{ fontSize: '10.5px' }}>
+                IP: {admission.ip_no}
+              </span>
+            </div>
+
+            <div className="d-flex gap-2">
+              <a
+                href={`/admissions/${admission.id}/documents/pdf/${getPdfRouteType(activeDoc)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="btn btn-sm btn-outline-secondary"
+              >
+                <i className="bi bi-box-arrow-up-right me-1"></i> Open Fullscreen
+              </a>
+              <a
+                href={`/admissions/${admission.id}/documents/pdf/${getPdfRouteType(activeDoc)}`}
+                download
+                className="btn btn-sm btn-primary"
+              >
+                <i className="bi bi-download me-1"></i> Download PDF
+              </a>
+            </div>
+          </div>
+
+          <div className="card-body p-0" style={{ background: '#525659' }}>
+            {isApproved || isGenerated ? (
+              <div style={{ width: '100%', height: '920px' }}>
+                <iframe
+                  src={`/admissions/${admission.id}/documents/pdf/${getPdfRouteType(activeDoc)}`}
+                  style={{ width: '100%', height: '100%', border: 'none' }}
+                  title={`Playwright PDF Preview — ${getDocTitle(activeDoc)}`}
+                />
+              </div>
+            ) : (
+              <div className="text-center py-5 px-4 text-white" style={{ background: '#1e293b' }}>
+                <div className="mb-3">
+                  <i className="bi bi-shield-exclamation fs-1 text-warning"></i>
+                </div>
+                <h5 className="fw-bold">Clinical Approval Required for Official PDF Stream</h5>
+                <p className="text-white-50 mx-auto" style={{ maxWidth: '540px' }}>
+                  This document is currently in <strong>{admission.status.toUpperCase()}</strong> status.
+                  You can review the exact layout in the <strong>Formatted Sheet</strong> mode.
+                  Once clinically approved by a doctor, the final Playwright Chromium PDF stream will be instantly available here.
+                </p>
+                <div className="d-flex justify-content-center gap-2 mt-3">
+                  <button
+                    type="button"
+                    className="btn btn-light fw-semibold"
+                    onClick={() => setViewMode('sheet')}
+                  >
+                    <i className="bi bi-file-text me-1"></i> Switch to Formatted Sheet View
+                  </button>
+                  {isReady && user?.can_approve && (
+                    <button
+                      type="button"
+                      className="btn btn-success fw-semibold"
+                      onClick={handleApprove}
+                    >
+                      <i className="bi bi-check2-circle me-1"></i> Approve Pack Now
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* DOCUMENT 1: DISCHARGE SUMMARY */}
+          {(activeDoc === 'all' || activeDoc === 'discharge_summary') && (
+            <div className="document-sheet mb-4">
         <div
           className="text-end text-muted small mb-2 no-print"
           style={{ fontSize: '10.5px', letterSpacing: '0.05em', fontWeight: 600 }}
@@ -672,8 +848,10 @@ export default function Pack({ admission }: Props) {
           </div>
         </div>
       </div>
+      )}
 
       {/* DOCUMENT 2: OPERATION THEATRE NOTES */}
+      {(activeDoc === 'all' || activeDoc === 'operation_notes') && (
       <div className="document-sheet mb-4 page-break">
         <div
           className="text-end text-muted small mb-2 no-print"
@@ -920,8 +1098,10 @@ export default function Pack({ admission }: Props) {
           </div>
         </div>
       </div>
+      )}
 
       {/* DOCUMENT 3: MRD FORM */}
+      {(activeDoc === 'all' || activeDoc === 'mrd_form') && (
       <div className="document-sheet mb-4 page-break">
         <div
           className="text-end text-muted small mb-2 no-print"
@@ -984,6 +1164,9 @@ export default function Pack({ admission }: Props) {
           </table>
         </div>
       </div>
+      )}
+      </>
+      )}
 
       {/* Return for Correction Modal */}
       {returnModalOpen && (

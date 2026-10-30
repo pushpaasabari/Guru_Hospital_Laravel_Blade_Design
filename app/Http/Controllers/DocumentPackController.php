@@ -11,12 +11,19 @@ use Inertia\Response as InertiaResponse;
 
 class DocumentPackController extends Controller
 {
-    public function preview(Admission $admission): InertiaResponse
+    public function preview(Request $request, Admission $admission): InertiaResponse
     {
         $this->authorize('view', $admission);
         $admission->load(['newborns', 'approvals.performer', 'revisions.approver', 'creator', 'approver']);
 
-        return Inertia::render('Documents/Pack', compact('admission'));
+        $initialDoc = $request->query('doc', 'all');
+        $initialMode = $request->query('mode', 'sheet');
+
+        return Inertia::render('Documents/Pack', [
+            'admission' => $admission,
+            'initialDoc' => $initialDoc,
+            'initialMode' => $initialMode,
+        ]);
     }
 
     public function pdf(Request $request, Admission $admission, DocumentPackPdfService $pdfService, ?string $type = null): Response
