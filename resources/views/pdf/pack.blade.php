@@ -512,127 +512,111 @@
 <!-- ========================================== -->
 <div class="page-break"></div>
 
-<div class="hospital-header">
-    <div class="hospital-name">GURU HOSPITAL</div>
-    <div class="hospital-subtitle">MEDICAL RECORDS DEPARTMENT (MRD)</div>
-    <div class="hospital-subtitle">32, A/2, Antony Street, Nethaji Bypass Road, Govt. Medical College Hospital Opp. Dharmapuri - 636 701</div>
-    <div class="hospital-subtitle">Ph: 04342-262266 &bull; Cell: +91 7418084266</div>
+@php
+    $logoPath = public_path('images/guru-hospital-logo.png');
+    $logoBase64 = file_exists($logoPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath)) : '';
+@endphp
+
+<div style="text-align: center; margin-top: 15px; margin-bottom: 25px;">
+    @if($logoBase64)
+        <div style="margin-bottom: 2px;">
+            <img src="{{ $logoBase64 }}" alt="Guru Hospital Logo" style="width: 68px; height: auto; display: inline-block;" />
+            <div style="font-size: 8pt; font-weight: bold; letter-spacing: 0.5px; text-transform: uppercase; color: #333; margin-top: 2px; margin-bottom: 6px;">GURU HOSPITAL</div>
+        </div>
+    @endif
+    <div style="font-size: 20pt; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #111; margin: 0 0 4px 0;">GURU HOSPITAL</div>
+    <div style="font-size: 9.5pt; color: #222; line-height: 1.4; margin: 1px 0;">32, A/2, Antony Street, Nethaji Bypass Road,</div>
+    <div style="font-size: 9.5pt; color: #222; line-height: 1.4; margin: 1px 0;">Govt. Medical College Hospital Opp. Dharmapuri - 636 701.</div>
+    <div style="font-size: 9.5pt; font-weight: 600; color: #111; margin-top: 2px;">Ph : 04342-262266, Cell : 9418084266</div>
 </div>
 
-<div class="document-title">MEDICAL RECORD INPATIENT FILE HANDOVER & ARCHIVE FORM</div>
+<div style="text-align: center; margin-top: 25px; margin-bottom: 35px;">
+    <span style="font-family: 'Times New Roman', Times, Georgia, serif; font-size: 15.5pt; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #111; display: inline-block; border-bottom: 3px double #111; padding-bottom: 3px;">
+        MEDICAL RECORDS DEPARTMENT
+    </span>
+</div>
 
-<table class="meta-table">
-    <tr>
-        <th>Patient Full Name</th>
-        <td><strong>{{ $admission->patient_name }}</strong></td>
-        <th>MRD File Number</th>
-        <td><strong>{{ $admission->mrd_no ?: 'MRD-2026/582' }}</strong></td>
-    </tr>
-    <tr>
-        <th>UHID / MRN</th>
-        <td>{{ $admission->uhid }}</td>
-        <th>Inpatient No (IP No)</th>
-        <td><strong>{{ $admission->ip_no }}</strong></td>
-    </tr>
-    <tr>
-        <th>Admission Date & Time</th>
-        <td>{{ $admission->admission_at?->format('d/m/Y h:i A') }}</td>
-        <th>Discharge Date & Time</th>
-        <td>{{ $admission->discharge_at?->format('d/m/Y h:i A') }}</td>
-    </tr>
-    <tr>
-        <th>Department</th>
-        <td>{{ $admission->department ?? 'Obstetrics & Gynaecology' }}</td>
-        <th>Payment Mode / Scheme</th>
-        <td>{{ $admission->payment_mode ?: 'Cash / General' }}</td>
-    </tr>
-    <tr>
-        <th>Primary Consultant</th>
-        <td colspan="3">{{ $admission->surgeon ?: ($admission->consultant ?? 'Dr. Ambika M.S (O&G)') }}</td>
-    </tr>
-    <tr>
-        <th>Final Diagnosis (ICD-10)</th>
-        <td colspan="3">{{ $admission->diagnosis }}</td>
-    </tr>
-</table>
-
-<div class="section-heading">Case-Sheet Document Audit Checklist</div>
-<table class="meta-table" style="margin-top: 6px;">
-    <thead>
-        <tr>
-            <th style="width: 8%;">S.No</th>
-            <th style="width: 62%;">Document Description</th>
-            <th style="width: 15%; text-align: center;">Verified</th>
-            <th style="width: 15%; text-align: center;">Remarks</th>
-        </tr>
-    </thead>
+<table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
     <tbody>
         <tr>
-            <td>1</td>
-            <td>Inpatient Admission Face Sheet & Consent Form</td>
-            <td style="text-align: center;">[ &#10003; ]</td>
-            <td style="text-align: center;">Complete</td>
+            <td style="width: 230px; font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">Patient Name</td>
+            <td style="width: 30px; font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
+            <td style="color: #111; padding: 13px 4px; font-size: 11.5pt;"><strong>{{ $admission->patient_name }}</strong></td>
         </tr>
         <tr>
-            <td>2</td>
-            <td>Clinical History & Initial Physical Examination</td>
-            <td style="text-align: center;">[ &#10003; ]</td>
-            <td style="text-align: center;">Verified</td>
+            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">Discharge Date &amp; Time</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
+            <td style="color: #111; padding: 13px 4px; font-size: 11.5pt;">
+                {{ $admission->discharge_at ? $admission->discharge_at->format('d.m.Y') . ' @ ' . $admission->discharge_at->format('h.i A') : '29.08.2026 @ 04.00 PM' }}
+            </td>
         </tr>
         <tr>
-            <td>3</td>
-            <td>Doctor's Daily Progress Notes & Treatment Charts</td>
-            <td style="text-align: center;">[ &#10003; ]</td>
-            <td style="text-align: center;">Signed</td>
+            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">MRD No.</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
+            <td style="color: #111; padding: 13px 4px; font-size: 11.5pt;">
+                {{ $admission->mrd_no ?: ($admission->ip_no ?: '2026/567') }}
+            </td>
         </tr>
         <tr>
-            <td>4</td>
-            <td>Operation Theatre Notes & Anaesthesia Record</td>
-            <td style="text-align: center;">[ &#10003; ]</td>
-            <td style="text-align: center;">Enclosed</td>
+            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">IP No.</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
+            <td style="color: #111; padding: 13px 4px; font-size: 11.5pt;">
+                <strong>{{ $admission->ip_no }}</strong>
+            </td>
         </tr>
         <tr>
-            <td>5</td>
-            <td>Laboratory & Diagnostic Investigation Reports</td>
-            <td style="text-align: center;">[ &#10003; ]</td>
-            <td style="text-align: center;">Attached</td>
+            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">No of pages</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
+            <td style="color: #111; padding: 13px 4px; font-size: 11.5pt;">
+                {{ $admission->no_of_pages ?? ($admission->isDelivery() ? 3 : 2) }}
+            </td>
         </tr>
         <tr>
-            <td>6</td>
-            <td>Nursing Vital Signs & Medication Administration Record</td>
-            <td style="text-align: center;">[ &#10003; ]</td>
-            <td style="text-align: center;">Verified</td>
+            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">Payment Mode</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
+            <td style="color: #111; padding: 13px 4px; font-size: 11.5pt;">
+                @if($admission->payment_mode)
+                    {{ $admission->payment_mode }}
+                @elseif($admission->format === 'cmchistn')
+                    Chief Minister Comprehensive Health Insurance Scheme (CMCHISTN)
+                @elseif($admission->format === 'private')
+                    Insurance / Mediclaim
+                @elseif($admission->format === 'employee')
+                    Hospital Staff Healthcare Scheme
+                @else
+                    Cash / General
+                @endif
+            </td>
         </tr>
         <tr>
-            <td>7</td>
-            <td>Final Approved Discharge Summary (3 Coordinated Pack)</td>
-            <td style="text-align: center;">[ &#10003; ]</td>
-            <td style="text-align: center;">Approved</td>
+            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">Hand Over Sign</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
+            <td style="color: #222; padding: 13px 4px; font-size: 11.5pt;">
+                @if($admission->handover_name)
+                    {{ $admission->handover_name }}
+                @elseif($admission->creator)
+                    {{ $admission->creator->name }} (Staff Nurse)
+                @else
+                    Staff Nurse
+                @endif
+            </td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">Floor Incharge Sign</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
+            <td style="color: #222; padding: 13px 4px; font-size: 11.5pt;">
+                {{ $admission->floor_incharge_name ?: 'Nursing Supervisor' }}
+            </td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold; color: #111; padding: 13px 4px; font-size: 11.5pt;">MRD Incharge Sign</td>
+            <td style="font-weight: bold; text-align: center; color: #111; padding: 13px 4px; font-size: 11.5pt;">:</td>
+            <td style="color: #222; padding: 13px 4px; font-size: 11.5pt;">
+                {{ $admission->mrd_incharge_name ?: 'Medical Records Officer' }}
+            </td>
         </tr>
     </tbody>
 </table>
-
-<div style="margin-top: 15px; font-size: 9.5px; color: #555;">
-    <em>Note: The total official page count of this document dossier is dynamically calculated after two-pass layout rendering and registered in the MRD master catalog.</em>
-</div>
-
-<div class="signature-row" style="margin-top: 40px;">
-    <div class="sig-block">
-        <div class="sig-line"></div>
-        <div>Ward Handover Nurse</div>
-        <div style="font-size:8.5px; color:#555;">{{ $admission->handover_name ?: 'Staff Nurse' }}</div>
-    </div>
-    <div class="sig-block">
-        <div class="sig-line"></div>
-        <div>Floor In-Charge</div>
-        <div style="font-size:8.5px; color:#555;">{{ $admission->floor_incharge_name ?: 'Nursing Supervisor' }}</div>
-    </div>
-    <div class="sig-block">
-        <div class="sig-line"></div>
-        <div>MRD In-Charge / Custodian</div>
-        <div style="font-size:8.5px; color:#555;">{{ $admission->mrd_incharge_name ?: 'Medical Records Officer' }}</div>
-    </div>
-</div>
 
 </body>
 </html>

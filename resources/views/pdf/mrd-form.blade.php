@@ -2,103 +2,107 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Guru Hospital — MRD Inpatient Form — {{ $admission->patient_name }} ({{ $admission->ip_no }})</title>
+    <title>Guru Hospital — Medical Records Department — {{ $admission->patient_name }} ({{ $admission->ip_no }})</title>
     <style>
-        @font-face {
-            font-family: 'Nirmala';
-            font-style: normal;
-            font-weight: normal;
-            src: url('{{ str_replace('\\', '/', public_path('fonts/Nirmala.ttf')) }}') format('truetype');
-        }
-        @font-face {
-            font-family: 'Nirmala';
-            font-style: normal;
-            font-weight: bold;
-            src: url('{{ str_replace('\\', '/', public_path('fonts/NirmalaB.ttf')) }}') format('truetype');
-        }
         @page {
             size: A4 portrait;
-            margin: 12mm 15mm 18mm 15mm;
+            margin: 15mm 20mm 15mm 20mm;
         }
         body {
-            font-family: 'Nirmala', 'DejaVu Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-size: 10.5px;
-            line-height: 1.45;
+            font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
             color: #111;
             margin: 0;
             padding: 0;
+            background: #fff;
+            -webkit-print-color-adjust: exact;
         }
-        .hospital-header {
+        .header-container {
             text-align: center;
-            border-bottom: 2px solid #17365d;
-            padding-bottom: 6px;
-            margin-bottom: 12px;
+            margin-top: 10px;
+            margin-bottom: 25px;
         }
-        .hospital-name {
-            font-size: 18px;
+        .logo-wrapper {
+            margin-bottom: 4px;
+        }
+        .logo-img {
+            width: 72px;
+            height: auto;
+            display: inline-block;
+        }
+        .logo-caption {
+            font-size: 8pt;
             font-weight: bold;
-            color: #17365d;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: #333;
+            margin-top: 2px;
+            margin-bottom: 8px;
+        }
+        .hospital-title {
+            font-size: 20pt;
+            font-weight: 800;
             letter-spacing: 1px;
-            margin: 0;
+            text-transform: uppercase;
+            color: #111;
+            margin: 0 0 4px 0;
         }
-        .hospital-subtitle {
-            font-size: 9.5px;
-            color: #444;
-            margin: 2px 0;
+        .address-line {
+            font-size: 9.5pt;
+            color: #222;
+            line-height: 1.4;
+            margin: 1px 0;
         }
-        .document-title {
-            font-size: 12px;
+        .phone-line {
+            font-size: 9.5pt;
+            font-weight: 600;
+            color: #111;
+            margin-top: 2px;
+        }
+        .mrd-title-wrapper {
+            text-align: center;
+            margin-top: 24px;
+            margin-bottom: 35px;
+        }
+        .mrd-title {
+            font-family: 'Times New Roman', Times, Georgia, serif;
+            font-size: 15.5pt;
             font-weight: bold;
             text-transform: uppercase;
-            background-color: #f0f4f8;
-            border: 1px solid #17365d;
-            color: #17365d;
-            text-align: center;
-            padding: 5px;
-            margin: 8px 0 12px 0;
             letter-spacing: 0.5px;
+            color: #111;
+            display: inline-block;
+            border-bottom: 3px double #111;
+            padding-bottom: 3px;
         }
-        .meta-table {
+        .mrd-form-table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 12px;
+            margin-top: 10px;
         }
-        .meta-table th, .meta-table td {
-            border: 1px solid #999;
-            padding: 5px 8px;
-            font-size: 10px;
-            vertical-align: top;
+        .mrd-form-table td {
+            padding: 13px 4px;
+            vertical-align: middle;
+            font-size: 11.5pt;
         }
-        .meta-table th {
-            background-color: #f7f9fa;
-            color: #222;
+        .field-label {
+            width: 230px;
             font-weight: bold;
-            width: 24%;
+            color: #111;
+            white-space: nowrap;
         }
-        .section-heading {
-            font-size: 11px;
+        .colon-col {
+            width: 30px;
             font-weight: bold;
-            color: #17365d;
-            border-bottom: 1px solid #ccc;
-            padding-bottom: 3px;
-            margin: 12px 0 6px 0;
-            text-transform: uppercase;
-        }
-        .signature-row {
-            margin-top: 45px;
-            width: 100%;
-            page-break-inside: avoid;
-        }
-        .sig-block {
-            width: 32%;
-            display: inline-block;
-            vertical-align: top;
             text-align: center;
-            font-size: 9.5px;
+            color: #111;
         }
-        .sig-line {
-            border-top: 1px dashed #555;
-            margin: 35px 10px 4px 10px;
+        .field-value {
+            color: #111;
+            font-weight: normal;
+        }
+        .sig-value {
+            color: #222;
+            font-weight: normal;
         }
         .watermark {
             position: fixed;
@@ -119,131 +123,113 @@
     <div class="watermark">DRAFT — NOT OFFICIAL</div>
 @endif
 
-<!-- ========================================== -->
-<!-- 3. MRD INPATIENT FORM                      -->
-<!-- ========================================== -->
-<div class="hospital-header">
-    <div class="hospital-name">GURU HOSPITAL</div>
-    <div class="hospital-subtitle">MEDICAL RECORDS DEPARTMENT (MRD)</div>
-    <div class="hospital-subtitle">32, A/2, Antony Street, Nethaji Bypass Road, Govt. Medical College Hospital Opp. Dharmapuri - 636 701</div>
-    <div class="hospital-subtitle">Ph: 04342-262266 &bull; Cell: +91 7418084266</div>
+@php
+    $logoPath = public_path('images/guru-hospital-logo.png');
+    $logoBase64 = file_exists($logoPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath)) : '';
+@endphp
+
+<!-- HEADER -->
+<div class="header-container">
+    <div class="logo-wrapper">
+        @if($logoBase64)
+            <img src="{{ $logoBase64 }}" alt="Guru Hospital Logo" class="logo-img" />
+        @endif
+        <div class="logo-caption">GURU HOSPITAL</div>
+    </div>
+
+    <div class="hospital-title">GURU HOSPITAL</div>
+    <div class="address-line">32, A/2, Antony Street, Nethaji Bypass Road,</div>
+    <div class="address-line">Govt. Medical College Hospital Opp. Dharmapuri - 636 701.</div>
+    <div class="phone-line">Ph : 04342-262266, Cell : 9418084266</div>
 </div>
 
-<div class="document-title">MEDICAL RECORD INPATIENT FILE HANDOVER & ARCHIVE FORM</div>
+<!-- MEDICAL RECORDS DEPARTMENT TITLE -->
+<div class="mrd-title-wrapper">
+    <span class="mrd-title">MEDICAL RECORDS DEPARTMENT</span>
+</div>
 
-<table class="meta-table">
-    <tr>
-        <th>Patient Full Name</th>
-        <td><strong>{{ $admission->patient_name }}</strong></td>
-        <th>MRD File Number</th>
-        <td><strong>{{ $admission->mrd_no ?: ('MRD-' . str_replace('/', '-', $admission->ip_no)) }}</strong></td>
-    </tr>
-    <tr>
-        <th>UHID / MRN</th>
-        <td>{{ $admission->uhid }}</td>
-        <th>Inpatient No (IP No)</th>
-        <td><strong>{{ $admission->ip_no }}</strong></td>
-    </tr>
-    <tr>
-        <th>Admission Date & Time</th>
-        <td>{{ $admission->admission_at?->format('d/m/Y h:i A') }}</td>
-        <th>Discharge Date & Time</th>
-        <td>{{ $admission->discharge_at?->format('d/m/Y h:i A') }}</td>
-    </tr>
-    <tr>
-        <th>Department</th>
-        <td>{{ $admission->department ?? 'Obstetrics & Gynaecology' }}</td>
-        <th>Payment Mode / Scheme</th>
-        <td>{{ $admission->payment_mode ?: 'Cash / General' }}</td>
-    </tr>
-    <tr>
-        <th>Primary Consultant</th>
-        <td colspan="3">{{ $admission->surgeon ?: ($admission->consultant ?? 'Dr. Ambika M.S (O&G)') }}</td>
-    </tr>
-    <tr>
-        <th>Final Diagnosis (ICD-10)</th>
-        <td colspan="3">{{ $admission->diagnosis }}</td>
-    </tr>
-</table>
-
-<div class="section-heading">Case-Sheet Document Audit Checklist</div>
-<table class="meta-table" style="margin-top: 6px;">
-    <thead>
-        <tr>
-            <th style="width: 8%;">S.No</th>
-            <th style="width: 62%;">Document Description</th>
-            <th style="width: 15%; text-align: center;">Verified</th>
-            <th style="width: 15%; text-align: center;">Remarks</th>
-        </tr>
-    </thead>
+<!-- EXACT FIELD LIST -->
+<table class="mrd-form-table">
     <tbody>
         <tr>
-            <td>1</td>
-            <td>Inpatient Admission Face Sheet & Consent Form</td>
-            <td style="text-align: center;">[ &#10003; ]</td>
-            <td style="text-align: center;">Complete</td>
+            <td class="field-label">Patient Name</td>
+            <td class="colon-col">:</td>
+            <td class="field-value"><strong>{{ $admission->patient_name }}</strong></td>
         </tr>
         <tr>
-            <td>2</td>
-            <td>Clinical History & Initial Physical Examination</td>
-            <td style="text-align: center;">[ &#10003; ]</td>
-            <td style="text-align: center;">Verified</td>
+            <td class="field-label">Discharge Date &amp; Time</td>
+            <td class="colon-col">:</td>
+            <td class="field-value">
+                {{ $admission->discharge_at ? $admission->discharge_at->format('d.m.Y') . ' @ ' . $admission->discharge_at->format('h.i A') : '29.08.2026 @ 04.00 PM' }}
+            </td>
         </tr>
         <tr>
-            <td>3</td>
-            <td>Doctor's Daily Progress Notes & Treatment Charts</td>
-            <td style="text-align: center;">[ &#10003; ]</td>
-            <td style="text-align: center;">Signed</td>
+            <td class="field-label">MRD No.</td>
+            <td class="colon-col">:</td>
+            <td class="field-value">
+                {{ $admission->mrd_no ?: ($admission->ip_no ?: '2026/567') }}
+            </td>
         </tr>
         <tr>
-            <td>4</td>
-            <td>Operation Theatre Notes & Anaesthesia Record</td>
-            <td style="text-align: center;">[ &#10003; ]</td>
-            <td style="text-align: center;">Enclosed</td>
+            <td class="field-label">IP No.</td>
+            <td class="colon-col">:</td>
+            <td class="field-value">
+                <strong>{{ $admission->ip_no }}</strong>
+            </td>
         </tr>
         <tr>
-            <td>5</td>
-            <td>Laboratory & Diagnostic Investigation Reports</td>
-            <td style="text-align: center;">[ &#10003; ]</td>
-            <td style="text-align: center;">Attached</td>
+            <td class="field-label">No of pages</td>
+            <td class="colon-col">:</td>
+            <td class="field-value">
+                {{ $admission->no_of_pages ?? ($admission->isDelivery() ? 3 : 2) }}
+            </td>
         </tr>
         <tr>
-            <td>6</td>
-            <td>Nursing Vital Signs & Medication Administration Record</td>
-            <td style="text-align: center;">[ &#10003; ]</td>
-            <td style="text-align: center;">Verified</td>
+            <td class="field-label">Payment Mode</td>
+            <td class="colon-col">:</td>
+            <td class="field-value">
+                @if($admission->payment_mode)
+                    {{ $admission->payment_mode }}
+                @elseif($admission->format === 'cmchistn')
+                    Chief Minister Comprehensive Health Insurance Scheme (CMCHISTN)
+                @elseif($admission->format === 'private')
+                    Insurance / Mediclaim
+                @elseif($admission->format === 'employee')
+                    Hospital Staff Healthcare Scheme
+                @else
+                    Cash / General
+                @endif
+            </td>
         </tr>
         <tr>
-            <td>7</td>
-            <td>Final Approved Discharge Summary</td>
-            <td style="text-align: center;">[ &#10003; ]</td>
-            <td style="text-align: center;">Approved</td>
+            <td class="field-label">Hand Over Sign</td>
+            <td class="colon-col">:</td>
+            <td class="sig-value">
+                @if($admission->handover_name)
+                    {{ $admission->handover_name }}
+                @elseif($admission->creator)
+                    {{ $admission->creator->name }} (Staff Nurse)
+                @else
+                    Staff Nurse
+                @endif
+            </td>
+        </tr>
+        <tr>
+            <td class="field-label">Floor Incharge Sign</td>
+            <td class="colon-col">:</td>
+            <td class="sig-value">
+                {{ $admission->floor_incharge_name ?: 'Nursing Supervisor' }}
+            </td>
+        </tr>
+        <tr>
+            <td class="field-label">MRD Incharge Sign</td>
+            <td class="colon-col">:</td>
+            <td class="sig-value">
+                {{ $admission->mrd_incharge_name ?: 'Medical Records Officer' }}
+            </td>
         </tr>
     </tbody>
 </table>
 
-<div style="margin-top: 15px; font-size: 9.5px; color: #555;">
-    <em>Note: This medical record is formally audited and archived in the Guru Hospital Medical Records Department in compliance with NABH / National Hospital Documentation Standards.</em>
-</div>
-
-<div class="signature-row">
-    <div class="sig-block">
-        <div class="sig-line"></div>
-        <div>Ward Handover Nurse</div>
-        <div style="font-size:8.5px; color:#555;">{{ $admission->handover_name ?: 'Staff Nurse' }}</div>
-    </div>
-    <div class="sig-block">
-        <div class="sig-line"></div>
-        <div>Floor In-Charge</div>
-        <div style="font-size:8.5px; color:#555;">{{ $admission->floor_incharge_name ?: 'Nursing Supervisor' }}</div>
-    </div>
-    <div class="sig-block">
-        <div class="sig-line"></div>
-        <div>MRD In-Charge / Custodian</div>
-        <div style="font-size:8.5px; color:#555;">{{ $admission->mrd_incharge_name ?: 'Medical Records Officer' }}</div>
-    </div>
-</div>
-
 </body>
 </html>
-
