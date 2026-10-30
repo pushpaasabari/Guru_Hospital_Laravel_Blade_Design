@@ -1,4 +1,4 @@
-<div class="discharge-summary-document">
+<div class="discharge-summary-document" style="font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 11pt; line-height: 1.45; color: #000;">
     {{-- Space for Pre-printed Letterhead (First page only) --}}
     <div style="height: 35mm;"></div>
 

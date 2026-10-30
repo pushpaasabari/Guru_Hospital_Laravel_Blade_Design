@@ -597,7 +597,15 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
           DOCUMENT 1 OF 3: DISCHARGE SUMMARY ({admission.format.toUpperCase()})
         </div>
 
-        <div className="discharge-summary-document">
+        <div
+          className="discharge-summary-document"
+          style={{
+            fontFamily: "Arial, 'Helvetica Neue', Helvetica, sans-serif",
+            fontSize: '11pt',
+            lineHeight: 1.45,
+            color: '#000',
+          }}
+        >
           {/* Space for Pre-printed Letterhead (First page only) */}
           <div style={{ height: '35mm' }}></div>
 

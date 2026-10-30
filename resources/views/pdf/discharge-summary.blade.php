@@ -22,7 +22,7 @@
         }
         body {
             font-family: 'Nirmala', 'DejaVu Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-size: 10.5px;
+            font-size: 10pt;
             line-height: 1.45;
             color: #111;
             margin: 0;
@@ -47,11 +47,12 @@
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 10px;
+            font-size: 10pt;
         }
         .meta-table th, .meta-table td {
             border: 1px solid #999;
             padding: 4px 6px;
-            font-size: 10px;
+            font-size: 10pt;
             vertical-align: top;
         }
         .meta-table th {
@@ -61,7 +62,7 @@
             width: 22%;
         }
         .section-heading {
-            font-size: 11px;
+            font-size: 10.5pt;
             font-weight: bold;
             color: #17365d;
             border-bottom: 1px solid #ccc;
@@ -71,8 +72,9 @@
         }
         .content-block {
             margin-bottom: 6px;
-            font-size: 10px;
+            font-size: 10pt;
             text-align: justify;
+            line-height: 1.45;
         }
         .baby-box {
             border: 1px solid #2563eb;
@@ -80,6 +82,8 @@
             padding: 6px;
             margin-bottom: 8px;
             border-radius: 3px;
+            font-size: 10pt;
+            line-height: 1.45;
         }
         .emergency-box {
             border: 1px solid #dc3545;
@@ -88,7 +92,7 @@
             padding: 6px 8px;
             margin-top: 12px;
             margin-bottom: 8px;
-            font-size: 9.5px;
+            font-size: 9.5pt;
         }
         .signature-row {
             margin-top: 30px;
@@ -100,7 +104,7 @@
             display: inline-block;
             vertical-align: top;
             text-align: center;
-            font-size: 9.5px;
+            font-size: 10pt;
         }
         .sig-line {
             border-top: 1px dashed #555;
@@ -221,7 +225,7 @@
 @if($admission->isDelivery())
     <div class="section-heading">Baby / Newborn Details</div>
     @if($admission->pediatrician_name)
-        <div style="font-size: 10px; margin-bottom: 4px;"><strong>Consultant Paediatrician:</strong> {{ $admission->pediatrician_name }}</div>
+        <div style="font-size: 10pt; margin-bottom: 4px;"><strong>Consultant Paediatrician:</strong> {{ $admission->pediatrician_name }}</div>
     @endif
 
     @if($admission->newborns->isEmpty())
@@ -253,7 +257,7 @@
 
 @if($admission->investigations)
     <div class="section-heading">Investigations</div>
-    <div class="content-block" style="font-family: 'DejaVu Sans Mono', monospace; font-size: 9.5px; background: #fafafa; padding: 4px; border: 1px solid #ddd;">
+    <div class="content-block" style="font-family: 'DejaVu Sans Mono', monospace; font-size: 9.5pt; background: #fafafa; padding: 4px; border: 1px solid #ddd;">
         @if(is_array($admission->investigations))
             @foreach($admission->investigations as $k => $v)
                 <div>{{ is_string($k) ? $k . ': ' : '' }}{{ is_array($v) ? json_encode($v) : $v }}</div>
@@ -294,7 +298,7 @@
     <div class="sig-block">
         <div class="sig-line"></div>
         <div>Prepared By (Staff Nurse)</div>
-        <div style="font-size:8.5px; color:#555;">{{ $admission->creator?->name ?? 'Staff Nurse' }}</div>
+        <div style="font-size:9pt; color:#555;">{{ $admission->creator?->name ?? 'Staff Nurse' }}</div>
     </div>
     <div class="sig-block">
         <div class="sig-line"></div>
@@ -303,9 +307,9 @@
     <div class="sig-block">
         <div class="sig-line"></div>
         <div><strong>Consultant Surgeon / O&G</strong></div>
-        <div style="font-size:8.5px; color:#555;">{{ $admission->surgeon ?: ($admission->consultant ?? 'Dr. Ambika M.S (O&G)') }}</div>
+        <div style="font-size:9pt; color:#555;">{{ $admission->surgeon ?: ($admission->consultant ?? 'Dr. Ambika M.S (O&G)') }}</div>
         @if($admission->approver && $admission->approver->doctor_reg_no)
-            <div style="font-size:8px; color:#333;">Reg: {{ $admission->approver->doctor_reg_no }}</div>
+            <div style="font-size:8.5pt; color:#333;">Reg: {{ $admission->approver->doctor_reg_no }}</div>
         @endif
     </div>
 </div>
