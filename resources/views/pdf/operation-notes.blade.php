@@ -28,34 +28,20 @@
             margin: 0;
             padding: 0;
         }
-        .hospital-header {
-            text-align: center;
-            border-bottom: 2px solid #17365d;
-            padding-bottom: 6px;
-            margin-bottom: 12px;
-        }
-        .hospital-name {
-            font-size: 18px;
-            font-weight: bold;
-            color: #17365d;
-            letter-spacing: 1px;
-            margin: 0;
-        }
-        .hospital-subtitle {
-            font-size: 9.5px;
-            color: #444;
-            margin: 2px 0;
+        .letterhead-space {
+            height: 35mm;
+            width: 100%;
         }
         .ot-title {
             text-align: center;
-            margin-top: 8px;
+            margin-top: 4px;
             margin-bottom: 18px;
             font-size: 13pt;
             font-weight: bold;
             text-decoration: underline;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            color: #17365d;
+            color: #000;
         }
         .meta-table {
             width: 100%;
@@ -107,11 +93,7 @@
 <!-- ========================================== -->
 <!-- 2. OPERATION THEATRE NOTES                 -->
 <!-- ========================================== -->
-<div class="hospital-header">
-    <div class="hospital-name">GURU HOSPITAL</div>
-    <div class="hospital-subtitle">32, A/2, Antony Street, Nethaji Bypass Road, Govt. Medical College Hospital Opp. Dharmapuri - 636 701</div>
-    <div class="hospital-subtitle">Ph: 04342-262266 &bull; Emergency / Cell: +91 7418084266</div>
-</div>
+<div class="letterhead-space"></div>
 
 <div class="ot-title">OPERATION THEATRE NOTES</div>
 

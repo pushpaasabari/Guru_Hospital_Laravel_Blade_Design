@@ -337,7 +337,10 @@
 <!-- ========================================== -->
 <div class="page-break"></div>
 
-<div style="text-align: center; margin-top: 10px; margin-bottom: 22px;">
+{{-- Letterhead Space (First page of OT notes only) --}}
+<div style="height: 35mm;"></div>
+
+<div style="text-align: center; margin-top: 4px; margin-bottom: 22px;">
     <div style="font-size: 14pt; font-weight: bold; text-decoration: underline; text-transform: uppercase; letter-spacing: 0.5px;">OPERATION THEATRE NOTES</div>
 </div>
 
