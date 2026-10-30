@@ -514,7 +514,7 @@
     <div style="font-size: 21pt; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #111; margin: 0 0 4px 0;">GURU HOSPITAL</div>
     <div style="font-size: 10pt; color: #222; line-height: 1.4; margin: 1px 0;">32, A/2, Antony Street, Nethaji Bypass Road,</div>
     <div style="font-size: 10pt; color: #222; line-height: 1.4; margin: 1px 0;">Govt. Medical College Hospital Opp. Dharmapuri - 636 701.</div>
-    <div style="font-size: 10pt; font-weight: 600; color: #111; margin-top: 2px;">Ph : 04342-262266, Cell : 9418084266</div>
+    <div style="font-size: 10pt; font-weight: 600; color: #111; margin-top: 2px;">Ph : 04342-262266, Cell : 7418084266</div>
 </div>
 
 <div style="text-align: center; margin-top: 20px; margin-bottom: 25px;">
@@ -541,7 +541,7 @@
             <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">MRD No.</td>
             <td style="font-weight: bold; text-align: center; color: #111; padding: 21px 4px; font-size: 14pt;">:</td>
             <td style="color: #111; padding: 21px 4px; font-size: 14pt;">
-                {{ $admission->mrd_no ?: ($admission->ip_no ?: '2026/567') }}
+                {{ $admission->uhid ? (str_starts_with($admission->uhid, 'MRD-') ? $admission->uhid : 'MRD-' . $admission->uhid) : ($admission->mrd_no ?: ($admission->ip_no ? 'MRD-' . $admission->ip_no : '')) }}
             </td>
         </tr>
         <tr>
@@ -554,26 +554,12 @@
         <tr>
             <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">No of pages</td>
             <td style="font-weight: bold; text-align: center; color: #111; padding: 21px 4px; font-size: 14pt;">:</td>
-            <td style="color: #111; padding: 21px 4px; font-size: 14pt;">
-                {{ $admission->no_of_pages ?? ($admission->isDelivery() ? 3 : 2) }}
-            </td>
+            <td style="color: #111; padding: 21px 4px; font-size: 14pt;"></td>
         </tr>
         <tr>
             <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">Payment Mode</td>
             <td style="font-weight: bold; text-align: center; color: #111; padding: 21px 4px; font-size: 14pt;">:</td>
-            <td style="color: #111; padding: 21px 4px; font-size: 14pt;">
-                @if($admission->payment_mode)
-                    {{ $admission->payment_mode }}
-                @elseif($admission->format === 'cmchistn')
-                    Chief Minister Comprehensive Health Insurance Scheme (CMCHISTN)
-                @elseif($admission->format === 'private')
-                    Insurance / Mediclaim
-                @elseif($admission->format === 'employee')
-                    Hospital Staff Healthcare Scheme
-                @else
-                    Cash / General
-                @endif
-            </td>
+            <td style="color: #111; padding: 21px 4px; font-size: 14pt;"></td>
         </tr>
         <tr>
             <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">Hand Over Sign</td>

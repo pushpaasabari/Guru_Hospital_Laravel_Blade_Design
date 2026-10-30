@@ -50,7 +50,7 @@ class AshwiniDischargeSummarySeeder extends Seeder
                 'medication_orders' => "* Tab. Clavam 625 mg (1-1-1) x 7 Days - After food\n* Tab. Alonac-Sp (1-0-1) x 7 Days - After food\n* Cap. Cyra D (1-1-1) x 7 Days - Before food",
                 'discharge_advice' => "• Immunisation\n• Exclusive breast feeding for 6 months\n• Review after one week for suture removal (06/09/2026)\n• Post natal exercise",
                 'follow_up' => 'Review After one week For Suture Removal (06/09/2026)',
-                'mrd_no' => 'MRD-2026/582',
+                'mrd_no' => 'MRD-2022/151',
                 'payment_mode' => 'Cash / General',
                 'handover_name' => 'Staff Nurse Anitha',
                 'floor_incharge_name' => 'Nursing Supervisor Mary',

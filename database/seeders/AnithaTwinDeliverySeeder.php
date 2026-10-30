@@ -49,7 +49,7 @@ class AnithaTwinDeliverySeeder extends Seeder
                 'medication_orders' => "* Tab. Cefixime + sulbactum (1-0-1) x 7 Days - After food\n* Tab. Acendol-P (1-0-1) x 7 Days - After food\n* Cap. Cyra-D (1-0-1) x 7 Days - Before food",
                 'discharge_advice' => "• Immunisation\n• Exclusive breast feeding for 6 months\n• Post Natal Exercise\n• Review after one week (03/09/2026)",
                 'follow_up' => 'Review after one week (03/09/2026)',
-                'mrd_no' => 'MRD-2026/567',
+                'mrd_no' => 'MRD-2023/3931',
                 'payment_mode' => 'Cash / General',
                 'handover_name' => 'Staff Nurse Anitha',
                 'floor_incharge_name' => 'Nursing Supervisor Mary',

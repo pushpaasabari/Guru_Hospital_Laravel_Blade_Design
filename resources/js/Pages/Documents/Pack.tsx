@@ -1147,7 +1147,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
               Govt. Medical College Hospital Opp. Dharmapuri - 636 701.
             </div>
             <div style={{ fontSize: '10pt', fontWeight: 600, color: '#111', marginTop: '2px' }}>
-              Ph : 04342-262266, Cell : 9418084266
+              Ph : 04342-262266, Cell : 7418084266
             </div>
           </div>
 
@@ -1191,7 +1191,9 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                 <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>MRD No.</td>
                 <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
                 <td style={{ padding: '20px 4px' }}>
-                  {admission.mrd_no || admission.ip_no || '2026/567'}
+                  {admission.uhid
+                    ? (admission.uhid.startsWith('MRD-') ? admission.uhid : `MRD-${admission.uhid}`)
+                    : (admission.mrd_no || (admission.ip_no ? `MRD-${admission.ip_no}` : ''))}
                 </td>
               </tr>
               <tr>
@@ -1204,16 +1206,12 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
               <tr>
                 <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>No of pages</td>
                 <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
-                <td style={{ padding: '20px 4px' }}>
-                  {admission.surgery_type === 'delivery' ? 3 : 2}
-                </td>
+                <td style={{ padding: '20px 4px' }}></td>
               </tr>
               <tr>
                 <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>Payment Mode</td>
                 <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
-                <td style={{ padding: '20px 4px' }}>
-                  {admission.payment_mode || (admission.format === 'cmchistn' ? 'Chief Minister Scheme' : 'Cash')}
-                </td>
+                <td style={{ padding: '20px 4px' }}></td>
               </tr>
               <tr>
                 <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>Hand Over Sign</td>

@@ -50,7 +50,7 @@ class AjithKumarDischargeSummarySeeder extends Seeder
                 'medication_orders' => "* C. Cyra-D (1-0-1) x 5 Days- Before food\n* Tab. Clavam 625 mg (1-0-1) x 5 Days- After food\n* T. Zerodol.P (1-0-1) x 5 Days- After food",
                 'discharge_advice' => "Review after 7days on OPD (09/08/2026)",
                 'follow_up' => 'Review after 7days on OPD (09/08/2026)',
-                'mrd_no' => 'MRD-2026/488',
+                'mrd_no' => 'MRD-2026/2892',
                 'payment_mode' => 'Cash / General',
                 'handover_name' => 'Staff Nurse Anitha',
                 'floor_incharge_name' => 'Nursing Supervisor Mary',

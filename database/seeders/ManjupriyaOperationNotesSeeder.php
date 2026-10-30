@@ -60,7 +60,7 @@ class ManjupriyaOperationNotesSeeder extends Seeder
                 'drain' => '',
                 'postoperative_orders' => '',
 
-                'mrd_no' => 'MRD-2026-778',
+                'mrd_no' => 'MRD-2026/2952',
                 'payment_mode' => 'Cash',
                 'status' => 'approved',
                 'created_by' => $creator->id,

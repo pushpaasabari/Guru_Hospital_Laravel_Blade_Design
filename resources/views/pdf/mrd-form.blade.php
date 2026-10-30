@@ -130,7 +130,7 @@
     <div class="hospital-title">GURU HOSPITAL</div>
     <div class="address-line">32, A/2, Antony Street, Nethaji Bypass Road,</div>
     <div class="address-line">Govt. Medical College Hospital Opp. Dharmapuri - 636 701.</div>
-    <div class="phone-line">Ph : 04342-262266, Cell : 9418084266</div>
+    <div class="phone-line">Ph : 04342-262266, Cell : 7418084266</div>
 </div>
 
 <!-- MEDICAL RECORDS DEPARTMENT TITLE -->
@@ -157,7 +157,7 @@
             <td class="field-label">MRD No.</td>
             <td class="colon-col">:</td>
             <td class="field-value">
-                {{ $admission->mrd_no ?: ($admission->ip_no ?: '2026/567') }}
+                {{ $admission->uhid ? (str_starts_with($admission->uhid, 'MRD-') ? $admission->uhid : 'MRD-' . $admission->uhid) : ($admission->mrd_no ?: ($admission->ip_no ? 'MRD-' . $admission->ip_no : '')) }}
             </td>
         </tr>
         <tr>
@@ -170,26 +170,12 @@
         <tr>
             <td class="field-label">No of pages</td>
             <td class="colon-col">:</td>
-            <td class="field-value">
-                {{ $admission->no_of_pages ?? ($admission->isDelivery() ? 3 : 2) }}
-            </td>
+            <td class="field-value"></td>
         </tr>
         <tr>
             <td class="field-label">Payment Mode</td>
             <td class="colon-col">:</td>
-            <td class="field-value">
-                @if($admission->payment_mode)
-                    {{ $admission->payment_mode }}
-                @elseif($admission->format === 'cmchistn')
-                    Chief Minister Comprehensive Health Insurance Scheme (CMCHISTN)
-                @elseif($admission->format === 'private')
-                    Insurance / Mediclaim
-                @elseif($admission->format === 'employee')
-                    Hospital Staff Healthcare Scheme
-                @else
-                    Cash / General
-                @endif
-            </td>
+            <td class="field-value"></td>
         </tr>
         <tr>
             <td class="field-label">Hand Over Sign</td>
