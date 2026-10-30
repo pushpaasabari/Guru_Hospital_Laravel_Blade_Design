@@ -25,6 +25,19 @@ class DocumentPackPdfService
     {
         $type = strtolower(trim($type));
         $safeIp = preg_replace('/[^A-Za-z0-9_\-]/', '_', $admission->ip_no);
+        $safeUhid = preg_replace('/[^A-Za-z0-9_\-]/', '_', $admission->uhid ?: 'UHID');
+        $safeName = preg_replace('/[^A-Za-z0-9_\-]/', '_', trim($admission->patient_name ?: 'Patient'));
+        $safeName = preg_replace('/_+/', '_', $safeName);
+        $safeName = trim($safeName, '_');
+
+        $opType = $admission->procedure_name ?: ($admission->procedure_done ?: ($admission->surgery_type ?: 'Operation'));
+        $safeOpType = preg_replace('/[^A-Za-z0-9_\-]/', '_', trim($opType));
+        $safeOpType = preg_replace('/_+/', '_', $safeOpType);
+        $safeOpType = trim($safeOpType, '_');
+        if (strlen($safeOpType) > 60) {
+            $safeOpType = substr($safeOpType, 0, 60);
+            $safeOpType = trim($safeOpType, '_');
+        }
 
         if (in_array($type, ['discharge_summary', 'discharge-summary', 'discharge', 'summary', '1'], true)) {
             return [
@@ -41,7 +54,7 @@ class DocumentPackPdfService
                 'type' => self::TYPE_OPERATION_NOTES,
                 'view' => 'pdf.operation-notes',
                 'title' => 'Operation Theatre Notes',
-                'fileName' => "Guru_Hospital_Operation_Theatre_Notes_{$safeIp}.pdf",
+                'fileName' => "{$safeUhid}_{$safeName}_{$safeOpType}.pdf",
                 'headerTitle' => "Guru Hospital — Operation Theatre Notes (IP: {$admission->ip_no})",
             ];
         }

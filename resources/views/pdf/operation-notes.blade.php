@@ -201,14 +201,11 @@
 </table>
 
 <div class="section-label">PROCEDURE NOTE :</div>
-<div class="section-label" style="margin-top: 2px;">INCISION :</div>
-<div class="section-text">
-    @if($admission->procedure_note)
-        {!! nl2br(e($admission->procedure_note)) !!}
-    @elseif($admission->incision)
-        {!! nl2br(e($admission->incision)) !!}
-    @endif
-</div>
+@if($admission->procedure_note)
+    <div class="section-text">{!! nl2br(e($admission->procedure_note)) !!}</div>
+@endif
+
+<div class="section-label" style="margin-top: 6px;">INCISION : @if($admission->incision)<span style="font-weight: normal;">{!! nl2br(e($admission->incision)) !!}</span>@endif</div>
 
 <div class="section-label">FINDINGS :</div>
 @if($admission->findings)

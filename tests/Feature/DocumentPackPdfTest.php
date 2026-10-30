@@ -87,12 +87,12 @@ class DocumentPackPdfTest extends TestCase
         $this->assertEquals('application/pdf', $resDischarge->headers->get('Content-Type'));
         $this->assertStringContainsString('attachment; filename="Guru_Hospital_Discharge_Summary_IP-7701.pdf"', $resDischarge->headers->get('Content-Disposition'));
 
-        // 2. Operation Theatre Notes
+        // 2. Operation Theatre Notes (UHID_Patentname_OPerationtype)
         $resOt = $this->actingAs($this->doctor)
             ->get("/admissions/{$this->approvedAdmission->id}/documents/pdf/operation-notes");
         $resOt->assertStatus(200);
         $this->assertEquals('application/pdf', $resOt->headers->get('Content-Type'));
-        $this->assertStringContainsString('attachment; filename="Guru_Hospital_Operation_Theatre_Notes_IP-7701.pdf"', $resOt->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('attachment; filename="GH-7701_Ramesh_Natarajan_Laparoscopic_Cholecystectomy.pdf"', $resOt->headers->get('Content-Disposition'));
 
         // 3. MRD Inpatient Form
         $resMrd = $this->actingAs($this->doctor)

@@ -140,13 +140,13 @@
     {{-- Procedure Note & Incision --}}
     <div class="mt-3">
         <div class="ot-section-title">PROCEDURE NOTE :</div>
-        <div class="ot-section-title">INCISION :</div>
-        <div class="ot-narrative">
-            @if($admission->procedure_note)
+        @if($admission->procedure_note)
+            <div class="ot-narrative">
                 {!! nl2br(e($admission->procedure_note)) !!}
-            @elseif($admission->incision)
-                {!! nl2br(e($admission->incision)) !!}
-            @endif
+            </div>
+        @endif
+        <div class="ot-section-title mt-2">
+            INCISION : @if($admission->incision)<span style="font-weight: normal;">{!! nl2br(e($admission->incision)) !!}</span>@endif
         </div>
     </div>
 

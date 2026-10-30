@@ -428,13 +428,13 @@
 
 <div style="margin-top: 10px; font-size: 10pt;">
     <div style="font-weight: bold; margin-bottom: 2px;">PROCEDURE NOTE :</div>
-    <div style="font-weight: bold; margin-bottom: 2px;">INCISION :</div>
-    <div style="text-align: justify; line-height: 1.45; margin-bottom: 6px;">
-        @if($admission->procedure_note)
+    @if($admission->procedure_note)
+        <div style="text-align: justify; line-height: 1.45; margin-bottom: 6px;">
             {!! nl2br(e($admission->procedure_note)) !!}
-        @elseif($admission->incision)
-            {!! nl2br(e($admission->incision)) !!}
-        @endif
+        </div>
+    @endif
+    <div style="font-weight: bold; margin-top: 6px; margin-bottom: 2px;">
+        INCISION : @if($admission->incision)<span style="font-weight: normal;">{!! nl2br(e($admission->incision)) !!}</span>@endif
     </div>
 </div>
 

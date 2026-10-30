@@ -988,11 +988,13 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
             <div style={{ fontWeight: 'bold', fontSize: '10.5pt', marginTop: '6px', marginBottom: '2px' }}>
               PROCEDURE NOTE :
             </div>
-            <div style={{ fontWeight: 'bold', fontSize: '10.5pt', marginBottom: '2px' }}>
-              INCISION :
-            </div>
-            <div style={{ fontSize: '10.5pt', textAlign: 'justify', marginBottom: '6px', lineHeight: 1.45, whiteSpace: 'pre-line' }}>
-              {admission.procedure_note || admission.incision || ''}
+            {admission.procedure_note && (
+              <div style={{ fontSize: '10.5pt', textAlign: 'justify', marginBottom: '6px', lineHeight: 1.45, whiteSpace: 'pre-line' }}>
+                {admission.procedure_note}
+              </div>
+            )}
+            <div style={{ fontWeight: 'bold', fontSize: '10.5pt', marginTop: '6px', marginBottom: '2px' }}>
+              INCISION : {admission.incision && <span style={{ fontWeight: 'normal' }}>{admission.incision}</span>}
             </div>
           </div>
 
