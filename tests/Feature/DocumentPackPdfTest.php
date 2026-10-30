@@ -58,7 +58,8 @@ class DocumentPackPdfTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertEquals('application/pdf', $response->headers->get('Content-Type'));
-        $this->assertStringContainsString('Guru_Hospital_Discharge_Pack_IP-7701.pdf', $response->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('attachment; filename="Guru_Hospital_Discharge_Pack_IP-7701.pdf"', $response->headers->get('Content-Disposition'));
+        $this->assertNotNull($response->headers->get('Content-Length'));
 
         // Status is updated to generated
         $this->assertEquals('generated', $this->approvedAdmission->fresh()->status);
@@ -69,6 +70,12 @@ class DocumentPackPdfTest extends TestCase
             'auditable_type' => 'Admission',
             'auditable_id' => $this->approvedAdmission->id,
         ]);
+
+        // Test inline preview mode
+        $inlineResponse = $this->actingAs($this->doctor)
+            ->get(route('documents.pdf', [$this->approvedAdmission, 'inline' => 1]));
+        $inlineResponse->assertStatus(200);
+        $this->assertStringContainsString('inline; filename="Guru_Hospital_Discharge_Pack_IP-7701.pdf"', $inlineResponse->headers->get('Content-Disposition'));
     }
 
     public function test_can_download_3_separate_pdfs_individually(): void
@@ -78,21 +85,21 @@ class DocumentPackPdfTest extends TestCase
             ->get("/admissions/{$this->approvedAdmission->id}/documents/pdf/discharge-summary");
         $resDischarge->assertStatus(200);
         $this->assertEquals('application/pdf', $resDischarge->headers->get('Content-Type'));
-        $this->assertStringContainsString('Guru_Hospital_Discharge_Summary_IP-7701.pdf', $resDischarge->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('attachment; filename="Guru_Hospital_Discharge_Summary_IP-7701.pdf"', $resDischarge->headers->get('Content-Disposition'));
 
         // 2. Operation Theatre Notes
         $resOt = $this->actingAs($this->doctor)
             ->get("/admissions/{$this->approvedAdmission->id}/documents/pdf/operation-notes");
         $resOt->assertStatus(200);
         $this->assertEquals('application/pdf', $resOt->headers->get('Content-Type'));
-        $this->assertStringContainsString('Guru_Hospital_Operation_Theatre_Notes_IP-7701.pdf', $resOt->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('attachment; filename="Guru_Hospital_Operation_Theatre_Notes_IP-7701.pdf"', $resOt->headers->get('Content-Disposition'));
 
         // 3. MRD Inpatient Form
         $resMrd = $this->actingAs($this->doctor)
             ->get("/admissions/{$this->approvedAdmission->id}/documents/pdf/mrd-form");
         $resMrd->assertStatus(200);
         $this->assertEquals('application/pdf', $resMrd->headers->get('Content-Type'));
-        $this->assertStringContainsString('Guru_Hospital_MRD_Form_IP-7701.pdf', $resMrd->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('attachment; filename="Guru_Hospital_MRD_Form_IP-7701.pdf"', $resMrd->headers->get('Content-Disposition'));
     }
 
     public function test_unapproved_admission_cannot_generate_pdf(): void

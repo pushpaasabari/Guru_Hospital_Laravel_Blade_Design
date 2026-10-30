@@ -67,9 +67,9 @@ class DocumentPackPdfService
 
     /**
      * Generates and returns a downloadable/streamable PDF response for the admission document.
-     * Uses Playwright with Google Chrome/Chromium for high-fidelity rendering, with DomPDF fallback.
+     * Uses Playwright with Google Chrome/Chromium for high-fidelity A4 rendering, with DomPDF fallback.
      */
-    public function download(Admission $admission, string $type = 'pack'): Response
+    public function download(Admission $admission, string $type = 'pack', bool $asAttachment = true): Response
     {
         $admission->load(['newborns', 'creator', 'approver']);
         $meta = $this->resolveDocumentMetadata($type, $admission);
@@ -128,9 +128,12 @@ class DocumentPackPdfService
             );
         }
 
+        $disposition = $asAttachment ? 'attachment' : 'inline';
+
         return response($output, 200, [
             'Content-Type' => 'application/pdf',
-            'Content-Disposition' => "inline; filename=\"{$fileName}\"",
+            'Content-Disposition' => "{$disposition}; filename=\"{$fileName}\"",
+            'Content-Length' => strlen($output),
             'Cache-Control' => 'private, no-cache, no-store, must-revalidate',
             'Pragma' => 'no-cache',
             'Expires' => '0',

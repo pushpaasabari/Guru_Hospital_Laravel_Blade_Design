@@ -38,8 +38,9 @@ class DocumentPackController extends Controller
         );
 
         $documentType = $type ?: $request->query('type', 'pack');
+        $isInline = $request->boolean('inline') || $request->query('mode') === 'inline';
 
-        return $pdfService->download($admission, $documentType);
+        return $pdfService->download($admission, $documentType, !$isInline);
     }
 
     public function history(Admission $admission): InertiaResponse

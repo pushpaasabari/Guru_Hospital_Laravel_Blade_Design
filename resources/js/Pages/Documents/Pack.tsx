@@ -524,19 +524,21 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
 
             <div className="d-flex gap-2">
               <a
-                href={`/admissions/${admission.id}/documents/pdf/${getPdfRouteType(activeDoc)}`}
+                href={`/admissions/${admission.id}/documents/pdf/${getPdfRouteType(activeDoc)}?inline=1`}
                 target="_blank"
                 rel="noreferrer"
                 className="btn btn-sm btn-outline-secondary"
+                title="Open PDF in new tab"
               >
-                <i className="bi bi-box-arrow-up-right me-1"></i> Open Fullscreen
+                <i className="bi bi-box-arrow-up-right me-1"></i> New Tab Fullscreen
               </a>
               <a
                 href={`/admissions/${admission.id}/documents/pdf/${getPdfRouteType(activeDoc)}`}
                 download
                 className="btn btn-sm btn-primary"
+                title="Download standard A4 PDF"
               >
-                <i className="bi bi-download me-1"></i> Download PDF
+                <i className="bi bi-download me-1"></i> Download A4 PDF
               </a>
             </div>
           </div>
@@ -545,7 +547,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
             {isApproved || isGenerated ? (
               <div style={{ width: '100%', height: '920px' }}>
                 <iframe
-                  src={`/admissions/${admission.id}/documents/pdf/${getPdfRouteType(activeDoc)}`}
+                  src={`/admissions/${admission.id}/documents/pdf/${getPdfRouteType(activeDoc)}?inline=1`}
                   style={{ width: '100%', height: '100%', border: 'none' }}
                   title={`Playwright PDF Preview — ${getDocTitle(activeDoc)}`}
                 />

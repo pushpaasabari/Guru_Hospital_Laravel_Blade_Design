@@ -57,16 +57,16 @@ async function main() {
   // Load content
   await page.setContent(htmlContent, { waitUntil: 'load' });
 
-  // Render pixel-perfect medical document PDF
+  // Render standard ISO A4 medical document PDF (210mm x 297mm)
   await page.pdf({
     path: outputFile,
     format: 'A4',
     printBackground: true,
-    preferCSSPageSize: true,
+    preferCSSPageSize: false,
     displayHeaderFooter: true,
-    headerTemplate: '<div></div>',
+    headerTemplate: '<div style="font-size: 1px;"></div>',
     footerTemplate: `
-      <div style="font-family: Arial, sans-serif; font-size: 8pt; width: 100%; display: flex; justify-content: space-between; padding: 0 15mm; color: #555555; box-sizing: border-box;">
+      <div style="font-family: Arial, sans-serif; font-size: 8pt; width: 100%; display: flex; justify-content: space-between; padding: 0 12mm; color: #555555; box-sizing: border-box;">
         <span>${headerTitle}</span>
         <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
       </div>
