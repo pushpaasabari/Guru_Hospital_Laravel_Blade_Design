@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreAdmissionRequest;
 use App\Http\Requests\UpdateAdmissionRequest;
 use App\Models\Admission;
+use App\Models\ClinicalStaff;
 use App\Models\DocumentRevision;
 use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
@@ -42,7 +43,9 @@ class AdmissionController extends Controller
     public function create(): Response
     {
         $this->authorize('create', Admission::class);
-        return Inertia::render('Admissions/Create');
+        $clinicalStaff = ClinicalStaff::active()->orderBy('name')->get();
+
+        return Inertia::render('Admissions/Create', compact('clinicalStaff'));
     }
 
     public function store(StoreAdmissionRequest $request): RedirectResponse
@@ -50,6 +53,10 @@ class AdmissionController extends Controller
         $validated = $request->validated();
         $newborns = $validated['newborns'] ?? [];
         unset($validated['newborns']);
+
+        if (empty($validated['assisted_by'])) {
+            $validated['assisted_by'] = $validated['assisted_surgeon'] ?? ($validated['staff_nurse'] ?? null);
+        }
 
         $validated['created_by'] = $request->user()->id;
         $validated['status'] = 'draft';
@@ -93,8 +100,9 @@ class AdmissionController extends Controller
     {
         $this->authorize('update', $admission);
         $admission->load('newborns');
+        $clinicalStaff = ClinicalStaff::active()->orderBy('name')->get();
 
-        return Inertia::render('Admissions/Edit', compact('admission'));
+        return Inertia::render('Admissions/Edit', compact('admission', 'clinicalStaff'));
     }
 
     public function update(UpdateAdmissionRequest $request, Admission $admission): RedirectResponse
@@ -102,6 +110,10 @@ class AdmissionController extends Controller
         $validated = $request->validated();
         $newborns = $validated['newborns'] ?? [];
         unset($validated['newborns']);
+
+        if (empty($validated['assisted_by'])) {
+            $validated['assisted_by'] = $validated['assisted_surgeon'] ?? ($validated['staff_nurse'] ?? null);
+        }
 
         $oldData = $admission->toArray();
 

@@ -186,12 +186,28 @@
                     <input type="text" name="surgeon" class="form-control" value="{{ old('surgeon', $admission->surgeon) }}">
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">Consultant Pediatrician</label>
-                    <input type="text" name="pediatrician_name" class="form-control" value="{{ old('pediatrician_name', $admission->pediatrician_name) }}">
+                    <label class="form-label">Assisted Surgeon</label>
+                    <input type="text" name="assisted_surgeon" class="form-control" value="{{ old('assisted_surgeon', $admission->assisted_surgeon) }}">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Anesthetist</label>
                     <input type="text" name="anaesthetist" class="form-control" value="{{ old('anaesthetist', $admission->anaesthetist) }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Assisted Anesthetist</label>
+                    <input type="text" name="assisted_anaesthetist" class="form-control" value="{{ old('assisted_anaesthetist', $admission->assisted_anaesthetist) }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Staff Nurse</label>
+                    <input type="text" name="staff_nurse" class="form-control" value="{{ old('staff_nurse', $admission->staff_nurse) }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">OT Technician</label>
+                    <input type="text" name="ot_technician" class="form-control" value="{{ old('ot_technician', $admission->ot_technician) }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Consultant Pediatrician</label>
+                    <input type="text" name="pediatrician_name" class="form-control" value="{{ old('pediatrician_name', $admission->pediatrician_name) }}">
                 </div>
                 <div class="col-md-4">
                     <label class="form-label">Surgical Assistant</label>

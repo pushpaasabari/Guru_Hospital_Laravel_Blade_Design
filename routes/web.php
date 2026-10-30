@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ClinicalStaffController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentApprovalController;
 use App\Http\Controllers\DocumentPackController;
@@ -45,6 +46,13 @@ Route::middleware('auth')->group(function () {
 
     // Audit Logs (Admins & Auditors)
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index');
+
+    // Clinical Staff & Doctors Management (Admins)
+    Route::get('/clinical-staff', [ClinicalStaffController::class, 'index'])->name('clinical-staff.index');
+    Route::post('/clinical-staff', [ClinicalStaffController::class, 'store'])->name('clinical-staff.store');
+    Route::put('/clinical-staff/{clinicalStaff}', [ClinicalStaffController::class, 'update'])->name('clinical-staff.update');
+    Route::delete('/clinical-staff/{clinicalStaff}', [ClinicalStaffController::class, 'destroy'])->name('clinical-staff.destroy');
+    Route::patch('/clinical-staff/{clinicalStaff}/toggle', [ClinicalStaffController::class, 'toggleActive'])->name('clinical-staff.toggle');
 
     // Templates Management (Admins)
     Route::get('/templates', [TemplateController::class, 'index'])->name('templates.index');

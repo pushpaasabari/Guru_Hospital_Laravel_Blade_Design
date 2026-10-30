@@ -61,9 +61,13 @@ interface Admission {
   procedure_name?: string;
   procedure_done?: string;
   surgeon?: string;
+  assisted_surgeon?: string;
   anaesthetist?: string;
+  assisted_anaesthetist?: string;
   assisted_by?: string;
   assistant?: string;
+  staff_nurse?: string;
+  ot_technician?: string;
   anaesthesia_type?: string;
   pediatrician_name?: string;
   diagnosis: string;
@@ -984,11 +988,31 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
               <tr>
                 <td style={{ fontWeight: 'bold', padding: '2px 0' }}>ASSISTANT BY S/N</td>
                 <td style={{ textAlign: 'center', fontWeight: 'bold', padding: '2px 6px' }}>:</td>
-                <td style={{ padding: '2px 0' }}>{admission.assisted_by || admission.assistant || ''}</td>
+                <td style={{ padding: '2px 0' }}>{admission.assisted_surgeon || admission.assisted_by || admission.staff_nurse || admission.assistant || ''}</td>
                 <td style={{ fontWeight: 'bold', padding: '2px 0' }}>ANESTHESIA TYPE</td>
                 <td style={{ textAlign: 'center', fontWeight: 'bold', padding: '2px 6px' }}>:</td>
                 <td style={{ padding: '2px 0' }}>{admission.anaesthesia_type || 'Spinal'}</td>
               </tr>
+              {(admission.ot_technician || admission.assisted_anaesthetist || (admission.assisted_surgeon && admission.staff_nurse)) && (
+                <tr>
+                  <td style={{ fontWeight: 'bold', padding: '2px 0' }}>
+                    {admission.assisted_surgeon && admission.staff_nurse ? 'STAFF NURSE' : (admission.ot_technician ? 'OT TECHNICIAN' : 'ASST. ANAESTHETIST')}
+                  </td>
+                  <td style={{ textAlign: 'center', fontWeight: 'bold', padding: '2px 6px' }}>:</td>
+                  <td style={{ padding: '2px 0' }}>
+                    {admission.assisted_surgeon && admission.staff_nurse ? admission.staff_nurse : (admission.ot_technician || admission.assisted_anaesthetist)}
+                  </td>
+                  {admission.assisted_anaesthetist && (admission.ot_technician || (admission.assisted_surgeon && admission.staff_nurse)) ? (
+                    <>
+                      <td style={{ fontWeight: 'bold', padding: '2px 0' }}>ASST. ANESTHETIST</td>
+                      <td style={{ textAlign: 'center', fontWeight: 'bold', padding: '2px 6px' }}>:</td>
+                      <td style={{ padding: '2px 0' }}>{admission.assisted_anaesthetist}</td>
+                    </>
+                  ) : (
+                    <><td></td><td></td><td></td></>
+                  )}
+                </tr>
+              )}
             </tbody>
           </table>
 

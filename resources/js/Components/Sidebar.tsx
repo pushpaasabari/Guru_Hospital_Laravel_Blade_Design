@@ -175,6 +175,16 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                     </Link>
 
                     <Link
+                      href="/clinical-staff"
+                      className={`fg-sidebar-link ${isLinkActive('/clinical-staff') ? 'active' : ''}`}
+                      onClick={closeMobile}
+                      title="Clinical Staff & Doctors"
+                    >
+                      <i className="bi bi-heart-pulse icon-clinical-staff"></i>
+                      <span>Clinical Staff</span>
+                    </Link>
+
+                    <Link
                       href="/users"
                       className={`fg-sidebar-link ${isLinkActive('/users') ? 'active' : ''}`}
                       onClick={closeMobile}

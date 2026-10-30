@@ -1,6 +1,7 @@
 import React from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
+import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
 
 interface Newborn {
   id?: number;
@@ -43,9 +44,14 @@ interface AdmissionData {
   procedure_done?: string;
   icd_code?: string;
   surgeon?: string;
+  assisted_surgeon?: string;
   pediatrician_name?: string;
   anaesthetist?: string;
+  assisted_anaesthetist?: string;
+  assistant?: string;
   assisted_by?: string;
+  staff_nurse?: string;
+  ot_technician?: string;
   anaesthesia_type?: string;
   procedure_note?: string;
   incision?: string;
@@ -64,9 +70,10 @@ interface AdmissionData {
 
 interface Props {
   admission: AdmissionData;
+  clinicalStaff?: ClinicalStaffMember[];
 }
 
-export default function AdmissionsEdit({ admission }: Props) {
+export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props) {
   const { data, setData, put, processing, errors } = useForm({
     patient_name: admission.patient_name || '',
     uhid: admission.uhid || '',
@@ -96,9 +103,13 @@ export default function AdmissionsEdit({ admission }: Props) {
     procedure_done: admission.procedure_done || '',
     icd_code: admission.icd_code || '',
     surgeon: admission.surgeon || '',
+    assisted_surgeon: admission.assisted_surgeon || '',
     pediatrician_name: admission.pediatrician_name || '',
     anaesthetist: admission.anaesthetist || '',
+    assisted_anaesthetist: admission.assisted_anaesthetist || '',
     assisted_by: admission.assisted_by || '',
+    staff_nurse: admission.staff_nurse || '',
+    ot_technician: admission.ot_technician || '',
     anaesthesia_type: admission.anaesthesia_type || '',
     procedure_note: admission.procedure_note || '',
     incision: admission.incision || '',
@@ -305,12 +316,20 @@ export default function AdmissionsEdit({ admission }: Props) {
               </div>
 
               <div className="col-md-4">
-                <label className="form-label">Treating Consultant / Doctor</label>
-                <input
-                  type="text"
-                  className="form-control"
+                <StaffSelect
+                  label="Treating Consultant / Doctor"
+                  role="consultant_doctor"
                   value={data.consultant}
-                  onChange={(e) => setData('consultant', e.target.value)}
+                  onChange={(val) => {
+                    const match = clinicalStaff.find((s) => s.name === val);
+                    setData((prev) => ({
+                      ...prev,
+                      consultant: val,
+                      department: prev.department ? prev.department : (match?.department || prev.department),
+                    }));
+                  }}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Consultant Doctor --"
                 />
               </div>
               <div className="col-md-4">
@@ -488,35 +507,85 @@ export default function AdmissionsEdit({ admission }: Props) {
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Surgeon</label>
-                <input
-                  className="form-control"
+                <StaffSelect
+                  label="Surgeon"
+                  role="surgeon"
                   value={data.surgeon}
-                  onChange={(e) => setData('surgeon', e.target.value)}
+                  onChange={(val) => setData('surgeon', val)}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Surgeon --"
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Consultant Pediatrician</label>
-                <input
-                  className="form-control"
-                  value={data.pediatrician_name}
-                  onChange={(e) => setData('pediatrician_name', e.target.value)}
+                <StaffSelect
+                  label="Assisted Surgeon"
+                  role="assisted_surgeon"
+                  value={data.assisted_surgeon}
+                  onChange={(val) => {
+                    setData((prev) => ({
+                      ...prev,
+                      assisted_surgeon: val,
+                      assisted_by: prev.assisted_by ? prev.assisted_by : val,
+                    }));
+                  }}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Assisted Surgeon --"
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Anaesthetist</label>
-                <input
-                  className="form-control"
+                <StaffSelect
+                  label="Anaesthetist"
+                  role="anaesthetist"
                   value={data.anaesthetist}
-                  onChange={(e) => setData('anaesthetist', e.target.value)}
+                  onChange={(val) => setData('anaesthetist', val)}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Anaesthetist --"
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Assistant by S/N</label>
-                <input
-                  className="form-control"
-                  value={data.assisted_by}
-                  onChange={(e) => setData('assisted_by', e.target.value)}
+                <StaffSelect
+                  label="Assisted Anaesthetist"
+                  role="assisted_anaesthetist"
+                  value={data.assisted_anaesthetist}
+                  onChange={(val) => setData('assisted_anaesthetist', val)}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Asst. Anaesthetist --"
+                />
+              </div>
+              <div className="col-md-4">
+                <StaffSelect
+                  label="Staff Nurse"
+                  role="staff_nurse"
+                  value={data.staff_nurse}
+                  onChange={(val) => {
+                    setData((prev) => ({
+                      ...prev,
+                      staff_nurse: val,
+                      assisted_by: prev.assisted_by ? prev.assisted_by : val,
+                    }));
+                  }}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Staff Nurse --"
+                />
+              </div>
+              <div className="col-md-4">
+                <StaffSelect
+                  label="OT Technician"
+                  role="ot_technician"
+                  value={data.ot_technician}
+                  onChange={(val) => setData('ot_technician', val)}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select OT Technician --"
+                />
+              </div>
+              <div className="col-md-4">
+                <StaffSelect
+                  label="Consultant Pediatrician"
+                  role="consultant_doctor"
+                  value={data.pediatrician_name}
+                  onChange={(val) => setData('pediatrician_name', val)}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Pediatrician --"
                 />
               </div>
               <div className="col-md-4">
@@ -525,6 +594,7 @@ export default function AdmissionsEdit({ admission }: Props) {
                   className="form-control"
                   value={data.anaesthesia_type}
                   onChange={(e) => setData('anaesthesia_type', e.target.value)}
+                  placeholder="e.g. SA, GA"
                 />
               </div>
               <div className="col-md-4">

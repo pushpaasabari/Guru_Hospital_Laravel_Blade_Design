@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
+import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
 
 interface NewbornInput {
   sex: string;
@@ -12,7 +13,11 @@ interface NewbornInput {
   notes: string;
 }
 
-export default function AdmissionsCreate() {
+interface Props {
+  clinicalStaff?: ClinicalStaffMember[];
+}
+
+export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
   const { data, setData, post, processing, errors } = useForm({
     patient_name: '',
     uhid: '',
@@ -42,9 +47,13 @@ export default function AdmissionsCreate() {
     procedure_done: '',
     icd_code: '',
     surgeon: '',
+    assisted_surgeon: '',
     pediatrician_name: '',
     anaesthetist: '',
+    assisted_anaesthetist: '',
     assisted_by: '',
+    staff_nurse: '',
+    ot_technician: '',
     anaesthesia_type: '',
     procedure_note: '',
     incision: '',
@@ -232,13 +241,20 @@ export default function AdmissionsCreate() {
               </div>
 
               <div className="col-md-4">
-                <label className="form-label">Consultant</label>
-                <input
-                  type="text"
-                  className="form-control"
+                <StaffSelect
+                  label="Consultant Doctor"
+                  role="consultant_doctor"
                   value={data.consultant}
-                  onChange={(e) => setData('consultant', e.target.value)}
-                  placeholder="e.g. Dr. Ambika M.S (O&G)"
+                  onChange={(val) => {
+                    const match = clinicalStaff.find((s) => s.name === val);
+                    setData((prev) => ({
+                      ...prev,
+                      consultant: val,
+                      department: prev.department ? prev.department : (match?.department || prev.department),
+                    }));
+                  }}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Consultant Doctor --"
                 />
               </div>
               <div className="col-md-4">
@@ -419,37 +435,85 @@ export default function AdmissionsCreate() {
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Surgeon</label>
-                <input
-                  className="form-control"
+                <StaffSelect
+                  label="Surgeon"
+                  role="surgeon"
                   value={data.surgeon}
-                  onChange={(e) => setData('surgeon', e.target.value)}
+                  onChange={(val) => setData('surgeon', val)}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Surgeon --"
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Consultant Pediatrician</label>
-                <input
-                  className="form-control"
-                  value={data.pediatrician_name}
-                  onChange={(e) => setData('pediatrician_name', e.target.value)}
-                  placeholder="e.g. Dr. Nithyapriya (Paediatrician)"
+                <StaffSelect
+                  label="Assisted Surgeon"
+                  role="assisted_surgeon"
+                  value={data.assisted_surgeon}
+                  onChange={(val) => {
+                    setData((prev) => ({
+                      ...prev,
+                      assisted_surgeon: val,
+                      assisted_by: prev.assisted_by ? prev.assisted_by : val,
+                    }));
+                  }}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Assisted Surgeon --"
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Anaesthetist</label>
-                <input
-                  className="form-control"
+                <StaffSelect
+                  label="Anaesthetist"
+                  role="anaesthetist"
                   value={data.anaesthetist}
-                  onChange={(e) => setData('anaesthetist', e.target.value)}
+                  onChange={(val) => setData('anaesthetist', val)}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Anaesthetist --"
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Assistant by S/N</label>
-                <input
-                  className="form-control"
-                  value={data.assisted_by}
-                  onChange={(e) => setData('assisted_by', e.target.value)}
-                  placeholder="e.g. Miss Soudnharya"
+                <StaffSelect
+                  label="Assisted Anaesthetist"
+                  role="assisted_anaesthetist"
+                  value={data.assisted_anaesthetist}
+                  onChange={(val) => setData('assisted_anaesthetist', val)}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Asst. Anaesthetist --"
+                />
+              </div>
+              <div className="col-md-4">
+                <StaffSelect
+                  label="Staff Nurse"
+                  role="staff_nurse"
+                  value={data.staff_nurse}
+                  onChange={(val) => {
+                    setData((prev) => ({
+                      ...prev,
+                      staff_nurse: val,
+                      assisted_by: prev.assisted_by ? prev.assisted_by : val,
+                    }));
+                  }}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Staff Nurse --"
+                />
+              </div>
+              <div className="col-md-4">
+                <StaffSelect
+                  label="OT Technician"
+                  role="ot_technician"
+                  value={data.ot_technician}
+                  onChange={(val) => setData('ot_technician', val)}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select OT Technician --"
+                />
+              </div>
+              <div className="col-md-4">
+                <StaffSelect
+                  label="Consultant Pediatrician"
+                  role="consultant_doctor"
+                  value={data.pediatrician_name}
+                  onChange={(val) => setData('pediatrician_name', val)}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Pediatrician --"
                 />
               </div>
               <div className="col-md-4">

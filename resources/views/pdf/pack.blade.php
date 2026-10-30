@@ -407,11 +407,25 @@
     <tr>
         <td style="font-weight: bold;">ASSISTANT BY S/N</td>
         <td style="font-weight: bold; text-align: center;">:</td>
-        <td>{{ $admission->assisted_by ?: ($admission->assistant ?: '') }}</td>
+        <td>{{ $admission->assisted_surgeon ?: ($admission->assisted_by ?: ($admission->staff_nurse ?: ($admission->assistant ?: ''))) }}</td>
         <td style="font-weight: bold;">ANESTHESIA TYPE</td>
         <td style="font-weight: bold; text-align: center;">:</td>
         <td>{{ $admission->anaesthesia_type ?: 'Spinal' }}</td>
     </tr>
+    @if($admission->ot_technician || $admission->assisted_anaesthetist || ($admission->assisted_surgeon && $admission->staff_nurse))
+    <tr>
+        <td style="font-weight: bold;">{{ $admission->assisted_surgeon && $admission->staff_nurse ? 'STAFF NURSE' : ($admission->ot_technician ? 'OT TECHNICIAN' : 'ASST. ANAESTHETIST') }}</td>
+        <td style="font-weight: bold; text-align: center;">:</td>
+        <td>{{ $admission->assisted_surgeon && $admission->staff_nurse ? $admission->staff_nurse : ($admission->ot_technician ?: $admission->assisted_anaesthetist) }}</td>
+        @if($admission->assisted_anaesthetist && ($admission->ot_technician || ($admission->assisted_surgeon && $admission->staff_nurse)))
+            <td style="font-weight: bold;">ASST. ANESTHETIST</td>
+            <td style="font-weight: bold; text-align: center;">:</td>
+            <td>{{ $admission->assisted_anaesthetist }}</td>
+        @else
+            <td></td><td></td><td></td>
+        @endif
+    </tr>
+    @endif
 </table>
 
 <div style="margin-top: 10px; font-size: 10pt;">

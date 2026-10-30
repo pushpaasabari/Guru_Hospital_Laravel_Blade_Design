@@ -80,6 +80,10 @@
                         <i class="bi bi-file-earmark-code icon-templates"></i>
                         <span>Templates</span>
                     </a>
+                    <a class="fg-sidebar-link {{ request()->routeIs('clinical-staff.*') ? 'active' : '' }}" href="{{ route('clinical-staff.index') }}" title="Clinical Staff & Doctors">
+                        <i class="bi bi-heart-pulse icon-clinical-staff"></i>
+                        <span>Clinical Staff</span>
+                    </a>
                     <a class="fg-sidebar-link {{ request()->routeIs('users.*') ? 'active' : '' }}" href="{{ route('users.index') }}" title="Staff Users Management">
                         <i class="bi bi-people icon-users"></i>
                         <span>Staff Users</span>

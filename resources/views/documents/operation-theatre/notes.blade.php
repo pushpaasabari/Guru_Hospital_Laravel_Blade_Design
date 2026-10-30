@@ -133,11 +133,25 @@
         <tr>
             <td class="ot-lbl">ASSISTANT BY S/N</td>
             <td class="ot-sep">:</td>
-            <td class="ot-val">{{ $admission->assisted_by ?: ($admission->assistant ?: '') }}</td>
+            <td class="ot-val">{{ $admission->assisted_surgeon ?: ($admission->assisted_by ?: ($admission->staff_nurse ?: ($admission->assistant ?: ''))) }}</td>
             <td class="ot-lbl">ANESTHESIA TYPE</td>
             <td class="ot-sep">:</td>
             <td class="ot-val">{{ $admission->anaesthesia_type ?: 'Spinal' }}</td>
         </tr>
+        @if($admission->ot_technician || $admission->assisted_anaesthetist || ($admission->assisted_surgeon && $admission->staff_nurse))
+        <tr>
+            <td class="ot-lbl">{{ $admission->assisted_surgeon && $admission->staff_nurse ? 'STAFF NURSE' : ($admission->ot_technician ? 'OT TECHNICIAN' : 'ASST. ANAESTHETIST') }}</td>
+            <td class="ot-sep">:</td>
+            <td class="ot-val">{{ $admission->assisted_surgeon && $admission->staff_nurse ? $admission->staff_nurse : ($admission->ot_technician ?: $admission->assisted_anaesthetist) }}</td>
+            @if($admission->assisted_anaesthetist && ($admission->ot_technician || ($admission->assisted_surgeon && $admission->staff_nurse)))
+                <td class="ot-lbl">ASST. ANESTHETIST</td>
+                <td class="ot-sep">:</td>
+                <td class="ot-val">{{ $admission->assisted_anaesthetist }}</td>
+            @else
+                <td></td><td></td><td></td>
+            @endif
+        </tr>
+        @endif
     </table>
 
     {{-- Procedure Note & Incision --}}
