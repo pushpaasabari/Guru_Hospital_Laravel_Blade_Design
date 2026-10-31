@@ -47,14 +47,11 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
       {/* Mobile Topbar for screens < 992px */}
       <div className="fg-mobile-topbar no-print">
         <Link href="/dashboard" className="d-flex align-items-center text-decoration-none">
-          <div className="fg-brand-mark">
-            <span className="bar bar-1"></span>
-            <span className="bar bar-2"></span>
-            <span className="bar bar-3"></span>
-          </div>
-          <span className="fw-bold text-dark ms-1" style={{ fontSize: '1rem', letterSpacing: '-0.02em' }}>
-            Guru Hospital
-          </span>
+          <img
+            src="/images/guru-hospital-logo.png"
+            alt="Guru Hospital"
+            style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+          />
         </Link>
 
         <button
@@ -79,27 +76,24 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
       {/* Left Sidebar (Desktop + Mobile Drawer) */}
       <aside className={`fg-sidebar no-print ${mobileOpen ? 'mobile-open' : ''}`}>
         <div>
-          {/* Sidebar Header: Hospital Brand with FinGM 3-Bar Logo & Hide Button */}
+          {/* Sidebar Header: Hospital Brand with Official Logo & Hide Button */}
           <div className="fg-sidebar-header">
             <Link
               href="/dashboard"
-              className="d-flex align-items-center text-decoration-none"
+              className="d-flex align-items-center text-decoration-none fg-sidebar-brand"
               onClick={closeMobile}
               title="Guru Hospital Dashboard"
             >
-              <div className="fg-brand-mark">
-                <span className="bar bar-1"></span>
-                <span className="bar bar-2"></span>
-                <span className="bar bar-3"></span>
-              </div>
-              <div className="fg-sidebar-brand-text">
-                <div className="hospital-brand-title" style={{ fontSize: '1.05rem', fontWeight: 700, letterSpacing: '-0.02em' }}>
-                  Guru Hospital
-                </div>
-                <div className="hospital-brand-subtitle" style={{ fontSize: '9.5px', color: '#94a3b8' }}>
-                  Clinical Workflow
-                </div>
-              </div>
+              <img
+                src="/images/guru-hospital-logo.png"
+                alt="Guru Hospital"
+                className="fg-sidebar-logo-full"
+              />
+              <img
+                src="/images/guru-logo-emblem.png"
+                alt="Guru Hospital"
+                className="fg-sidebar-logo-emblem"
+              />
             </Link>
 
             <div className="d-flex align-items-center">

@@ -17,12 +17,7 @@
     <!-- Mobile Topbar for screens < 992px -->
     <div class="fg-mobile-topbar no-print">
         <a class="d-flex align-items-center text-decoration-none" href="{{ route('dashboard') }}">
-            <div class="fg-brand-mark">
-                <span class="bar bar-1"></span>
-                <span class="bar bar-2"></span>
-                <span class="bar bar-3"></span>
-            </div>
-            <span class="fw-bold text-dark ms-1" style="font-size: 1rem; letter-spacing: -0.02em;">Guru Hospital</span>
+            <img src="{{ asset('images/guru-hospital-logo.png') }}" alt="Guru Hospital" style="height: 36px; width: auto; object-fit: contain;">
         </a>
 
         <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#mobileSidebar" aria-label="Toggle navigation">
@@ -34,16 +29,9 @@
     <aside class="fg-sidebar no-print collapse d-lg-flex" id="mobileSidebar">
         <div>
             <div class="fg-sidebar-header">
-                <a class="d-flex align-items-center text-decoration-none" href="{{ route('dashboard') }}" title="Guru Hospital Dashboard">
-                    <div class="fg-brand-mark">
-                        <span class="bar bar-1"></span>
-                        <span class="bar bar-2"></span>
-                        <span class="bar bar-3"></span>
-                    </div>
-                    <div class="fg-sidebar-brand-text">
-                        <div class="hospital-brand-title" style="font-size: 1.05rem; font-weight: 700; letter-spacing: -0.02em;">Guru Hospital</div>
-                        <div class="hospital-brand-subtitle" style="font-size: 9.5px; color: #94a3b8;">Clinical Workflow</div>
-                    </div>
+                <a class="d-flex align-items-center text-decoration-none fg-sidebar-brand" href="{{ route('dashboard') }}" title="Guru Hospital Dashboard">
+                    <img src="{{ asset('images/guru-hospital-logo.png') }}" alt="Guru Hospital" class="fg-sidebar-logo-full">
+                    <img src="{{ asset('images/guru-logo-emblem.png') }}" alt="Guru Hospital" class="fg-sidebar-logo-emblem">
                 </a>
                 <div class="d-flex align-items-center">
                     <!-- Left Menu Hide / Expand Button -->

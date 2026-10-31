@@ -34,14 +34,11 @@ export default function Login() {
         style={{ width: '100%', maxWidth: '1300px', margin: '0 auto' }}
       >
         <div className="d-flex align-items-center">
-          <div className="fg-brand-mark">
-            <span className="bar bar-1"></span>
-            <span className="bar bar-2"></span>
-            <span className="bar bar-3"></span>
-          </div>
-          <span className="fw-bold text-dark ms-1" style={{ fontSize: '1.15rem', letterSpacing: '-0.02em' }}>
-            Guru Hospital
-          </span>
+          <img
+            src="/images/guru-hospital-logo.png"
+            alt="Guru Hospital"
+            style={{ height: '46px', width: 'auto', objectFit: 'contain' }}
+          />
         </div>
 
         <a href="/login" className="text-decoration-none text-muted small fw-medium">

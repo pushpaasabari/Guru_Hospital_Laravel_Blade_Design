@@ -15,13 +15,7 @@
 
 <header class="fg-auth-top-header">
     <div class="d-flex align-items-center gap-2">
-        <span class="hospital-brand-badge">
-            <i class="bi bi-hospital"></i>
-        </span>
-        <div>
-            <div class="hospital-brand-title">GURU HOSPITAL</div>
-            <div class="hospital-brand-subtitle">Clinical Document System</div>
-        </div>
+        <img src="{{ asset('images/guru-hospital-logo.png') }}" alt="Guru Hospital" style="height: 44px; width: auto; object-fit: contain;">
     </div>
     <div class="d-none d-sm-block text-muted small">
         <i class="bi bi-shield-lock-fill text-success me-1"></i> NABH / HIPAA Compliant Gateway
