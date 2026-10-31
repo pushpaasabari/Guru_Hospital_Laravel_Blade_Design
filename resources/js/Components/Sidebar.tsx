@@ -84,16 +84,21 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
               onClick={closeMobile}
               title="Guru Hospital Dashboard"
             >
-              <img
-                src="/images/guru-hospital-logo.png"
-                alt="Guru Hospital"
-                className="fg-sidebar-logo-full"
-              />
-              <img
-                src="/images/guru-logo-emblem.png"
-                alt="Guru Hospital"
-                className="fg-sidebar-logo-emblem"
-              />
+              {collapsed ? (
+                <img
+                  src="/images/guru-logo-emblem.png"
+                  alt="Guru Hospital"
+                  className="fg-sidebar-logo-emblem"
+                  style={{ display: 'block', height: '42px', width: '42px', objectFit: 'contain' }}
+                />
+              ) : (
+                <img
+                  src="/images/guru-hospital-logo.png"
+                  alt="Guru Hospital"
+                  className="fg-sidebar-logo-full"
+                  style={{ display: 'block' }}
+                />
+              )}
             </Link>
 
             <div className="d-flex align-items-center">
