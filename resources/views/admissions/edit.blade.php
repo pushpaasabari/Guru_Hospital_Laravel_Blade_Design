@@ -68,15 +68,11 @@
                     <input type="text" name="address" class="form-control" value="{{ old('address', $admission->address) }}">
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label required">Admission Date & Time</label>
                     <input type="datetime-local" name="admission_at" class="form-control" value="{{ old('admission_at', $admission->admission_at?->format('Y-m-d\TH:i')) }}" required>
                 </div>
-                <div class="col-md-4">
-                    <label class="form-label">Procedure / Delivery Date & Time</label>
-                    <input type="datetime-local" name="procedure_at" class="form-control" value="{{ old('procedure_at', $admission->procedure_at?->format('Y-m-d\TH:i')) }}">
-                </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <label class="form-label required">Discharge Date & Time</label>
                     <input type="datetime-local" name="discharge_at" class="form-control" value="{{ old('discharge_at', $admission->discharge_at?->format('Y-m-d\TH:i')) }}" required>
                 </div>
@@ -172,15 +168,19 @@
         </div>
         <div class="card-body">
             <div class="row g-3">
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <label class="form-label">Procedure / Delivery Date & Time</label>
+                    <input type="datetime-local" name="procedure_at" class="form-control" value="{{ old('procedure_at', $admission->procedure_at?->format('Y-m-d\TH:i')) }}">
+                </div>
+                <div class="col-md-3">
                     <label class="form-label">Procedure / Surgery Name</label>
                     <input type="text" name="procedure_name" class="form-control" value="{{ old('procedure_name', $admission->procedure_name) }}">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">Procedure Done</label>
                     <input type="text" name="procedure_done" class="form-control" value="{{ old('procedure_done', $admission->procedure_done) }}">
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <label class="form-label">ICD Code</label>
                     <input type="text" name="icd_code" class="form-control" value="{{ old('icd_code', $admission->icd_code) }}">
                 </div>

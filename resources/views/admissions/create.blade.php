@@ -6,20 +6,20 @@
 <form method="POST" action="{{ route('admissions.store') }}" id="admissionForm">
 @csrf
 <div class="card mb-3"><div class="card-header bg-white fw-bold">1. Shared patient and admission details</div><div class="card-body"><div class="row g-3">
-@php($shared = [
- ['patient_name','Patient name','text',true],['uhid','UHID / MRN','text',true],['ip_no','IP No.','text',true],
- ['age','Age','text',false],['sex','Sex','select',false],['address','Address','text',false],['contact','Contact','text',false],
- ['admission_at','Admission date/time','datetime-local',true],['procedure_at','Procedure / delivery date/time','datetime-local',false],
- ['discharge_at','Discharge date/time','datetime-local',true],['consultant','Consultant','text',false],['department','Department','text',false]
-])
-@foreach($shared as [$name,$label,$type,$required])
-<div class="col-md-4"><label class="form-label {{ $required?'required':'' }}">{{ $label }}</label>
-@if($type==='select')
-<select name="{{ $name }}" class="form-select" {{ $name==='sex' ? 'id=patientSex' : '' }}><option value="">Select</option>@foreach(['Female','Male','Other','Not recorded'] as $v)<option value="{{ $v }}" @selected(old($name)===$v)>{{ $v }}</option>@endforeach</select>
-@else
-<input class="form-control" name="{{ $name }}" type="{{ $type }}" value="{{ old($name) }}" {{ $required?'required':'' }}>
-@endif</div>
-@endforeach
+<div class="col-md-4"><label class="form-label required">Patient name</label><input class="form-control" name="patient_name" type="text" value="{{ old('patient_name') }}" required></div>
+<div class="col-md-4"><label class="form-label required">UHID / MRN</label><input class="form-control" name="uhid" type="text" value="{{ old('uhid') }}" required></div>
+<div class="col-md-4"><label class="form-label required">IP No.</label><input class="form-control" name="ip_no" type="text" value="{{ old('ip_no') }}" required></div>
+
+<div class="col-md-4"><label class="form-label">Age</label><input class="form-control" name="age" type="text" value="{{ old('age') }}"></div>
+<div class="col-md-4"><label class="form-label">Sex</label><select name="sex" class="form-select" id="patientSex"><option value="">Select</option>@foreach(['Female','Male','Other','Not recorded'] as $v)<option value="{{ $v }}" @selected(old('sex')===$v)>{{ $v }}</option>@endforeach</select></div>
+<div class="col-md-4"><label class="form-label">Contact</label><input class="form-control" name="contact" type="text" value="{{ old('contact') }}"></div>
+
+<div class="col-md-4"><label class="form-label">Address</label><input class="form-control" name="address" type="text" value="{{ old('address') }}"></div>
+<div class="col-md-4"><label class="form-label">Consultant</label><input class="form-control" name="consultant" type="text" value="{{ old('consultant') }}"></div>
+<div class="col-md-4"><label class="form-label">Department</label><input class="form-control" name="department" type="text" value="{{ old('department') }}"></div>
+
+<div class="col-md-6"><label class="form-label required">Admission date/time</label><input class="form-control" name="admission_at" type="datetime-local" value="{{ old('admission_at') }}" required></div>
+<div class="col-md-6"><label class="form-label required">Discharge date/time</label><input class="form-control" name="discharge_at" type="datetime-local" value="{{ old('discharge_at') }}" required></div>
 <div class="col-md-6"><label class="form-label required">Discharge summary format</label><select name="format" class="form-select" required>@foreach(['general'=>'General','cmchistn'=>'CMCHISTN','private'=>'Private','employee'=>'Employee'] as $v=>$label)<option value="{{ $v }}" @selected(old('format','general')===$v)>{{ $label }}</option>@endforeach</select><div class="form-text">Layouts are draft placeholders until the hospital supplies/approves each exact format.</div></div>
 <div class="col-md-6">
     <label class="form-label required">Surgery workflow</label>
@@ -40,9 +40,10 @@
 <div class="col-12"><label class="form-label">Investigations (Lab Reports, Pathology & Diagnostics)</label><textarea name="investigations" class="form-control" rows="4" placeholder="e.g.&#10;Hb: 10.6mgs%&#10;HIV: Negative | VDRL: Negative | HBsAG: Negative&#10;BG: B positive&#10;ECG: Normal&#10;RBS: 101.6 mg/dl | Urea: 24.3 mg/dl | Creatinine: 0.56 mg/dl | Uric Acid: 2.69 mg/dl">{{ old('investigations') }}</textarea></div>
 </div></div>
 <div class="card mb-3"><div class="card-header bg-white fw-bold">3. Operation Theatre Notes</div><div class="card-body row g-3">
-<div class="col-md-4"><label class="form-label">Procedure / surgery</label><input class="form-control" name="procedure_name" value="{{ old('procedure_name') }}"></div>
-<div class="col-md-4"><label class="form-label">Procedure done</label><input class="form-control" name="procedure_done" value="{{ old('procedure_done') }}"></div>
-<div class="col-md-4"><label class="form-label">ICD Code</label><input class="form-control" name="icd_code" value="{{ old('icd_code') }}"></div>
+<div class="col-md-3"><label class="form-label">Procedure / delivery date/time</label><input class="form-control" name="procedure_at" type="datetime-local" value="{{ old('procedure_at') }}"></div>
+<div class="col-md-3"><label class="form-label">Procedure / surgery</label><input class="form-control" name="procedure_name" value="{{ old('procedure_name') }}"></div>
+<div class="col-md-3"><label class="form-label">Procedure done</label><input class="form-control" name="procedure_done" value="{{ old('procedure_done') }}"></div>
+<div class="col-md-3"><label class="form-label">ICD Code</label><input class="form-control" name="icd_code" value="{{ old('icd_code') }}"></div>
 <div class="col-md-4"><label class="form-label">Surgeon</label><input class="form-control" name="surgeon" value="{{ old('surgeon') }}"></div>
 <div class="col-md-4"><label class="form-label">Assisted Surgeon</label><input class="form-control" name="assisted_surgeon" value="{{ old('assisted_surgeon') }}"></div>
 <div class="col-md-4"><label class="form-label">Anaesthetist</label><input class="form-control" name="anaesthetist" value="{{ old('anaesthetist') }}"></div>

@@ -233,7 +233,7 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
                 />
               </div>
 
-              <div className="col-md-4">
+              <div className="col-md-6">
                 <label className="form-label required">Admission Date/Time</label>
                 <input
                   type="datetime-local"
@@ -243,16 +243,7 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
                   required
                 />
               </div>
-              <div className="col-md-4">
-                <label className="form-label">Procedure / Delivery Date/Time</label>
-                <input
-                  type="datetime-local"
-                  className="form-control"
-                  value={data.procedure_at}
-                  onChange={(e) => setData('procedure_at', e.target.value)}
-                />
-              </div>
-              <div className="col-md-4">
+              <div className="col-md-6">
                 <label className="form-label required">Discharge Date/Time</label>
                 <input
                   type="datetime-local"
@@ -452,7 +443,16 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
           </div>
           <div className="card-body">
             <div className="row g-3">
-              <div className="col-md-4">
+              <div className="col-md-3">
+                <label className="form-label">Procedure / Delivery Date/Time</label>
+                <input
+                  type="datetime-local"
+                  className="form-control"
+                  value={data.procedure_at}
+                  onChange={(e) => setData('procedure_at', e.target.value)}
+                />
+              </div>
+              <div className="col-md-3">
                 <label className="form-label">Procedure / Surgery</label>
                 <input
                   className="form-control"
@@ -460,7 +460,7 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
                   onChange={(e) => setData('procedure_name', e.target.value)}
                 />
               </div>
-              <div className="col-md-4">
+              <div className="col-md-3">
                 <label className="form-label">Procedure Done</label>
                 <input
                   className="form-control"
@@ -468,7 +468,7 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
                   onChange={(e) => setData('procedure_done', e.target.value)}
                 />
               </div>
-              <div className="col-md-4">
+              <div className="col-md-3">
                 <label className="form-label">ICD Code</label>
                 <input
                   className="form-control"
