@@ -15,7 +15,7 @@
 
 <header class="fg-auth-top-header">
     <div class="d-flex align-items-center gap-2">
-        <img src="{{ asset('images/guru-hospital-logo.png') }}" alt="Guru Hospital" style="height: 44px; width: auto; object-fit: contain;">
+        <img src="{{ asset('images/guru-hospital-logo.png') }}" alt="Guru Hospital" style="height: 54px; width: auto; object-fit: contain;">
     </div>
     <div class="d-none d-sm-block text-muted small">
         <i class="bi bi-shield-lock-fill text-success me-1"></i> NABH / HIPAA Compliant Gateway
@@ -61,8 +61,8 @@
 
         <!-- Centered Floating White Auth Card -->
         <div class="fg-auth-card">
-            <div class="fg-auth-badge-top">
-                <i class="bi bi-hospital"></i>
+            <div class="fg-auth-badge-top" title="Guru Hospital" style="border: 2px solid #831661; padding: 2px; background: #ffffff; box-shadow: 0 4px 16px rgba(131, 22, 97, 0.18);">
+                <img src="{{ asset('images/guru-logo-emblem.png') }}" alt="Guru Hospital" style="width: 100%; height: 100%; object-fit: contain;">
             </div>
 
             <h1 class="fg-auth-title">Staff Authentication</h1>

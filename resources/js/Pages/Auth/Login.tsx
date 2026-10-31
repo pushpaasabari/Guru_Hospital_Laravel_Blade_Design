@@ -28,22 +28,32 @@ export default function Login() {
     <div className="fg-auth-page" style={{ minHeight: '100vh', background: 'var(--fg-page, #f4f5f7)', display: 'flex', flexDirection: 'column' }}>
       <Head title="Welcome back — Guru Hospital" />
 
-      {/* Top Header matching FinGM Screenshot */}
+      {/* Top Header Navigation Bar */}
       <header
-        className="d-flex align-items-center justify-content-between px-4 py-3"
-        style={{ width: '100%', maxWidth: '1300px', margin: '0 auto' }}
+        className="bg-white border-bottom shadow-sm"
+        style={{ width: '100%', position: 'relative', zIndex: 10 }}
       >
-        <div className="d-flex align-items-center">
-          <img
-            src="/images/guru-hospital-logo.png"
-            alt="Guru Hospital"
-            style={{ height: '46px', width: 'auto', objectFit: 'contain' }}
-          />
-        </div>
+        <div
+          className="d-flex align-items-center justify-content-between px-4 py-2"
+          style={{ maxWidth: '1300px', margin: '0 auto' }}
+        >
+          <div className="d-flex align-items-center">
+            <img
+              src="/images/guru-hospital-logo.png"
+              alt="Guru Hospital"
+              style={{ height: '58px', width: 'auto', objectFit: 'contain' }}
+            />
+          </div>
 
-        <a href="/login" className="text-decoration-none text-muted small fw-medium">
-          &larr; Back to home
-        </a>
+          <div className="d-flex align-items-center gap-3">
+            <span className="badge bg-light text-muted border px-2.5 py-1.5 small d-none d-md-inline-flex align-items-center">
+              <i className="bi bi-shield-check text-success me-1"></i> Clinical Document Workflow
+            </span>
+            <a href="/login" className="text-decoration-none text-muted small fw-medium">
+              &larr; Back to home
+            </a>
+          </div>
+        </div>
       </header>
 
       {/* Main Centered Hero with Orbital Canvas */}
@@ -55,9 +65,22 @@ export default function Login() {
           <OrbitalBackground />
 
           <div className="fg-auth-card">
-            {/* Top Green Icon Badge Overlapping Card Top Border */}
-            <div className="fg-auth-badge-top" title="Hospital Portal">
-              <i className="bi bi-bank2" style={{ color: '#16a34a' }}></i>
+            {/* Top Official Hospital Seal Overlapping Card Top Border */}
+            <div
+              className="fg-auth-badge-top"
+              title="Guru Hospital"
+              style={{
+                border: '2px solid #831661',
+                padding: '2px',
+                background: '#ffffff',
+                boxShadow: '0 4px 16px rgba(131, 22, 97, 0.18)',
+              }}
+            >
+              <img
+                src="/images/guru-logo-emblem.png"
+                alt="Guru Hospital"
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
             </div>
 
             <h1 className="fg-auth-title">Welcome back</h1>
