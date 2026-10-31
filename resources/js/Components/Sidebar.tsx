@@ -80,7 +80,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
           <div className="fg-sidebar-header">
             <Link
               href="/dashboard"
-              className="d-flex align-items-center text-decoration-none fg-sidebar-brand"
+              className="d-flex align-items-center justify-content-center text-decoration-none fg-sidebar-brand"
               onClick={closeMobile}
               title="Guru Hospital Dashboard"
             >

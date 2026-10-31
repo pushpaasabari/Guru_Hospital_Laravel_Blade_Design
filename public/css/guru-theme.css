@@ -912,27 +912,31 @@ body {
 }
 
 .fg-sidebar-header {
-  padding: 18px 20px 16px 20px;
+  padding: 16px 14px 14px 16px;
   border-bottom: 1px solid var(--fg-border, #e9e9e9);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 72px;
 }
 
 /* ─── Official Guru Hospital Brand Logo ──────────────────────────────────── */
 .fg-sidebar-brand {
+  flex: 1;
   display: flex;
   align-items: center;
+  justify-content: center;
   text-decoration: none;
-  max-width: 195px;
+  min-width: 0;
 }
 
 .fg-sidebar-logo-full {
-  height: 48px;
+  height: 44px;
   width: auto;
-  max-width: 190px;
+  max-width: 170px;
   object-fit: contain;
   display: block;
+  margin: 0 auto;
 }
 
 .fg-sidebar-logo-emblem {
@@ -1145,7 +1149,9 @@ body {
   }
 
   .fg-app-shell.sidebar-collapsed .fg-sidebar-hide-btn {
-    margin: 0 !important;
+    position: static !important;
+    transform: none !important;
+    margin: 0 auto !important;
   }
 
   /* Group titles & divider in icon menu mode */
@@ -1232,7 +1238,8 @@ body {
   transition: all 0.15s ease;
   color: var(--fg-text-secondary, #64748b);
   padding: 0;
-  margin-left: 8px;
+  flex-shrink: 0;
+  margin-left: 6px;
 }
 
 .fg-sidebar-hide-btn:hover {

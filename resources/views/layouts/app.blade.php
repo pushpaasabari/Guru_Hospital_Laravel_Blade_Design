@@ -29,7 +29,7 @@
     <aside class="fg-sidebar no-print collapse d-lg-flex" id="mobileSidebar">
         <div>
             <div class="fg-sidebar-header">
-                <a class="d-flex align-items-center text-decoration-none fg-sidebar-brand" href="{{ route('dashboard') }}" title="Guru Hospital Dashboard">
+                <a class="d-flex align-items-center justify-content-center text-decoration-none fg-sidebar-brand" href="{{ route('dashboard') }}" title="Guru Hospital Dashboard">
                     <img src="{{ asset('images/guru-hospital-logo.png') }}" alt="Guru Hospital" class="fg-sidebar-logo-full">
                     <img src="{{ asset('images/guru-logo-emblem.png') }}" alt="Guru Hospital" class="fg-sidebar-logo-emblem">
                 </a>
