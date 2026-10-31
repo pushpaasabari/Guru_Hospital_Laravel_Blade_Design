@@ -58,15 +58,18 @@
             padding: 4px 6px;
             font-size: 10pt;
             vertical-align: top;
+            text-align: left;
         }
         .meta-table th {
             background-color: #f7f9fa;
             color: #222;
             font-weight: bold;
             width: 20%;
+            text-align: left;
         }
         .meta-table td {
             width: 30%;
+            text-align: left;
         }
         .section-heading {
             font-size: 10.5pt;
