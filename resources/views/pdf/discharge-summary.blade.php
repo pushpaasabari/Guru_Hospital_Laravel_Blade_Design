@@ -48,6 +48,7 @@
             border-collapse: collapse;
             margin-bottom: 10px;
             font-size: 10pt;
+            table-layout: fixed;
         }
         .meta-table th, .meta-table td {
             border: 1px solid #999;
@@ -59,7 +60,10 @@
             background-color: #f7f9fa;
             color: #222;
             font-weight: bold;
-            width: 22%;
+            width: 20%;
+        }
+        .meta-table td {
+            width: 30%;
         }
         .section-heading {
             font-size: 10.5pt;
@@ -156,17 +160,14 @@
     <tr>
         <th>UHID NO</th>
         <td>{{ $admission->uhid }}</td>
-        <th>Age / Sex &bull; Date</th>
-        <td>{{ $admission->age ? $admission->age . ' / ' . ($admission->sex ?? 'F') : ($admission->sex ?? 'F') }} &bull; {{ $admission->discharge_at?->format('d/m/Y') }}</td>
+        <th>Age / Sex</th>
+        <td>{{ $admission->age ? $admission->age . ' / ' . ($admission->sex ?? 'F') : ($admission->sex ?? 'F') }}</td>
     </tr>
     <tr>
         <th>Address</th>
-        <td colspan="3">
-            {{ $admission->address ?? 'Not recorded' }}
-            @if($admission->contact)
-                &nbsp;&bull;&nbsp; <strong>Ph:</strong> {{ $admission->contact }}
-            @endif
-        </td>
+        <td>{{ $admission->address ?? 'Not recorded' }}</td>
+        <th>Phone</th>
+        <td>{{ $admission->contact ?? 'Not recorded' }}</td>
     </tr>
     <tr>
         <th>Admission Date & Time</th>

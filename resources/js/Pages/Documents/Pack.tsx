@@ -638,18 +638,15 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                 </td>
                 <td>
                   <strong>Age / Sex :</strong> {admission.age ? `${admission.age} Yrs` : 'N/A'} /{' '}
-                  {admission.sex || 'Female'} &nbsp;&nbsp;&nbsp;
-                  <strong>Date :</strong> {formatDate(admission.discharge_at)}
+                  {admission.sex || 'Female'}
                 </td>
               </tr>
               <tr>
-                <td colSpan={2}>
+                <td>
                   <strong>Address :</strong> {admission.address || 'Not recorded'}
-                  {admission.contact && (
-                    <>
-                      &nbsp;&bull;&nbsp; <strong>Ph :</strong> {admission.contact}
-                    </>
-                  )}
+                </td>
+                <td>
+                  <strong>Phone :</strong> {admission.contact || 'Not recorded'}
                 </td>
               </tr>
               <tr>

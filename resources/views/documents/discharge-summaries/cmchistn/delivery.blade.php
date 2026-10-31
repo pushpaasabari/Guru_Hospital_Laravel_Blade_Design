@@ -21,18 +21,11 @@
         </tr>
         <tr>
             <td><strong>UHID NO :</strong> {{ $admission->uhid }}</td>
-            <td>
-                <strong>Age / Sex :</strong> {{ $admission->age ? $admission->age . ' Yrs' : 'N/A' }} / {{ $admission->sex ?? 'Female' }} &nbsp;&nbsp;&nbsp;
-                <strong>Date :</strong> {{ $admission->discharge_at?->format('d/m/Y') ?? now()->format('d/m/Y') }}
-            </td>
+            <td><strong>Age / Sex :</strong> {{ $admission->age ? $admission->age . ' Yrs' : 'N/A' }} / {{ $admission->sex ?? 'Female' }}</td>
         </tr>
         <tr>
-            <td colspan="2">
-                <strong>Address :</strong> {{ $admission->address ?? 'Not recorded' }}
-                @if($admission->contact)
-                    &nbsp;&bull;&nbsp; <strong>Ph :</strong> {{ $admission->contact }}
-                @endif
-            </td>
+            <td><strong>Address :</strong> {{ $admission->address ?? 'Not recorded' }}</td>
+            <td><strong>Phone :</strong> {{ $admission->contact ?? 'Not recorded' }}</td>
         </tr>
         <tr>
             <td colspan="2">
