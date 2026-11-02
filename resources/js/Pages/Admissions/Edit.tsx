@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
@@ -66,6 +66,7 @@ interface Props {
 }
 
 export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props) {
+  const [customConsultant, setCustomConsultant] = useState(false);
   const { data, setData, put, processing, errors } = useForm({
     patient_name: admission.patient_name || '',
     uhid: admission.uhid || '',
@@ -278,8 +279,18 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
 
         {/* Section 2: Admission & Consultant Details */}
         <div className="card mb-4 border-0 shadow-sm">
-          <div className="card-header bg-white py-3 fw-bold text-dark">
-            <span className="badge bg-primary me-2">1.2</span> Admission &amp; Ward Assignment
+          <div className="card-header bg-white py-3 fw-bold text-dark d-flex align-items-center justify-content-between">
+            <div>
+              <span className="badge bg-primary me-2">1.2</span> Admission &amp; Ward Assignment
+            </div>
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-primary fw-semibold d-inline-flex align-items-center gap-1.5"
+              onClick={() => setCustomConsultant(!customConsultant)}
+            >
+              <i className={`bi ${customConsultant ? 'bi-list-ul' : 'bi-plus-circle'}`}></i>
+              <span>{customConsultant ? 'Select Doctor from List' : '+ Custom Consultant'}</span>
+            </button>
           </div>
           <div className="card-body">
             <div className="row g-3">
@@ -310,6 +321,9 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                   }}
                   staffList={clinicalStaff}
                   placeholder="-- Select Consultant Doctor --"
+                  showCustomToggle={false}
+                  isCustom={customConsultant}
+                  onCustomToggle={setCustomConsultant}
                 />
               </div>
               <div className="col-md-4">

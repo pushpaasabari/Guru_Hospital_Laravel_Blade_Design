@@ -17,6 +17,9 @@ interface StaffSelectProps {
   staffList?: ClinicalStaffMember[];
   placeholder?: string;
   required?: boolean;
+  showCustomToggle?: boolean;
+  isCustom?: boolean;
+  onCustomToggle?: (isCustom: boolean) => void;
 }
 
 export default function StaffSelect({
@@ -27,8 +30,21 @@ export default function StaffSelect({
   staffList = [],
   placeholder = '-- Select --',
   required = false,
+  showCustomToggle = false,
+  isCustom,
+  onCustomToggle,
 }: StaffSelectProps) {
-  const [customMode, setCustomMode] = useState(false);
+  const [internalCustom, setInternalCustom] = useState(false);
+
+  // Controlled or uncontrolled custom mode
+  const customMode = isCustom !== undefined ? isCustom : internalCustom;
+
+  const setCustomMode = (val: boolean) => {
+    if (onCustomToggle) {
+      onCustomToggle(val);
+    }
+    setInternalCustom(val);
+  };
 
   // Filter staff by the requested role
   const filtered = staffList.filter(
@@ -44,25 +60,37 @@ export default function StaffSelect({
         <label className={`form-label mb-0 ${required ? 'required' : ''}`}>
           {label}
         </label>
-        <button
-          type="button"
-          className="btn btn-link p-0 text-decoration-none small text-primary"
-          style={{ fontSize: '0.75rem', fontWeight: 500 }}
-          onClick={() => setCustomMode(!customMode)}
-        >
-          {customMode ? '← Pick from list' : '+ Custom name'}
-        </button>
+        {showCustomToggle && (
+          <button
+            type="button"
+            className="btn btn-link p-0 text-decoration-none small text-primary"
+            style={{ fontSize: '0.75rem', fontWeight: 500 }}
+            onClick={() => setCustomMode(!customMode)}
+          >
+            {customMode ? '← Pick from list' : '+ Custom name'}
+          </button>
+        )}
       </div>
 
       {customMode ? (
-        <input
-          type="text"
-          className="form-control"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={`Enter custom ${label}`}
-          required={required}
-        />
+        <div className="input-group">
+          <input
+            type="text"
+            className="form-control"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={`Enter custom ${label}`}
+            required={required}
+          />
+          <button
+            type="button"
+            className="btn btn-outline-secondary"
+            onClick={() => setCustomMode(false)}
+            title="Pick from staff list"
+          >
+            List
+          </button>
+        </div>
       ) : (
         <select
           className="form-select"
@@ -91,4 +119,3 @@ export default function StaffSelect({
     </div>
   );
 }
-
