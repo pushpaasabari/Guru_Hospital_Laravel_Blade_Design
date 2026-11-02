@@ -73,6 +73,7 @@ export default function AdmissionsSurgery({
   anesthesiaTypes = [],
 }: Props) {
   const isDelivery = admission.surgery_type === 'delivery';
+  const isMedical = admission.surgery_type === 'medical';
 
   const initialNewborns: Newborn[] =
     admission.newborns && admission.newborns.length > 0
@@ -164,18 +165,37 @@ export default function AdmissionsSurgery({
 
   return (
     <AppLayout>
-      <Head title={`Stage 2: Labour / Surgery — ${admission.patient_name}`} />
+      <Head title={`Stage 2: ${isMedical ? 'Clinical Notes' : 'Labour / Surgery'} — ${admission.patient_name}`} />
 
       {/* 4-Stage Navigation Header */}
       <AdmissionStageNav currentStage="surgery" admission={admission} />
 
+      {isMedical && (
+        <div className="alert alert-info d-flex flex-wrap align-items-center justify-content-between mb-4 border-0 shadow-sm p-3">
+          <div className="d-flex align-items-center gap-2">
+            <i className="bi bi-info-circle-fill fs-5 text-info"></i>
+            <div>
+              <strong>Medical Case (Non-Surgical):</strong> This patient is admitted for medical / conservative management. Operation theatre notes and newborn details are optional. You may record bedside notes or proceed directly to Stage 3.
+            </div>
+          </div>
+          <Link
+            href={`/admissions/${admission.id}/test-reports`}
+            className="btn btn-sm btn-info text-white text-nowrap fw-semibold mt-2 mt-md-0"
+          >
+            Skip to Stage 3: Test Reports <i className="bi bi-arrow-right ms-1"></i>
+          </Link>
+        </div>
+      )}
+
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
           <h1 className="h3 fw-bold mb-1 text-dark" style={{ letterSpacing: '-0.02em' }}>
-            Stage 2: Labour / LSCS / Surgery Notes
+            Stage 2: {isMedical ? 'Clinical & Bedside Notes' : 'Labour / LSCS / Surgery Notes'}
           </h1>
           <p className="text-muted mb-0">
-            Record Operation Theatre notes, surgical team members, procedure details, and newborn birth records.
+            {isMedical
+              ? 'Record any bedside procedures, conservative management notes, or clinical team details.'
+              : 'Record Operation Theatre notes, surgical team members, procedure details, and newborn birth records.'}
           </p>
         </div>
         <div className="d-flex gap-2">

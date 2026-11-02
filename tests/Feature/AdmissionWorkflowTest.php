@@ -393,5 +393,31 @@ class AdmissionWorkflowTest extends TestCase
         $this->assertEquals('Dharmapuri - 636701', $admission->address_line3);
         $this->assertEquals('No. 45, Anna Salai, Pennagaram Road, Dharmapuri - 636701', $admission->address);
     }
+
+    public function test_nurse_can_create_medical_case_workflow_admission(): void
+    {
+        $response = $this->actingAs($this->nurse)->post(route('admissions.store'), [
+            'patient_name' => 'Ramesh Kannan',
+            'uhid' => 'GH-2026-MED-01',
+            'ip_no' => 'IP-MED-01',
+            'address_line1' => '22 Bharathi Street',
+            'age' => '45',
+            'sex' => 'Male',
+            'admission_at' => '2026-10-24 10:00:00',
+            'diagnosis' => 'Acute Febrile Illness / Dengue Fever with Thrombocytopenia',
+            'format' => 'general',
+            'surgery_type' => 'medical',
+        ]);
+
+        $this->assertDatabaseHas('admissions', [
+            'ip_no' => 'IP-MED-01',
+            'surgery_type' => 'medical',
+        ]);
+
+        $admission = Admission::where('ip_no', 'IP-MED-01')->first();
+        $this->assertTrue($admission->isMedical());
+        $this->assertFalse($admission->isDelivery());
+        $this->assertFalse($admission->isSurgical());
+    }
 }
 

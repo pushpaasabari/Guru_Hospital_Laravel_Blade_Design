@@ -33,10 +33,14 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
     {
       id: 'surgery',
       step: 2,
-      name: 'Labour / Surgery',
-      subtitle: 'OT Team & Notes',
+      name: admission?.surgery_type === 'medical' ? 'Clinical Notes' : 'Labour / Surgery',
+      subtitle: admission?.surgery_type === 'medical' ? 'Bedside & Treatment' : 'OT Team & Notes',
       href: admission ? `/admissions/${admission.id}/surgery` : undefined,
-      isCompleted: Boolean(admission?.procedure_name || admission?.surgery_type === 'delivery'),
+      isCompleted: Boolean(
+        admission?.procedure_name ||
+        admission?.surgery_type === 'delivery' ||
+        admission?.surgery_type === 'medical'
+      ),
     },
     {
       id: 'test-reports',
@@ -103,7 +107,11 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
                     {admission.format || 'General'}
                   </span>
                   <span className="badge bg-info-subtle text-info text-uppercase">
-                    {admission.surgery_type === 'delivery' ? 'Delivery / Obstetric' : 'Other Surgery'}
+                    {admission.surgery_type === 'delivery'
+                      ? 'Delivery / Obstetric'
+                      : admission.surgery_type === 'medical'
+                      ? 'Medical Case'
+                      : 'Other Surgery'}
                   </span>
                 </div>
               </div>

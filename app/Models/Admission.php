@@ -76,6 +76,16 @@ class Admission extends Model
         return $this->surgery_type === 'delivery';
     }
 
+    public function isMedical(): bool
+    {
+        return $this->surgery_type === 'medical';
+    }
+
+    public function isSurgical(): bool
+    {
+        return $this->surgery_type === 'other';
+    }
+
     public function isDraft(): bool
     {
         return $this->status === 'draft';

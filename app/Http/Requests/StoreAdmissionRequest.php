@@ -38,7 +38,7 @@ class StoreAdmissionRequest extends FormRequest
 
             // Workflow Configurations
             'format' => ['required', Rule::in(['general', 'cmchistn', 'private', 'employee'])],
-            'surgery_type' => ['required', Rule::in(['delivery', 'other'])],
+            'surgery_type' => ['required', Rule::in(['delivery', 'other', 'medical'])],
             'diagnosis' => ['required', 'string', 'max:3000'],
 
             // Clinical Summary

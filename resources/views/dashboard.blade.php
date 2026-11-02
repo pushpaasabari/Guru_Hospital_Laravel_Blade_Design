@@ -111,7 +111,8 @@
                 <select name="surgery_type" class="form-select form-select-sm">
                     <option value="">All Workflows</option>
                     <option value="delivery" @selected(request('surgery_type')==='delivery')>Delivery / Obstetric</option>
-                    <option value="other_surgery" @selected(request('surgery_type')==='other_surgery')>Other Surgery</option>
+                    <option value="other" @selected(request('surgery_type')==='other' || request('surgery_type')==='other_surgery')>Other Surgery</option>
+                    <option value="medical" @selected(request('surgery_type')==='medical')>Medical Case</option>
                 </select>
             </div>
             <div class="col-md-3 d-flex gap-2">

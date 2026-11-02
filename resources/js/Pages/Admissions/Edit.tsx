@@ -469,14 +469,15 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                     Delivery / Obstetric {!isFemale ? '— (Female patients only)' : ''}
                   </option>
                   <option value="other">Other Surgery / Non-Obstetric</option>
+                  <option value="medical">Medical Case (Non-Surgical)</option>
                 </select>
                 {!isFemale ? (
                   <div className="form-text text-muted small">
-                    <i className="bi bi-info-circle me-1"></i> Delivery / obstetric workflow is only available when patient sex is set to <strong>Female</strong>.
+                    <i className="bi bi-info-circle me-1"></i> Delivery workflow is female only. Choose <strong>Other Surgery</strong> for operations or <strong>Medical Case</strong> for non-surgical conservative care.
                   </div>
                 ) : (
                   <div className="form-text text-muted small">
-                    Select <strong>Delivery / Obstetric</strong> for maternal delivery &amp; birth details, or <strong>Other Surgery</strong> for general operations.
+                    Select <strong>Delivery</strong> for maternal labour/LSCS, <strong>Other Surgery</strong> for surgical operations, or <strong>Medical Case</strong> for non-surgical conservative care.
                   </div>
                 )}
                 {errors.surgery_type && <div className="invalid-feedback">{errors.surgery_type}</div>}

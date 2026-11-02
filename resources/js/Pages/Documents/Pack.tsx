@@ -60,7 +60,7 @@ interface Admission {
   payment_mode?: string;
   status: string;
   format: 'general' | 'cmchistn' | 'employee' | 'private';
-  surgery_type: 'delivery' | 'other';
+  surgery_type: 'delivery' | 'other' | 'medical';
   procedure_name?: string;
   procedure_done?: string;
   surgeon?: string;
@@ -275,6 +275,8 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                 <strong className="text-dark">
                   {admission.surgery_type === 'delivery'
                     ? `Delivery / Obstetric (${admission.newborns?.length || 0} baby)`
+                    : admission.surgery_type === 'medical'
+                    ? 'Medical Case (Non-Surgical)'
                     : 'Other Surgery'}
                 </strong>{' '}
                 &bull; Consultant:{' '}

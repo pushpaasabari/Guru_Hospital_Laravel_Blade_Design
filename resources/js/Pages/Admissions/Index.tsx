@@ -152,7 +152,11 @@ export default function AdmissionsIndex({ admissions, filters = {}, auth }: Prop
                     <td>
                       <span className="badge bg-secondary text-uppercase">{adm.format}</span>
                       <div className="small text-muted mt-1">
-                        {adm.surgery_type === 'delivery' ? 'Delivery / Obstetric' : 'Other Surgery'}
+                        {adm.surgery_type === 'delivery'
+                          ? 'Delivery / Obstetric'
+                          : adm.surgery_type === 'medical'
+                          ? 'Medical Case'
+                          : 'Other Surgery'}
                       </div>
                     </td>
                     <td>

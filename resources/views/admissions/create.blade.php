@@ -159,6 +159,7 @@
                 <select name="surgery_type" id="surgeryType" class="form-select" required>
                     <option value="delivery" id="deliveryOption" @selected(old('surgery_type')==='delivery')>Delivery / Obstetric</option>
                     <option value="other" @selected(old('surgery_type', 'other')==='other')>Other Surgery / Non-Obstetric</option>
+                    <option value="medical" @selected(old('surgery_type')==='medical')>Medical Case (Non-Surgical)</option>
                 </select>
                 <div id="sexWarning" class="form-text text-muted small" style="display:none;">
                     <i class="bi bi-info-circle me-1"></i> Delivery / Obstetric workflow is only enabled when patient sex is set to <strong>Female</strong>.

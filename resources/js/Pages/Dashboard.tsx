@@ -341,6 +341,7 @@ export default function Dashboard({ counts, admissions, filters = {}, auth }: Pr
                 <option value="">All Workflows</option>
                 <option value="delivery">Delivery</option>
                 <option value="other">Other Surgery</option>
+                <option value="medical">Medical Case</option>
               </select>
             </div>
 
@@ -407,7 +408,11 @@ export default function Dashboard({ counts, admissions, filters = {}, auth }: Pr
                         {item.format}
                       </span>
                       <span className="badge bg-secondary" style={{ fontSize: '10px' }}>
-                        {item.surgery_type === 'delivery' ? `Delivery (${item.newborns?.length || 0})` : 'Other'}
+                        {item.surgery_type === 'delivery'
+                          ? `Delivery (${item.newborns?.length || 0})`
+                          : item.surgery_type === 'medical'
+                          ? 'Medical'
+                          : 'Other'}
                       </span>
                     </td>
                     <td>
