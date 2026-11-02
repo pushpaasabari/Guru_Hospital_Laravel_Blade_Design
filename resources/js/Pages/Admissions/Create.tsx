@@ -1,25 +1,14 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
-import AnesthesiaSelect, { AnesthesiaTypeItem } from '../../Components/AnesthesiaSelect';
-
-interface NewbornInput {
-  sex: string;
-  birth_at: string;
-  birth_weight_kg: string;
-  apgar_1_min: string;
-  apgar_5_min: string;
-  neonatal_care: string;
-  notes: string;
-}
+import AdmissionStageNav from '../../Components/AdmissionStageNav';
 
 interface Props {
   clinicalStaff?: ClinicalStaffMember[];
-  anesthesiaTypes?: AnesthesiaTypeItem[];
 }
 
-export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes = [] }: Props) {
+export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
   const { data, setData, post, processing, errors } = useForm({
     patient_name: '',
     uhid: '',
@@ -29,55 +18,15 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
     address: '',
     contact: '',
     admission_at: '',
-    procedure_at: '',
-    discharge_at: '',
     consultant: '',
     department: '',
     ward_room_no: '',
     format: 'general',
     surgery_type: 'other',
     diagnosis: '',
-    clinical_history: '',
-    examination: '',
-    treatment_course: '',
-    discharge_condition: '',
-    medication_orders: '',
-    discharge_advice: '',
-    follow_up: '',
-    investigations: '',
-    procedure_name: '',
-    procedure_done: '',
-    icd_code: '',
-    surgeon: '',
-    assisted_surgeon: '',
-    pediatrician_name: '',
-    anaesthetist: '',
-    assisted_anaesthetist: '',
-    assisted_by: '',
-    staff_nurse: '',
-    ot_technician: '',
-    anaesthesia_type: '',
-    procedure_note: '',
-    incision: '',
-    findings: '',
-    complications: '',
-    blood_loss_ml: '',
-    specimen: '',
-    drain: '',
-    postoperative_orders: '',
     mrd_no: '',
-    payment_mode: '',
-    newborns: [
-      {
-        sex: '',
-        birth_at: '',
-        birth_weight_kg: '',
-        apgar_1_min: '',
-        apgar_5_min: '',
-        neonatal_care: '',
-        notes: '',
-      },
-    ] as NewbornInput[],
+    payment_mode: 'Cash',
+    next_step: 'surgery',
   });
 
   const isFemale = data.sex?.toLowerCase() === 'female';
@@ -101,34 +50,6 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
     }
   };
 
-  const addBaby = () => {
-    setData('newborns', [
-      ...data.newborns,
-      {
-        sex: '',
-        birth_at: '',
-        birth_weight_kg: '',
-        apgar_1_min: '',
-        apgar_5_min: '',
-        neonatal_care: '',
-        notes: '',
-      },
-    ]);
-  };
-
-  const removeBaby = (index: number) => {
-    setData(
-      'newborns',
-      data.newborns.filter((_, i) => i !== index)
-    );
-  };
-
-  const updateBaby = (index: number, field: keyof NewbornInput, val: string) => {
-    const updated = [...data.newborns];
-    updated[index][field] = val;
-    setData('newborns', updated);
-  };
-
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     post('/admissions');
@@ -136,15 +57,18 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
 
   return (
     <AppLayout>
-      <Head title="New Admission — Guru Hospital" />
+      <Head title="New Admission (Stage 1) — Guru Hospital" />
+
+      {/* 4-Stage Navigation Header */}
+      <AdmissionStageNav currentStage="admission" admission={null} />
 
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
           <h1 className="h3 fw-bold mb-1 text-dark" style={{ letterSpacing: '-0.02em' }}>
-            New Admission / Document Pack
+            Stage 1: Patient Admission &amp; Case Setup
           </h1>
           <p className="text-muted mb-0">
-            Enter shared details once. Save as draft, then review the discharge summary, OT notes and MRD form together.
+            Enter patient demographics, admission details, format, and provisional diagnosis.
           </p>
         </div>
         <Link href="/admissions" className="btn btn-outline-secondary">
@@ -155,8 +79,11 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
       <form onSubmit={submit} id="admissionForm">
         {/* Section 1: Demographics */}
         <div className="card mb-4 border-0 shadow-sm">
-          <div className="card-header bg-white py-3 fw-bold text-dark">
-            <span className="badge bg-dark me-2">1</span> Shared Patient &amp; Admission Details
+          <div className="card-header bg-white py-3 fw-bold text-dark d-flex align-items-center justify-content-between">
+            <div>
+              <span className="badge bg-primary me-2">1.1</span> Patient Demographics
+            </div>
+            <span className="text-muted small">Step 1 of 4</span>
           </div>
           <div className="card-body">
             <div className="row g-3">
@@ -164,34 +91,37 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
                 <label className="form-label required">Patient Full Name</label>
                 <input
                   type="text"
-                  className="form-control"
+                  className={`form-control ${errors.patient_name ? 'is-invalid' : ''}`}
                   value={data.patient_name}
                   onChange={(e) => setData('patient_name', e.target.value)}
+                  placeholder="e.g. Mrs. Anitha"
                   required
                 />
-                {errors.patient_name && <div className="text-danger small">{errors.patient_name}</div>}
+                {errors.patient_name && <div className="invalid-feedback">{errors.patient_name}</div>}
               </div>
               <div className="col-md-4">
                 <label className="form-label required">UHID / MRN</label>
                 <input
                   type="text"
-                  className="form-control"
+                  className={`form-control ${errors.uhid ? 'is-invalid' : ''}`}
                   value={data.uhid}
                   onChange={(e) => setData('uhid', e.target.value)}
+                  placeholder="e.g. 2023/3931"
                   required
                 />
-                {errors.uhid && <div className="text-danger small">{errors.uhid}</div>}
+                {errors.uhid && <div className="invalid-feedback">{errors.uhid}</div>}
               </div>
               <div className="col-md-4">
                 <label className="form-label required">IP No.</label>
                 <input
                   type="text"
-                  className="form-control"
+                  className={`form-control ${errors.ip_no ? 'is-invalid' : ''}`}
                   value={data.ip_no}
                   onChange={(e) => setData('ip_no', e.target.value)}
+                  placeholder="e.g. 2026/567"
                   required
                 />
-                {errors.ip_no && <div className="text-danger small">{errors.ip_no}</div>}
+                {errors.ip_no && <div className="invalid-feedback">{errors.ip_no}</div>}
               </div>
 
               <div className="col-md-2">
@@ -201,26 +131,33 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
                   className="form-control"
                   value={data.age}
                   onChange={(e) => setData('age', e.target.value)}
-                  placeholder="e.g. 26"
+                  placeholder="e.g. 23"
                 />
               </div>
               <div className="col-md-2">
-                <label className="form-label">Sex</label>
-                <select className="form-select" value={data.sex} onChange={(e) => handleSexChange(e.target.value)}>
-                  <option value="">Select</option>
+                <label className="form-label required">Sex</label>
+                <select
+                  className={`form-select ${errors.sex ? 'is-invalid' : ''}`}
+                  value={data.sex}
+                  onChange={(e) => handleSexChange(e.target.value)}
+                  required
+                >
+                  <option value="">Select Sex</option>
                   <option value="Female">Female</option>
                   <option value="Male">Male</option>
                   <option value="Other">Other</option>
                   <option value="Not recorded">Not recorded</option>
                 </select>
+                {errors.sex && <div className="invalid-feedback">{errors.sex}</div>}
               </div>
               <div className="col-md-4">
-                <label className="form-label">Contact</label>
+                <label className="form-label">Phone / Contact</label>
                 <input
                   type="text"
                   className="form-control"
                   value={data.contact}
                   onChange={(e) => setData('contact', e.target.value)}
+                  placeholder="e.g. 7373667465"
                 />
               </div>
               <div className="col-md-4">
@@ -230,28 +167,30 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
                   className="form-control"
                   value={data.address}
                   onChange={(e) => setData('address', e.target.value)}
+                  placeholder="e.g. W/O Sarath Veerasamur"
                 />
               </div>
+            </div>
+          </div>
+        </div>
 
-              <div className="col-md-6">
-                <label className="form-label required">Admission Date/Time</label>
+        {/* Section 2: Admission & Consultant Details */}
+        <div className="card mb-4 border-0 shadow-sm">
+          <div className="card-header bg-white py-3 fw-bold text-dark">
+            <span className="badge bg-primary me-2">1.2</span> Admission &amp; Ward Assignment
+          </div>
+          <div className="card-body">
+            <div className="row g-3">
+              <div className="col-md-4">
+                <label className="form-label required">Admission Date &amp; Time</label>
                 <input
                   type="datetime-local"
-                  className="form-control"
+                  className={`form-control ${errors.admission_at ? 'is-invalid' : ''}`}
                   value={data.admission_at}
                   onChange={(e) => setData('admission_at', e.target.value)}
                   required
                 />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label required">Discharge Date/Time</label>
-                <input
-                  type="datetime-local"
-                  className="form-control"
-                  value={data.discharge_at}
-                  onChange={(e) => setData('discharge_at', e.target.value)}
-                  required
-                />
+                {errors.admission_at && <div className="invalid-feedback">{errors.admission_at}</div>}
               </div>
 
               <div className="col-md-4">
@@ -272,7 +211,7 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">Department</label>
+                <label className="form-label">Department / Specialty</label>
                 <input
                   type="text"
                   className="form-control"
@@ -288,9 +227,40 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
                   className="form-control"
                   value={data.ward_room_no}
                   onChange={(e) => setData('ward_room_no', e.target.value)}
+                  placeholder="e.g. Ward A / Bed 04"
                 />
               </div>
+              <div className="col-md-4">
+                <label className="form-label">MRD File Number</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={data.mrd_no}
+                  onChange={(e) => setData('mrd_no', e.target.value)}
+                  placeholder="e.g. MRD-2026-0567"
+                />
+              </div>
+              <div className="col-md-4">
+                <label className="form-label">Payment / Insurance Mode</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={data.payment_mode}
+                  onChange={(e) => setData('payment_mode', e.target.value)}
+                  placeholder="e.g. Cash / CMCHISTN / Star Health"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
+        {/* Section 3: Format & Diagnosis */}
+        <div className="card mb-4 border-0 shadow-sm">
+          <div className="card-header bg-white py-3 fw-bold text-dark">
+            <span className="badge bg-primary me-2">1.3</span> Format, Workflow &amp; Diagnosis
+          </div>
+          <div className="card-body">
+            <div className="row g-3">
               <div className="col-md-6">
                 <label className="form-label required">Discharge Summary Format</label>
                 <select
@@ -304,7 +274,11 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
                   <option value="private">Private Insurance</option>
                   <option value="employee">Hospital Employee</option>
                 </select>
+                <div className="form-text text-muted small">
+                  Determines the header style and layout for all generated documents.
+                </div>
               </div>
+
               <div className="col-md-6">
                 <div className="d-flex justify-content-between align-items-center mb-1">
                   <label className="form-label required mb-0" htmlFor="surgeryType">Surgery / Clinical Workflow</label>
@@ -339,459 +313,38 @@ export default function AdmissionsCreate({ clinicalStaff = [], anesthesiaTypes =
               </div>
 
               <div className="col-12">
-                <label className="form-label required">Diagnosis</label>
+                <label className="form-label required">Provisional / Admission Diagnosis</label>
                 <textarea
-                  className="form-control"
+                  className={`form-control ${errors.diagnosis ? 'is-invalid' : ''}`}
                   rows={2}
                   value={data.diagnosis}
                   onChange={(e) => setData('diagnosis', e.target.value)}
+                  placeholder="e.g. G3P1L1A1 / TWINS / Preterm / PROM"
                   required
                 />
+                {errors.diagnosis && <div className="invalid-feedback">{errors.diagnosis}</div>}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Section 2: Clinical Details */}
-        <div className="card mb-4 border-0 shadow-sm">
-          <div className="card-header bg-white py-3 fw-bold text-dark">
-            <span className="badge bg-dark me-2">2</span> Discharge Summary Clinical Details
-          </div>
-          <div className="card-body">
-            <div className="row g-3">
-              <div className="col-md-6">
-                <label className="form-label">Presenting Complaints / Relevant History</label>
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  value={data.clinical_history}
-                  onChange={(e) => setData('clinical_history', e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Clinical Examination / Vital Signs</label>
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  value={data.examination}
-                  onChange={(e) => setData('examination', e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Treatment &amp; Hospital Course</label>
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  value={data.treatment_course}
-                  onChange={(e) => setData('treatment_course', e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Condition at Discharge</label>
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  value={data.discharge_condition}
-                  onChange={(e) => setData('discharge_condition', e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Authorised Discharge Medication Orders</label>
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  value={data.medication_orders}
-                  onChange={(e) => setData('medication_orders', e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Discharge Advice / Warning Signs</label>
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  value={data.discharge_advice}
-                  onChange={(e) => setData('discharge_advice', e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Follow-up</label>
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  value={data.follow_up}
-                  onChange={(e) => setData('follow_up', e.target.value)}
-                />
-              </div>
-              <div className="col-12">
-                <label className="form-label">Investigations (Lab Reports, Pathology &amp; Diagnostics)</label>
-                <textarea
-                  className="form-control"
-                  rows={4}
-                  value={data.investigations}
-                  onChange={(e) => setData('investigations', e.target.value)}
-                  placeholder="e.g.&#10;Hb: 10.6mgs%&#10;HIV: Negative | VDRL: Negative | HBsAG: Negative&#10;BG: B positive&#10;ECG: Normal&#10;RBS: 101.6 mg/dl | Urea: 24.3 mg/dl | Creatinine: 0.56 mg/dl"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 3: OT Notes */}
-        <div className="card mb-4 border-0 shadow-sm">
-          <div className="card-header bg-white py-3 fw-bold text-dark">
-            <span className="badge bg-dark me-2">3</span> Operation Theatre Notes
-          </div>
-          <div className="card-body">
-            <div className="row g-3">
-              <div className="col-md-3">
-                <label className="form-label">Procedure / Delivery Date/Time</label>
-                <input
-                  type="datetime-local"
-                  className="form-control"
-                  value={data.procedure_at}
-                  onChange={(e) => setData('procedure_at', e.target.value)}
-                />
-              </div>
-              <div className="col-md-3">
-                <label className="form-label">Procedure / Surgery</label>
-                <input
-                  className="form-control"
-                  value={data.procedure_name}
-                  onChange={(e) => setData('procedure_name', e.target.value)}
-                />
-              </div>
-              <div className="col-md-3">
-                <label className="form-label">Procedure Done</label>
-                <input
-                  className="form-control"
-                  value={data.procedure_done}
-                  onChange={(e) => setData('procedure_done', e.target.value)}
-                />
-              </div>
-              <div className="col-md-3">
-                <label className="form-label">ICD Code</label>
-                <input
-                  className="form-control"
-                  value={data.icd_code}
-                  onChange={(e) => setData('icd_code', e.target.value)}
-                />
-              </div>
-              <div className="col-md-4">
-                <StaffSelect
-                  label="Surgeon"
-                  role="surgeon"
-                  value={data.surgeon}
-                  onChange={(val) => setData('surgeon', val)}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select Surgeon --"
-                />
-              </div>
-              <div className="col-md-4">
-                <StaffSelect
-                  label="Assisted Surgeon"
-                  role="assisted_surgeon"
-                  value={data.assisted_surgeon}
-                  onChange={(val) => {
-                    setData((prev) => ({
-                      ...prev,
-                      assisted_surgeon: val,
-                      assisted_by: prev.assisted_by ? prev.assisted_by : val,
-                    }));
-                  }}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select Assisted Surgeon --"
-                />
-              </div>
-              <div className="col-md-4">
-                <StaffSelect
-                  label="Anaesthetist"
-                  role="anaesthetist"
-                  value={data.anaesthetist}
-                  onChange={(val) => setData('anaesthetist', val)}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select Anaesthetist --"
-                />
-              </div>
-              <div className="col-md-4">
-                <StaffSelect
-                  label="Assisted Anaesthetist"
-                  role="assisted_anaesthetist"
-                  value={data.assisted_anaesthetist}
-                  onChange={(val) => setData('assisted_anaesthetist', val)}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select Asst. Anaesthetist --"
-                />
-              </div>
-              <div className="col-md-4">
-                <StaffSelect
-                  label="Staff Nurse"
-                  role="staff_nurse"
-                  value={data.staff_nurse}
-                  onChange={(val) => {
-                    setData((prev) => ({
-                      ...prev,
-                      staff_nurse: val,
-                      assisted_by: prev.assisted_by ? prev.assisted_by : val,
-                    }));
-                  }}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select Staff Nurse --"
-                />
-              </div>
-              <div className="col-md-4">
-                <StaffSelect
-                  label="OT Technician"
-                  role="ot_technician"
-                  value={data.ot_technician}
-                  onChange={(val) => setData('ot_technician', val)}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select OT Technician --"
-                />
-              </div>
-              <div className="col-md-4">
-                <StaffSelect
-                  label="Consultant Pediatrician"
-                  role="consultant_pediatrician"
-                  value={data.pediatrician_name}
-                  onChange={(val) => setData('pediatrician_name', val)}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select Pediatrician --"
-                />
-              </div>
-              <div className="col-md-4">
-                <AnesthesiaSelect
-                  label="Anaesthesia Type"
-                  value={data.anaesthesia_type}
-                  onChange={(val) => setData('anaesthesia_type', val)}
-                  types={anesthesiaTypes}
-                  placeholder="-- Select Anaesthesia Type --"
-                />
-              </div>
-              <div className="col-md-4">
-                <label className="form-label">Blood Loss (mL)</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  min="0"
-                  className="form-control"
-                  value={data.blood_loss_ml}
-                  onChange={(e) => setData('blood_loss_ml', e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Procedure Note</label>
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  value={data.procedure_note}
-                  onChange={(e) => setData('procedure_note', e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Incision</label>
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  value={data.incision}
-                  onChange={(e) => setData('incision', e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Findings</label>
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  value={data.findings}
-                  onChange={(e) => setData('findings', e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Complications</label>
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  value={data.complications}
-                  onChange={(e) => setData('complications', e.target.value)}
-                />
-              </div>
-              <div className="col-md-6">
-                <label className="form-label">Post-operative Orders</label>
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  value={data.postoperative_orders}
-                  onChange={(e) => setData('postoperative_orders', e.target.value)}
-                />
-              </div>
-              <div className="col-md-3">
-                <label className="form-label">Specimen</label>
-                <input
-                  className="form-control"
-                  value={data.specimen}
-                  onChange={(e) => setData('specimen', e.target.value)}
-                />
-              </div>
-              <div className="col-md-3">
-                <label className="form-label">Drain</label>
-                <input
-                  className="form-control"
-                  value={data.drain}
-                  onChange={(e) => setData('drain', e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 4: Birth Details (Delivery Only) */}
-        {data.surgery_type === 'delivery' && (
-          <div className="card mb-4 border-0 shadow-sm" id="deliveryFields">
-            <div className="card-header bg-white py-3 fw-bold text-dark">
-              <span className="badge bg-dark me-2">4</span> Birth / Newborn Details — Delivery Only
-            </div>
-            <div className="card-body">
-              <p className="small text-muted">
-                Add one record per newborn; for twins, enter two separate newborn records.
-              </p>
-
-              {data.newborns.map((baby, i) => (
-                <div key={i} className="border rounded p-3 mb-3 bg-light">
-                  <div className="d-flex justify-content-between align-items-center mb-2">
-                    <strong>Newborn <span className="badge bg-dark">#{i + 1}</span></strong>
-                    {data.newborns.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeBaby(i)}
-                        className="btn btn-sm btn-outline-danger"
-                      >
-                        Remove
-                      </button>
-                    )}
-                  </div>
-                  <div className="row g-2">
-                    <div className="col-md-2">
-                      <label className="form-label">Sex</label>
-                      <select
-                        className="form-select"
-                        value={baby.sex}
-                        onChange={(e) => updateBaby(i, 'sex', e.target.value)}
-                      >
-                        <option value="">Select</option>
-                        <option value="Female">Female</option>
-                        <option value="Male">Male</option>
-                        <option value="Other">Other</option>
-                        <option value="Not recorded">Not recorded</option>
-                      </select>
-                    </div>
-                    <div className="col-md-3">
-                      <label className="form-label">Birth Date/Time</label>
-                      <input
-                        type="datetime-local"
-                        className="form-control"
-                        value={baby.birth_at}
-                        onChange={(e) => updateBaby(i, 'birth_at', e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-2">
-                      <label className="form-label">Weight (kg)</label>
-                      <input
-                        type="number"
-                        step="0.01"
-                        min="0.1"
-                        max="8"
-                        className="form-control"
-                        value={baby.birth_weight_kg}
-                        onChange={(e) => updateBaby(i, 'birth_weight_kg', e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-2">
-                      <label className="form-label">Apgar 1 min</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="10"
-                        className="form-control"
-                        value={baby.apgar_1_min}
-                        onChange={(e) => updateBaby(i, 'apgar_1_min', e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-2">
-                      <label className="form-label">Apgar 5 min</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="10"
-                        className="form-control"
-                        value={baby.apgar_5_min}
-                        onChange={(e) => updateBaby(i, 'apgar_5_min', e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label">Neonatal Care</label>
-                      <textarea
-                        className="form-control"
-                        rows={2}
-                        value={baby.neonatal_care}
-                        onChange={(e) => updateBaby(i, 'neonatal_care', e.target.value)}
-                      />
-                    </div>
-                    <div className="col-md-6">
-                      <label className="form-label">Other Documented Notes</label>
-                      <textarea
-                        className="form-control"
-                        rows={2}
-                        value={baby.notes}
-                        onChange={(e) => updateBaby(i, 'notes', e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-
-              <button type="button" onClick={addBaby} className="btn btn-outline-secondary">
-                <i className="bi bi-plus"></i> Add Newborn
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Section 5: MRD Fields */}
-        <div className="card mb-4 border-0 shadow-sm">
-          <div className="card-header bg-white py-3 fw-bold text-dark">
-            <span className="badge bg-dark me-2">5</span> MRD Fields
-          </div>
-          <div className="card-body">
-            <div className="row g-3">
-              <div className="col-md-4">
-                <label className="form-label">MRD No.</label>
-                <input
-                  className="form-control"
-                  value={data.mrd_no}
-                  onChange={(e) => setData('mrd_no', e.target.value)}
-                />
-              </div>
-              <div className="col-md-4">
-                <label className="form-label">Payment Mode</label>
-                <input
-                  className="form-control"
-                  value={data.payment_mode}
-                  onChange={(e) => setData('payment_mode', e.target.value)}
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="d-flex gap-2 mb-5">
-          <button type="submit" className="btn btn-primary btn-lg" disabled={processing}>
-            {processing ? 'Saving Draft…' : 'Save Draft & Preview Three Documents'}
-          </button>
-          <Link href="/admissions" className="btn btn-outline-secondary btn-lg">
+        {/* Action Bar */}
+        <div className="d-flex justify-content-between align-items-center pb-5">
+          <Link href="/admissions" className="btn btn-outline-secondary">
             Cancel
           </Link>
+          <div className="d-flex gap-2">
+            <button
+              type="submit"
+              disabled={processing}
+              className="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2"
+            >
+              <span>Save &amp; Proceed to Stage 2: Surgery / Labour</span>
+              <i className="bi bi-arrow-right"></i>
+            </button>
+          </div>
         </div>
       </form>
     </AppLayout>
   );
 }
-

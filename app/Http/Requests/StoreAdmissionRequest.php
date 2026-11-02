@@ -27,7 +27,7 @@ class StoreAdmissionRequest extends FormRequest
             // Core Dates & Doctors
             'admission_at' => ['required', 'date'],
             'procedure_at' => ['nullable', 'date'],
-            'discharge_at' => ['required', 'date', 'after_or_equal:admission_at'],
+            'discharge_at' => ['nullable', 'date', 'after_or_equal:admission_at'],
             'consultant' => ['nullable', 'string', 'max:160'],
             'department' => ['nullable', 'string', 'max:160'],
             'ward_room_no' => ['nullable', 'string', 'max:50'],

@@ -289,9 +289,41 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
               </Link>
 
               {canBeEdited && user?.can_edit && (
-                <Link href={`/admissions/${admission.id}/edit`} className="btn btn-outline-secondary">
-                  <i className="bi bi-pencil me-1"></i> Edit Data
-                </Link>
+                <div className="btn-group">
+                  <Link href={`/admissions/${admission.id}/edit`} className="btn btn-outline-secondary">
+                    <i className="bi bi-pencil me-1"></i> Edit Data
+                  </Link>
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    <span className="visually-hidden">Toggle Sub-Forms</span>
+                  </button>
+                  <ul className="dropdown-menu shadow-sm border-0" style={{ fontSize: '13px' }}>
+                    <li>
+                      <Link className="dropdown-item py-1.5" href={`/admissions/${admission.id}/edit`}>
+                        <i className="bi bi-person me-2 text-primary"></i>1. Admission Details
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item py-1.5" href={`/admissions/${admission.id}/surgery`}>
+                        <i className="bi bi-heart-pulse me-2 text-danger"></i>2. Labour / Surgery
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item py-1.5" href={`/admissions/${admission.id}/test-reports`}>
+                        <i className="bi bi-file-earmark-medical me-2 text-info"></i>3. Test Reports
+                      </Link>
+                    </li>
+                    <li>
+                      <Link className="dropdown-item py-1.5" href={`/admissions/${admission.id}/discharge`}>
+                        <i className="bi bi-clipboard2-check me-2 text-success"></i>4. Discharge Summary
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
               )}
 
               {(isDraft || isReturned) && (

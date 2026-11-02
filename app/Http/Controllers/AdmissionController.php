@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreAdmissionRequest;
 use App\Http\Requests\UpdateAdmissionRequest;
+use App\Http\Requests\UpdateSurgeryRequest;
+use App\Http\Requests\UpdateTestReportsRequest;
+use App\Http\Requests\UpdateDischargeRequest;
 use App\Models\Admission;
 use App\Models\AnesthesiaType;
 use App\Models\ClinicalStaff;
@@ -86,8 +89,14 @@ class AdmissionController extends Controller
             return $admission;
         });
 
-        return redirect()->route('documents.preview', $admission)
-            ->with('status', 'Draft admission saved successfully. Review all three documents before submitting for approval.');
+        $redirectTo = $request->input('redirect_to', $request->input('next_step', 'surgery'));
+        if ($redirectTo === 'preview') {
+            return redirect()->route('documents.preview', $admission)
+                ->with('status', 'Draft admission saved successfully.');
+        }
+
+        return redirect()->route('admissions.surgery', $admission)
+            ->with('status', 'Admission details saved successfully. Proceed to Labour / LSCS / Surgery.');
     }
 
     public function show(Admission $admission): Response
@@ -145,8 +154,147 @@ class AdmissionController extends Controller
             );
         });
 
+        $nextStep = $request->input('next_step', 'surgery');
+        if ($nextStep === 'stay') {
+            return redirect()->route('admissions.edit', $admission)
+                ->with('status', 'Admission details updated successfully.');
+        }
+        if ($nextStep === 'preview') {
+            return redirect()->route('documents.preview', $admission)
+                ->with('status', 'Admission details updated successfully.');
+        }
+
+        return redirect()->route('admissions.surgery', $admission)
+            ->with('status', 'Admission details updated. Proceed to Labour / LSCS / Surgery.');
+    }
+
+    public function editSurgery(Admission $admission): Response
+    {
+        $this->authorize('update', $admission);
+        $admission->load('newborns');
+        $clinicalStaff = ClinicalStaff::active()->orderBy('name')->get();
+        $anesthesiaTypes = AnesthesiaType::active()->get();
+
+        return Inertia::render('Admissions/Surgery', compact('admission', 'clinicalStaff', 'anesthesiaTypes'));
+    }
+
+    public function updateSurgery(UpdateSurgeryRequest $request, Admission $admission): RedirectResponse
+    {
+        $validated = $request->validated();
+        $newborns = $validated['newborns'] ?? [];
+        unset($validated['newborns']);
+
+        if (empty($validated['assisted_by'])) {
+            $validated['assisted_by'] = $validated['assisted_surgeon'] ?? ($validated['staff_nurse'] ?? null);
+        }
+
+        $oldData = $admission->toArray();
+
+        DB::transaction(function () use ($admission, $validated, $newborns, $oldData) {
+            $admission->update($validated);
+
+            if ($admission->isDelivery()) {
+                $admission->newborns()->delete();
+                foreach ($newborns as $newborn) {
+                    if (collect($newborn)->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty()) {
+                        $admission->newborns()->create($newborn);
+                    }
+                }
+            } else {
+                $admission->newborns()->delete();
+            }
+
+            AuditService::log(
+                'admission.surgery_updated',
+                'Admission',
+                $admission->id,
+                "Surgery & OT details updated for {$admission->patient_name}",
+                $oldData,
+                $admission->fresh()->toArray()
+            );
+        });
+
+        $nextStep = $request->input('next_step', 'test-reports');
+        if ($nextStep === 'stay') {
+            return redirect()->route('admissions.surgery', $admission)
+                ->with('status', 'Surgery / Labour details saved successfully.');
+        }
+        if ($nextStep === 'preview') {
+            return redirect()->route('documents.preview', $admission)
+                ->with('status', 'Surgery / Labour details saved successfully.');
+        }
+
+        return redirect()->route('admissions.test-reports', $admission)
+            ->with('status', 'Surgery details saved. Proceed to Test Reports.');
+    }
+
+    public function editTestReports(Admission $admission): Response
+    {
+        $this->authorize('update', $admission);
+        return Inertia::render('Admissions/TestReports', compact('admission'));
+    }
+
+    public function updateTestReports(UpdateTestReportsRequest $request, Admission $admission): RedirectResponse
+    {
+        $validated = $request->validated();
+        $oldData = $admission->toArray();
+
+        $admission->update($validated);
+
+        AuditService::log(
+            'admission.test_reports_updated',
+            'Admission',
+            $admission->id,
+            "Test reports / investigations updated for {$admission->patient_name}",
+            $oldData,
+            $admission->fresh()->toArray()
+        );
+
+        $nextStep = $request->input('next_step', 'discharge');
+        if ($nextStep === 'stay') {
+            return redirect()->route('admissions.test-reports', $admission)
+                ->with('status', 'Test reports saved successfully.');
+        }
+        if ($nextStep === 'preview') {
+            return redirect()->route('documents.preview', $admission)
+                ->with('status', 'Test reports saved successfully.');
+        }
+
+        return redirect()->route('admissions.discharge', $admission)
+            ->with('status', 'Test reports saved. Proceed to Discharge Summary.');
+    }
+
+    public function editDischarge(Admission $admission): Response
+    {
+        $this->authorize('update', $admission);
+        $clinicalStaff = ClinicalStaff::active()->orderBy('name')->get();
+        return Inertia::render('Admissions/Discharge', compact('admission', 'clinicalStaff'));
+    }
+
+    public function updateDischarge(UpdateDischargeRequest $request, Admission $admission): RedirectResponse
+    {
+        $validated = $request->validated();
+        $oldData = $admission->toArray();
+
+        $admission->update($validated);
+
+        AuditService::log(
+            'admission.discharge_updated',
+            'Admission',
+            $admission->id,
+            "Discharge details updated for {$admission->patient_name}",
+            $oldData,
+            $admission->fresh()->toArray()
+        );
+
+        $nextStep = $request->input('next_step', 'preview');
+        if ($nextStep === 'stay') {
+            return redirect()->route('admissions.discharge', $admission)
+                ->with('status', 'Discharge details saved successfully.');
+        }
+
         return redirect()->route('documents.preview', $admission)
-            ->with('status', 'Admission details updated successfully.');
+            ->with('status', 'Discharge details saved. Document pack is ready for review.');
     }
 
     public function createRevision(Request $request, Admission $admission): RedirectResponse

@@ -1,147 +1,190 @@
 @extends('layouts.app')
-@section('title','New Admission — Guru Hospital')
+@section('title', 'Stage 1: Patient Admission — Guru Hospital')
 @section('content')
-<h1 class="h3 mb-1">New admission / document pack</h1>
-<p class="text-muted">Enter shared details once. Save as draft, then review the discharge summary, OT notes and MRD form together.</p>
-<form method="POST" action="{{ route('admissions.store') }}" id="admissionForm">
-@csrf
-<div class="card mb-3"><div class="card-header bg-white fw-bold">1. Shared patient and admission details</div><div class="card-body"><div class="row g-3">
-<div class="col-md-4"><label class="form-label required">Patient name</label><input class="form-control" name="patient_name" type="text" value="{{ old('patient_name') }}" required></div>
-<div class="col-md-4"><label class="form-label required">UHID / MRN</label><input class="form-control" name="uhid" type="text" value="{{ old('uhid') }}" required></div>
-<div class="col-md-4"><label class="form-label required">IP No.</label><input class="form-control" name="ip_no" type="text" value="{{ old('ip_no') }}" required></div>
+<div class="mb-4">
+    <!-- Stage Workflow Navigation -->
+    <div class="card mb-3 border-0 shadow-sm">
+        <div class="card-body p-2">
+            <div class="row g-2 text-center">
+                <div class="col-md-3">
+                    <div class="p-2 rounded bg-primary text-white fw-bold">
+                        1. Admission (Current)
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-2 rounded bg-light text-muted border">
+                        2. Labour / LSCS / Surgery
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-2 rounded bg-light text-muted border">
+                        3. Test Reports
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="p-2 rounded bg-light text-muted border">
+                        4. Discharge Summary
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<div class="col-md-4"><label class="form-label">Age</label><input class="form-control" name="age" type="text" value="{{ old('age') }}"></div>
-<div class="col-md-4"><label class="form-label">Sex</label><select name="sex" class="form-select" id="patientSex"><option value="">Select</option>@foreach(['Female','Male','Other','Not recorded'] as $v)<option value="{{ $v }}" @selected(old('sex')===$v)>{{ $v }}</option>@endforeach</select></div>
-<div class="col-md-4"><label class="form-label">Contact</label><input class="form-control" name="contact" type="text" value="{{ old('contact') }}"></div>
-
-<div class="col-md-4"><label class="form-label">Address</label><input class="form-control" name="address" type="text" value="{{ old('address') }}"></div>
-<div class="col-md-4"><label class="form-label">Consultant</label><input class="form-control" name="consultant" type="text" value="{{ old('consultant') }}"></div>
-<div class="col-md-4"><label class="form-label">Department</label><input class="form-control" name="department" type="text" value="{{ old('department') }}"></div>
-
-<div class="col-md-6"><label class="form-label required">Admission date/time</label><input class="form-control" name="admission_at" type="datetime-local" value="{{ old('admission_at') }}" required></div>
-<div class="col-md-6"><label class="form-label required">Discharge date/time</label><input class="form-control" name="discharge_at" type="datetime-local" value="{{ old('discharge_at') }}" required></div>
-<div class="col-md-6"><label class="form-label required">Discharge summary format</label><select name="format" class="form-select" required>@foreach(['general'=>'General','cmchistn'=>'CMCHISTN','private'=>'Private','employee'=>'Employee'] as $v=>$label)<option value="{{ $v }}" @selected(old('format','general')===$v)>{{ $label }}</option>@endforeach</select><div class="form-text">Layouts are draft placeholders until the hospital supplies/approves each exact format.</div></div>
-<div class="col-md-6">
-    <label class="form-label required">Surgery workflow</label>
-    <select name="surgery_type" id="surgeryType" class="form-select" required>
-        <option value="delivery" id="deliveryOption" @selected(old('surgery_type')==='delivery')>Delivery / Obstetric</option>
-        <option value="other" @selected(old('surgery_type', 'other')==='other')>Other surgery</option>
-    </select>
-    <div id="sexWarning" class="form-text text-muted small" style="display:none;">
-        <i class="bi bi-info-circle me-1"></i> Delivery / Obstetric workflow is only enabled when patient sex is set to <strong>Female</strong>.
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-1 fw-bold text-dark">Stage 1: Patient Admission &amp; Case Setup</h1>
+            <p class="text-muted mb-0">Enter patient demographics, admission details, format, and provisional diagnosis.</p>
+        </div>
+        <a href="{{ route('admissions.index') }}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Back to Archive
+        </a>
     </div>
 </div>
-<div class="col-12"><label class="form-label required">Diagnosis</label><textarea name="diagnosis" class="form-control" rows="2" required>{{ old('diagnosis') }}</textarea></div>
-</div></div></div>
-<div class="card mb-3"><div class="card-header bg-white fw-bold">2. Discharge summary clinical details</div><div class="card-body row g-3">
-@foreach(['clinical_history'=>'Presenting complaints / relevant history','examination'=>'Clinical examination / vital signs','treatment_course'=>'Treatment and hospital course','discharge_condition'=>'Condition at discharge','medication_orders'=>'Authorised discharge medication orders','discharge_advice'=>'Discharge advice / warning signs','follow_up'=>'Follow-up'] as $name=>$label)
-<div class="col-md-6"><label class="form-label">{{ $label }}</label><textarea name="{{ $name }}" class="form-control" rows="2">{{ old($name) }}</textarea></div>
-@endforeach
-<div class="col-12"><label class="form-label">Investigations (Lab Reports, Pathology & Diagnostics)</label><textarea name="investigations" class="form-control" rows="4" placeholder="e.g.&#10;Hb: 10.6mgs%&#10;HIV: Negative | VDRL: Negative | HBsAG: Negative&#10;BG: B positive&#10;ECG: Normal&#10;RBS: 101.6 mg/dl | Urea: 24.3 mg/dl | Creatinine: 0.56 mg/dl | Uric Acid: 2.69 mg/dl">{{ old('investigations') }}</textarea></div>
-</div></div>
-<div class="card mb-3"><div class="card-header bg-white fw-bold">3. Operation Theatre Notes</div><div class="card-body row g-3">
-<div class="col-md-3"><label class="form-label">Procedure / delivery date/time</label><input class="form-control" name="procedure_at" type="datetime-local" value="{{ old('procedure_at') }}"></div>
-<div class="col-md-3"><label class="form-label">Procedure / surgery</label><input class="form-control" name="procedure_name" value="{{ old('procedure_name') }}"></div>
-<div class="col-md-3"><label class="form-label">Procedure done</label><input class="form-control" name="procedure_done" value="{{ old('procedure_done') }}"></div>
-<div class="col-md-3"><label class="form-label">ICD Code</label><input class="form-control" name="icd_code" value="{{ old('icd_code') }}"></div>
-<div class="col-md-4"><label class="form-label">Surgeon</label><input class="form-control" name="surgeon" value="{{ old('surgeon') }}"></div>
-<div class="col-md-4"><label class="form-label">Assisted Surgeon</label><input class="form-control" name="assisted_surgeon" value="{{ old('assisted_surgeon') }}"></div>
-<div class="col-md-4"><label class="form-label">Anaesthetist</label><input class="form-control" name="anaesthetist" value="{{ old('anaesthetist') }}"></div>
-<div class="col-md-4"><label class="form-label">Assisted Anaesthetist</label><input class="form-control" name="assisted_anaesthetist" value="{{ old('assisted_anaesthetist') }}"></div>
-<div class="col-md-4"><label class="form-label">Staff Nurse</label><input class="form-control" name="staff_nurse" value="{{ old('staff_nurse') }}" placeholder="e.g. Miss Soudnharya"></div>
-<div class="col-md-4"><label class="form-label">OT Technician</label><input class="form-control" name="ot_technician" value="{{ old('ot_technician') }}" placeholder="e.g. OT Tech Selvam"></div>
-<div class="col-md-4">
-    <label class="form-label">Consultant Pediatrician</label>
-    <input class="form-control" list="pediatrician_options" name="pediatrician_name" value="{{ old('pediatrician_name') }}" placeholder="e.g. Dr. Nithyapriya (Paediatrician)">
-    <datalist id="pediatrician_options">
-        @foreach(\App\Models\ClinicalStaff::active()->forRole('consultant_pediatrician')->get() as $p)
-            <option value="{{ $p->name }}">{{ $p->qualification ? "{$p->name} ({$p->qualification})" : $p->name }}</option>
-        @endforeach
-    </datalist>
+
+<form method="POST" action="{{ route('admissions.store') }}" id="admissionForm">
+@csrf
+
+<div class="card mb-3 border-0 shadow-sm">
+    <div class="card-header bg-white fw-bold py-3">
+        <span class="badge bg-primary me-2">1.1</span> Patient Demographics
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label required">Patient Full Name</label>
+                <input class="form-control" name="patient_name" type="text" value="{{ old('patient_name') }}" required placeholder="e.g. Mrs. Anitha">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label required">UHID / MRN</label>
+                <input class="form-control" name="uhid" type="text" value="{{ old('uhid') }}" required placeholder="e.g. 2023/3931">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label required">IP No.</label>
+                <input class="form-control" name="ip_no" type="text" value="{{ old('ip_no') }}" required placeholder="e.g. 2026/567">
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">Age</label>
+                <input class="form-control" name="age" type="text" value="{{ old('age') }}" placeholder="e.g. 23">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label required">Sex</label>
+                <select name="sex" class="form-select" id="patientSex" required>
+                    <option value="">Select</option>
+                    @foreach(['Female','Male','Other','Not recorded'] as $v)
+                        <option value="{{ $v }}" @selected(old('sex')===$v)>{{ $v }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Contact / Phone</label>
+                <input class="form-control" name="contact" type="text" value="{{ old('contact') }}" placeholder="e.g. 7373667465">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Address</label>
+                <input class="form-control" name="address" type="text" value="{{ old('address') }}" placeholder="e.g. W/O Sarath Veerasamur">
+            </div>
+        </div>
+    </div>
 </div>
-<div class="col-md-4"><label class="form-label">Assistant by S/N</label><input class="form-control" name="assisted_by" value="{{ old('assisted_by') }}" placeholder="e.g. Miss Soudnharya"></div>
-<div class="col-md-4">
-    <label class="form-label">Anaesthesia type</label>
-    <input class="form-control" list="anesthesia_type_options" name="anaesthesia_type" value="{{ old('anaesthesia_type') }}" placeholder="e.g. SA, GA, Spinal">
-    <datalist id="anesthesia_type_options">
-        @foreach(\App\Models\AnesthesiaType::active()->get() as $at)
-            <option value="{{ $at->name }}">{{ $at->code ? "{$at->name} [{$at->code}]" : $at->name }}</option>
-            @if($at->code && $at->code !== $at->name)
-                <option value="{{ $at->code }}">{{ $at->code }} ({{ $at->name }})</option>
-            @endif
-        @endforeach
-    </datalist>
+
+<div class="card mb-3 border-0 shadow-sm">
+    <div class="card-header bg-white fw-bold py-3">
+        <span class="badge bg-primary me-2">1.2</span> Admission &amp; Ward Assignment
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label required">Admission Date &amp; Time</label>
+                <input class="form-control" name="admission_at" type="datetime-local" value="{{ old('admission_at') }}" required>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Consultant Doctor</label>
+                <input class="form-control" name="consultant" type="text" value="{{ old('consultant') }}" placeholder="e.g. Dr. Ambika MS OG">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Department / Specialty</label>
+                <input class="form-control" name="department" type="text" value="{{ old('department') }}" placeholder="e.g. Obstetrics & Gynaecology">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Ward / Bed Number</label>
+                <input class="form-control" name="ward_room_no" type="text" value="{{ old('ward_room_no') }}" placeholder="e.g. Room 102">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">MRD File Number</label>
+                <input class="form-control" name="mrd_no" type="text" value="{{ old('mrd_no') }}" placeholder="e.g. MRD-2026-0567">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Payment / Insurance Mode</label>
+                <input class="form-control" name="payment_mode" type="text" value="{{ old('payment_mode', 'Cash') }}" placeholder="e.g. Cash / CMCHISTN">
+            </div>
+        </div>
+    </div>
 </div>
-@foreach(['procedure_note'=>'Procedure note','incision'=>'Incision','findings'=>'Findings','complications'=>'Complications','blood_loss_ml'=>'Blood loss (mL)','specimen'=>'Specimen','drain'=>'Drain','postoperative_orders'=>'Post-operative orders'] as $name=>$label)
-<div class="{{ in_array($name,['procedure_note','incision','findings','complications','postoperative_orders'])?'col-md-6':'col-md-4' }}"><label class="form-label">{{ $label }}</label>
-@if(in_array($name,['procedure_note','incision','findings','complications','postoperative_orders']))<textarea class="form-control" rows="2" name="{{ $name }}">{{ old($name) }}</textarea>@else<input class="form-control" name="{{ $name }}" value="{{ old($name) }}" type="{{ $name==='blood_loss_ml'?'number':'text' }}" {{ $name==='blood_loss_ml'?'min=0 step=0.1':'' }}>@endif
+
+<div class="card mb-3 border-0 shadow-sm">
+    <div class="card-header bg-white fw-bold py-3">
+        <span class="badge bg-primary me-2">1.3</span> Format, Workflow &amp; Diagnosis
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label required">Discharge Summary Format</label>
+                <select name="format" class="form-select" required>
+                    @foreach(['general'=>'General (Standard Cash / TPA)','cmchistn'=>'CMCHISTN Government Scheme','private'=>'Private Insurance','employee'=>'Hospital Employee'] as $v=>$label)
+                        <option value="{{ $v }}" @selected(old('format','general')===$v)>{{ $label }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label required">Surgery Workflow</label>
+                <select name="surgery_type" id="surgeryType" class="form-select" required>
+                    <option value="delivery" id="deliveryOption" @selected(old('surgery_type')==='delivery')>Delivery / Obstetric</option>
+                    <option value="other" @selected(old('surgery_type', 'other')==='other')>Other Surgery / Non-Obstetric</option>
+                </select>
+                <div id="sexWarning" class="form-text text-muted small" style="display:none;">
+                    <i class="bi bi-info-circle me-1"></i> Delivery / Obstetric workflow is only enabled when patient sex is set to <strong>Female</strong>.
+                </div>
+            </div>
+            <div class="col-12">
+                <label class="form-label required">Provisional / Admission Diagnosis</label>
+                <textarea name="diagnosis" class="form-control" rows="2" required placeholder="e.g. G3P1L1A1 / TWINS / Preterm / PROM">{{ old('diagnosis') }}</textarea>
+            </div>
+        </div>
+    </div>
 </div>
-@endforeach
-</div></div>
-<div class="card mb-3" id="deliveryFields"><div class="card-header bg-white fw-bold">4. Birth / newborn details — delivery only</div><div class="card-body">
-<p class="small text-muted">Add one row per newborn; for twins, enter two separate newborn records. Do not infer missing values.</p>
-<div id="newbornRows">
-@php($newborns=old('newborns',[[]]))
-@foreach($newborns as $i=>$baby)
-<div class="border rounded p-3 mb-3 newborn-row"><div class="d-flex justify-content-between"><strong>Newborn <span class="baby-number">{{ $i+1 }}</span></strong><button type="button" class="btn btn-sm btn-outline-danger remove-baby no-print">Remove</button></div><div class="row g-2 mt-1">
-<div class="col-md-2"><label class="form-label">Sex</label><select class="form-select" name="newborns[{{ $i }}][sex]"><option value="">Select</option>@foreach(['Female','Male','Other','Not recorded'] as $v)<option @selected(($baby['sex']??'')===$v)>{{ $v }}</option>@endforeach</select></div>
-<div class="col-md-3"><label class="form-label">Birth date/time</label><input class="form-control" type="datetime-local" name="newborns[{{ $i }}][birth_at]" value="{{ $baby['birth_at']??'' }}"></div>
-<div class="col-md-2"><label class="form-label">Weight (kg)</label><input class="form-control" type="number" step="0.01" min="0.1" max="8" name="newborns[{{ $i }}][birth_weight_kg]" value="{{ $baby['birth_weight_kg']??'' }}"></div>
-<div class="col-md-2"><label class="form-label">Apgar 1 min</label><input class="form-control" type="number" min="0" max="10" name="newborns[{{ $i }}][apgar_1_min]" value="{{ $baby['apgar_1_min']??'' }}"></div>
-<div class="col-md-2"><label class="form-label">Apgar 5 min</label><input class="form-control" type="number" min="0" max="10" name="newborns[{{ $i }}][apgar_5_min]" value="{{ $baby['apgar_5_min']??'' }}"></div>
-<div class="col-md-6"><label class="form-label">Neonatal care</label><textarea class="form-control" rows="2" name="newborns[{{ $i }}][neonatal_care]">{{ $baby['neonatal_care']??'' }}</textarea></div>
-<div class="col-md-6"><label class="form-label">Other documented notes</label><textarea class="form-control" rows="2" name="newborns[{{ $i }}][notes]">{{ $baby['notes']??'' }}</textarea></div>
-</div></div>
-@endforeach
-</div><button type="button" class="btn btn-outline-primary no-print" id="addBaby">+ Add newborn</button>
-</div></div>
-<div class="card mb-3"><div class="card-header bg-white fw-bold">5. MRD fields</div><div class="card-body row g-3">
-<div class="col-md-4"><label class="form-label">MRD No.</label><input class="form-control" name="mrd_no" value="{{ old('mrd_no') }}"></div>
-<div class="col-md-4"><label class="form-label">Payment mode</label><input class="form-control" name="payment_mode" value="{{ old('payment_mode') }}"></div>
-<p class="text-muted small mb-0">Page count is calculated only after the final pack PDF is rendered. Signature fields must be completed by the responsible staff and are not simulated by this form.</p>
-</div></div>
-<div class="d-flex gap-2 no-print"><button class="btn btn-primary btn-lg" type="submit">Save draft & preview three documents</button></div>
+
+<div class="d-flex justify-content-between align-items-center mb-5">
+    <a href="{{ route('admissions.index') }}" class="btn btn-outline-secondary">Cancel</a>
+    <button type="submit" class="btn btn-primary px-4 py-2 fw-semibold">
+        Save &amp; Proceed to Stage 2: Labour / Surgery <i class="bi bi-arrow-right ms-1"></i>
+    </button>
+</div>
 </form>
-<template id="newbornTemplate">
-<div class="border rounded p-3 mb-3 newborn-row"><div class="d-flex justify-content-between"><strong>Newborn <span class="baby-number"></span></strong><button type="button" class="btn btn-sm btn-outline-danger remove-baby no-print">Remove</button></div><div class="row g-2 mt-1">
-<div class="col-md-2"><label class="form-label">Sex</label><select class="form-select" name="newborns[__INDEX__][sex]"><option value="">Select</option><option>Female</option><option>Male</option><option>Other</option><option>Not recorded</option></select></div>
-<div class="col-md-3"><label class="form-label">Birth date/time</label><input class="form-control" type="datetime-local" name="newborns[__INDEX__][birth_at]"></div>
-<div class="col-md-2"><label class="form-label">Weight (kg)</label><input class="form-control" type="number" step="0.01" min="0.1" max="8" name="newborns[__INDEX__][birth_weight_kg]"></div>
-<div class="col-md-2"><label class="form-label">Apgar 1 min</label><input class="form-control" type="number" min="0" max="10" name="newborns[__INDEX__][apgar_1_min]"></div>
-<div class="col-md-2"><label class="form-label">Apgar 5 min</label><input class="form-control" type="number" min="0" max="10" name="newborns[__INDEX__][apgar_5_min]"></div>
-<div class="col-md-6"><label class="form-label">Neonatal care</label><textarea class="form-control" rows="2" name="newborns[__INDEX__][neonatal_care]"></textarea></div>
-<div class="col-md-6"><label class="form-label">Other documented notes</label><textarea class="form-control" rows="2" name="newborns[__INDEX__][notes]"></textarea></div>
-</div></div>
-</template>
+
 <script>
-(() => {
- const type=document.getElementById('surgeryType'), fields=document.getElementById('deliveryFields');
- const sexSelect=document.getElementById('patientSex'), deliveryOption=document.getElementById('deliveryOption'), sexWarning=document.getElementById('sexWarning');
- function updateSurgeryWorkflow(){
-   const isFemale = sexSelect && sexSelect.value.toLowerCase() === 'female';
-   if (deliveryOption) {
-     deliveryOption.disabled = !isFemale;
-     deliveryOption.textContent = isFemale ? 'Delivery / Obstetric' : 'Delivery / Obstetric (Female only)';
-   }
-   if (sexWarning) {
-     sexWarning.style.display = isFemale ? 'none' : 'block';
-   }
-   if (!isFemale && type.value === 'delivery') {
-     type.value = 'other';
-   }
-   fields.hidden = type.value !== 'delivery';
- }
- if (sexSelect) sexSelect.addEventListener('change', updateSurgeryWorkflow);
- type.addEventListener('change', () => { fields.hidden = type.value !== 'delivery'; });
- updateSurgeryWorkflow();
- const list=document.getElementById('newbornRows'), tmpl=document.getElementById('newbornTemplate');
- function renumber(){ [...list.querySelectorAll('.newborn-row')].forEach((r,i)=>r.querySelector('.baby-number').textContent=i+1); }
- document.getElementById('addBaby').addEventListener('click',()=>{
-   const idx=Date.now(); const wrapper=document.createElement('div');
-   wrapper.innerHTML=tmpl.innerHTML.replaceAll('__INDEX__',idx);
-   list.appendChild(wrapper.firstElementChild); renumber();
- });
- list.addEventListener('click',e=>{ if(e.target.classList.contains('remove-baby')){e.target.closest('.newborn-row').remove();renumber();} });
-})();
+document.addEventListener('DOMContentLoaded', function () {
+    const sexSelect = document.getElementById('patientSex');
+    const surgerySelect = document.getElementById('surgeryType');
+    const deliveryOpt = document.getElementById('deliveryOption');
+    const warning = document.getElementById('sexWarning');
+
+    function syncSurgeryWorkflow() {
+        const isFemale = (sexSelect.value || '').trim().toLowerCase() === 'female';
+        if (isFemale) {
+            deliveryOpt.removeAttribute('disabled');
+            warning.style.display = 'none';
+        } else {
+            deliveryOpt.setAttribute('disabled', 'disabled');
+            warning.style.display = 'block';
+            if (surgerySelect.value === 'delivery') {
+                surgerySelect.value = 'other';
+            }
+        }
+    }
+
+    sexSelect.addEventListener('change', syncSurgeryWorkflow);
+    syncSurgeryWorkflow();
+});
 </script>
 @endsection

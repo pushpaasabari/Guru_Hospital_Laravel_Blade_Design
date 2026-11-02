@@ -214,9 +214,41 @@ export default function AdmissionsIndex({ admissions, filters = {}, auth }: Prop
                           </ul>
                         </div>
                         {auth.user?.can_edit && (
-                          <Link href={`/admissions/${adm.id}/edit`} className="btn btn-outline-secondary" title="Edit">
-                            Edit
-                          </Link>
+                          <div className="btn-group btn-group-sm">
+                            <Link href={`/admissions/${adm.id}/edit`} className="btn btn-outline-secondary" title="Edit">
+                              Edit
+                            </Link>
+                            <button
+                              type="button"
+                              className="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
+                              data-bs-toggle="dropdown"
+                              aria-expanded="false"
+                            >
+                              <span className="visually-hidden">Toggle Stages</span>
+                            </button>
+                            <ul className="dropdown-menu shadow-sm border-0" style={{ fontSize: '12px' }}>
+                              <li>
+                                <Link className="dropdown-item py-1" href={`/admissions/${adm.id}/edit`}>
+                                  <i className="bi bi-person me-2 text-primary"></i>1. Admission Details
+                                </Link>
+                              </li>
+                              <li>
+                                <Link className="dropdown-item py-1" href={`/admissions/${adm.id}/surgery`}>
+                                  <i className="bi bi-heart-pulse me-2 text-danger"></i>2. Labour / Surgery
+                                </Link>
+                              </li>
+                              <li>
+                                <Link className="dropdown-item py-1" href={`/admissions/${adm.id}/test-reports`}>
+                                  <i className="bi bi-file-earmark-medical me-2 text-info"></i>3. Test Reports
+                                </Link>
+                              </li>
+                              <li>
+                                <Link className="dropdown-item py-1" href={`/admissions/${adm.id}/discharge`}>
+                                  <i className="bi bi-clipboard2-check me-2 text-success"></i>4. Discharge
+                                </Link>
+                              </li>
+                            </ul>
+                          </div>
                         )}
                         <Link href={`/documents/${adm.id}/history`} className="btn btn-outline-secondary" title="History">
                           History

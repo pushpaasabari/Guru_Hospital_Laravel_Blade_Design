@@ -69,7 +69,7 @@ class AdmissionWorkflowTest extends TestCase
         ]);
 
         $admission = Admission::where('ip_no', 'IP-8891')->first();
-        $response->assertRedirect(route('documents.preview', $admission));
+        $response->assertRedirect(route('admissions.surgery', $admission));
     }
 
     public function test_duplicate_ip_number_is_rejected(): void
@@ -217,6 +217,113 @@ class AdmissionWorkflowTest extends TestCase
             'ip_no' => 'IP-FEM-DEL-01',
             'surgery_type' => 'delivery',
             'sex' => 'Female',
+        ]);
+    }
+
+    public function test_nurse_can_access_and_update_surgery_stage(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'Kavitha S',
+            'uhid' => 'GH-STAGE-01',
+            'ip_no' => 'IP-STAGE-01',
+            'age' => '27',
+            'sex' => 'Female',
+            'admission_at' => now(),
+            'diagnosis' => 'Full Term Normal Delivery',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+            'status' => 'draft',
+            'created_by' => $this->nurse->id,
+        ]);
+
+        $getResponse = $this->actingAs($this->nurse)->get(route('admissions.surgery', $admission));
+        $getResponse->assertOk();
+
+        $updateResponse = $this->actingAs($this->nurse)->put(route('admissions.surgery.update', $admission), [
+            'procedure_name' => 'Normal Delivery with Episiotomy',
+            'surgeon' => 'Dr. Ambika MS OG',
+            'findings' => 'Live female infant delivered spontaneously',
+            'newborns' => [
+                [
+                    'sex' => 'Female',
+                    'birth_weight_kg' => '2.95',
+                    'apgar_1_min' => 9,
+                    'apgar_5_min' => 10,
+                ],
+            ],
+            'next_step' => 'test-reports',
+        ]);
+
+        $updateResponse->assertRedirect(route('admissions.test-reports', $admission));
+        $this->assertDatabaseHas('admissions', [
+            'id' => $admission->id,
+            'procedure_name' => 'Normal Delivery with Episiotomy',
+        ]);
+        $this->assertCount(1, $admission->fresh()->newborns);
+    }
+
+    public function test_nurse_can_access_and_update_test_reports_stage(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'Prakash R',
+            'uhid' => 'GH-STAGE-02',
+            'ip_no' => 'IP-STAGE-02',
+            'age' => '35',
+            'sex' => 'Male',
+            'admission_at' => now(),
+            'diagnosis' => 'Renal Calculus',
+            'format' => 'general',
+            'surgery_type' => 'other',
+            'status' => 'draft',
+            'created_by' => $this->nurse->id,
+        ]);
+
+        $getResponse = $this->actingAs($this->nurse)->get(route('admissions.test-reports', $admission));
+        $getResponse->assertOk();
+
+        $updateResponse = $this->actingAs($this->nurse)->put(route('admissions.test-reports.update', $admission), [
+            'investigations' => "Hb: 14.2 g/dL\nUrea: 24 mg/dL\nCreatinine: 0.9 mg/dL\nUSG: 5mm right lower ureteric calculus",
+            'next_step' => 'discharge',
+        ]);
+
+        $updateResponse->assertRedirect(route('admissions.discharge', $admission));
+        $this->assertDatabaseHas('admissions', [
+            'id' => $admission->id,
+        ]);
+        $this->assertStringContainsString('5mm right lower ureteric calculus', $admission->fresh()->investigations);
+    }
+
+    public function test_nurse_can_access_and_update_discharge_stage(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'Prakash R',
+            'uhid' => 'GH-STAGE-03',
+            'ip_no' => 'IP-STAGE-03',
+            'age' => '35',
+            'sex' => 'Male',
+            'admission_at' => now()->subDays(2),
+            'diagnosis' => 'Renal Calculus',
+            'format' => 'general',
+            'surgery_type' => 'other',
+            'status' => 'draft',
+            'created_by' => $this->nurse->id,
+        ]);
+
+        $getResponse = $this->actingAs($this->nurse)->get(route('admissions.discharge', $admission));
+        $getResponse->assertOk();
+
+        $updateResponse = $this->actingAs($this->nurse)->put(route('admissions.discharge.update', $admission), [
+            'discharge_at' => now()->toDateTimeString(),
+            'discharge_condition' => 'Stable, asymptomatic, vitals normal',
+            'discharge_advice' => 'Plenty of oral fluids, avoid oxalate-rich food',
+            'medication_orders' => 'Tab. Silodosin 8mg HS x 5 days',
+            'next_step' => 'preview',
+        ]);
+
+        $updateResponse->assertRedirect(route('documents.preview', $admission));
+        $this->assertDatabaseHas('admissions', [
+            'id' => $admission->id,
+            'discharge_condition' => 'Stable, asymptomatic, vitals normal',
         ]);
     }
 }
