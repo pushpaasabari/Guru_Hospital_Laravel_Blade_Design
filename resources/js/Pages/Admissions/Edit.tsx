@@ -90,7 +90,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
     format: admission.format || 'general',
     surgery_type: admission.surgery_type || 'other',
     diagnosis: admission.diagnosis || '',
-    mrd_no: admission.mrd_no || '',
+    mrd_no: admission.mrd_no || (admission.uhid ? (admission.uhid.startsWith('MRD-') ? admission.uhid : `MRD-${admission.uhid}`) : ''),
     payment_mode: admission.payment_mode || '',
     // Preserve existing fields
     procedure_at: admission.procedure_at ? admission.procedure_at.slice(0, 16) : '',
@@ -218,7 +218,14 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                   type="text"
                   className={`form-control ${errors.uhid ? 'is-invalid' : ''}`}
                   value={data.uhid}
-                  onChange={(e) => setData('uhid', e.target.value)}
+                  onChange={(e) => {
+                    const newUhid = e.target.value;
+                    setData((prev) => ({
+                      ...prev,
+                      uhid: newUhid,
+                      mrd_no: (!prev.mrd_no || prev.mrd_no === `MRD-${prev.uhid}`) && newUhid.trim() ? `MRD-${newUhid.trim()}` : prev.mrd_no,
+                    }));
+                  }}
                   required
                 />
                 {errors.uhid && <div className="invalid-feedback">{errors.uhid}</div>}
@@ -426,14 +433,22 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">MRD File Number</label>
+                <div className="d-flex justify-content-between align-items-center mb-1">
+                  <label className="form-label mb-0">MRD File Number</label>
+                  <span className="badge bg-light text-muted border" style={{ fontSize: '0.68rem' }}>
+                    Auto: MRD-{'{UHID}'}
+                  </span>
+                </div>
                 <input
                   type="text"
                   className="form-control"
                   value={data.mrd_no || ''}
                   onChange={(e) => setData('mrd_no', e.target.value)}
-                  placeholder="e.g. MRD-2026-0567"
+                  placeholder={data.uhid ? `MRD-${data.uhid}` : 'e.g. MRD-{UHID}'}
                 />
+                <div className="form-text text-muted small">
+                  Default format: <span className="font-monospace">MRD-{'{UHID}'}</span>
+                </div>
               </div>
               <div className="col-md-4">
                 <label className="form-label">Payment / Insurance Mode</label>

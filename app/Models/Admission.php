@@ -43,6 +43,13 @@ class Admission extends Model
             } elseif (!empty($admission->address) && empty($admission->address_line1)) {
                 $admission->address_line1 = $admission->address;
             }
+
+            // Temporarily MRD File Number will be (MRD-{UHID})
+            if (empty($admission->mrd_no) && !empty($admission->uhid)) {
+                $admission->mrd_no = str_starts_with((string) $admission->uhid, 'MRD-')
+                    ? $admission->uhid
+                    : 'MRD-' . $admission->uhid;
+            }
         });
     }
 

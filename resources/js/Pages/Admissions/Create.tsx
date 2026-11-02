@@ -104,7 +104,14 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
                   type="text"
                   className={`form-control ${errors.uhid ? 'is-invalid' : ''}`}
                   value={data.uhid}
-                  onChange={(e) => setData('uhid', e.target.value)}
+                  onChange={(e) => {
+                    const newUhid = e.target.value;
+                    setData((prev) => ({
+                      ...prev,
+                      uhid: newUhid,
+                      mrd_no: (!prev.mrd_no || prev.mrd_no === `MRD-${prev.uhid}`) && newUhid.trim() ? `MRD-${newUhid.trim()}` : prev.mrd_no,
+                    }));
+                  }}
                   placeholder="e.g. 2023/3931"
                   required
                 />
@@ -314,14 +321,22 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
                 />
               </div>
               <div className="col-md-4">
-                <label className="form-label">MRD File Number</label>
+                <div className="d-flex justify-content-between align-items-center mb-1">
+                  <label className="form-label mb-0">MRD File Number</label>
+                  <span className="badge bg-light text-muted border" style={{ fontSize: '0.68rem' }}>
+                    Auto: MRD-{'{UHID}'}
+                  </span>
+                </div>
                 <input
                   type="text"
                   className="form-control"
                   value={data.mrd_no}
                   onChange={(e) => setData('mrd_no', e.target.value)}
-                  placeholder="e.g. MRD-2026-0567"
+                  placeholder={data.uhid ? `MRD-${data.uhid}` : 'e.g. MRD-{UHID}'}
                 />
+                <div className="form-text text-muted small">
+                  Default format: <span className="font-monospace">MRD-{'{UHID}'}</span>
+                </div>
               </div>
               <div className="col-md-4">
                 <label className="form-label">Payment / Insurance Mode</label>

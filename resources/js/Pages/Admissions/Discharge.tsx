@@ -46,7 +46,7 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
     medication_orders: admission.medication_orders || '',
     discharge_advice: admission.discharge_advice || '',
     follow_up: admission.follow_up || '',
-    mrd_no: admission.mrd_no || '',
+    mrd_no: admission.mrd_no || (admission.uhid ? (admission.uhid.startsWith('MRD-') ? admission.uhid : `MRD-${admission.uhid}`) : ''),
     payment_mode: admission.payment_mode || '',
     handover_name: admission.handover_name || '',
     floor_incharge_name: admission.floor_incharge_name || '',
@@ -223,14 +223,22 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
           <div className="card-body">
             <div className="row g-3">
               <div className="col-md-4">
-                <label className="form-label">MRD File Number</label>
+                <div className="d-flex justify-content-between align-items-center mb-1">
+                  <label className="form-label mb-0">MRD File Number</label>
+                  <span className="badge bg-light text-muted border" style={{ fontSize: '0.68rem' }}>
+                    Auto: MRD-{'{UHID}'}
+                  </span>
+                </div>
                 <input
                   type="text"
                   className="form-control"
                   value={data.mrd_no}
                   onChange={(e) => setData('mrd_no', e.target.value)}
-                  placeholder="e.g. MRD-2026-0567"
+                  placeholder={admission.uhid ? `MRD-${admission.uhid}` : 'e.g. MRD-{UHID}'}
                 />
+                <div className="form-text text-muted small">
+                  Default format: <span className="font-monospace">MRD-{'{UHID}'}</span>
+                </div>
               </div>
 
               <div className="col-md-4">

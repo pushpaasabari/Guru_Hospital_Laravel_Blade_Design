@@ -419,5 +419,30 @@ class AdmissionWorkflowTest extends TestCase
         $this->assertFalse($admission->isDelivery());
         $this->assertFalse($admission->isSurgical());
     }
+
+    public function test_mrd_file_number_defaults_to_mrd_dash_uhid(): void
+    {
+        $response = $this->actingAs($this->nurse)->post(route('admissions.store'), [
+            'patient_name' => 'Kaviarasan S',
+            'uhid' => '2026/8899',
+            'ip_no' => 'IP-MRD-8899',
+            'address_line1' => '5 Main Street, Dharmapuri',
+            'age' => '32',
+            'sex' => 'Male',
+            'admission_at' => '2026-10-25 10:00:00',
+            'diagnosis' => 'Acute Viral Infection',
+            'format' => 'general',
+            'surgery_type' => 'medical',
+        ]);
+
+        $this->assertDatabaseHas('admissions', [
+            'uhid' => '2026/8899',
+            'ip_no' => 'IP-MRD-8899',
+            'mrd_no' => 'MRD-2026/8899',
+        ]);
+
+        $admission = Admission::where('ip_no', 'IP-MRD-8899')->first();
+        $this->assertEquals('MRD-2026/8899', $admission->mrd_no);
+    }
 }
 

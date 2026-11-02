@@ -141,8 +141,9 @@
                 <input class="form-control" name="ward_room_no" type="text" value="{{ old('ward_room_no') }}" placeholder="e.g. Room 102">
             </div>
             <div class="col-md-4">
-                <label class="form-label">MRD File Number</label>
-                <input class="form-control" name="mrd_no" type="text" value="{{ old('mrd_no') }}" placeholder="e.g. MRD-2026-0567">
+                <label class="form-label">MRD File Number <span class="badge bg-light text-muted border ms-1" style="font-size: 0.68rem;">Auto: MRD-{UHID}</span></label>
+                <input class="form-control" name="mrd_no" id="mrdNoInput" type="text" value="{{ old('mrd_no') }}" placeholder="e.g. MRD-{UHID}">
+                <div class="form-text text-muted small">Default format: <span class="font-monospace">MRD-{UHID}</span></div>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Payment / Insurance Mode</label>
@@ -214,6 +215,20 @@ document.addEventListener('DOMContentLoaded', function () {
     sexSelect.addEventListener('change', syncSurgeryWorkflow);
     surgerySelect.addEventListener('change', syncSurgeryWorkflow);
     syncSurgeryWorkflow();
+
+    const uhidInput = document.querySelector('[name="uhid"]');
+    const mrdInput = document.getElementById('mrdNoInput');
+    if (uhidInput && mrdInput) {
+        uhidInput.addEventListener('input', function() {
+            if (!mrdInput.value || mrdInput.dataset.autoFilled === 'true') {
+                mrdInput.value = uhidInput.value.trim() ? 'MRD-' + uhidInput.value.trim() : '';
+                mrdInput.dataset.autoFilled = 'true';
+            }
+        });
+        mrdInput.addEventListener('input', function() {
+            mrdInput.dataset.autoFilled = 'false';
+        });
+    }
 });
 </script>
 @endsection

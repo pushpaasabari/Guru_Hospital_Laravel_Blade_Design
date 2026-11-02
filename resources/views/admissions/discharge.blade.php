@@ -134,8 +134,9 @@
     <div class="card-body">
         <div class="row g-3">
             <div class="col-md-4">
-                <label class="form-label">MRD File Number</label>
-                <input class="form-control" name="mrd_no" value="{{ old('mrd_no', $admission->mrd_no) }}" placeholder="e.g. MRD-2026-0567">
+                <label class="form-label">MRD File Number <span class="badge bg-light text-muted border ms-1" style="font-size: 0.68rem;">Auto: MRD-{UHID}</span></label>
+                <input class="form-control" name="mrd_no" value="{{ old('mrd_no', $admission->mrd_no ?: ($admission->uhid ? (str_starts_with($admission->uhid, 'MRD-') ? $admission->uhid : 'MRD-' . $admission->uhid) : '')) }}" placeholder="e.g. MRD-{UHID}">
+                <div class="form-text text-muted small">Default format: <span class="font-monospace">MRD-{UHID}</span></div>
             </div>
             <div class="col-md-4">
                 <label class="form-label">Payment / Insurance Scheme</label>
