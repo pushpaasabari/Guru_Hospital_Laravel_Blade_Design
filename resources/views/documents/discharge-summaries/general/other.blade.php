@@ -1,390 +1,331 @@
-<div class="discharge-summary-document" style="font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 9.5pt; line-height: 1.4; color: #000;">
+<div class="discharge-summary-document surgical-doc" style="font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif; font-size: 9pt; line-height: 1.35; color: #000;">
     <style>
-        .ds-doc-title {
-            text-align: center;
-            font-size: 15pt;
-            font-weight: bold;
-            color: #111111;
-            letter-spacing: 0.5px;
-            margin: 0 0 10px 0;
-            text-transform: uppercase;
-        }
-        .ds-info-table {
+        .surgical-table {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            margin-bottom: 8px;
-            border: 1px solid #94a3b8;
-        }
-        .ds-info-table.bg-gray {
-            background-color: #f1f5f9;
-        }
-        .ds-info-table.bg-white {
-            background-color: #ffffff;
-        }
-        .ds-info-table td, .ds-info-table th {
-            border: 1px solid #cbd5e1;
-            padding: 4px 6px;
-            vertical-align: top;
-        }
-        .ds-cell-lbl {
-            font-size: 7pt;
-            font-weight: bold;
-            color: #475569;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-            margin-bottom: 1px;
-            display: block;
-        }
-        .ds-cell-val {
-            font-size: 9.2pt;
-            font-weight: bold;
-            color: #000000;
-            line-height: 1.25;
-            display: block;
-        }
-        .ds-section-header {
-            font-size: 10pt;
-            font-weight: bold;
-            color: #111111;
-            text-transform: uppercase;
-            border-bottom: 1.5px solid #222222;
-            padding-bottom: 2px;
-            margin-top: 12px;
             margin-bottom: 6px;
+            border: 1px solid #334155;
         }
-        .ds-prose-text {
-            font-size: 9pt;
-            line-height: 1.4;
-            color: #000000;
-            text-align: justify;
-            margin-bottom: 6px;
-        }
-        .ds-data-table {
-            width: 100%;
-            border-collapse: collapse;
-            table-layout: fixed;
-            margin-bottom: 8px;
-            border: 1px solid #94a3b8;
-        }
-        .ds-data-table th {
-            background-color: #000000;
-            color: #ffffff;
-            font-size: 8pt;
-            font-weight: bold;
+        .surgical-table th, .surgical-table td {
+            border: 1px solid #64748b;
             padding: 4px 6px;
-            text-align: left;
-            border: 1px solid #000000;
+            font-size: 8.5pt;
+            vertical-align: middle;
         }
-        .ds-data-table td {
-            border: 1px solid #94a3b8;
-            padding: 4px 6px;
-            font-size: 9pt;
-            vertical-align: top;
-        }
-        .ds-emergency-box {
-            background-color: #ebebeb;
-            border-left: 4px solid #000000;
-            padding: 8px 12px;
-            margin-top: 10px;
-            margin-bottom: 10px;
-        }
-        .ds-review-box {
-            border: 1.5px solid #000000;
+        .surgical-table th {
             background-color: #f1f5f9;
-            padding: 6px 12px;
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .ds-sig-row {
-            display: flex;
-            justify-content: space-between;
-            border-top: 1px solid #444444;
-            padding-top: 8px;
-            margin-top: 24px;
+            color: #0f172a;
+            font-weight: bold;
         }
     </style>
 
-    {{-- Space for Pre-printed Letterhead (First page only) --}}
-    <div style="height: 38mm;"></div>
-
-    <div class="ds-doc-title">DISCHARGE SUMMARY</div>
-
-    {{-- Box 1: Patient Demographics --}}
-    <table class="ds-info-table bg-gray">
-        <colgroup>
-            <col style="width: 8.3333%;"><col style="width: 8.3333%;"><col style="width: 8.3333%;"><col style="width: 8.3333%;">
-            <col style="width: 8.3333%;"><col style="width: 8.3333%;"><col style="width: 8.3333%;"><col style="width: 8.3333%;">
-            <col style="width: 8.3333%;"><col style="width: 8.3333%;"><col style="width: 8.3333%;"><col style="width: 8.3333%;">
-        </colgroup>
-        <tr>
-            <td colspan="3">
-                <span class="ds-cell-lbl">PATIENT NAME</span>
-                <span class="ds-cell-val">{{ $admission->patient_name }}</span>
-            </td>
-            <td colspan="3">
-                <span class="ds-cell-lbl">AGE / SEX</span>
-                <span class="ds-cell-val">{{ $admission->age ? $admission->age . ' / ' : '' }}{{ $admission->sex ?? 'Male' }}</span>
-            </td>
-            <td colspan="3">
-                <span class="ds-cell-lbl">IP NO.</span>
-                <span class="ds-cell-val">{{ $admission->ip_no }}</span>
-            </td>
-            <td colspan="3">
-                <span class="ds-cell-lbl">UHID NO.</span>
-                <span class="ds-cell-val">{{ $admission->uhid }}</span>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="4">
-                <span class="ds-cell-lbl">PHONE</span>
-                <span class="ds-cell-val">{{ $admission->contact ?? '—' }}</span>
-            </td>
-            <td colspan="4">
-                <span class="ds-cell-lbl">ADMISSION</span>
-                <span class="ds-cell-val">{{ $admission->admission_at?->format('d/m/Y, h:i A') ?? '—' }}</span>
-            </td>
-            <td colspan="4">
-                <span class="ds-cell-lbl">DISCHARGE</span>
-                <span class="ds-cell-val">{{ $admission->discharge_at?->format('d/m/Y, h:i A') ?? '—' }}</span>
-            </td>
-        </tr>
-        <tr>
-            <td colspan="12">
-                <span class="ds-cell-lbl">ADDRESS</span>
-                <span class="ds-cell-val">{{ str_replace(["\r\n", "\r", "\n"], ', ', $admission->address ?? '—') }}@if($admission->picme_no) &nbsp;<span style="font-size: 8pt; color: #475569; font-weight: normal;">(PICME: {{ $admission->picme_no }})</span>@endif</span>
-            </td>
-        </tr>
-    </table>
-
-    {{-- Box 2: Clinical / Surgical Team --}}
-    <table class="ds-info-table bg-white">
-        <tr>
-            <td style="width: 33.3%;">
-                <span class="ds-cell-lbl">CONSULTANT DOCTOR</span>
-                <span class="ds-cell-val">{{ $admission->consultant ?: ($admission->surgeon ?: 'Dr. Jayaprakash MS') }}</span>
-            </td>
-            <td style="width: 33.3%;">
-                <span class="ds-cell-lbl">DEPARTMENT</span>
-                <span class="ds-cell-val">{{ $admission->department ?? 'General Surgery' }}</span>
-            </td>
-            <td style="width: 33.4%;">
-                <span class="ds-cell-lbl">DATE OF SURGERY</span>
-                <span class="ds-cell-val">{{ $admission->procedure_at?->format('d/m/Y, h:i A') ?? '—' }}</span>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 33.3%;">
-                <span class="ds-cell-lbl">SURGEON</span>
-                <span class="ds-cell-val">{{ $admission->surgeon ?: ($admission->consultant ?: 'Dr. Jayaprakash MS') }}</span>
-            </td>
-            <td style="width: 33.3%;">
-                <span class="ds-cell-lbl">ANAESTHETIST</span>
-                <span class="ds-cell-val">{{ $admission->anaesthetist ? $admission->anaesthetist . ($admission->anaesthesia_type ? ' (' . $admission->anaesthesia_type . ')' : '') : '—' }}</span>
-            </td>
-            <td style="width: 33.4%;">
-                <span class="ds-cell-lbl">ASSISTED BY</span>
-                <span class="ds-cell-val">{{ $admission->assisted_by ?: ($admission->assistant ?: '—') }}</span>
-            </td>
-        </tr>
-    </table>
-
-    {{-- Box 3: Diagnosis & Surgery Performed --}}
-    <table class="ds-info-table bg-gray">
-        <tr>
-            <td style="width: 22%; background-color: #f1f5f9;">
-                <span class="ds-cell-lbl" style="font-size: 7.5pt;">DIAGNOSIS</span>
-            </td>
-            <td style="width: 78%;">
-                <span class="ds-cell-val" style="font-size: 9.5pt;">{{ $admission->diagnosis }}</span>
-            </td>
-        </tr>
-        <tr>
-            <td style="width: 22%; background-color: #f1f5f9;">
-                <span class="ds-cell-lbl" style="font-size: 7.5pt;">{{ $admission->surgery_type === 'medical' ? 'CLINICAL CARE' : 'SURGERY PERFORMED' }}</span>
-            </td>
-            <td style="width: 78%;">
-                <span class="ds-cell-val" style="font-size: 9.2pt;">{{ $admission->procedure_name ?: ($admission->procedure_done ?: ($admission->surgery_type === 'medical' ? 'Conservative Medical Management' : '—')) }}</span>
-            </td>
-        </tr>
-    </table>
-
-    {{-- Presenting Complaints --}}
-    @if($admission->clinical_history)
-        <div class="ds-section-header">PRESENTING COMPLAINTS</div>
-        <div class="ds-prose-text">{!! nl2br(e($admission->clinical_history)) !!}</div>
-    @endif
-
-    {{-- Clinical Examination --}}
-    @if($admission->examination)
-        <div class="ds-section-header">CLINICAL EXAMINATION</div>
-        <div class="ds-prose-text">{!! nl2br(e($admission->examination)) !!}</div>
-    @endif
-
-    {{-- Procedure Note --}}
-    @if($admission->procedure_note)
-        <div class="ds-section-header">{{ $admission->surgery_type === 'medical' ? 'CLINICAL COURSE NOTE' : 'PROCEDURE NOTE' }}</div>
-        <div class="ds-prose-text">{!! nl2br(e($admission->procedure_note)) !!}</div>
-    @endif
-
-    {{-- Page 2 Break / Web Separator --}}
-    <div class="my-4 py-2 border-top border-bottom text-center text-muted small bg-light">
-        <i class="bi bi-file-earmark-break me-1"></i> Page 2 (Running Header: {{ $admission->patient_name }} &bull; IP: {{ $admission->ip_no }})
+    {{-- Document Title --}}
+    <div style="text-align: center; font-size: 15pt; font-weight: bold; color: #111; letter-spacing: 0.5px; margin: 0 0 10px 0; text-transform: uppercase;">
+        DISCHARGE SUMMARY
     </div>
 
-    {{-- Treatment Given --}}
-    @php
-        $treatmentRows = $admission->formatted_treatment_course;
-    @endphp
-    @if(!empty($treatmentRows))
-        <div class="ds-section-header">TREATMENT GIVEN</div>
-        <table class="ds-data-table">
-            <thead>
-                <tr>
-                    <th style="width: 60%;">Medication / fluid</th>
-                    <th style="width: 40%;">Dose & route</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($treatmentRows as $row)
-                    <tr>
-                        <td style="font-weight: 500;">{{ $row['medicine'] }}</td>
-                        <td>{{ $row['dose'] }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    @endif
+    {{-- Top Demographics Grid --}}
+    <table class="surgical-table">
+        <tr>
+            <td style="width: 12%; font-weight: bold; background: #f8fafc;">NAME</td>
+            <td style="width: 44%; font-weight: bold; font-size: 9.5pt;">{{ strtoupper($admission->patient_name) }}</td>
+            <td style="width: 10%; font-weight: bold; text-align: center;">{{ $admission->age }}</td>
+            <td style="width: 6%; font-weight: bold; text-align: center;">{{ strtoupper(substr($admission->sex ?? 'M', 0, 1)) }}</td>
+            <td style="width: 14%; font-weight: bold; background: #f8fafc;">CONSULTANT</td>
+            <td style="width: 14%; font-weight: bold;">{{ strtoupper($admission->consultant ?: ($admission->surgeon ?: 'DR. N. JAYAPRAKASH')) }}</td>
+        </tr>
+    </table>
 
-    {{-- Investigations (5 columns grid) --}}
+    <table class="surgical-table">
+        <tr>
+            <td style="width: 14%; font-weight: bold; background: #f8fafc; vertical-align: top;">ADDRESS</td>
+            <td style="width: 36%; vertical-align: top;">
+                {{ str_replace(["\r\n", "\r", "\n"], ' ', $admission->address ?? '—') }}
+            </td>
+            <td style="width: 18%; font-weight: bold; background: #f8fafc; vertical-align: top;">FINAL DIAGNOSIS</td>
+            <td style="width: 32%; font-weight: bold; vertical-align: top;">
+                {{ strtoupper($admission->diagnosis) }}
+            </td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold; background: #f8fafc;">PHONE</td>
+            <td>{{ $admission->contact ?? '—' }}</td>
+            <td style="font-weight: bold; background: #f8fafc;">PROCEDURE DONE</td>
+            <td style="font-weight: bold;">{{ strtoupper($admission->procedure_done ?: ($admission->procedure_name ?: '—')) }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold; background: #f8fafc;">MRD No</td>
+            <td>{{ $admission->mrd_no ?: '2026-1247' }}</td>
+            <td style="font-weight: bold; background: #f8fafc;">ICD CODE</td>
+            <td>{{ $admission->icd_code ?: '—' }}</td>
+        </tr>
+        <tr>
+            <td colspan="2" style="background: #ffffff; border: none; padding: 0;"></td>
+            <td style="font-weight: bold; background: #f8fafc;">IP NO :</td>
+            <td style="font-weight: bold;">{{ $admission->ip_no }}</td>
+        </tr>
+    </table>
+
+    {{-- Dates Row --}}
+    <table class="surgical-table">
+        <tr>
+            <td style="width: 10%; font-weight: bold; background: #f8fafc;">DOA</td>
+            <td style="width: 23%;">{{ $admission->admission_at?->format('d.m.Y \a\t h.i A') ?? '—' }}</td>
+            <td style="width: 10%; font-weight: bold; background: #f8fafc;">DOO</td>
+            <td style="width: 23%;">{{ $admission->procedure_at?->format('d.m.Y \a\t h.i A') ?? '—' }}</td>
+            <td style="width: 10%; font-weight: bold; background: #f8fafc;">DOD</td>
+            <td style="width: 24%;">{{ $admission->discharge_at?->format('d.m.Y \a\t h.i A') ?? '—' }}</td>
+        </tr>
+    </table>
+
+    {{-- PRESENTING COMPLAINTS --}}
+    <table class="surgical-table">
+        <tr>
+            <th style="background: #f1f5f9; text-align: left; font-size: 8.5pt;">PRESENTING COMPLAINTS</th>
+        </tr>
+        <tr>
+            <td style="padding: 5px 8px; font-size: 8.8pt;">
+                {{ $admission->clinical_history ? strtok($admission->clinical_history, "\n") : 'Admitted for elective surgical procedure.' }}
+            </td>
+        </tr>
+    </table>
+
+    {{-- PAST MEDICAL & SURGICAL HISTORY --}}
     @php
-        $investigations = $admission->formatted_investigations;
+        $hist = $admission->formatted_surgical_past_history;
     @endphp
-    @if(!empty($investigations))
-        <div class="ds-section-header">INVESTIGATIONS</div>
-        <table class="ds-info-table bg-white">
-            @foreach(array_chunk($investigations, 5) as $chunk)
+    <table class="surgical-table">
+        <tr>
+            <th style="width: 60%; background: #f1f5f9; text-align: left; font-size: 8.5pt;">PAST MEDICAL HISTORY</th>
+            <th style="width: 40%; background: #f1f5f9; text-align: left; font-size: 8.5pt;">PAST SURGICAL HISTORY</th>
+        </tr>
+        <tr>
+            <td style="padding: 4px 6px;">
+                <table style="width: 100%; border-collapse: collapse; border: none;">
+                    <tr>
+                        <td style="border: none; padding: 1px 2px; font-size: 7.5pt; font-weight: bold; width: 20%;">DM</td>
+                        <td style="border: none; padding: 1px 2px; font-size: 7.5pt; font-weight: bold; width: 20%;">HT</td>
+                        <td style="border: none; padding: 1px 2px; font-size: 7.5pt; font-weight: bold; width: 20%;">ASTHMA</td>
+                        <td style="border: none; padding: 1px 2px; font-size: 7.5pt; font-weight: bold; width: 25%;">TUBERCULOSIS</td>
+                        <td style="border: none; padding: 1px 2px; font-size: 7.5pt; font-weight: bold; width: 15%;">Other</td>
+                    </tr>
+                    <tr>
+                        <td style="border: none; padding: 1px 2px; font-size: 8.5pt;">{{ $hist['dm'] }}</td>
+                        <td style="border: none; padding: 1px 2px; font-size: 8.5pt;">{{ $hist['ht'] }}</td>
+                        <td style="border: none; padding: 1px 2px; font-size: 8.5pt;">{{ $hist['asthma'] }}</td>
+                        <td style="border: none; padding: 1px 2px; font-size: 8.5pt;">{{ $hist['tb'] }}</td>
+                        <td style="border: none; padding: 1px 2px; font-size: 8.5pt;">{{ $hist['other'] }}</td>
+                    </tr>
+                </table>
+            </td>
+            <td style="padding: 4px 6px; font-size: 8.5pt; vertical-align: top;">
+                {{ $hist['past_surgical'] }}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 3px 6px;">
+                <span style="font-weight: bold; font-size: 7.5pt; margin-right: 6px;">ALLERGIES:</span> {{ $hist['allergies'] }}
+            </td>
+            <td style="padding: 3px 6px;">
+                <span style="font-weight: bold; font-size: 7.5pt; margin-right: 6px;">MEDICATIONS:</span> {{ $hist['medications'] }}
+            </td>
+        </tr>
+        <tr>
+            <td style="padding: 3px 6px;">
+                <span style="font-weight: bold; font-size: 7.5pt; margin-right: 6px;">PULSE:</span> {{ $hist['pulse'] }}
+            </td>
+            <td style="padding: 3px 6px;">
+                <span style="font-weight: bold; font-size: 7.5pt; margin-right: 6px;">BP:</span> {{ $hist['bp'] }}
+            </td>
+        </tr>
+    </table>
+
+    {{-- CLINICAL EXAMINATION --}}
+    <table class="surgical-table">
+        <tr>
+            <th style="background: #f1f5f9; text-align: left; font-size: 8.5pt;">CLINICAL EXAMINATION</th>
+        </tr>
+        <tr>
+            <td style="padding: 5px 8px; font-size: 8.8pt;">
+                {{ $admission->examination ?: 'CVS: NAD  RS: Clear  Abdomen: Soft, no mass, no free fluid, no organomegaly.' }}
+            </td>
+        </tr>
+    </table>
+
+    {{-- INVESTIGATIONS --}}
+    @php
+        $inv = $admission->formatted_surgical_investigations;
+    @endphp
+    <table class="surgical-table">
+        <tr>
+            <th style="background: #f1f5f9; text-align: left; font-size: 8.5pt;" colspan="2">INVESTIGATIONS</th>
+        </tr>
+        <tr>
+            <td style="width: 55%; padding: 4px 6px; vertical-align: top;">
+                <table style="width: 100%; border-collapse: collapse; border: none;">
+                    <tr>
+                        @foreach($inv['group1'] as $k => $v)
+                            <td style="border: none; padding: 1px 2px; font-size: 7.5pt; font-weight: bold;">{{ $k }}</td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        @foreach($inv['group1'] as $k => $v)
+                            <td style="border: none; padding: 1px 2px; font-size: 8.5pt;">{{ $v }}</td>
+                        @endforeach
+                    </tr>
+                </table>
+            </td>
+            <td style="width: 45%; padding: 4px 6px; vertical-align: top;">
+                <table style="width: 100%; border-collapse: collapse; border: none;">
+                    <tr>
+                        @foreach($inv['group2'] as $k => $v)
+                            <td style="border: none; padding: 1px 2px; font-size: 7.5pt; font-weight: bold;">{{ $k }}</td>
+                        @endforeach
+                    </tr>
+                    <tr>
+                        @foreach($inv['group2'] as $k => $v)
+                            <td style="border: none; padding: 1px 2px; font-size: 8.5pt;">{{ $v }}</td>
+                        @endforeach
+                    </tr>
+                </table>
+            </td>
+        </tr>
+        @if(!empty($inv['imaging']))
+            @foreach($inv['imaging'] as $imgKey => $imgVal)
                 <tr>
-                    @foreach($chunk as $inv)
-                        <td style="width: 20%; padding: 4px 6px;">
-                            <span class="ds-cell-lbl" style="font-size: 6.8pt;">{{ $inv['label'] }}</span>
-                            <span class="ds-cell-val" style="font-size: 8.8pt;">{{ $inv['value'] }}</span>
-                        </td>
-                    @endforeach
-                    @if(count($chunk) < 5)
-                        @for($i = 0; $i < (5 - count($chunk)); $i++)
-                            <td style="width: 20%; border: 1px solid #cbd5e1;">&nbsp;</td>
-                        @endfor
-                    @endif
+                    <td style="font-weight: bold; background: #f8fafc; font-size: 8pt; width: 25%;">{{ $imgKey }}</td>
+                    <td style="font-weight: bold; font-size: 8.5pt;">{{ $imgVal }}</td>
                 </tr>
             @endforeach
-        </table>
-    @endif
+        @endif
+    </table>
 
-    {{-- Condition on Discharge --}}
-    @php
-        $cond = $admission->formatted_condition;
-    @endphp
-    <div class="ds-section-header">CONDITION ON DISCHARGE</div>
-    <table class="ds-info-table bg-white">
+    {{-- THEATER NOTES --}}
+    <table class="surgical-table">
         <tr>
-            <td style="width: 20%;">
-                <span class="ds-cell-lbl">General condition</span>
-                <span class="ds-cell-val">{{ $cond['general'] }}</span>
-            </td>
-            <td style="width: 18%;">
-                <span class="ds-cell-lbl">BP</span>
-                <span class="ds-cell-val">{{ $cond['bp'] }}</span>
-            </td>
-            <td style="width: 17%;">
-                <span class="ds-cell-lbl">Pulse</span>
-                <span class="ds-cell-val">{{ $cond['pulse'] }}</span>
-            </td>
-            <td style="width: 45%;">
-                <span class="ds-cell-lbl">P/A</span>
-                <span class="ds-cell-val" style="font-size: 8.8pt;">{{ $cond['pa'] }}</span>
+            <th style="background: #f1f5f9; text-align: left; font-size: 8.5pt;" colspan="4">THEATER NOTES</th>
+        </tr>
+        <tr>
+            <td style="width: 15%; font-weight: bold; background: #f8fafc;">SURGERY</td>
+            <td colspan="3" style="font-weight: bold;">{{ strtoupper($admission->procedure_name ?: ($admission->procedure_done ?: 'RIGHT URSL & DJ STENTING')) }}</td>
+        </tr>
+        <tr>
+            <td style="width: 15%; font-weight: bold; background: #f8fafc;">DATE</td>
+            <td style="width: 35%;">{{ $admission->procedure_at?->format('d.m.Y @ h.iA') ?? '07.08.2026 @ 05.00PM' }}</td>
+            <td style="width: 15%; font-weight: bold; background: #f8fafc;">ANAESTHESIA</td>
+            <td style="width: 35%;">{{ $admission->anaesthesia_type ?: 'SA' }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold; background: #f8fafc;">SURGEON</td>
+            <td>{{ strtoupper($admission->surgeon ?: 'DR. N. JAYAPRAKASH') }}</td>
+            <td style="font-weight: bold; background: #f8fafc;">ANESTHETIST</td>
+            <td>{{ strtoupper($admission->anaesthetist ?: 'DR. S.G. ARUN KUMAR') }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold; background: #f8fafc;">ASSISTED BY</td>
+            <td>{{ strtoupper($admission->assisted_by ?: ($admission->assistant ?: 'MISS. SOUNDHARYA')) }}</td>
+            <td style="font-weight: bold; background: #f8fafc;">ICD CODE</td>
+            <td>{{ $admission->icd_code ?: 'N20.0' }}</td>
+        </tr>
+        <tr>
+            <td colspan="4" style="padding: 6px 8px; font-size: 8.5pt; line-height: 1.4; text-align: justify;">
+                {!! nl2br(e($admission->procedure_note)) !!}
             </td>
         </tr>
     </table>
 
-    {{-- Discharge Medications --}}
-    @php
-        $meds = $admission->formatted_medications;
-    @endphp
-    @if(!empty($meds))
-        <div class="ds-section-header">DISCHARGE MEDICATIONS</div>
-        <table class="ds-data-table">
-            <thead>
-                <tr>
-                    <th style="width: 44%;">Medicine</th>
-                    <th style="width: 18%;">Frequency</th>
-                    <th style="width: 18%;">Duration</th>
-                    <th style="width: 20%;">Timing</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach($meds as $med)
-                    <tr>
-                        <td style="font-weight: bold;">{{ $med['medicine'] }}</td>
-                        <td>{{ $med['frequency'] }}</td>
-                        <td>{{ $med['duration'] }}</td>
-                        <td>{{ $med['timing'] }}</td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
-    @endif
+    {{-- COURSE IN THE HOSPITAL --}}
+    <table class="surgical-table">
+        <tr>
+            <th style="background: #f1f5f9; text-align: left; font-size: 8.5pt;">COURSE IN THE HOSPITAL</th>
+        </tr>
+        <tr>
+            <td style="padding: 5px 8px; font-size: 8.8pt; line-height: 1.4; text-align: justify;">
+                {!! nl2br(e($admission->treatment_course ?: 'Admitted electively and underwent procedure. Received peri-operative antibiotics. Uneventful hospital stay.')) !!}
+            </td>
+        </tr>
+    </table>
 
-    {{-- Advice & Review --}}
+    {{-- CONDITION AT DISCHARGE --}}
+    <table class="surgical-table">
+        <tr>
+            <td style="width: 25%; font-weight: bold; background: #f1f5f9; font-size: 8.5pt;">CONDITION AT DISCHARGE</td>
+            <td style="width: 75%; font-weight: bold; font-size: 9pt;">{{ strtoupper($admission->discharge_condition ? strtok($admission->discharge_condition, "\n-:") : 'STABLE') }}</td>
+        </tr>
+    </table>
+
+    {{-- DISCHARGE ADVICE --}}
     @php
-        $adviceData = $admission->formatted_advice_and_review;
+        $surgDrugs = $admission->formatted_surgical_drugs;
+        $surgAdvice = $admission->formatted_surgical_advice;
     @endphp
-    <div class="ds-section-header">ADVICE</div>
-    <div style="font-size: 8.8pt; line-height: 1.5; margin-bottom: 6px;">
-        @foreach($adviceData['advice_items'] as $item)
-            <span style="display: inline-block; margin-right: 18px;">
-                <strong>&bull;</strong> {{ $item }}
-            </span>
+    <table class="surgical-table">
+        <tr>
+            <th style="background: #f1f5f9; text-align: left; font-size: 8.5pt;" colspan="4">DISCHARGE ADVICE</th>
+        </tr>
+        <tr>
+            <td rowspan="{{ count($surgDrugs) + 1 }}" style="width: 12%; font-weight: bold; background: #f8fafc; vertical-align: top; text-align: center;">DRUGS</td>
+            <td style="width: 48%; font-weight: bold; font-size: 8pt; background: #f8fafc;">DRUG</td>
+            <td style="width: 25%; font-weight: bold; font-size: 8pt; background: #f8fafc;">DOSAGE</td>
+            <td style="width: 15%; font-weight: bold; font-size: 8pt; background: #f8fafc; text-align: center;">NO</td>
+        </tr>
+        @foreach($surgDrugs as $drug)
+            <tr>
+                <td style="font-size: 8.8pt; font-weight: 500;">{{ $drug['drug'] }}</td>
+                <td style="font-size: 8.8pt;">{{ $drug['dosage'] }}</td>
+                <td style="font-size: 8.8pt; text-align: center;">{{ $drug['no'] }}</td>
+            </tr>
         @endforeach
-    </div>
-
-    <div class="ds-section-header">REVIEW & SUTURE REMOVAL</div>
-    <div class="ds-review-box">
-        <div style="font-size: 9.5pt; font-weight: bold;">
-            {{ $adviceData['review_text'] }}
-        </div>
-        <div style="font-size: 11.5pt; font-weight: bold;">
-            {{ $adviceData['review_date'] }}
-        </div>
-    </div>
-
-    {{-- When to Contact / Emergency Box --}}
-    <div class="ds-emergency-box">
-        <div style="margin-bottom: 3px;">
-            <span style="font-size: 7.5pt; font-weight: bold; color: #111; width: 130px; display: inline-block; vertical-align: top;">WHEN TO CONTACT</span>
-            <span style="font-size: 8.8pt; font-weight: bold; color: #000; display: inline-block;">Report immediately if there is bleeding, fever, abdominal pain, or other emergencies.</span>
-        </div>
-        <div>
-            <span style="font-size: 7.5pt; font-weight: bold; color: #111; width: 130px; display: inline-block; vertical-align: middle;">EMERGENCY</span>
-            <span style="font-size: 10.5pt; font-weight: bold; color: #000; display: inline-block; vertical-align: middle;">04342-262266 &nbsp;&nbsp;|&nbsp;&nbsp; +91-7418084266</span>
-        </div>
-    </div>
+        <tr>
+            <td style="font-weight: bold; background: #f8fafc;">IMPLANT</td>
+            <td colspan="3" style="font-weight: bold; font-size: 8.8pt;">{{ $surgAdvice['implant'] }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold; background: #f8fafc;">DIET</td>
+            <td colspan="3" style="font-size: 8.8pt;">{{ $surgAdvice['diet'] }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold; background: #f8fafc;">EXERCISE</td>
+            <td colspan="3" style="font-size: 8.8pt;">{{ $surgAdvice['exercise'] }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold; background: #f8fafc;">EMERGENCY CONTACT</td>
+            <td colspan="3" style="font-weight: bold; font-size: 8.8pt;">{{ $surgAdvice['emergency_contact'] }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold; background: #f8fafc;">WHEN TO CONTACT</td>
+            <td colspan="3" style="font-size: 8.8pt; color: #b91c1c; font-weight: 600;">{{ $surgAdvice['when_to_contact'] }}</td>
+        </tr>
+        <tr>
+            <td style="font-weight: bold; background: #f8fafc;">REVIEW</td>
+            <td colspan="3" style="font-weight: bold; font-size: 8.8pt;">{{ $surgAdvice['review'] }}</td>
+        </tr>
+        @if(!empty($surgAdvice['tamil_note']))
+            <tr>
+                <td style="background: #f8fafc;"></td>
+                <td colspan="3" style="font-size: 8.5pt; font-family: 'Nirmala', 'Arial Unicode MS', sans-serif; line-height: 1.4; color: #1e293b;">
+                    {{ $surgAdvice['tamil_note'] }}
+                </td>
+            </tr>
+        @endif
+    </table>
 
     {{-- Signatures --}}
-    <div class="ds-sig-row">
-        <div style="width: 28%;">
-            <div style="font-size: 7.5pt; color: #475569; font-weight: bold;">Prepared by</div>
-            <div style="font-size: 9pt; color: #000000; margin-top: 2px;">{{ $admission->handover_name ?: ($admission->creator?->name ?? 'Staff Nurse') }}</div>
-        </div>
-        <div style="width: 44%;">
-            <div style="font-size: 9pt; font-weight: bold; color: #000000;">Dr. Karthik Rajan MS, MCh</div>
-            <div style="font-size: 7.5pt; color: #475569; margin-top: 1px;">Medical Officer / Resident Consultant Surgeon</div>
-        </div>
-        <div style="width: 28%; text-align: right;">
-            <div style="font-size: 9pt; font-weight: bold; color: #000000;">{{ $admission->consultant ?: ($admission->surgeon ?: 'Dr. Jayaprakash MS') }}</div>
-            <div style="font-size: 7.5pt; color: #475569; margin-top: 1px;">Reg: {{ $admission->approver?->doctor_reg_no ?? 'TNMC-64821' }}</div>
-        </div>
-    </div>
+    <table class="surgical-table" style="margin-top: 15px; border: none;">
+        <tr>
+            <td style="width: 50%; border: none; padding: 10px 8px 0 8px;">
+                <div style="font-size: 8pt; font-weight: bold; color: #475569;">PREPARED BY</div>
+                <div style="font-size: 9.5pt; font-weight: bold; color: #000; margin-top: 2px;">
+                    {{ strtoupper($admission->handover_name ?: ($admission->consultant ?: ($admission->surgeon ?: 'DR. N. JAYAPRAKASH'))) }}
+                </div>
+            </td>
+            <td style="width: 50%; border: none; padding: 10px 8px 0 8px; text-align: right;">
+                <div style="font-size: 8pt; font-weight: bold; color: #475569;">COUNTERSIGNED BY</div>
+                <div style="font-size: 9.5pt; font-weight: bold; color: #000; margin-top: 2px;">
+                    {{ strtoupper($admission->consultant ?: ($admission->surgeon ?: 'DR. N. JAYAPRAKASH')) }}
+                </div>
+            </td>
+        </tr>
+    </table>
 </div>

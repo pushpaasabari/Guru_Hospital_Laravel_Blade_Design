@@ -144,6 +144,7 @@ class DatabaseSeeder extends Seeder
         $this->call(AjithKumarDischargeSummarySeeder::class);
         $this->call(ManjupriyaOperationNotesSeeder::class);
         $this->call(AnithaTwinDeliverySeeder::class);
+        $this->call(GopalakrishnanDischargeSummarySeeder::class);
     }
 }
 

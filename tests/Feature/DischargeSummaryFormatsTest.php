@@ -8,6 +8,7 @@ use Database\Seeders\AjithKumarDischargeSummarySeeder;
 use Database\Seeders\AshwiniDischargeSummarySeeder;
 use Database\Seeders\ManjupriyaOperationNotesSeeder;
 use Database\Seeders\AnithaTwinDeliverySeeder;
+use Database\Seeders\GopalakrishnanDischargeSummarySeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -263,5 +264,63 @@ class DischargeSummaryFormatsTest extends TestCase
         $this->assertCount(2, $admission->formatted_newborns);
         $this->assertEquals('Newborn #1 - Twin A', $admission->formatted_newborns[0]['title']);
         $this->assertEquals('Newborn #2 - Twin B', $admission->formatted_newborns[1]['title']);
+    }
+
+    public function test_mr_gopalakrishnan_surgical_discharge_summary_renders_and_generates_pdf_successfully(): void
+    {
+        $this->seed(GopalakrishnanDischargeSummarySeeder::class);
+
+        $admission = Admission::where('ip_no', '2026/507')->first();
+        $this->assertNotNull($admission);
+        $this->assertEquals('Mr. Gopalakrishnan', $admission->patient_name);
+        $this->assertEquals('2026/1247', $admission->uhid);
+        $this->assertEquals('Right Lower Ureteric Calculus', $admission->diagnosis);
+        $this->assertEquals('other', $admission->surgery_type);
+
+        // Preview Check via Inertia
+        $previewResponse = $this->actingAs($this->doctor)
+            ->get(route('documents.preview', $admission));
+
+        $previewResponse->assertStatus(200);
+        $previewResponse->assertInertia(fn (Assert $page) => $page
+            ->component('Documents/Pack')
+            ->where('admission.patient_name', 'Mr. Gopalakrishnan')
+            ->where('admission.ip_no', '2026/507')
+            ->where('admission.uhid', '2026/1247')
+            ->where('admission.diagnosis', 'Right Lower Ureteric Calculus')
+            ->where('admission.surgery_type', 'other')
+        );
+
+        // PDF Generation Check (Individual Discharge Summary)
+        $pdfResponse = $this->actingAs($this->doctor)
+            ->get(route('documents.pdf', ['admission' => $admission, 'type' => 'discharge_summary']));
+
+        $pdfResponse->assertStatus(200);
+        $this->assertEquals('application/pdf', $pdfResponse->headers->get('Content-Type'));
+
+        // PDF Generation Check (Full Pack)
+        $packPdfResponse = $this->actingAs($this->doctor)
+            ->get(route('documents.pdf', ['admission' => $admission]));
+
+        $packPdfResponse->assertStatus(200);
+        $this->assertEquals('application/pdf', $packPdfResponse->headers->get('Content-Type'));
+
+        // Formatted surgical helpers check
+        $pastHist = $admission->formatted_surgical_past_history;
+        $this->assertEquals('82 b/min', $pastHist['pulse']);
+        $this->assertEquals('110/70 mmHg', $pastHist['bp']);
+
+        $inv = $admission->formatted_surgical_investigations;
+        $this->assertEquals('15.5g/dl', $inv['group1']['Hb']);
+        $this->assertEquals('Neg', $inv['group2']['HIV']);
+
+        $advice = $admission->formatted_surgical_advice;
+        $this->assertEquals('Right DJ Stent', $advice['implant']);
+        $this->assertStringContainsString('வயிற்றுக்குள்', $advice['tamil_note']);
+
+        $drugs = $admission->formatted_surgical_drugs;
+        $this->assertGreaterThanOrEqual(4, count($drugs));
+        $this->assertEquals('T. Niftas', $drugs[0]['drug']);
+        $this->assertEquals('1-0-1', $drugs[0]['dosage']);
     }
 }

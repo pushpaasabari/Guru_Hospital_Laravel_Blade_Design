@@ -82,14 +82,16 @@ export default function StaffSelect({
             placeholder={`Enter custom ${label}`}
             required={required}
           />
-          <button
-            type="button"
-            className="btn btn-outline-secondary"
-            onClick={() => setCustomMode(false)}
-            title="Pick from staff list"
-          >
-            List
-          </button>
+          {showCustomToggle && (
+            <button
+              type="button"
+              className="btn btn-outline-secondary"
+              onClick={() => setCustomMode(false)}
+              title="Pick from staff list"
+            >
+              List
+            </button>
+          )}
         </div>
       ) : (
         <select

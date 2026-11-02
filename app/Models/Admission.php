@@ -157,4 +157,24 @@ class Admission extends Model
     {
         return \App\Services\DischargeSummaryFormatter::formatNewborns($this);
     }
+
+    public function getFormattedSurgicalPastHistoryAttribute(): array
+    {
+        return \App\Services\DischargeSummaryFormatter::formatSurgicalPastHistory($this);
+    }
+
+    public function getFormattedSurgicalInvestigationsAttribute(): array
+    {
+        return \App\Services\DischargeSummaryFormatter::formatSurgicalInvestigations($this);
+    }
+
+    public function getFormattedSurgicalAdviceAttribute(): array
+    {
+        return \App\Services\DischargeSummaryFormatter::formatSurgicalAdvice($this);
+    }
+
+    public function getFormattedSurgicalDrugsAttribute(): array
+    {
+        return \App\Services\DischargeSummaryFormatter::formatSurgicalDrugs($this->medication_orders);
+    }
 }

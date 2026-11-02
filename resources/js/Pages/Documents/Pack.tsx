@@ -9,6 +9,10 @@ import {
   formatAdviceAndReview,
   formatNewborns,
   formatSurgeryPerformed,
+  formatSurgicalPastHistory,
+  formatSurgicalInvestigations,
+  formatSurgicalAdvice,
+  formatSurgicalDrugs,
 } from '../../utils/dischargeFormatter';
 
 interface Newborn {
@@ -639,13 +643,14 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
         <>
           {/* DOCUMENT 1: DISCHARGE SUMMARY */}
           {(activeDoc === 'all' || activeDoc === 'discharge_summary') && (() => {
-            const treatmentRows = formatTreatmentCourse(admission.treatment_course || admission.treatment_given);
-            const investigationList = formatInvestigations(admission.investigations);
-            const conditionData = formatConditionOnDischarge(admission.discharge_condition || admission.condition_at_discharge);
-            const medicationList = formatMedications(admission.medication_orders);
-            const adviceData = formatAdviceAndReview(admission.discharge_advice, admission.follow_up, admission.discharge_at);
-            const newbornCards = formatNewborns(admission);
-            const surgeryPerformed = formatSurgeryPerformed(admission);
+            if (admission.surgery_type === 'delivery') {
+              const treatmentRows = formatTreatmentCourse(admission.treatment_course || admission.treatment_given);
+              const investigationList = formatInvestigations(admission.investigations);
+              const conditionData = formatConditionOnDischarge(admission.discharge_condition || admission.condition_at_discharge);
+              const medicationList = formatMedications(admission.medication_orders);
+              const adviceData = formatAdviceAndReview(admission.discharge_advice, admission.follow_up, admission.discharge_at);
+              const newbornCards = formatNewborns(admission);
+              const surgeryPerformed = formatSurgeryPerformed(admission);
 
             return (
               <div className="document-sheet mb-4">
@@ -1275,6 +1280,389 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                 </div>
               </div>
             );
+          }
+
+          // SURGICAL / NON-OBSTETRIC DISCHARGE SUMMARY (Mr. Gopalakrishnan Hospital Standard)
+          const hist = formatSurgicalPastHistory(admission);
+          const inv = formatSurgicalInvestigations(admission);
+          const surgAdvice = formatSurgicalAdvice(admission);
+          const surgDrugs = formatSurgicalDrugs(admission.medication_orders);
+
+          const formatDt = (dtStr?: string | null) => {
+            if (!dtStr) return '—';
+            const dt = new Date(dtStr);
+            if (isNaN(dt.getTime())) return dtStr;
+            const d = String(dt.getDate()).padStart(2, '0');
+            const m = String(dt.getMonth() + 1).padStart(2, '0');
+            const y = dt.getFullYear();
+            const time = dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            return `${d}.${m}.${y} at ${time}`;
+          };
+
+          return (
+            <div className="document-sheet mb-4">
+              <div
+                className="text-end text-muted small mb-2 no-print"
+                style={{ fontSize: '10.5px', letterSpacing: '0.05em', fontWeight: 600 }}
+              >
+                DOCUMENT 1 OF 3: DISCHARGE SUMMARY ({admission.format.toUpperCase()})
+              </div>
+
+              <div
+                className="discharge-summary-document surgical-doc"
+                style={{
+                  fontFamily: "Arial, 'Helvetica Neue', Helvetica, sans-serif",
+                  fontSize: '9pt',
+                  lineHeight: 1.35,
+                  color: '#000',
+                }}
+              >
+                {/* Space for Pre-printed Letterhead (First page only) */}
+                <div style={{ height: '38mm' }}></div>
+
+                <div className="text-center mb-3">
+                  <h3
+                    className="fw-bold text-uppercase mb-0"
+                    style={{ letterSpacing: '0.5px', fontSize: '15pt', color: '#111' }}
+                  >
+                    DISCHARGE SUMMARY
+                  </h3>
+                </div>
+
+                {/* Top Demographics Grid */}
+                <table className="table table-bordered mb-2 border-dark" style={{ fontSize: '8.5pt' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ width: '12%', fontWeight: 'bold', background: '#f8fafc' }}>NAME</td>
+                      <td style={{ width: '44%', fontWeight: 'bold', fontSize: '9.5pt' }}>{admission.patient_name?.toUpperCase()}</td>
+                      <td style={{ width: '10%', fontWeight: 'bold', textAlign: 'center' }}>{admission.age}</td>
+                      <td style={{ width: '6%', fontWeight: 'bold', textAlign: 'center' }}>{(admission.sex || 'M').charAt(0).toUpperCase()}</td>
+                      <td style={{ width: '14%', fontWeight: 'bold', background: '#f8fafc' }}>CONSULTANT</td>
+                      <td style={{ width: '14%', fontWeight: 'bold' }}>{(admission.consultant || admission.surgeon || 'DR. N. JAYAPRAKASH').toUpperCase()}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <table className="table table-bordered mb-2 border-dark" style={{ fontSize: '8.5pt' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ width: '14%', fontWeight: 'bold', background: '#f8fafc', verticalAlign: 'top' }}>ADDRESS</td>
+                      <td style={{ width: '36%', verticalAlign: 'top' }}>{admission.address || '—'}</td>
+                      <td style={{ width: '18%', fontWeight: 'bold', background: '#f8fafc', verticalAlign: 'top' }}>FINAL DIAGNOSIS</td>
+                      <td style={{ width: '32%', fontWeight: 'bold', verticalAlign: 'top' }}>{(admission.diagnosis || '—').toUpperCase()}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>PHONE</td>
+                      <td>{admission.contact || '—'}</td>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>PROCEDURE DONE</td>
+                      <td style={{ fontWeight: 'bold' }}>{(admission.procedure_done || admission.procedure_name || '—').toUpperCase()}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>MRD No</td>
+                      <td>{admission.mrd_no || '2026-1247'}</td>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>ICD CODE</td>
+                      <td>{admission.icd_code || '—'}</td>
+                    </tr>
+                    <tr>
+                      <td colSpan={2} style={{ background: '#ffffff', border: 'none' }}></td>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>IP NO :</td>
+                      <td style={{ fontWeight: 'bold' }}>{admission.ip_no}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* Dates Row */}
+                <table className="table table-bordered mb-2 border-dark" style={{ fontSize: '8.5pt' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ width: '10%', fontWeight: 'bold', background: '#f8fafc' }}>DOA</td>
+                      <td style={{ width: '23%' }}>{formatDt(admission.admission_at)}</td>
+                      <td style={{ width: '10%', fontWeight: 'bold', background: '#f8fafc' }}>DOO</td>
+                      <td style={{ width: '23%' }}>{formatDt(admission.procedure_at)}</td>
+                      <td style={{ width: '10%', fontWeight: 'bold', background: '#f8fafc' }}>DOD</td>
+                      <td style={{ width: '24%' }}>{formatDt(admission.discharge_at)}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* PRESENTING COMPLAINTS */}
+                <table className="table table-bordered mb-2 border-dark" style={{ fontSize: '8.5pt' }}>
+                  <thead>
+                    <tr className="bg-light">
+                      <th style={{ background: '#f1f5f9', textAlign: 'left', fontSize: '8.5pt' }}>PRESENTING COMPLAINTS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '6px 8px', fontSize: '8.8pt' }}>
+                        {admission.clinical_history ? admission.clinical_history.split('\n')[0] : 'Admitted for elective surgical procedure.'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* PAST MEDICAL & SURGICAL HISTORY */}
+                <table className="table table-bordered mb-2 border-dark" style={{ fontSize: '8.5pt' }}>
+                  <thead>
+                    <tr className="bg-light">
+                      <th style={{ width: '60%', background: '#f1f5f9', textAlign: 'left', fontSize: '8.5pt' }}>PAST MEDICAL HISTORY</th>
+                      <th style={{ width: '40%', background: '#f1f5f9', textAlign: 'left', fontSize: '8.5pt' }}>PAST SURGICAL HISTORY</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '4px 6px' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}>
+                          <tbody>
+                            <tr>
+                              <td style={{ border: 'none', padding: '1px 2px', fontSize: '7.5pt', fontWeight: 'bold', width: '20%' }}>DM</td>
+                              <td style={{ border: 'none', padding: '1px 2px', fontSize: '7.5pt', fontWeight: 'bold', width: '20%' }}>HT</td>
+                              <td style={{ border: 'none', padding: '1px 2px', fontSize: '7.5pt', fontWeight: 'bold', width: '20%' }}>ASTHMA</td>
+                              <td style={{ border: 'none', padding: '1px 2px', fontSize: '7.5pt', fontWeight: 'bold', width: '25%' }}>TUBERCULOSIS</td>
+                              <td style={{ border: 'none', padding: '1px 2px', fontSize: '7.5pt', fontWeight: 'bold', width: '15%' }}>Other</td>
+                            </tr>
+                            <tr>
+                              <td style={{ border: 'none', padding: '1px 2px', fontSize: '8.5pt' }}>{hist.dm}</td>
+                              <td style={{ border: 'none', padding: '1px 2px', fontSize: '8.5pt' }}>{hist.ht}</td>
+                              <td style={{ border: 'none', padding: '1px 2px', fontSize: '8.5pt' }}>{hist.asthma}</td>
+                              <td style={{ border: 'none', padding: '1px 2px', fontSize: '8.5pt' }}>{hist.tb}</td>
+                              <td style={{ border: 'none', padding: '1px 2px', fontSize: '8.5pt' }}>{hist.other}</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                      <td style={{ padding: '4px 6px', fontSize: '8.5pt', verticalAlign: 'top' }}>
+                        {hist.past_surgical}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '3px 6px' }}>
+                        <span style={{ fontWeight: 'bold', fontSize: '7.5pt', marginRight: '6px' }}>ALLERGIES:</span> {hist.allergies}
+                      </td>
+                      <td style={{ padding: '3px 6px' }}>
+                        <span style={{ fontWeight: 'bold', fontSize: '7.5pt', marginRight: '6px' }}>MEDICATIONS:</span> {hist.medications}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style={{ padding: '3px 6px' }}>
+                        <span style={{ fontWeight: 'bold', fontSize: '7.5pt', marginRight: '6px' }}>PULSE:</span> {hist.pulse}
+                      </td>
+                      <td style={{ padding: '3px 6px' }}>
+                        <span style={{ fontWeight: 'bold', fontSize: '7.5pt', marginRight: '6px' }}>BP:</span> {hist.bp}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* CLINICAL EXAMINATION */}
+                <table className="table table-bordered mb-2 border-dark" style={{ fontSize: '8.5pt' }}>
+                  <thead>
+                    <tr className="bg-light">
+                      <th style={{ background: '#f1f5f9', textAlign: 'left', fontSize: '8.5pt' }}>CLINICAL EXAMINATION</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '6px 8px', fontSize: '8.8pt' }}>
+                        {admission.examination || 'CVS: NAD  RS: Clear  Abdomen: Soft, no mass, no free fluid, no organomegaly.'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* INVESTIGATIONS */}
+                <table className="table table-bordered mb-2 border-dark" style={{ fontSize: '8.5pt' }}>
+                  <thead>
+                    <tr className="bg-light">
+                      <th style={{ background: '#f1f5f9', textAlign: 'left', fontSize: '8.5pt' }} colSpan={2}>INVESTIGATIONS</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ width: '55%', padding: '4px 6px', verticalAlign: 'top' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}>
+                          <tbody>
+                            <tr>
+                              {Object.keys(inv.group1).map((k) => (
+                                <td key={k} style={{ border: 'none', padding: '1px 2px', fontSize: '7.5pt', fontWeight: 'bold' }}>{k}</td>
+                              ))}
+                            </tr>
+                            <tr>
+                              {Object.values(inv.group1).map((v, i) => (
+                                <td key={i} style={{ border: 'none', padding: '1px 2px', fontSize: '8.5pt' }}>{v}</td>
+                              ))}
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                      <td style={{ width: '45%', padding: '4px 6px', verticalAlign: 'top' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}>
+                          <tbody>
+                            <tr>
+                              {Object.keys(inv.group2).map((k) => (
+                                <td key={k} style={{ border: 'none', padding: '1px 2px', fontSize: '7.5pt', fontWeight: 'bold' }}>{k}</td>
+                              ))}
+                            </tr>
+                            <tr>
+                              {Object.values(inv.group2).map((v, i) => (
+                                <td key={i} style={{ border: 'none', padding: '1px 2px', fontSize: '8.5pt' }}>{v}</td>
+                              ))}
+                            </tr>
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                    {Object.entries(inv.imaging).map(([k, v]) => (
+                      <tr key={k}>
+                        <td style={{ fontWeight: 'bold', background: '#f8fafc', fontSize: '8pt', width: '25%' }}>{k}</td>
+                        <td style={{ fontWeight: 'bold', fontSize: '8.5pt' }}>{v}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* THEATER NOTES */}
+                <table className="table table-bordered mb-2 border-dark" style={{ fontSize: '8.5pt' }}>
+                  <thead>
+                    <tr className="bg-light">
+                      <th style={{ background: '#f1f5f9', textAlign: 'left', fontSize: '8.5pt' }} colSpan={4}>THEATER NOTES</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ width: '15%', fontWeight: 'bold', background: '#f8fafc' }}>SURGERY</td>
+                      <td colSpan={3} style={{ fontWeight: 'bold' }}>{(admission.procedure_name || admission.procedure_done || 'RIGHT URSL & DJ STENTING').toUpperCase()}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ width: '15%', fontWeight: 'bold', background: '#f8fafc' }}>DATE</td>
+                      <td style={{ width: '35%' }}>{formatDt(admission.procedure_at)}</td>
+                      <td style={{ width: '15%', fontWeight: 'bold', background: '#f8fafc' }}>ANAESTHESIA</td>
+                      <td style={{ width: '35%' }}>{admission.anaesthesia_type || 'SA'}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>SURGEON</td>
+                      <td>{(admission.surgeon || 'DR. N. JAYAPRAKASH').toUpperCase()}</td>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>ANESTHETIST</td>
+                      <td>{(admission.anaesthetist || 'DR. S.G. ARUN KUMAR').toUpperCase()}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>ASSISTED BY</td>
+                      <td>{(admission.assisted_by || admission.assistant || 'MISS. SOUNDHARYA').toUpperCase()}</td>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>ICD CODE</td>
+                      <td>{admission.icd_code || 'N20.0'}</td>
+                    </tr>
+                    <tr>
+                      <td colSpan={4} style={{ padding: '6px 8px', fontSize: '8.5pt', lineHeight: 1.4, textAlign: 'justify', whiteSpace: 'pre-line' }}>
+                        {admission.procedure_note || 'Right lower ureteric calculus fragmented with pneumatic lithotripter. 4.5F 26cm DJ stent placed.'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* COURSE IN THE HOSPITAL */}
+                <table className="table table-bordered mb-2 border-dark" style={{ fontSize: '8.5pt' }}>
+                  <thead>
+                    <tr className="bg-light">
+                      <th style={{ background: '#f1f5f9', textAlign: 'left', fontSize: '8.5pt' }}>COURSE IN THE HOSPITAL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td style={{ padding: '6px 8px', fontSize: '8.8pt', lineHeight: 1.4, textAlign: 'justify', whiteSpace: 'pre-line' }}>
+                        {admission.treatment_course || 'Admitted electively and underwent procedure. Received peri-operative antibiotics. Uneventful hospital stay.'}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* CONDITION AT DISCHARGE */}
+                <table className="table table-bordered mb-2 border-dark" style={{ fontSize: '8.5pt' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ width: '25%', fontWeight: 'bold', background: '#f1f5f9', fontSize: '8.5pt' }}>CONDITION AT DISCHARGE</td>
+                      <td style={{ width: '75%', fontWeight: 'bold', fontSize: '9pt' }}>{(admission.discharge_condition ? admission.discharge_condition.split('\n')[0] : 'STABLE').toUpperCase()}</td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                {/* DISCHARGE ADVICE */}
+                <table className="table table-bordered mb-2 border-dark" style={{ fontSize: '8.5pt' }}>
+                  <thead>
+                    <tr className="bg-light">
+                      <th style={{ background: '#f1f5f9', textAlign: 'left', fontSize: '8.5pt' }} colSpan={4}>DISCHARGE ADVICE</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td rowSpan={surgDrugs.length + 1} style={{ width: '12%', fontWeight: 'bold', background: '#f8fafc', verticalAlign: 'top', textAlign: 'center' }}>DRUGS</td>
+                      <td style={{ width: '48%', fontWeight: 'bold', fontSize: '8pt', background: '#f8fafc' }}>DRUG</td>
+                      <td style={{ width: '25%', fontWeight: 'bold', fontSize: '8pt', background: '#f8fafc' }}>DOSAGE</td>
+                      <td style={{ width: '15%', fontWeight: 'bold', fontSize: '8pt', background: '#f8fafc', textAlign: 'center' }}>NO</td>
+                    </tr>
+                    {surgDrugs.map((d, i) => (
+                      <tr key={i}>
+                        <td style={{ fontSize: '8.8pt', fontWeight: 500 }}>{d.drug}</td>
+                        <td style={{ fontSize: '8.8pt' }}>{d.dosage}</td>
+                        <td style={{ fontSize: '8.8pt', textAlign: 'center' }}>{d.no}</td>
+                      </tr>
+                    ))}
+                    <tr>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>IMPLANT</td>
+                      <td colSpan={3} style={{ fontWeight: 'bold', fontSize: '8.8pt' }}>{surgAdvice.implant}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>DIET</td>
+                      <td colSpan={3} style={{ fontSize: '8.8pt' }}>{surgAdvice.diet}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>EXERCISE</td>
+                      <td colSpan={3} style={{ fontSize: '8.8pt' }}>{surgAdvice.exercise}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>EMERGENCY CONTACT</td>
+                      <td colSpan={3} style={{ fontWeight: 'bold', fontSize: '8.8pt' }}>{surgAdvice.emergency_contact}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>WHEN TO CONTACT</td>
+                      <td colSpan={3} style={{ fontSize: '8.8pt', color: '#b91c1c', fontWeight: 600 }}>{surgAdvice.when_to_contact}</td>
+                    </tr>
+                    <tr>
+                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>REVIEW</td>
+                      <td colSpan={3} style={{ fontWeight: 'bold', fontSize: '8.8pt' }}>{surgAdvice.review}</td>
+                    </tr>
+                    {surgAdvice.tamil_note && (
+                      <tr>
+                        <td style={{ background: '#f8fafc' }}></td>
+                        <td colSpan={3} style={{ fontSize: '8.5pt', lineHeight: 1.4, color: '#1e293b' }}>
+                          {surgAdvice.tamil_note}
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+
+                {/* Signatures */}
+                <table className="table table-borderless mt-3" style={{ fontSize: '8.5pt' }}>
+                  <tbody>
+                    <tr>
+                      <td style={{ width: '50%', padding: '10px 8px 0 8px' }}>
+                        <div style={{ fontSize: '8pt', fontWeight: 'bold', color: '#475569' }}>PREPARED BY</div>
+                        <div style={{ fontSize: '9.5pt', fontWeight: 'bold', color: '#000', marginTop: '2px' }}>
+                          {(admission.handover_name || admission.consultant || admission.surgeon || 'DR. N. JAYAPRAKASH').toUpperCase()}
+                        </div>
+                      </td>
+                      <td style={{ width: '50%', padding: '10px 8px 0 8px', textAlign: 'right' }}>
+                        <div style={{ fontSize: '8pt', fontWeight: 'bold', color: '#475569' }}>COUNTERSIGNED BY</div>
+                        <div style={{ fontSize: '9.5pt', fontWeight: 'bold', color: '#000', marginTop: '2px' }}>
+                          {(admission.consultant || admission.surgeon || 'DR. N. JAYAPRAKASH').toUpperCase()}
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          );
           })()}
 
       {/* DOCUMENT 2: OPERATION THEATRE NOTES */}
