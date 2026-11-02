@@ -84,15 +84,6 @@
                 <input class="form-control" name="ip_no" type="text" value="{{ old('ip_no', $admission->ip_no) }}" required>
             </div>
 
-            <div class="col-md-4" id="picmeFieldWrapper" style="{{ old('surgery_type', $admission->surgery_type) === 'delivery' ? '' : 'display: none;' }}">
-                <label class="form-label required">
-                    PICME Number (RCH ID)
-                    <span class="badge bg-danger-subtle text-danger ms-1" style="font-size: 0.68rem;">DELIVERY / OBSTETRIC</span>
-                </label>
-                <input class="form-control" name="picme_no" id="picmeInput" type="text" value="{{ old('picme_no', $admission->picme_no) }}" placeholder="e.g. 331024567890 (12-digit PICME / RCH ID)">
-                <div class="form-text text-muted small">Mandatory for all delivery/obstetric patients in Tamil Nadu.</div>
-            </div>
-
             <div class="col-md-2">
                 <label class="form-label">Age</label>
                 <input class="form-control" name="age" type="text" value="{{ old('age', $admission->age) }}">
@@ -106,13 +97,31 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-8">
                 <label class="form-label">Contact / Phone</label>
                 <input class="form-control" name="contact" type="text" value="{{ old('contact', $admission->contact) }}">
             </div>
+
             <div class="col-md-4">
-                <label class="form-label">Address</label>
-                <input class="form-control" name="address" type="text" value="{{ old('address', $admission->address) }}">
+                <label class="form-label required">Address Line 1</label>
+                <input class="form-control" name="address_line1" type="text" value="{{ old('address_line1', $admission->address_line1 ?? $admission->address) }}" required placeholder="e.g. Door No. / Street / Building">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Address Line 2</label>
+                <input class="form-control" name="address_line2" type="text" value="{{ old('address_line2', $admission->address_line2) }}" placeholder="e.g. Area / Locality / Village">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Address Line 3</label>
+                <input class="form-control" name="address_line3" type="text" value="{{ old('address_line3', $admission->address_line3) }}" placeholder="e.g. City / Taluk / Pincode">
+            </div>
+
+            <div class="col-md-4" id="picmeFieldWrapper" style="{{ old('surgery_type', $admission->surgery_type) === 'delivery' ? '' : 'display: none;' }}">
+                <label class="form-label required">
+                    PICME Number (RCH ID)
+                    <span class="badge bg-danger-subtle text-danger ms-1" style="font-size: 0.68rem;">DELIVERY / OBSTETRIC</span>
+                </label>
+                <input class="form-control" name="picme_no" id="picmeInput" type="text" value="{{ old('picme_no', $admission->picme_no) }}" placeholder="e.g. 331024567890 (12-digit PICME / RCH ID)">
+                <div class="form-text text-muted small">Mandatory for all delivery/obstetric patients in Tamil Nadu.</div>
             </div>
         </div>
     </div>

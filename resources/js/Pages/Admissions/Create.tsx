@@ -18,6 +18,9 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
     age: '',
     sex: '',
     address: '',
+    address_line1: '',
+    address_line2: '',
+    address_line3: '',
     contact: '',
     admission_at: '',
     consultant: '',
@@ -126,29 +129,6 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
                 {errors.ip_no && <div className="invalid-feedback">{errors.ip_no}</div>}
               </div>
 
-              {data.surgery_type === 'delivery' && (
-                <div className="col-md-4">
-                  <label className="form-label required">
-                    PICME Number (RCH ID)
-                    <span className="badge bg-danger-subtle text-danger ms-2" style={{ fontSize: '0.68rem' }}>
-                      DELIVERY / OBSTETRIC
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${errors.picme_no ? 'is-invalid' : ''}`}
-                    value={data.picme_no}
-                    onChange={(e) => setData('picme_no', e.target.value)}
-                    placeholder="e.g. 331024567890 (12-digit PICME / RCH ID)"
-                    maxLength={25}
-                  />
-                  {errors.picme_no && <div className="invalid-feedback">{errors.picme_no}</div>}
-                  <div className="form-text text-muted small">
-                    Mandatory for all delivery/obstetric patients in Tamil Nadu.
-                  </div>
-                </div>
-              )}
-
               <div className="col-md-2">
                 <label className="form-label">Age</label>
                 <input
@@ -175,7 +155,7 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
                 </select>
                 {errors.sex && <div className="invalid-feedback">{errors.sex}</div>}
               </div>
-              <div className="col-md-4">
+              <div className="col-md-8">
                 <label className="form-label">Phone / Contact</label>
                 <input
                   type="text"
@@ -185,16 +165,62 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
                   placeholder="e.g. 7373667465"
                 />
               </div>
+
               <div className="col-md-4">
-                <label className="form-label">Address</label>
+                <label className="form-label required">Address Line 1</label>
+                <input
+                  type="text"
+                  className={`form-control ${errors.address_line1 ? 'is-invalid' : ''}`}
+                  value={data.address_line1}
+                  onChange={(e) => setData('address_line1', e.target.value)}
+                  placeholder="e.g. Door No. / Street / Building"
+                  required
+                />
+                {errors.address_line1 && <div className="invalid-feedback">{errors.address_line1}</div>}
+              </div>
+              <div className="col-md-4">
+                <label className="form-label">Address Line 2</label>
                 <input
                   type="text"
                   className="form-control"
-                  value={data.address}
-                  onChange={(e) => setData('address', e.target.value)}
-                  placeholder="e.g. W/O Sarath Veerasamur"
+                  value={data.address_line2}
+                  onChange={(e) => setData('address_line2', e.target.value)}
+                  placeholder="e.g. Area / Locality / Village"
                 />
               </div>
+              <div className="col-md-4">
+                <label className="form-label">Address Line 3</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={data.address_line3}
+                  onChange={(e) => setData('address_line3', e.target.value)}
+                  placeholder="e.g. City / Taluk / Pincode"
+                />
+              </div>
+
+              {data.surgery_type === 'delivery' && (
+                <div className="col-md-4">
+                  <label className="form-label required">
+                    PICME Number (RCH ID)
+                    <span className="badge bg-danger-subtle text-danger ms-2" style={{ fontSize: '0.68rem' }}>
+                      DELIVERY / OBSTETRIC
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${errors.picme_no ? 'is-invalid' : ''}`}
+                    value={data.picme_no}
+                    onChange={(e) => setData('picme_no', e.target.value)}
+                    placeholder="e.g. 331024567890 (12-digit PICME / RCH ID)"
+                    maxLength={25}
+                  />
+                  {errors.picme_no && <div className="invalid-feedback">{errors.picme_no}</div>}
+                  <div className="form-text text-muted small">
+                    Mandatory for all delivery/obstetric patients in Tamil Nadu.
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

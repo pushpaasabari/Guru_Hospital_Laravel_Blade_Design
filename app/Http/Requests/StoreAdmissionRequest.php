@@ -23,6 +23,9 @@ class StoreAdmissionRequest extends FormRequest
             'age' => ['nullable', 'string', 'max:30'],
             'sex' => ['nullable', Rule::in(['Female', 'Male', 'Other', 'Not recorded'])],
             'address' => ['nullable', 'string', 'max:1000'],
+            'address_line1' => ['nullable', 'string', 'max:255'],
+            'address_line2' => ['nullable', 'string', 'max:255'],
+            'address_line3' => ['nullable', 'string', 'max:255'],
             'contact' => ['nullable', 'string', 'max:50'],
 
             // Core Dates & Doctors

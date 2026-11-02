@@ -359,5 +359,39 @@ class AdmissionWorkflowTest extends TestCase
 
         $this->assertEquals('331024889999', $admission->fresh()->picme_no);
     }
+
+    public function test_admission_saves_three_address_fields_and_auto_syncs_full_address(): void
+    {
+        $response = $this->actingAs($this->nurse)->post(route('admissions.store'), [
+            'patient_name' => 'Kavitha Selvam',
+            'uhid' => 'GH-2026-ADDR-01',
+            'ip_no' => 'IP-ADDR-01',
+            'address_line1' => 'No. 45, Anna Salai',
+            'address_line2' => 'Pennagaram Road',
+            'address_line3' => 'Dharmapuri - 636701',
+            'picme_no' => '331024998877',
+            'age' => '27',
+            'sex' => 'Female',
+            'admission_at' => '2026-10-23 10:00:00',
+            'diagnosis' => 'Full Term Normal Delivery',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+        ]);
+
+        $this->assertDatabaseHas('admissions', [
+            'ip_no' => 'IP-ADDR-01',
+            'address_line1' => 'No. 45, Anna Salai',
+            'address_line2' => 'Pennagaram Road',
+            'address_line3' => 'Dharmapuri - 636701',
+            'address' => 'No. 45, Anna Salai, Pennagaram Road, Dharmapuri - 636701',
+            'picme_no' => '331024998877',
+        ]);
+
+        $admission = Admission::where('ip_no', 'IP-ADDR-01')->first();
+        $this->assertEquals('No. 45, Anna Salai', $admission->address_line1);
+        $this->assertEquals('Pennagaram Road', $admission->address_line2);
+        $this->assertEquals('Dharmapuri - 636701', $admission->address_line3);
+        $this->assertEquals('No. 45, Anna Salai, Pennagaram Road, Dharmapuri - 636701', $admission->address);
+    }
 }
 

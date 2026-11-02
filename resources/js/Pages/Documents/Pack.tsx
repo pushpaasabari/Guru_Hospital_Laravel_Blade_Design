@@ -46,6 +46,9 @@ interface Admission {
   age?: string;
   sex?: string;
   address?: string;
+  address_line1?: string;
+  address_line2?: string;
+  address_line3?: string;
   contact?: string;
   admission_at?: string;
   discharge_at?: string;

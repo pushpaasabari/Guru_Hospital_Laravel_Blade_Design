@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Admission extends Model
 {
     protected $fillable = [
-        'patient_name', 'uhid', 'ip_no', 'picme_no', 'age', 'sex', 'address', 'contact',
+        'patient_name', 'uhid', 'ip_no', 'picme_no', 'age', 'sex', 'address', 'address_line1', 'address_line2', 'address_line3', 'contact',
         'admission_at', 'procedure_at', 'discharge_at', 'consultant',
         'department', 'diagnosis', 'format', 'surgery_type', 'clinical_history',
         'examination', 'investigations', 'treatment_course', 'discharge_condition',
@@ -30,6 +30,21 @@ class Admission extends Model
         'birth_details' => 'array',
         'blood_loss_ml' => 'decimal:2',
     ];
+
+    protected static function booted(): void
+    {
+        static::saving(function ($admission) {
+            if (!empty($admission->address_line1) || !empty($admission->address_line2) || !empty($admission->address_line3)) {
+                $admission->address = implode(', ', array_filter([
+                    $admission->address_line1,
+                    $admission->address_line2,
+                    $admission->address_line3,
+                ]));
+            } elseif (!empty($admission->address) && empty($admission->address_line1)) {
+                $admission->address_line1 = $admission->address;
+            }
+        });
+    }
 
     public function newborns(): HasMany
     {
