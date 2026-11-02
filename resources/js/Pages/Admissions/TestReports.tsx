@@ -213,3 +213,4 @@ export default function AdmissionsTestReports({ admission }: Props) {
     </AppLayout>
   );
 }
+

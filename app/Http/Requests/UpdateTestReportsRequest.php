@@ -19,3 +19,4 @@ class UpdateTestReportsRequest extends FormRequest
         ];
     }
 }
+

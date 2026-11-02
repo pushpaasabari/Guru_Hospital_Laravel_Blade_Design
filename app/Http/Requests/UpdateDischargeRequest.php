@@ -31,3 +31,4 @@ class UpdateDischargeRequest extends FormRequest
         ];
     }
 }
+

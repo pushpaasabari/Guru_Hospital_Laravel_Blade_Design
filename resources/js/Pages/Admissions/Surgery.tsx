@@ -612,3 +612,4 @@ export default function AdmissionsSurgery({
     </AppLayout>
   );
 }
+

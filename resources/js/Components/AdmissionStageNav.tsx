@@ -28,24 +28,14 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
       subtitle: 'Demographics & Case',
       href: admission ? `/admissions/${admission.id}/edit` : undefined,
       isCompleted: Boolean(admission?.uhid && admission?.ip_no),
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-      ),
     },
     {
       id: 'surgery',
       step: 2,
-      name: 'Labour / LSCS / Surgery',
-      subtitle: 'OT Team, Notes & Newborns',
+      name: 'Labour / Surgery',
+      subtitle: 'OT Team & Notes',
       href: admission ? `/admissions/${admission.id}/surgery` : undefined,
       isCompleted: Boolean(admission?.procedure_name || admission?.surgery_type === 'delivery'),
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879a3 3 0 11-4.242-4.242L9.88 9.88m4.241 4.241L9.88 9.88" />
-        </svg>
-      ),
     },
     {
       id: 'test-reports',
@@ -54,11 +44,6 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
       subtitle: 'Lab Tests & Diagnostics',
       href: admission ? `/admissions/${admission.id}/test-reports` : undefined,
       isCompleted: Boolean(admission?.investigations && admission.investigations.trim().length > 0),
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
-        </svg>
-      ),
     },
     {
       id: 'discharge',
@@ -67,129 +52,132 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
       subtitle: 'Summary, Advice & MRD',
       href: admission ? `/admissions/${admission.id}/discharge` : undefined,
       isCompleted: Boolean(admission?.discharge_at),
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      ),
     },
   ];
 
   return (
-    <div className="mb-6 space-y-3">
+    <div className="mb-4">
       {/* Patient Clinical Banner (When editing existing admission) */}
       {admission && (
-        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-sm">
-              {admission.patient_name ? admission.patient_name.charAt(0).toUpperCase() : 'P'}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-lg font-bold text-slate-800">{admission.patient_name || 'Patient Record'}</h2>
-                {admission.sex && (
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">
-                    {admission.age ? `${admission.age} Yrs / ` : ''}{admission.sex}
+        <div className="card border-0 shadow-sm mb-3">
+          <div className="card-body p-3 d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div className="d-flex align-items-center gap-3">
+              <div
+                className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                style={{ width: '42px', height: '42px', fontSize: '1.1rem' }}
+              >
+                {admission.patient_name ? admission.patient_name.charAt(0).toUpperCase() : 'P'}
+              </div>
+              <div>
+                <div className="d-flex align-items-center gap-2 flex-wrap">
+                  <h5 className="fw-bold mb-0 text-dark">{admission.patient_name || 'Patient Record'}</h5>
+                  {admission.sex && (
+                    <span className="badge bg-light text-secondary border">
+                      {admission.age ? `${admission.age} Yrs / ` : ''}{admission.sex}
+                    </span>
+                  )}
+                  <span className="badge bg-success-subtle text-success border border-success-subtle text-uppercase">
+                    {admission.status || 'Draft'}
                   </span>
-                )}
-                <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 font-semibold border border-emerald-200/60 uppercase">
-                  {admission.status || 'Draft'}
-                </span>
-              </div>
-              <div className="flex flex-wrap items-center gap-3 text-xs text-slate-500 mt-1 font-mono">
-                <span><strong className="text-slate-600 font-sans">UHID:</strong> {admission.uhid}</span>
-                <span>&bull;</span>
-                <span><strong className="text-slate-600 font-sans">IP No:</strong> {admission.ip_no}</span>
-                <span>&bull;</span>
-                <span className="uppercase font-sans font-medium px-2 py-0.5 bg-slate-100 rounded text-slate-700">
-                  {admission.format || 'General'}
-                </span>
-                <span className="uppercase font-sans font-medium px-2 py-0.5 bg-sky-50 text-sky-800 rounded">
-                  {admission.surgery_type === 'delivery' ? 'Delivery / Obstetric' : 'Other Surgery'}
-                </span>
+                </div>
+                <div className="d-flex align-items-center gap-3 text-muted small mt-1 flex-wrap">
+                  <span>
+                    <strong className="text-secondary">UHID:</strong> <span className="font-monospace text-dark">{admission.uhid}</span>
+                  </span>
+                  <span>&bull;</span>
+                  <span>
+                    <strong className="text-secondary">IP No:</strong> <span className="font-monospace text-dark">{admission.ip_no}</span>
+                  </span>
+                  <span>&bull;</span>
+                  <span className="badge bg-secondary-subtle text-secondary text-uppercase">
+                    {admission.format || 'General'}
+                  </span>
+                  <span className="badge bg-info-subtle text-info text-uppercase">
+                    {admission.surgery_type === 'delivery' ? 'Delivery / Obstetric' : 'Other Surgery'}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-2">
-            <Link
-              href={`/admissions/${admission.id}/documents/preview`}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300/80 transition shadow-xs"
-            >
-              <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              View Document Pack
-            </Link>
+            <div className="d-flex gap-2">
+              <Link
+                href={`/admissions/${admission.id}/documents/preview`}
+                className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1.5"
+              >
+                <i className="bi bi-file-earmark-text"></i>
+                <span>Preview Document Pack</span>
+              </Link>
+            </div>
           </div>
         </div>
       )}
 
-      {/* 4-Stage Navigation Bar */}
-      <nav aria-label="Admission Stage Workflow" className="bg-white rounded-xl border border-slate-200/80 p-2 shadow-sm">
-        <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+      {/* 4-Stage Horizontal Stepper */}
+      <div className="fg-stage-stepper">
+        <div className="row g-2">
           {stages.map((stage) => {
             const isActive = currentStage === stage.id;
             const isClickable = Boolean(stage.href);
 
+            const cardClasses = [
+              'fg-stage-card',
+              isActive ? 'active' : '',
+              stage.isCompleted && !isActive ? 'completed' : '',
+              !isClickable ? 'disabled' : '',
+            ]
+              .filter(Boolean)
+              .join(' ');
+
             const content = (
-              <div
-                className={`flex items-center gap-3 p-3 rounded-lg border transition-all ${
-                  isActive
-                    ? 'bg-sky-50/80 border-sky-400 text-sky-950 shadow-xs ring-1 ring-sky-300'
-                    : isClickable
-                    ? 'bg-slate-50/50 border-slate-200/70 text-slate-600 hover:bg-slate-100/70 hover:border-slate-300'
-                    : 'bg-slate-50/30 border-dashed border-slate-200 text-slate-400 cursor-not-allowed opacity-60'
-                }`}
-              >
-                <div
-                  className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 font-bold text-sm ${
-                    isActive
-                      ? 'bg-sky-600 text-white shadow-sm'
-                      : stage.isCompleted
-                      ? 'bg-emerald-500 text-white'
-                      : 'bg-slate-200 text-slate-600'
-                  }`}
-                >
+              <div className={cardClasses}>
+                <div className="fg-stage-number">
                   {stage.isCompleted && !isActive ? (
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-                    </svg>
+                    <i className="bi bi-check-lg" style={{ fontSize: '1.1rem' }}></i>
                   ) : (
                     stage.step
                   )}
                 </div>
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center justify-between gap-1">
-                    <p className={`text-xs font-bold truncate ${isActive ? 'text-sky-900' : 'text-slate-800'}`}>
+                <div className="min-w-0 flex-grow-1" style={{ overflow: 'hidden' }}>
+                  <div className="d-flex align-items-center justify-content-between gap-1">
+                    <span
+                      className={`fw-bold text-truncate ${
+                        isActive ? 'text-primary' : isClickable ? 'text-dark' : 'text-secondary'
+                      }`}
+                      style={{ fontSize: '0.86rem' }}
+                    >
                       {stage.name}
-                    </p>
+                    </span>
                     {isActive && (
-                      <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-sky-200/70 text-sky-800">
-                        Active
+                      <span
+                        className="badge bg-primary text-white"
+                        style={{ fontSize: '0.62rem', letterSpacing: '0.04em' }}
+                      >
+                        ACTIVE
                       </span>
                     )}
                   </div>
-                  <p className="text-[11px] text-slate-500 truncate">{stage.subtitle}</p>
+                  <div className="text-muted text-truncate" style={{ fontSize: '0.74rem' }}>
+                    {stage.subtitle}
+                  </div>
                 </div>
               </div>
             );
 
             return (
-              <li key={stage.id} className="relative">
+              <div key={stage.id} className="col-12 col-sm-6 col-lg-3">
                 {isClickable ? (
-                  <Link href={stage.href!} className="block focus:outline-hidden">
+                  <Link href={stage.href!} className="text-decoration-none d-block h-100">
                     {content}
                   </Link>
                 ) : (
                   content
                 )}
-              </li>
+              </div>
             );
           })}
-        </ol>
-      </nav>
+        </div>
+      </div>
     </div>
   );
 }
