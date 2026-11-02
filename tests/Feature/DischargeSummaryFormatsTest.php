@@ -249,5 +249,19 @@ class DischargeSummaryFormatsTest extends TestCase
         $pdfResponse->assertStatus(200);
         $this->assertEquals('application/pdf', $pdfResponse->headers->get('Content-Type'));
         $this->assertStringContainsString('Guru_Hospital_Discharge_Pack_2026_567.pdf', $pdfResponse->headers->get('Content-Disposition'));
+
+        // Formatted helper tests
+        $this->assertCount(4, $admission->formatted_treatment_course);
+        $this->assertEquals('Inj. Pipzo', $admission->formatted_treatment_course[1]['medicine']);
+        $this->assertEquals('4.5 g BD IV', $admission->formatted_treatment_course[1]['dose']);
+        $this->assertCount(10, $admission->formatted_investigations);
+        $this->assertEquals('HB', $admission->formatted_investigations[0]['label']);
+        $this->assertEquals('110/70 mmHg', $admission->formatted_condition['bp']);
+        $this->assertCount(3, $admission->formatted_medications);
+        $this->assertStringContainsString('Cefixime', $admission->formatted_medications[0]['medicine']);
+        $this->assertEquals('03/09/2026', $admission->formatted_advice_and_review['review_date']);
+        $this->assertCount(2, $admission->formatted_newborns);
+        $this->assertEquals('Newborn #1 - Twin A', $admission->formatted_newborns[0]['title']);
+        $this->assertEquals('Newborn #2 - Twin B', $admission->formatted_newborns[1]['title']);
     }
 }

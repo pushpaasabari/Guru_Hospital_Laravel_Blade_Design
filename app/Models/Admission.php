@@ -127,4 +127,34 @@ class Admission extends Model
     {
         return in_array($this->status, ['draft', 'returned_for_correction'], true);
     }
+
+    public function getFormattedTreatmentCourseAttribute(): array
+    {
+        return \App\Services\DischargeSummaryFormatter::formatTreatmentCourse($this->treatment_course);
+    }
+
+    public function getFormattedInvestigationsAttribute(): array
+    {
+        return \App\Services\DischargeSummaryFormatter::formatInvestigations($this->investigations);
+    }
+
+    public function getFormattedConditionAttribute(): array
+    {
+        return \App\Services\DischargeSummaryFormatter::formatConditionOnDischarge($this->discharge_condition);
+    }
+
+    public function getFormattedMedicationsAttribute(): array
+    {
+        return \App\Services\DischargeSummaryFormatter::formatMedications($this->medication_orders);
+    }
+
+    public function getFormattedAdviceAndReviewAttribute(): array
+    {
+        return \App\Services\DischargeSummaryFormatter::formatAdviceAndReview($this->discharge_advice, $this->follow_up, $this->discharge_at);
+    }
+
+    public function getFormattedNewbornsAttribute(): array
+    {
+        return \App\Services\DischargeSummaryFormatter::formatNewborns($this);
+    }
 }
