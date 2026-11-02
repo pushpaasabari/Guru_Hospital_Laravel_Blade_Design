@@ -76,9 +76,20 @@
                     @endforeach
                 </select>
             </div>
-            <div class="col-md-8">
+            <div class="col-md-4">
                 <label class="form-label">Contact / Phone</label>
                 <input class="form-control" name="contact" type="text" value="{{ old('contact') }}" placeholder="e.g. 7373667465">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label required">Surgery / Clinical Workflow</label>
+                <select name="surgery_type" id="surgeryType" class="form-select" required>
+                    <option value="delivery" id="deliveryOption" @selected(old('surgery_type')==='delivery')>Delivery / Obstetric</option>
+                    <option value="other" @selected(old('surgery_type', 'other')==='other')>Other Surgery / Non-Obstetric</option>
+                    <option value="medical" @selected(old('surgery_type')==='medical')>Medical Case (Non-Surgical)</option>
+                </select>
+                <div id="sexWarning" class="form-text text-muted small" style="display:none;">
+                    <i class="bi bi-info-circle me-1"></i> Delivery / Obstetric is only for <strong>Female</strong> patients.
+                </div>
             </div>
 
             <div class="col-md-4">
@@ -142,7 +153,7 @@
 
 <div class="card mb-3 border-0 shadow-sm">
     <div class="card-header bg-white fw-bold py-3">
-        <span class="badge bg-primary me-2">1.3</span> Format, Workflow &amp; Diagnosis
+        <span class="badge bg-primary me-2">1.3</span> Format &amp; Admission Diagnosis
     </div>
     <div class="card-body">
         <div class="row g-3">
@@ -153,17 +164,6 @@
                         <option value="{{ $v }}" @selected(old('format','general')===$v)>{{ $label }}</option>
                     @endforeach
                 </select>
-            </div>
-            <div class="col-md-6">
-                <label class="form-label required">Surgery Workflow</label>
-                <select name="surgery_type" id="surgeryType" class="form-select" required>
-                    <option value="delivery" id="deliveryOption" @selected(old('surgery_type')==='delivery')>Delivery / Obstetric</option>
-                    <option value="other" @selected(old('surgery_type', 'other')==='other')>Other Surgery / Non-Obstetric</option>
-                    <option value="medical" @selected(old('surgery_type')==='medical')>Medical Case (Non-Surgical)</option>
-                </select>
-                <div id="sexWarning" class="form-text text-muted small" style="display:none;">
-                    <i class="bi bi-info-circle me-1"></i> Delivery / Obstetric workflow is only enabled when patient sex is set to <strong>Female</strong>.
-                </div>
             </div>
             <div class="col-12">
                 <label class="form-label required">Provisional / Admission Diagnosis</label>

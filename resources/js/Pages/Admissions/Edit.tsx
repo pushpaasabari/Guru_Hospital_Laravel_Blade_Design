@@ -261,7 +261,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                 </select>
                 {errors.sex && <div className="invalid-feedback">{errors.sex}</div>}
               </div>
-              <div className="col-md-8">
+              <div className="col-md-4">
                 <label className="form-label">Phone / Contact</label>
                 <input
                   type="text"
@@ -270,6 +270,30 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                   onChange={(e) => setData('contact', e.target.value)}
                   placeholder="e.g. 7373667465"
                 />
+              </div>
+              <div className="col-md-4">
+                <div className="d-flex justify-content-between align-items-center mb-1">
+                  <label className="form-label required mb-0" htmlFor="surgeryType">Surgery / Clinical Workflow</label>
+                  {!isFemale && (
+                    <span className="badge bg-secondary-subtle text-secondary" style={{ fontSize: '0.72rem' }}>
+                      Female only for Delivery
+                    </span>
+                  )}
+                </div>
+                <select
+                  id="surgeryType"
+                  className={`form-select ${errors.surgery_type ? 'is-invalid' : ''}`}
+                  value={data.surgery_type}
+                  onChange={(e) => setData('surgery_type', e.target.value)}
+                  required
+                >
+                  <option value="delivery" disabled={!isFemale}>
+                    Delivery / Obstetric {!isFemale ? '— (Female patients only)' : ''}
+                  </option>
+                  <option value="other">Other Surgery / Non-Obstetric</option>
+                  <option value="medical">Medical Case (Non-Surgical)</option>
+                </select>
+                {errors.surgery_type && <div className="invalid-feedback">{errors.surgery_type}</div>}
               </div>
 
               <div className="col-md-4">
@@ -427,7 +451,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
         {/* Section 3: Format & Diagnosis */}
         <div className="card mb-4 border-0 shadow-sm">
           <div className="card-header bg-white py-3 fw-bold text-dark">
-            <span className="badge bg-primary me-2">1.3</span> Format, Workflow &amp; Diagnosis
+            <span className="badge bg-primary me-2">1.3</span> Format &amp; Admission Diagnosis
           </div>
           <div className="card-body">
             <div className="row g-3">
@@ -447,40 +471,6 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                 <div className="form-text text-muted small">
                   Determines the header style and layout for all generated documents.
                 </div>
-              </div>
-
-              <div className="col-md-6">
-                <div className="d-flex justify-content-between align-items-center mb-1">
-                  <label className="form-label required mb-0" htmlFor="surgeryType">Surgery / Clinical Workflow</label>
-                  {!isFemale && (
-                    <span className="badge bg-secondary-subtle text-secondary" style={{ fontSize: '0.72rem' }}>
-                      Female only for Delivery
-                    </span>
-                  )}
-                </div>
-                <select
-                  id="surgeryType"
-                  className={`form-select ${errors.surgery_type ? 'is-invalid' : ''}`}
-                  value={data.surgery_type}
-                  onChange={(e) => setData('surgery_type', e.target.value)}
-                  required
-                >
-                  <option value="delivery" disabled={!isFemale}>
-                    Delivery / Obstetric {!isFemale ? '— (Female patients only)' : ''}
-                  </option>
-                  <option value="other">Other Surgery / Non-Obstetric</option>
-                  <option value="medical">Medical Case (Non-Surgical)</option>
-                </select>
-                {!isFemale ? (
-                  <div className="form-text text-muted small">
-                    <i className="bi bi-info-circle me-1"></i> Delivery workflow is female only. Choose <strong>Other Surgery</strong> for operations or <strong>Medical Case</strong> for non-surgical conservative care.
-                  </div>
-                ) : (
-                  <div className="form-text text-muted small">
-                    Select <strong>Delivery</strong> for maternal labour/LSCS, <strong>Other Surgery</strong> for surgical operations, or <strong>Medical Case</strong> for non-surgical conservative care.
-                  </div>
-                )}
-                {errors.surgery_type && <div className="invalid-feedback">{errors.surgery_type}</div>}
               </div>
 
               <div className="col-12">
