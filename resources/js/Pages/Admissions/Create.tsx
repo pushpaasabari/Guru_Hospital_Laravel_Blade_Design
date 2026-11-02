@@ -27,7 +27,7 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
     department: '',
     ward_room_no: '',
     format: 'general',
-    surgery_type: 'other',
+    surgery_type: '',
     diagnosis: '',
     mrd_no: '',
     payment_mode: 'Cash',
@@ -42,13 +42,7 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
       setData((prev) => ({
         ...prev,
         sex: newSex,
-        surgery_type: 'other',
-      }));
-    } else if (isNewFemale && !data.sex && data.surgery_type === 'other') {
-      setData((prev) => ({
-        ...prev,
-        sex: newSex,
-        surgery_type: 'delivery',
+        surgery_type: '',
       }));
     } else {
       setData('sex', newSex);
@@ -181,6 +175,7 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
                   onChange={(e) => setData('surgery_type', e.target.value)}
                   required
                 >
+                  <option value="">Select</option>
                   <option value="delivery" disabled={!isFemale}>
                     Delivery / Obstetric {!isFemale ? '— (Female patients only)' : ''}
                   </option>

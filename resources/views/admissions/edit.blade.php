@@ -104,6 +104,7 @@
             <div class="col-md-4">
                 <label class="form-label required">Surgery / Clinical Workflow</label>
                 <select name="surgery_type" id="surgeryType" class="form-select" required>
+                    <option value="">Select</option>
                     <option value="delivery" id="deliveryOption" @selected(old('surgery_type', $admission->surgery_type)==='delivery')>Delivery / Obstetric</option>
                     <option value="other" @selected(old('surgery_type', $admission->surgery_type)==='other')>Other Surgery / Non-Obstetric</option>
                     <option value="medical" @selected(old('surgery_type', $admission->surgery_type)==='medical')>Medical Case (Non-Surgical)</option>
@@ -225,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function () {
             deliveryOpt.setAttribute('disabled', 'disabled');
             warning.style.display = 'block';
             if (surgerySelect.value === 'delivery') {
-                surgerySelect.value = 'other';
+                surgerySelect.value = '';
             }
         }
 

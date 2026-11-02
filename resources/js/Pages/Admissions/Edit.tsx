@@ -287,6 +287,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                   onChange={(e) => setData('surgery_type', e.target.value)}
                   required
                 >
+                  <option value="">Select</option>
                   <option value="delivery" disabled={!isFemale}>
                     Delivery / Obstetric {!isFemale ? '— (Female patients only)' : ''}
                   </option>
