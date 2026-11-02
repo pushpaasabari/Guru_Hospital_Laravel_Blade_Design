@@ -326,5 +326,38 @@ class AdmissionWorkflowTest extends TestCase
             'discharge_condition' => 'Stable, asymptomatic, vitals normal',
         ]);
     }
+
+    public function test_delivery_admission_saves_and_persists_picme_number(): void
+    {
+        $response = $this->actingAs($this->nurse)->post(route('admissions.store'), [
+            'patient_name' => 'Revathi Murugan',
+            'uhid' => 'GH-2026-PICME-01',
+            'ip_no' => 'IP-PICME-01',
+            'picme_no' => '331024889912',
+            'age' => '24',
+            'sex' => 'Female',
+            'admission_at' => '2026-10-22 06:00:00',
+            'diagnosis' => 'Primigravida at 39 weeks in Labour',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+        ]);
+
+        $this->assertDatabaseHas('admissions', [
+            'ip_no' => 'IP-PICME-01',
+            'picme_no' => '331024889912',
+            'surgery_type' => 'delivery',
+        ]);
+
+        $admission = Admission::where('ip_no', 'IP-PICME-01')->first();
+        $this->assertEquals('331024889912', $admission->picme_no);
+
+        // Update in surgery stage
+        $this->actingAs($this->nurse)->put(route('admissions.surgery.update', $admission), [
+            'picme_no' => '331024889999',
+            'procedure_name' => 'Normal Vaginal Delivery with Episiotomy',
+        ]);
+
+        $this->assertEquals('331024889999', $admission->fresh()->picme_no);
+    }
 }
 

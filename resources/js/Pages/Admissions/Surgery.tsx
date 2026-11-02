@@ -21,6 +21,7 @@ interface AdmissionData {
   patient_name: string;
   uhid: string;
   ip_no: string;
+  picme_no?: string | null;
   age?: string | null;
   sex?: string | null;
   address?: string | null;
@@ -94,6 +95,7 @@ export default function AdmissionsSurgery({
       : [];
 
   const { data, setData, put, processing, errors } = useForm({
+    picme_no: admission.picme_no || '',
     procedure_at: admission.procedure_at ? admission.procedure_at.slice(0, 16) : '',
     procedure_name: admission.procedure_name || '',
     procedure_done: admission.procedure_done || '',
@@ -208,7 +210,27 @@ export default function AdmissionsSurgery({
                 {errors.procedure_at && <div className="invalid-feedback">{errors.procedure_at}</div>}
               </div>
 
-              <div className="col-md-5">
+              {isDelivery && (
+                <div className="col-md-4">
+                  <label className="form-label required">
+                    PICME Number (RCH ID)
+                    <span className="badge bg-danger-subtle text-danger ms-2" style={{ fontSize: '0.68rem' }}>
+                      DELIVERY / OBSTETRIC
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${errors.picme_no ? 'is-invalid' : ''}`}
+                    value={data.picme_no}
+                    onChange={(e) => setData('picme_no', e.target.value)}
+                    placeholder="e.g. 331024567890 (12-digit PICME / RCH ID)"
+                    maxLength={25}
+                  />
+                  {errors.picme_no && <div className="invalid-feedback">{errors.picme_no}</div>}
+                </div>
+              )}
+
+              <div className={isDelivery ? 'col-md-4' : 'col-md-5'}>
                 <label className="form-label">Procedure / Surgery Name</label>
                 <input
                   type="text"
@@ -219,7 +241,7 @@ export default function AdmissionsSurgery({
                 />
               </div>
 
-              <div className="col-md-3">
+              <div className={isDelivery ? 'col-md-4' : 'col-md-3'}>
                 <label className="form-label">ICD-10 Code</label>
                 <input
                   type="text"

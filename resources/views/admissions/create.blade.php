@@ -63,6 +63,15 @@
                 <input class="form-control" name="ip_no" type="text" value="{{ old('ip_no') }}" required placeholder="e.g. 2026/567">
             </div>
 
+            <div class="col-md-4" id="picmeFieldWrapper" style="display: none;">
+                <label class="form-label required">
+                    PICME Number (RCH ID)
+                    <span class="badge bg-danger-subtle text-danger ms-1" style="font-size: 0.68rem;">DELIVERY / OBSTETRIC</span>
+                </label>
+                <input class="form-control" name="picme_no" id="picmeInput" type="text" value="{{ old('picme_no') }}" placeholder="e.g. 331024567890 (12-digit PICME / RCH ID)">
+                <div class="form-text text-muted small">Mandatory for all delivery/obstetric patients in Tamil Nadu.</div>
+            </div>
+
             <div class="col-md-2">
                 <label class="form-label">Age</label>
                 <input class="form-control" name="age" type="text" value="{{ old('age') }}" placeholder="e.g. 23">
@@ -169,6 +178,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const deliveryOpt = document.getElementById('deliveryOption');
     const warning = document.getElementById('sexWarning');
 
+    const picmeWrapper = document.getElementById('picmeFieldWrapper');
+
     function syncSurgeryWorkflow() {
         const isFemale = (sexSelect.value || '').trim().toLowerCase() === 'female';
         if (isFemale) {
@@ -181,9 +192,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 surgerySelect.value = 'other';
             }
         }
+
+        if (isFemale && surgerySelect.value === 'delivery') {
+            picmeWrapper.style.display = 'block';
+        } else {
+            picmeWrapper.style.display = 'none';
+        }
     }
 
     sexSelect.addEventListener('change', syncSurgeryWorkflow);
+    surgerySelect.addEventListener('change', syncSurgeryWorkflow);
     syncSurgeryWorkflow();
 });
 </script>

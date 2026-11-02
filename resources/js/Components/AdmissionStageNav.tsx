@@ -8,6 +8,7 @@ export interface AdmissionStageNavProps {
     patient_name: string;
     uhid: string;
     ip_no: string;
+    picme_no?: string | null;
     age?: string | null;
     sex?: string | null;
     format?: string;
@@ -88,6 +89,15 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
                   <span>
                     <strong className="text-secondary">IP No:</strong> <span className="font-monospace text-dark">{admission.ip_no}</span>
                   </span>
+                  {admission.picme_no && (
+                    <>
+                      <span>&bull;</span>
+                      <span>
+                        <strong className="text-secondary">PICME:</strong>{' '}
+                        <span className="font-monospace text-dark fw-bold">{admission.picme_no}</span>
+                      </span>
+                    </>
+                  )}
                   <span>&bull;</span>
                   <span className="badge bg-secondary-subtle text-secondary text-uppercase">
                     {admission.format || 'General'}

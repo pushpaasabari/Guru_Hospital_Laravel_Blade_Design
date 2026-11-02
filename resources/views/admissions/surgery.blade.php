@@ -75,11 +75,20 @@
                 <label class="form-label">Procedure / Delivery Date &amp; Time</label>
                 <input class="form-control" name="procedure_at" type="datetime-local" value="{{ old('procedure_at', optional($admission->procedure_at)->format('Y-m-d\TH:i')) }}">
             </div>
-            <div class="col-md-5">
+            @if($admission->surgery_type === 'delivery')
+            <div class="col-md-4">
+                <label class="form-label required">
+                    PICME Number (RCH ID)
+                    <span class="badge bg-danger-subtle text-danger ms-1" style="font-size: 0.68rem;">DELIVERY / OBSTETRIC</span>
+                </label>
+                <input class="form-control" name="picme_no" value="{{ old('picme_no', $admission->picme_no) }}" placeholder="e.g. 331024567890 (12-digit PICME / RCH ID)">
+            </div>
+            @endif
+            <div class="{{ $admission->surgery_type === 'delivery' ? 'col-md-4' : 'col-md-5' }}">
                 <label class="form-label">Procedure / Surgery Name</label>
                 <input class="form-control" name="procedure_name" value="{{ old('procedure_name', $admission->procedure_name) }}" placeholder="e.g. Emergency Lower Segment Caesarean Section (LSCS)">
             </div>
-            <div class="col-md-3">
+            <div class="{{ $admission->surgery_type === 'delivery' ? 'col-md-4' : 'col-md-3' }}">
                 <label class="form-label">ICD-10 Code</label>
                 <input class="form-control" name="icd_code" value="{{ old('icd_code', $admission->icd_code) }}" placeholder="e.g. O82.0">
             </div>

@@ -667,6 +667,11 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
               <tr>
                 <td>
                   <strong>UHID NO :</strong> {admission.uhid}
+                  {admission.picme_no && (
+                    <span className="ms-2">
+                      &bull; <strong>PICME :</strong> {admission.picme_no}
+                    </span>
+                  )}
                 </td>
                 <td>
                   <strong>Age / Sex :</strong> {admission.age ? `${admission.age} Yrs` : 'N/A'} /{' '}
@@ -941,7 +946,10 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                 </td>
                 <td style={{ fontWeight: 'bold', padding: '2px 0' }}>UHID NO</td>
                 <td style={{ textAlign: 'center', fontWeight: 'bold', padding: '2px 6px' }}>:</td>
-                <td style={{ padding: '2px 0' }}>{admission.uhid}</td>
+                <td style={{ padding: '2px 0' }}>
+                  {admission.uhid}
+                  {admission.picme_no ? ` • PICME: ${admission.picme_no}` : ''}
+                </td>
               </tr>
               <tr>
                 <td style={{ fontWeight: 'bold', padding: '2px 0' }}>CONSULTANT</td>

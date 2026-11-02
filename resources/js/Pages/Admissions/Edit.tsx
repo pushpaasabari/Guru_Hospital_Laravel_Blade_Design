@@ -9,6 +9,7 @@ interface AdmissionData {
   patient_name: string;
   uhid: string;
   ip_no: string;
+  picme_no?: string | null;
   age?: string | null;
   sex?: string | null;
   address?: string | null;
@@ -71,6 +72,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
     patient_name: admission.patient_name || '',
     uhid: admission.uhid || '',
     ip_no: admission.ip_no || '',
+    picme_no: admission.picme_no || '',
     age: admission.age || '',
     sex: admission.sex || '',
     address: admission.address || '',
@@ -226,6 +228,29 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                 />
                 {errors.ip_no && <div className="invalid-feedback">{errors.ip_no}</div>}
               </div>
+
+              {data.surgery_type === 'delivery' && (
+                <div className="col-md-4">
+                  <label className="form-label required">
+                    PICME Number (RCH ID)
+                    <span className="badge bg-danger-subtle text-danger ms-2" style={{ fontSize: '0.68rem' }}>
+                      DELIVERY / OBSTETRIC
+                    </span>
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${errors.picme_no ? 'is-invalid' : ''}`}
+                    value={data.picme_no}
+                    onChange={(e) => setData('picme_no', e.target.value)}
+                    placeholder="e.g. 331024567890 (12-digit PICME / RCH ID)"
+                    maxLength={25}
+                  />
+                  {errors.picme_no && <div className="invalid-feedback">{errors.picme_no}</div>}
+                  <div className="form-text text-muted small">
+                    Mandatory for all delivery/obstetric patients in Tamil Nadu.
+                  </div>
+                </div>
+              )}
 
               <div className="col-md-2">
                 <label className="form-label">Age</label>

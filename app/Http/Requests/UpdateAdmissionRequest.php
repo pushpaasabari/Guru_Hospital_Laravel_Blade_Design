@@ -22,6 +22,7 @@ class UpdateAdmissionRequest extends FormRequest
             'patient_name' => ['required', 'string', 'max:160'],
             'uhid' => ['required', 'string', 'max:60'],
             'ip_no' => ['required', 'string', 'max:60', Rule::unique('admissions', 'ip_no')->ignore($admissionId)],
+            'picme_no' => ['nullable', 'string', 'max:30'],
             'age' => ['nullable', 'string', 'max:30'],
             'sex' => ['nullable', Rule::in(['Female', 'Male', 'Other', 'Not recorded'])],
             'address' => ['nullable', 'string', 'max:1000'],

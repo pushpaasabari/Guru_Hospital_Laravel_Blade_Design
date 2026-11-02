@@ -16,6 +16,7 @@ class UpdateSurgeryRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'picme_no' => ['nullable', 'string', 'max:30'],
             'procedure_at' => ['nullable', 'date'],
             'procedure_name' => ['nullable', 'string', 'max:300'],
             'procedure_done' => ['nullable', 'string', 'max:300'],

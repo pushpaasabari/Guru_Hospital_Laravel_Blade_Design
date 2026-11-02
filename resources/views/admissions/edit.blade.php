@@ -84,6 +84,15 @@
                 <input class="form-control" name="ip_no" type="text" value="{{ old('ip_no', $admission->ip_no) }}" required>
             </div>
 
+            <div class="col-md-4" id="picmeFieldWrapper" style="{{ old('surgery_type', $admission->surgery_type) === 'delivery' ? '' : 'display: none;' }}">
+                <label class="form-label required">
+                    PICME Number (RCH ID)
+                    <span class="badge bg-danger-subtle text-danger ms-1" style="font-size: 0.68rem;">DELIVERY / OBSTETRIC</span>
+                </label>
+                <input class="form-control" name="picme_no" id="picmeInput" type="text" value="{{ old('picme_no', $admission->picme_no) }}" placeholder="e.g. 331024567890 (12-digit PICME / RCH ID)">
+                <div class="form-text text-muted small">Mandatory for all delivery/obstetric patients in Tamil Nadu.</div>
+            </div>
+
             <div class="col-md-2">
                 <label class="form-label">Age</label>
                 <input class="form-control" name="age" type="text" value="{{ old('age', $admission->age) }}">
@@ -195,6 +204,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const deliveryOpt = document.getElementById('deliveryOption');
     const warning = document.getElementById('sexWarning');
 
+    const picmeWrapper = document.getElementById('picmeFieldWrapper');
+
     function syncSurgeryWorkflow() {
         const isFemale = (sexSelect.value || '').trim().toLowerCase() === 'female';
         if (isFemale) {
@@ -207,9 +218,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 surgerySelect.value = 'other';
             }
         }
+
+        if (isFemale && surgerySelect.value === 'delivery') {
+            picmeWrapper.style.display = 'block';
+        } else {
+            picmeWrapper.style.display = 'none';
+        }
     }
 
     sexSelect.addEventListener('change', syncSurgeryWorkflow);
+    surgerySelect.addEventListener('change', syncSurgeryWorkflow);
     syncSurgeryWorkflow();
 });
 </script>

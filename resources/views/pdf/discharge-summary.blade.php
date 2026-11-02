@@ -162,7 +162,7 @@
     </tr>
     <tr>
         <th>UHID NO</th>
-        <td>{{ $admission->uhid }}</td>
+        <td>{{ $admission->uhid }}@if($admission->picme_no) &bull; <strong style="font-size: 8pt;">PICME:</strong> {{ $admission->picme_no }}@endif</td>
         <th>Age / Sex</th>
         <td>{{ $admission->age ? $admission->age . ' / ' . ($admission->sex ?? 'F') : ($admission->sex ?? 'F') }}</td>
     </tr>
