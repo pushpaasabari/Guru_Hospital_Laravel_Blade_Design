@@ -587,3 +587,4 @@ def build_pdf(filename="Guru_Hospital_Discharge_Summary_Anitha_IP2026-567.pdf", 
 if __name__ == "__main__":
     is_long = "--long-address" in sys.argv
     build_pdf(long_address=is_long)
+

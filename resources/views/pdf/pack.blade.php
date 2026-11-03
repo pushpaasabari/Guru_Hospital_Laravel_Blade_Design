@@ -32,7 +32,7 @@
             page-break-before: always;
         }
         .letterhead-space {
-            height: 40mm;
+            height: 33mm;
             width: 100%;
         }
         .document-title {
@@ -135,18 +135,18 @@
         /* Modern Exact Discharge Summary Styles */
         .doc-title {
             text-align: center;
-            font-size: 15pt;
+            font-size: 14pt;
             font-weight: bold;
             color: #111111;
             letter-spacing: 0.5px;
-            margin: 0 0 10px 0;
+            margin: 0 0 5px 0;
             text-transform: uppercase;
         }
         .info-table {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             border: 0.6pt solid #94a3b8;
         }
         .info-table.bg-gray {
@@ -157,62 +157,62 @@
         }
         .info-table td, .info-table th {
             border: 0.6pt solid #cbd5e1;
-            padding: 3px 6px;
+            padding: 2px 5px;
             vertical-align: top;
         }
         .cell-lbl {
-            font-size: 7pt;
+            font-size: 6.8pt;
             font-weight: bold;
             color: #475569;
             text-transform: uppercase;
             letter-spacing: 0.3px;
-            margin-bottom: 1px;
+            margin-bottom: 0px;
             display: block;
         }
         .cell-val {
-            font-size: 9.2pt;
+            font-size: 8.8pt;
             font-weight: bold;
             color: #000000;
-            line-height: 1.25;
+            line-height: 1.2;
             display: block;
         }
         .section-header {
-            font-size: 10pt;
+            font-size: 9.5pt;
             font-weight: bold;
             color: #111111;
             text-transform: uppercase;
             border-bottom: 1.2pt solid #222222;
-            padding-bottom: 2px;
-            margin-top: 8px;
-            margin-bottom: 4px;
+            padding-bottom: 1.5px;
+            margin-top: 4.5px;
+            margin-bottom: 2px;
         }
         .prose-text {
-            font-size: 9pt;
-            line-height: 1.38;
+            font-size: 8.5pt;
+            line-height: 1.25;
             color: #000000;
             text-align: justify;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
         .data-table {
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             border: 0.6pt solid #94a3b8;
         }
         .data-table th {
             background-color: #000000;
             color: #ffffff;
-            font-size: 8pt;
+            font-size: 7.5pt;
             font-weight: bold;
-            padding: 3.5px 6px;
+            padding: 2.5px 5px;
             text-align: left;
             border: 0.6pt solid #000000;
         }
         .data-table td {
             border: 0.6pt solid #94a3b8;
-            padding: 3.5px 6px;
-            font-size: 9pt;
+            padding: 2.5px 5px;
+            font-size: 8.5pt;
             vertical-align: top;
         }
         .running-header {
@@ -447,31 +447,31 @@
             </tr>
             <tr>
                 @foreach($newbornCards as $card)
-                    <td style="padding: 4px 6px; font-size: 8.5pt;">
+                    <td style="padding: 2.5px 5px; font-size: 8pt;">
                         <table style="width: 100%; border-collapse: collapse;">
                             <tr>
-                                <td style="width: 28%; font-size: 7pt; font-weight: bold; color: #475569; padding: 1.5px 2px; border: none;">SEX</td>
-                                <td style="font-size: 8.5pt; font-weight: bold; padding: 1.5px 2px; border: none;">: {{ $card['sex'] }}</td>
+                                <td style="width: 28%; font-size: 6.8pt; font-weight: bold; color: #475569; padding: 1px 2px; border: none;">SEX</td>
+                                <td style="font-size: 8pt; font-weight: bold; padding: 1px 2px; border: none;">: {{ $card['sex'] }}</td>
                             </tr>
                             <tr>
-                                <td style="font-size: 7pt; font-weight: bold; color: #475569; padding: 1.5px 2px; border: none;">BORN</td>
-                                <td style="font-size: 8.5pt; padding: 1.5px 2px; border: none;">: {{ $card['born'] }}</td>
+                                <td style="font-size: 6.8pt; font-weight: bold; color: #475569; padding: 1px 2px; border: none;">BORN</td>
+                                <td style="font-size: 8pt; padding: 1px 2px; border: none;">: {{ $card['born'] }}</td>
                             </tr>
                             <tr>
-                                <td style="font-size: 7pt; font-weight: bold; color: #475569; padding: 1.5px 2px; border: none;">MODE</td>
-                                <td style="font-size: 8.5pt; padding: 1.5px 2px; border: none;">: {{ $card['mode'] }}</td>
+                                <td style="font-size: 6.8pt; font-weight: bold; color: #475569; padding: 1px 2px; border: none;">MODE</td>
+                                <td style="font-size: 8pt; padding: 1px 2px; border: none;">: {{ $card['mode'] }}</td>
                             </tr>
                             <tr>
-                                <td style="font-size: 7pt; font-weight: bold; color: #475569; padding: 1.5px 2px; border: none;">WEIGHT</td>
-                                <td style="font-size: 8.5pt; font-weight: bold; padding: 1.5px 2px; border: none;">: {{ $card['weight'] }}</td>
+                                <td style="font-size: 6.8pt; font-weight: bold; color: #475569; padding: 1px 2px; border: none;">WEIGHT</td>
+                                <td style="font-size: 8pt; font-weight: bold; padding: 1px 2px; border: none;">: {{ $card['weight'] }}</td>
                             </tr>
                             <tr>
-                                <td style="font-size: 7pt; font-weight: bold; color: #475569; padding: 1.5px 2px; border: none;">APGAR</td>
-                                <td style="font-size: 8.5pt; font-weight: bold; padding: 1.5px 2px; border: none;">: {{ $card['apgar'] }}</td>
+                                <td style="font-size: 6.8pt; font-weight: bold; color: #475569; padding: 1px 2px; border: none;">APGAR</td>
+                                <td style="font-size: 8pt; font-weight: bold; padding: 1px 2px; border: none;">: {{ $card['apgar'] }}</td>
                             </tr>
                             <tr>
-                                <td style="font-size: 7pt; font-weight: bold; color: #475569; padding: 1.5px 2px; border: none; vertical-align: top;">NEONATAL CARE</td>
-                                <td style="font-size: 8.5pt; padding: 1.5px 2px; border: none; vertical-align: top;">: {{ $card['neonatal_care'] }}</td>
+                                <td style="font-size: 6.8pt; font-weight: bold; color: #475569; padding: 1px 2px; border: none; vertical-align: top;">NEONATAL CARE</td>
+                                <td style="font-size: 8pt; padding: 1px 2px; border: none; vertical-align: top;">: {{ $card['neonatal_care'] }}</td>
                             </tr>
                         </table>
                     </td>

@@ -225,15 +225,33 @@ class DocumentPackPdfService
         $domPdf->render();
 
         $canvas = $domPdf->getCanvas();
-        $font = $domPdf->getFontMetrics()->getFont('DejaVu Sans', 'normal');
-        $size = 9;
-        $color = [0.4, 0.4, 0.4];
 
-        // Bottom right page number
-        $canvas->page_text(450, 810, "Page {PAGE_NUM} of {PAGE_COUNT}", $font, $size, $color);
+        if ($type === self::TYPE_DISCHARGE_SUMMARY) {
+            $ipNo = $admission->ip_no;
+            $patientName = $admission->patient_name;
+            $canvas->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) use ($ipNo, $patientName) {
+                // Page 1 has NO footer, NO footer line, and NO page number (as per strict hospital spec)
+                if ($pageNumber > 1) {
+                    $font = $fontMetrics->getFont('DejaVu Sans', 'normal');
+                    $size = 8;
+                    $color = [0.35, 0.35, 0.35];
+                    // Hairline rule above footer
+                    $canvas->line(40, 804, 555, 804, [0.65, 0.7, 0.75], 0.5);
+                    $canvas->text(40, 812, "Guru Hospital - Discharge Summary (IP: {$ipNo}) - {$patientName}", $font, $size, $color);
+                    $canvas->text(500, 812, "Page {$pageNumber} of {$pageCount}", $font, $size, $color);
+                }
+            });
+        } else {
+            $font = $domPdf->getFontMetrics()->getFont('DejaVu Sans', 'normal');
+            $size = 9;
+            $color = [0.4, 0.4, 0.4];
 
-        // Bottom left hospital confidential notice
-        $canvas->page_text(40, 810, $meta['headerTitle'], $font, $size, $color);
+            // Bottom right page number
+            $canvas->page_text(450, 810, "Page {PAGE_NUM} of {PAGE_COUNT}", $font, $size, $color);
+
+            // Bottom left hospital confidential notice
+            $canvas->page_text(40, 810, $meta['headerTitle'], $font, $size, $color);
+        }
 
         return $domPdf->output();
     }
