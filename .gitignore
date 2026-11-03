@@ -23,6 +23,7 @@
 /storage/fonts/*.json
 /storage/fonts/installed-fonts.json
 /vendor
+/.venv
 Homestead.json
 Homestead.yaml
 Thumbs.db

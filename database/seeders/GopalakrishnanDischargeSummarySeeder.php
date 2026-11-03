@@ -87,3 +87,4 @@ class GopalakrishnanDischargeSummarySeeder extends Seeder
         ]);
     }
 }
+
