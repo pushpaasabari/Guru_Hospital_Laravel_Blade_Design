@@ -175,6 +175,26 @@
             display: table-cell;
             vertical-align: top;
         }
+        .page-2-footer {
+            margin-top: 22px;
+            border-top: 0.5pt solid #94a3b8;
+            padding-top: 4px;
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+            font-size: 8pt;
+            color: #555555;
+        }
+        .footer-left {
+            display: table-cell;
+            text-align: left;
+            width: 75%;
+        }
+        .footer-right {
+            display: table-cell;
+            text-align: right;
+            width: 25%;
+        }
         .watermark {
             position: fixed;
             top: 40%;
@@ -538,6 +558,11 @@
             <div style="font-size: 7.5pt; color: #475569; margin-top: 1px;">Reg: {{ $admission->approver?->doctor_reg_no ?? 'TNMC-64821' }}</div>
         </div>
     </div>
+
+    <div class="page-2-footer">
+        <div class="footer-left">Guru Hospital - Discharge Summary (IP: {{ $admission->ip_no }}) - {{ $admission->patient_name }}</div>
+        <div class="footer-right">Page 2 of 2</div>
+    </div>
 </div>
 
 @else
@@ -852,6 +877,11 @@
             </td>
         </tr>
     </table>
+
+    <div class="page-2-footer">
+        <div class="footer-left">Guru Hospital - Discharge Summary (IP: {{ $admission->ip_no }}) - {{ $admission->patient_name }}</div>
+        <div class="footer-right">Page 2 of 2</div>
+    </div>
 </div>
 @endif
 

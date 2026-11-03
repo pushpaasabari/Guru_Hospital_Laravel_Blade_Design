@@ -4,7 +4,8 @@
     "type": "module",
     "scripts": {
         "build": "vite build",
-        "dev": "vite"
+        "dev": "vite",
+        "generate:ds": "node generate_discharge_summary_chromium.js"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",

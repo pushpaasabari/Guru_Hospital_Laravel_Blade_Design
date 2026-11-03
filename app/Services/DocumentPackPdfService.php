@@ -176,13 +176,25 @@ class DocumentPackPdfService
             $scriptPath = resource_path('scripts/generate-pdf.js');
             $headerTitle = $meta['headerTitle'];
 
+            // Provide Windows environment variables to prevent Node.js 24 CSPRNG crash
+            $env = array_merge($_SERVER, $_ENV, [
+                'SystemRoot' => getenv('SystemRoot') ?: 'C:\\Windows',
+                'LOCALAPPDATA' => getenv('LOCALAPPDATA') ?: 'C:\\Users\\Admin\\AppData\\Local',
+                'USERPROFILE' => getenv('USERPROFILE') ?: 'C:\\Users\\Admin',
+                'PATH' => getenv('PATH') ?: 'C:\\Windows\\system32',
+                'APPDATA' => getenv('APPDATA') ?: 'C:\\Users\\Admin\\AppData\\Roaming',
+                'TEMP' => sys_get_temp_dir(),
+                'TMP' => sys_get_temp_dir(),
+            ]);
+
             $process = new Process([
                 'node',
                 $scriptPath,
                 '--input', $tempHtml,
                 '--output', $tempPdf,
                 '--title', $headerTitle,
-            ]);
+                '--type', $type,
+            ], null, $env);
 
             $process->setTimeout(30);
             $process->run();
@@ -226,22 +238,7 @@ class DocumentPackPdfService
 
         $canvas = $domPdf->getCanvas();
 
-        if ($type === self::TYPE_DISCHARGE_SUMMARY) {
-            $ipNo = $admission->ip_no;
-            $patientName = $admission->patient_name;
-            $canvas->page_script(function ($pageNumber, $pageCount, $canvas, $fontMetrics) use ($ipNo, $patientName) {
-                // Page 1 has NO footer, NO footer line, and NO page number (as per strict hospital spec)
-                if ($pageNumber > 1) {
-                    $font = $fontMetrics->getFont('DejaVu Sans', 'normal');
-                    $size = 8;
-                    $color = [0.35, 0.35, 0.35];
-                    // Hairline rule above footer
-                    $canvas->line(40, 804, 555, 804, [0.65, 0.7, 0.75], 0.5);
-                    $canvas->text(40, 812, "Guru Hospital - Discharge Summary (IP: {$ipNo}) - {$patientName}", $font, $size, $color);
-                    $canvas->text(500, 812, "Page {$pageNumber} of {$pageCount}", $font, $size, $color);
-                }
-            });
-        } else {
+        if ($type !== self::TYPE_DISCHARGE_SUMMARY) {
             $font = $domPdf->getFontMetrics()->getFont('DejaVu Sans', 'normal');
             $size = 9;
             $color = [0.4, 0.4, 0.4];
