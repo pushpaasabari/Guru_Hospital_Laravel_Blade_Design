@@ -637,7 +637,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
               const investigationList = formatInvestigations(admission.investigations);
               const conditionData = formatConditionOnDischarge(admission.discharge_condition || admission.condition_at_discharge);
               const medicationList = formatMedications(admission.medication_orders);
-              const adviceData = formatAdviceAndReview(admission.discharge_advice, admission.follow_up, admission.discharge_at);
+              const adviceData = formatAdviceAndReview(admission.discharge_advice, admission.follow_up, admission.discharge_at, `${admission.procedure_name || ''} ${admission.procedure_done || ''}`);
               const newbornCards = formatNewborns(admission);
               const surgeryPerformed = formatSurgeryPerformed(admission);
 
@@ -1222,6 +1222,27 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                     <div style={{ fontSize: '9.5pt', fontWeight: 'bold' }}>{adviceData.review_text}</div>
                     <div style={{ fontSize: '11.5pt', fontWeight: 'bold' }}>{adviceData.review_date}</div>
                   </div>
+
+                  {adviceData.tamil_note && (
+                    <div
+                      style={{
+                        border: '1px solid #000',
+                        borderLeft: '4px solid #000',
+                        backgroundColor: '#f8fafc',
+                        padding: '6px 10px',
+                        marginBottom: '8px',
+                        fontFamily: "'Nirmala', 'Arial Unicode MS', sans-serif",
+                        fontSize: '8.5pt',
+                        lineHeight: 1.4,
+                        color: '#111',
+                      }}
+                    >
+                      <strong style={{ display: 'block', fontSize: '8pt', marginBottom: '2px' }}>
+                        ஸ்டெண்ட் குறிப்பு (STENT REMOVAL NOTICE):
+                      </strong>
+                      {adviceData.tamil_note}
+                    </div>
+                  )}
 
                   {/* When to Contact Box */}
                   <div

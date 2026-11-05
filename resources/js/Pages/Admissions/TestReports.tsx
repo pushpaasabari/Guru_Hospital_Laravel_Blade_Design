@@ -21,57 +21,157 @@ interface Props {
   admission: AdmissionData;
 }
 
-const CLINICAL_TEMPLATES = [
-  {
-    title: 'Complete Blood Count (CBC)',
-    snippet: 'Hb: 12.4 g/dL | TC: 8,400 cells/cu.mm | DC: P68 L26 E4 M2 | Platelets: 2.5 Lakhs/cu.mm | PCV: 37.2%',
-  },
-  {
-    title: 'Blood Group & Rh',
-    snippet: "Blood Group: 'O' Positive (Rh Positive) | Screen: Antibody Negative",
-  },
-  {
-    title: 'Urine Routine',
-    snippet: 'Urine Routine: Albumin: Nil | Sugar: Nil | Deposits: Pus cells 1-2/HPF, Epithelial cells 2-3/HPF, RBCs: Nil',
-  },
-  {
-    title: 'Biochemistry (RBS, Urea, Creatinine)',
-    snippet: 'RBS: 98 mg/dL | Blood Urea: 20 mg/dL | Serum Creatinine: 0.8 mg/dL | Serum Electrolytes: Na+ 138, K+ 4.1, Cl- 102 mEq/L',
-  },
-  {
-    title: 'Viral Screening (Serology)',
-    snippet: 'HIV I & II: Non-Reactive | HBsAg: Negative | Anti-HCV: Negative | VDRL: Non-Reactive',
-  },
-  {
-    title: 'Thyroid Function (TSH)',
-    snippet: 'Serum TSH: 2.14 uIU/mL (Normal Reference: 0.35 - 4.94 uIU/mL)',
-  },
-  {
-    title: 'Obstetric Ultrasound (USG)',
-    snippet: 'USG Obstetric: Single live intrauterine fetus in cephalic presentation. Gestational age: 38+4 weeks. Good cardiac activity and fetal movements. Placenta: Fundal anterior Grade II. Adequate liquor (AFI: 13 cm). Estimated Fetal Weight: 2.9 kg.',
-  },
-  {
-    title: 'ECG & Chest X-Ray',
-    snippet: 'ECG: Normal sinus rhythm, rate 78 bpm, no ST-T changes. | Chest X-Ray PA: Normal bronchovascular markings, CTR normal, both CP angles clear.',
-  },
-  {
-    title: 'Coagulation Profile',
-    snippet: 'PT: 12.4 sec (Control: 12.0 sec) | INR: 1.03 | APTT: 31.0 sec | Bleeding Time: 2 min 10 sec | Clotting Time: 4 min 30 sec',
-  },
-];
+interface LabValues {
+  hb: string;
+  bg: string;
+  hcv: string;
+  hiv: string;
+  vdrl: string;
+  hbsag: string;
+  urea: string;
+  creatinine: string;
+  uric_acid: string;
+  rbs: string;
+}
+
+interface ExtraTest {
+  name: string;
+  value: string;
+}
+
+const parseInvestigations = (raw: string): { core: LabValues; extra: ExtraTest[] } => {
+  const core: LabValues = {
+    hb: '',
+    bg: '',
+    hcv: '',
+    hiv: '',
+    vdrl: '',
+    hbsag: '',
+    urea: '',
+    creatinine: '',
+    uric_acid: '',
+    rbs: '',
+  };
+  const extra: ExtraTest[] = [];
+
+  if (!raw || !raw.trim()) {
+    return { core, extra };
+  }
+
+  const cleanRaw = raw.replace(/\t+/g, '\n').replace(/\|/g, '\n');
+  const lines = cleanRaw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+
+  for (const line of lines) {
+    const m = line.match(/^([^:=]+)[:=](.+)$/);
+    if (m) {
+      const rawK = m[1].trim();
+      const val = m[2].trim();
+      const k = rawK.toLowerCase().replace(/[^a-z0-9]/g, '');
+
+      if (k === 'hb' || k === 'haemoglobin') core.hb = val;
+      else if (k === 'bg' || k === 'bloodgroup' || k === 'bloodgrouping' || k === 'rh') core.bg = val;
+      else if (k === 'hcv') core.hcv = val;
+      else if (k === 'hiv') core.hiv = val;
+      else if (k === 'vdrl') core.vdrl = val;
+      else if (k === 'hbsag' || k === 'hbs') core.hbsag = val;
+      else if (k === 'urea' || k === 'bloodurea') core.urea = val;
+      else if (k === 'creatine' || k === 'creatinine' || k === 'serumcreatinine') core.creatinine = val;
+      else if (k === 'uricacid' || k === 'serumuricacid') core.uric_acid = val;
+      else if (k === 'rbs' || k === 'bloodsugar' || k === 'randombloodsugar') core.rbs = val;
+      else {
+        extra.push({ name: rawK, value: val });
+      }
+    } else {
+      if (!line.toLowerCase().startsWith('investigations')) {
+        extra.push({ name: 'Note', value: line });
+      }
+    }
+  }
+
+  return { core, extra };
+};
+
+const serializeInvestigations = (core: LabValues, extra: ExtraTest[]): string => {
+  const lines: string[] = [];
+  if (core.hb.trim()) lines.push(`Hb : ${core.hb.trim()}`);
+  if (core.bg.trim()) lines.push(`BG : ${core.bg.trim()}`);
+  if (core.hcv.trim()) lines.push(`HCV : ${core.hcv.trim()}`);
+  if (core.hiv.trim()) lines.push(`HIV : ${core.hiv.trim()}`);
+  if (core.vdrl.trim()) lines.push(`VDRL : ${core.vdrl.trim()}`);
+  if (core.hbsag.trim()) lines.push(`HBsAG : ${core.hbsag.trim()}`);
+  if (core.urea.trim()) lines.push(`UREA : ${core.urea.trim()}`);
+  if (core.creatinine.trim()) lines.push(`CREATININE : ${core.creatinine.trim()}`);
+  if (core.uric_acid.trim()) lines.push(`URIC ACID : ${core.uric_acid.trim()}`);
+  if (core.rbs.trim()) lines.push(`RBS : ${core.rbs.trim()}`);
+
+  for (const item of extra) {
+    if (item.value.trim()) {
+      if (item.name === 'Note' || !item.name.trim()) {
+        lines.push(item.value.trim());
+      } else {
+        lines.push(`${item.name.trim()} : ${item.value.trim()}`);
+      }
+    }
+  }
+
+  return lines.join('\n');
+};
 
 export default function AdmissionsTestReports({ admission }: Props) {
+  const initial = parseInvestigations(admission.investigations || '');
+  const [coreValues, setCoreValues] = useState<LabValues>(initial.core);
+  const [extraTests, setExtraTests] = useState<ExtraTest[]>(initial.extra);
+  const [showRawEditor, setShowRawEditor] = useState<boolean>(false);
+
   const { data, setData, put, processing, errors } = useForm({
-    investigations: admission.investigations || '',
+    investigations: admission.investigations || serializeInvestigations(initial.core, initial.extra),
     next_step: 'discharge',
   });
 
-  const insertTemplate = (snippet: string) => {
-    setData((prev) => {
-      const current = prev.investigations.trim();
-      const nextVal = current ? `${current}\n${snippet}` : snippet;
-      return { ...prev, investigations: nextVal };
-    });
+  const syncState = (newCore: LabValues, newExtra: ExtraTest[]) => {
+    setCoreValues(newCore);
+    setExtraTests(newExtra);
+    const serialized = serializeInvestigations(newCore, newExtra);
+    setData('investigations', serialized);
+  };
+
+  const updateCore = (key: keyof LabValues, val: string) => {
+    const updated = { ...coreValues, [key]: val };
+    syncState(updated, extraTests);
+  };
+
+  const setAllViralNegative = () => {
+    const updated = {
+      ...coreValues,
+      hiv: 'Negative',
+      hcv: 'Negative',
+      vdrl: 'Negative',
+      hbsag: 'Negative',
+    };
+    syncState(updated, extraTests);
+  };
+
+  const addExtraTest = (name = '', value = '') => {
+    const updated = [...extraTests, { name, value }];
+    syncState(coreValues, updated);
+  };
+
+  const updateExtraTest = (idx: number, field: 'name' | 'value', val: string) => {
+    const updated = [...extraTests];
+    updated[idx] = { ...updated[idx], [field]: val };
+    syncState(coreValues, updated);
+  };
+
+  const removeExtraTest = (idx: number) => {
+    const updated = extraTests.filter((_, i) => i !== idx);
+    syncState(coreValues, updated);
+  };
+
+  const handleRawChange = (raw: string) => {
+    setData('investigations', raw);
+    const parsed = parseInvestigations(raw);
+    setCoreValues(parsed.core);
+    setExtraTests(parsed.extra);
   };
 
   const handleSaveOnly = (e: React.FormEvent) => {
@@ -88,7 +188,7 @@ export default function AdmissionsTestReports({ admission }: Props) {
 
   return (
     <AppLayout>
-      <Head title={`Stage 3: Test Reports — ${admission.patient_name}`} />
+      <Head title={`Stage 3: Lab Results — ${admission.patient_name}`} />
 
       {/* 4-Stage Navigation Header */}
       <AdmissionStageNav currentStage="test-reports" admission={admission} />
@@ -99,88 +199,415 @@ export default function AdmissionsTestReports({ admission }: Props) {
             Stage 3: Laboratory &amp; Diagnostic Test Reports
           </h1>
           <p className="text-muted mb-0">
-            Record clinical pathology, biochemistry, hematology, blood grouping, and diagnostic imaging reports.
+            Standard laboratory investigations are predefined below. Simply enter the patient&rsquo;s test values.
           </p>
         </div>
         <div className="d-flex gap-2">
           <Link href={`/admissions/${admission.id}/surgery`} className="btn btn-outline-secondary">
-            <i className="bi bi-arrow-left me-1"></i> Back to Stage 2: Surgery
+            <i className="bi bi-arrow-left me-1"></i> Back to Stage 2
           </Link>
-          <Link href={`/admissions/${admission.id}/documents/preview`} className="btn btn-outline-secondary">
-            <i className="bi bi-file-earmark-text me-1"></i> Preview Documents
-          </Link>
+          <button
+            type="button"
+            onClick={() => setShowRawEditor(!showRawEditor)}
+            className="btn btn-outline-secondary"
+          >
+            <i className={`bi bi-${showRawEditor ? 'table' : 'code-slash'} me-1`}></i>
+            {showRawEditor ? 'Show Values Form' : 'Show Raw Text View'}
+          </button>
         </div>
       </div>
 
       <form id="testReportsForm">
-        {/* Quick Insertion Templates */}
-        <div className="card mb-4 border-0 shadow-sm">
-          <div className="card-header bg-white py-3 fw-bold text-dark d-flex align-items-center justify-content-between">
-            <div className="d-flex align-items-center gap-2">
-              <span className="badge bg-primary">3.1</span>
-              <span>Quick Clinical Test Templates</span>
-            </div>
-            <span className="text-muted small">Click any test template below to insert instantly</span>
-          </div>
-          <div className="card-body bg-light-subtle">
-            <div className="d-flex flex-wrap gap-2">
-              {CLINICAL_TEMPLATES.map((tmpl, idx) => (
-                <button
-                  key={idx}
-                  type="button"
-                  onClick={() => insertTemplate(tmpl.snippet)}
-                  className="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1.5 shadow-xs bg-white"
-                >
-                  <i className="bi bi-plus-circle text-primary"></i>
-                  <span>{tmpl.title}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Main Test Reports Editor */}
-        <div className="card mb-4 border-0 shadow-sm">
-          <div className="card-header bg-white py-3 fw-bold text-dark d-flex align-items-center justify-content-between">
-            <div>
-              <span className="badge bg-primary me-2">3.2</span>
-              <span>Diagnostic Investigations &amp; Lab Results</span>
-            </div>
-            <span className="text-muted small">Step 3 of 4</span>
-          </div>
-          <div className="card-body">
-            <div className="mb-3">
-              <label className="form-label fw-semibold text-dark">
-                Investigations (Hematology, Biochemistry, Urine, Scans, X-Ray, etc.)
-              </label>
-              <textarea
-                className={`form-control font-monospace ${errors.investigations ? 'is-invalid' : ''}`}
-                rows={12}
-                value={data.investigations}
-                onChange={(e) => setData('investigations', e.target.value)}
-                placeholder="Enter or paste lab reports, test values, and diagnostic impressions here..."
-                style={{ fontSize: '0.92rem', lineHeight: '1.6' }}
-              />
-              {errors.investigations && <div className="invalid-feedback">{errors.investigations}</div>}
-              <div className="form-text text-muted mt-2">
-                <i className="bi bi-info-circle me-1"></i> These findings appear in the &ldquo;INVESTIGATIONS&rdquo; section of the patient&rsquo;s Discharge Summary.
+        {/* Core Hospital Lab Results Form (Values Only) */}
+        {!showRawEditor ? (
+          <div className="card mb-4 border-0 shadow-sm">
+            <div className="card-header bg-white py-3 fw-bold text-dark d-flex align-items-center justify-content-between flex-wrap gap-2">
+              <div className="d-flex align-items-center gap-2">
+                <span className="badge bg-primary">3.1</span>
+                <span>Hospital Core Lab Investigations (Enter Values Only)</span>
               </div>
+              <button
+                type="button"
+                onClick={setAllViralNegative}
+                className="btn btn-sm btn-outline-success fw-semibold shadow-xs"
+              >
+                <i className="bi bi-shield-check me-1"></i> Set All Viral Markers (HIV, HCV, VDRL, HBsAg) Negative
+              </button>
             </div>
-
-            {/* Live Preview Box */}
-            {data.investigations.trim() && (
-              <div className="mt-4 p-3 rounded-3 bg-light border">
-                <h6 className="fw-bold text-secondary text-uppercase mb-2 small tracking-wide">
-                  <i className="bi bi-eye me-1"></i> Document Print Preview:
+            <div className="card-body">
+              {/* Row 1: Hematology & Blood Group */}
+              <div className="p-3 bg-light rounded-3 mb-3 border">
+                <h6 className="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                  <i className="bi bi-droplet-half text-danger"></i>
+                  <span>Hematology &amp; Blood Grouping</span>
                 </h6>
-                <div
-                  className="bg-white p-3 rounded border text-dark font-sans"
-                  style={{ whiteSpace: 'pre-wrap', fontSize: '0.9rem', lineHeight: '1.5' }}
-                >
-                  {data.investigations}
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <label className="form-label fw-semibold text-secondary small text-uppercase">
+                      Haemoglobin (Hb) <span className="text-muted fw-normal lowercase">(e.g. 12.9 mgs% or 12.4 g/dL)</span>
+                    </label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '90px' }}>
+                        Hb :
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={coreValues.hb}
+                        onChange={(e) => updateCore('hb', e.target.value)}
+                        placeholder="Enter value only (e.g. 12.9 mgs %)"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-6">
+                    <label className="form-label fw-semibold text-secondary small text-uppercase">
+                      Blood Group &amp; Rh (BG) <span className="text-muted fw-normal lowercase">(e.g. O positive)</span>
+                    </label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '90px' }}>
+                        BG :
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={coreValues.bg}
+                        onChange={(e) => updateCore('bg', e.target.value)}
+                        placeholder="Enter value or select (e.g. O positive)"
+                        list="bgOptions"
+                      />
+                      <datalist id="bgOptions">
+                        <option value="O positive" />
+                        <option value="A positive" />
+                        <option value="B positive" />
+                        <option value="AB positive" />
+                        <option value="O negative" />
+                        <option value="A negative" />
+                        <option value="B negative" />
+                        <option value="AB negative" />
+                      </datalist>
+                    </div>
+                  </div>
                 </div>
               </div>
-            )}
+
+              {/* Row 2: Viral Serology Screen */}
+              <div className="p-3 bg-light rounded-3 mb-3 border">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                    <i className="bi bi-virus text-primary"></i>
+                    <span>Viral &amp; Infectious Disease Screening</span>
+                  </h6>
+                  <button
+                    type="button"
+                    onClick={setAllViralNegative}
+                    className="btn btn-xs btn-outline-success fw-semibold"
+                    style={{ fontSize: '0.78rem' }}
+                  >
+                    Quick: All Negative
+                  </button>
+                </div>
+                <div className="row g-3">
+                  <div className="col-md-3">
+                    <label className="form-label fw-semibold text-secondary small text-uppercase">HCV</label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '70px' }}>
+                        HCV :
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={coreValues.hcv}
+                        onChange={(e) => updateCore('hcv', e.target.value)}
+                        placeholder="Negative"
+                        list="viralOptions"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="form-label fw-semibold text-secondary small text-uppercase">HIV</label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '70px' }}>
+                        HIV :
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={coreValues.hiv}
+                        onChange={(e) => updateCore('hiv', e.target.value)}
+                        placeholder="Negative"
+                        list="viralOptions"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="form-label fw-semibold text-secondary small text-uppercase">VDRL</label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '70px' }}>
+                        VDRL :
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={coreValues.vdrl}
+                        onChange={(e) => updateCore('vdrl', e.target.value)}
+                        placeholder="Negative"
+                        list="viralOptions"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="form-label fw-semibold text-secondary small text-uppercase">HBsAg</label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '70px' }}>
+                        HBsAg :
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={coreValues.hbsag}
+                        onChange={(e) => updateCore('hbsag', e.target.value)}
+                        placeholder="Negative"
+                        list="viralOptions"
+                      />
+                    </div>
+                  </div>
+
+                  <datalist id="viralOptions">
+                    <option value="Negative" />
+                    <option value="Non-Reactive" />
+                    <option value="Positive" />
+                  </datalist>
+                </div>
+              </div>
+
+              {/* Row 3: Biochemistry & Renal Function */}
+              <div className="p-3 bg-light rounded-3 mb-3 border">
+                <h6 className="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                  <i className="bi bi-activity text-success"></i>
+                  <span>Biochemistry, Renal Function &amp; Blood Sugar</span>
+                </h6>
+                <div className="row g-3">
+                  <div className="col-md-3">
+                    <label className="form-label fw-semibold text-secondary small text-uppercase">
+                      Blood Urea <span className="text-muted fw-normal lowercase">(e.g. 9.7 g/dl or 20 mg/dL)</span>
+                    </label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '75px' }}>
+                        Urea :
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={coreValues.urea}
+                        onChange={(e) => updateCore('urea', e.target.value)}
+                        placeholder="e.g. 9.7 g/dl"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="form-label fw-semibold text-secondary small text-uppercase">
+                      Serum Creatinine <span className="text-muted fw-normal lowercase">(e.g. 0.86 mg/dl)</span>
+                    </label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '75px' }}>
+                        Creat :
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={coreValues.creatinine}
+                        onChange={(e) => updateCore('creatinine', e.target.value)}
+                        placeholder="e.g. 0.86 mg/dl"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="form-label fw-semibold text-secondary small text-uppercase">
+                      Serum Uric Acid <span className="text-muted fw-normal lowercase">(e.g. 4.3 mg/dl)</span>
+                    </label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '75px' }}>
+                        Uric :
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={coreValues.uric_acid}
+                        onChange={(e) => updateCore('uric_acid', e.target.value)}
+                        placeholder="e.g. 4.3 mg/dl"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-3">
+                    <label className="form-label fw-semibold text-secondary small text-uppercase">
+                      RBS (Random Sugar) <span className="text-muted fw-normal lowercase">(e.g. 100.8 mg/dl)</span>
+                    </label>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '75px' }}>
+                        RBS :
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={coreValues.rbs}
+                        onChange={(e) => updateCore('rbs', e.target.value)}
+                        placeholder="e.g. 100.8 mg/dl"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 4: Additional / Custom Tests & Imaging */}
+              <div className="p-3 bg-light rounded-3 border">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                    <i className="bi bi-file-earmark-medical text-info"></i>
+                    <span>Additional Lab Tests / Imaging / Urine Reports</span>
+                  </h6>
+                  <button
+                    type="button"
+                    onClick={() => addExtraTest()}
+                    className="btn btn-sm btn-outline-primary"
+                  >
+                    <i className="bi bi-plus-circle me-1"></i> Add Other Test
+                  </button>
+                </div>
+
+                {extraTests.length === 0 ? (
+                  <div className="text-muted small py-2">
+                    No additional test reports added. Standard 10 panel above is fully active.
+                  </div>
+                ) : (
+                  extraTests.map((t, idx) => (
+                    <div key={idx} className="input-group mb-2">
+                      <input
+                        type="text"
+                        className="form-control"
+                        style={{ maxWidth: '280px' }}
+                        value={t.name}
+                        onChange={(e) => updateExtraTest(idx, 'name', e.target.value)}
+                        placeholder="Test Name (e.g. Urine Albumin / USG / ECG)"
+                      />
+                      <span className="input-group-text bg-white">:</span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={t.value}
+                        onChange={(e) => updateExtraTest(idx, 'value', e.target.value)}
+                        placeholder="Result value only (e.g. Nil / Pus cells 1-2 / Normal Sinus)"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeExtraTest(idx)}
+                        className="btn btn-outline-danger"
+                        title="Remove Test"
+                      >
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Raw Text Area (Advanced Mode) */
+          <div className="card mb-4 border-0 shadow-sm">
+            <div className="card-header bg-white py-3 fw-bold text-dark d-flex align-items-center justify-content-between">
+              <div>
+                <span className="badge bg-secondary me-2">RAW</span>
+                <span>Direct Raw Text Editor</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowRawEditor(false)}
+                className="btn btn-sm btn-primary"
+              >
+                Switch Back to Values Form
+              </button>
+            </div>
+            <div className="card-body">
+              <textarea
+                className="form-control font-monospace"
+                rows={12}
+                value={data.investigations}
+                onChange={(e) => handleRawChange(e.target.value)}
+                style={{ fontSize: '0.92rem', lineHeight: '1.6' }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Live Document Print Preview */}
+        <div className="card mb-4 border-0 shadow-sm border-start border-4 border-primary">
+          <div className="card-header bg-white py-3 fw-bold text-dark d-flex justify-content-between align-items-center">
+            <span className="small text-uppercase tracking-wide text-secondary">
+              <i className="bi bi-printer me-1"></i> Discharge Summary Print Preview (INVESTIGATIONS Section)
+            </span>
+            <span className="badge bg-light text-dark border">Auto-Formatted Grid</span>
+          </div>
+          <div className="card-body bg-white p-3">
+            <div className="table-responsive">
+              <table className="table table-bordered table-sm text-center mb-0 align-middle" style={{ fontSize: '0.86rem' }}>
+                <thead className="table-dark">
+                  <tr>
+                    <th>HB</th>
+                    <th>BLOOD GROUP</th>
+                    <th>HCV</th>
+                    <th>HIV</th>
+                    <th>VDRL</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="bg-light fw-bold text-dark">
+                    <td>{coreValues.hb || '—'}</td>
+                    <td>{coreValues.bg || '—'}</td>
+                    <td>{coreValues.hcv || '—'}</td>
+                    <td>{coreValues.hiv || '—'}</td>
+                    <td>{coreValues.vdrl || '—'}</td>
+                  </tr>
+                </tbody>
+                <thead className="table-dark">
+                  <tr>
+                    <th>HBSAG</th>
+                    <th>UREA</th>
+                    <th>CREATININE</th>
+                    <th>URIC ACID</th>
+                    <th>RBS</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="bg-light fw-bold text-dark">
+                    <td>{coreValues.hbsag || '—'}</td>
+                    <td>{coreValues.urea || '—'}</td>
+                    <td>{coreValues.creatinine || '—'}</td>
+                    <td>{coreValues.uric_acid || '—'}</td>
+                    <td>{coreValues.rbs || '—'}</td>
+                  </tr>
+                </tbody>
+              </table>
+
+              {extraTests.length > 0 && (
+                <div className="mt-2 pt-2 border-top">
+                  <div className="small fw-bold text-secondary mb-1">Additional Findings:</div>
+                  <div className="d-flex flex-wrap gap-2">
+                    {extraTests.map((t, idx) => (
+                      <span key={idx} className="badge bg-light text-dark border py-1.5 px-2">
+                        <strong>{t.name}:</strong> {t.value}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -213,4 +640,3 @@ export default function AdmissionsTestReports({ admission }: Props) {
     </AppLayout>
   );
 }
-

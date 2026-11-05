@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
@@ -122,6 +122,74 @@ export default function AdmissionsSurgery({
     newborns: initialNewborns,
     next_step: 'test-reports',
   });
+
+  // Parse existing postoperative orders into individual rows
+  const parseOrders = (raw?: string | null): string[] => {
+    if (!raw || !raw.trim()) {
+      return [''];
+    }
+    const lines = raw
+      .split(/\r?\n/)
+      .map((s) => s.replace(/^[-*•\d+.\s]+/, '').trim())
+      .filter(Boolean);
+    if (lines.length === 0) {
+      const commaParts = raw
+        .split(',')
+        .map((s) => s.replace(/^[-*•\d+.\s]+/, '').trim())
+        .filter(Boolean);
+      if (commaParts.length > 1) return commaParts;
+      return [raw.trim()];
+    }
+    return lines;
+  };
+
+  const [orderRows, setOrderRows] = useState<string[]>(() => parseOrders(admission.postoperative_orders));
+
+  // Stent detection in operative procedure
+  const hasStentInText = Boolean(
+    (admission.procedure_name || '').match(/stent/i) ||
+    (admission.procedure_done || '').match(/stent/i) ||
+    (admission.procedure_note || '').match(/stent/i) ||
+    (admission.findings || '').match(/stent/i) ||
+    (admission.drain || '').match(/stent/i)
+  );
+  const [hasStent, setHasStent] = useState<boolean>(hasStentInText);
+
+  const syncOrders = (rows: string[]) => {
+    const valid = rows.map((r) => r.trim()).filter(Boolean);
+    const serialized = valid.map((r, i) => `${i + 1}. ${r}`).join('\n');
+    setData('postoperative_orders', serialized);
+  };
+
+  const updateOrderRow = (idx: number, val: string) => {
+    const updated = [...orderRows];
+    updated[idx] = val;
+    setOrderRows(updated);
+    syncOrders(updated);
+  };
+
+  const addOrderRow = (text = '') => {
+    const updated = [...orderRows, text];
+    setOrderRows(updated);
+    syncOrders(updated);
+  };
+
+  const removeOrderRow = (idx: number) => {
+    const updated = orderRows.filter((_, i) => i !== idx);
+    const finalRows = updated.length > 0 ? updated : [''];
+    setOrderRows(finalRows);
+    syncOrders(finalRows);
+  };
+
+  const moveOrderRow = (idx: number, direction: 'up' | 'down') => {
+    const targetIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (targetIdx < 0 || targetIdx >= orderRows.length) return;
+    const updated = [...orderRows];
+    const [moved] = updated.splice(idx, 1);
+    updated.splice(targetIdx, 0, moved);
+    setOrderRows(updated);
+    syncOrders(updated);
+  };
 
   const addBaby = () => {
     setData('newborns', [
@@ -479,15 +547,143 @@ export default function AdmissionsSurgery({
                 />
               </div>
 
-              <div className="col-12">
-                <label className="form-label">Immediate Postoperative Orders</label>
-                <textarea
-                  className="form-control"
-                  rows={2}
-                  value={data.postoperative_orders}
-                  onChange={(e) => setData('postoperative_orders', e.target.value)}
-                  placeholder="e.g. Monitor vitals q1h x 4h, NPO x 6 hours, IV fluids RL @ 100ml/hr, Inj. Paracetamol 1g IV TDS"
-                />
+              {/* Stent Placement Detection / Toggle */}
+              <div className="col-12 mt-2 pt-2 border-top">
+                <div className="card bg-light-subtle border">
+                  <div className="card-body p-3">
+                    <div className="form-check form-switch mb-1">
+                      <input
+                        className="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        id="hasStentSwitch"
+                        checked={hasStent}
+                        onChange={(e) => {
+                          const val = e.target.checked;
+                          setHasStent(val);
+                          if (val && !data.findings.toLowerCase().includes('stent')) {
+                            const newFindings = data.findings ? `${data.findings}. DJ stent in situ.` : 'DJ stent in situ.';
+                            setData('findings', newFindings);
+                          }
+                        }}
+                      />
+                      <label className="form-check-label fw-bold text-dark" htmlFor="hasStentSwitch">
+                        <i className="bi bi-shield-plus text-primary me-1"></i> Patient has STENT (e.g. DJ Stent inserted)
+                      </label>
+                    </div>
+
+                    {hasStent && (
+                      <div className="alert alert-warning py-2 px-3 mb-0 border-0 rounded-2 mt-2">
+                        <div className="d-flex align-items-center gap-2">
+                          <i className="bi bi-info-circle-fill text-warning fs-5"></i>
+                          <div className="small">
+                            <strong>Stent Placement Notice:</strong> When a patient has a stent, the mandatory Tamil stent removal instruction:
+                            <div className="font-monospace fw-bold text-dark mt-1" style={{ fontSize: '0.85rem' }}>
+                              &ldquo;வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு (Date) அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.&rdquo;
+                            </div>
+                            will automatically appear on the patient&rsquo;s Discharge Summary and discharge review advice.
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Immediate Postoperative Orders (Separate Rows) */}
+              <div className="col-12 mt-3">
+                <div className="d-flex justify-content-between align-items-center mb-2">
+                  <label className="form-label fw-bold text-dark mb-0">
+                    <i className="bi bi-list-check text-primary me-1"></i> Immediate Postoperative Orders (Row by Row)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => addOrderRow()}
+                    className="btn btn-sm btn-outline-primary fw-semibold"
+                  >
+                    <i className="bi bi-plus-circle me-1"></i> Add Order Row
+                  </button>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="mb-2 d-flex flex-wrap gap-1.5 align-items-center">
+                  <span className="small text-muted me-1">Quick add:</span>
+                  {[
+                    'NPO for 6 hours',
+                    'IV Fluids: RL @ 100 ml/hr',
+                    'Monitor vitals q1h x 4h, then q4h',
+                    'Inj. Tramadol 50mg IV SOS (severe pain)',
+                    'Inj. Ondansetron 4mg IV SOS (vomiting)',
+                    'Catheter care & monitor hourly urine output',
+                    'Check dressing site for soakage / bleeding',
+                    'Sips of water after 6 hours if bowel sounds present',
+                  ].map((preset, pIdx) => (
+                    <button
+                      key={pIdx}
+                      type="button"
+                      onClick={() => addOrderRow(preset)}
+                      className="btn btn-xs btn-light border text-secondary"
+                      style={{ fontSize: '0.76rem', padding: '2px 8px' }}
+                    >
+                      + {preset}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Order Rows Repeater */}
+                <div className="bg-light p-2.5 rounded-3 border">
+                  {orderRows.map((order, oIdx) => (
+                    <div key={oIdx} className="input-group mb-2 shadow-xs">
+                      <span className="input-group-text bg-white fw-bold text-secondary" style={{ width: '48px', justifyContent: 'center' }}>
+                        #{oIdx + 1}
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={order}
+                        onChange={(e) => updateOrderRow(oIdx, e.target.value)}
+                        placeholder={`Order #${oIdx + 1} (e.g. Monitor vitals q1h x 4h, IV fluids RL @ 100ml/hr)`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => moveOrderRow(oIdx, 'up')}
+                        disabled={oIdx === 0}
+                        className="btn btn-outline-secondary"
+                        title="Move Up"
+                      >
+                        <i className="bi bi-arrow-up"></i>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveOrderRow(oIdx, 'down')}
+                        disabled={oIdx === orderRows.length - 1}
+                        className="btn btn-outline-secondary"
+                        title="Move Down"
+                      >
+                        <i className="bi bi-arrow-down"></i>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => removeOrderRow(oIdx)}
+                        disabled={orderRows.length <= 1 && !order.trim()}
+                        className="btn btn-outline-danger"
+                        title="Remove Order Row"
+                      >
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </div>
+                  ))}
+
+                  <div className="mt-2 text-end">
+                    <button
+                      type="button"
+                      onClick={() => addOrderRow()}
+                      className="btn btn-sm btn-primary fw-semibold"
+                    >
+                      <i className="bi bi-plus-lg me-1"></i> Add Another Order Row
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

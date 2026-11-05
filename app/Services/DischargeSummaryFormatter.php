@@ -116,7 +116,7 @@ class DischargeSummaryFormatter
                         'vdrl' => 'VDRL',
                         'hbsag' => 'HBSAG',
                         'urea' => 'UREA',
-                        'creatinine' => 'CREATININE',
+                        'creatinine', 'creatine' => 'CREATININE',
                         'uricacid' => 'URIC ACID',
                         'rbs' => 'RBS',
                         default => strtoupper($rawLabel),
@@ -194,13 +194,35 @@ class DischargeSummaryFormatter
     /**
      * Parse discharge medication orders.
      *
-     * @param string|null $text
+     * @param mixed $text
      * @return array<int, array{medicine: string, frequency: string, duration: string, timing: string}>
      */
-    public static function formatMedications(?string $text): array
+    public static function formatMedications($text): array
     {
         if (!$text) {
             return [];
+        }
+
+        if (is_array($text)) {
+            $formatted = [];
+            foreach ($text as $item) {
+                if (is_array($item)) {
+                    $formatted[] = [
+                        'medicine' => trim($item['medicine'] ?? ($item['name'] ?? '—')),
+                        'frequency' => trim($item['frequency'] ?? ($item['freq'] ?? '—')),
+                        'duration' => trim($item['duration'] ?? ($item['dur'] ?? '—')),
+                        'timing' => trim($item['timing'] ?? '—'),
+                    ];
+                }
+            }
+            return $formatted;
+        }
+
+        if (is_string($text) && str_starts_with(trim($text), '[') && str_ends_with(trim($text), ']')) {
+            $decoded = json_decode($text, true);
+            if (is_array($decoded)) {
+                return self::formatMedications($decoded);
+            }
         }
 
         $lines = preg_split('/\r\n|\r|\n/', trim($text));
@@ -255,14 +277,49 @@ class DischargeSummaryFormatter
     }
 
     /**
+     * Check if the patient has a stent in situ or placed during procedure.
+     *
+     * @param Admission|null $admission
+     * @param string|null $extraText
+     * @return bool
+     */
+    public static function hasStent(?Admission $admission = null, ?string $extraText = null): bool
+    {
+        $content = $extraText ?? '';
+        if ($admission) {
+            $content .= ' ' . ($admission->procedure_name ?? '')
+                      . ' ' . ($admission->procedure_done ?? '')
+                      . ' ' . ($admission->procedure_note ?? '')
+                      . ' ' . ($admission->findings ?? '')
+                      . ' ' . ($admission->drain ?? '')
+                      . ' ' . ($admission->discharge_advice ?? '')
+                      . ' ' . ($admission->follow_up ?? '');
+        }
+        return (bool) preg_match('/\bstent\b/i', $content);
+    }
+
+    /**
+     * Generate the official hospital Tamil stent removal instruction.
+     *
+     * @param string|null $date
+     * @return string
+     */
+    public static function getStentRemovalNotice(?string $date = null): string
+    {
+        $d = $date ?: '(Date)';
+        return "வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு {$d} அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.";
+    }
+
+    /**
      * Parse discharge advice and follow-up / review details.
      *
      * @param string|null $adviceText
      * @param string|null $followUpText
      * @param Carbon|null $dischargeAt
-     * @return array{advice_items: array<int, string>, review_text: string, review_date: string}
+     * @param Admission|null $admission
+     * @return array{advice_items: array<int, string>, review_text: string, review_date: string, has_stent: bool, tamil_note: string|null}
      */
-    public static function formatAdviceAndReview(?string $adviceText, ?string $followUpText, ?Carbon $dischargeAt = null): array
+    public static function formatAdviceAndReview(?string $adviceText, ?string $followUpText, ?Carbon $dischargeAt = null, ?Admission $admission = null): array
     {
         $items = [];
         $reviewText = 'Review after one week';
@@ -297,7 +354,20 @@ class DischargeSummaryFormatter
                 $line = 'Immunisation';
             }
 
-            $items[] = $line;
+            // Exclude Tamil text from general bullet points (it gets its own box)
+            if (!preg_match('/[\x{0B80}-\x{0BFF}]/u', $line)) {
+                $items[] = $line;
+            }
+        }
+
+        $hasStent = self::hasStent($admission, $source);
+        $tamilNote = null;
+        if ($hasStent) {
+            if (preg_match('/([\x{0B80}-\x{0BFF}].*)/u', $source, $m)) {
+                $tamilNote = trim($m[1]);
+            } else {
+                $tamilNote = self::getStentRemovalNotice($reviewDate);
+            }
         }
 
         $items = array_unique(array_filter($items));
@@ -309,6 +379,8 @@ class DischargeSummaryFormatter
             'advice_items' => array_values($items),
             'review_text' => $reviewText,
             'review_date' => $reviewDate,
+            'has_stent' => $hasStent,
+            'tamil_note' => $tamilNote,
         ];
     }
 
@@ -548,7 +620,15 @@ class DischargeSummaryFormatter
         if (preg_match('/Emergency\s*Contact\s*[:\-]\s*(.*?)(?=\n|$)/i', $text, $m)) $res['emergency_contact'] = trim($m[1]);
         if (preg_match('/When\s*to\s*Contact\s*[:\-]\s*(.*?)(?=\n|$)/i', $text, $m)) $res['when_to_contact'] = trim($m[1]);
         if (preg_match('/Review\s*[:\-]\s*(.*?)(?=\n|$)/i', $text, $m)) $res['review'] = trim($m[1]);
-        if (preg_match('/([\x{0B80}-\x{0BFF}].*)/u', $text, $m)) $res['tamil_note'] = trim($m[1]);
+        if (preg_match('/([\x{0B80}-\x{0BFF}].*)/u', $text, $m)) {
+            $res['tamil_note'] = trim($m[1]);
+        } elseif (self::hasStent($admission, $text)) {
+            $date = '21.08.2026';
+            if (preg_match('/(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/', $res['review'], $dm)) {
+                $date = $dm[1];
+            }
+            $res['tamil_note'] = self::getStentRemovalNotice($date);
+        }
 
         return $res;
     }

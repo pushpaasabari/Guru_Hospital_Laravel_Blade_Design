@@ -26,6 +26,7 @@ export interface FormattedAdviceAndReview {
   advice_items: string[];
   review_text: string;
   review_date: string;
+  tamil_note?: string;
 }
 
 export interface FormattedNewbornCard {
@@ -101,7 +102,7 @@ export function formatInvestigations(text?: string | null): FormattedInvestigati
       else if (key === 'vdrl') label = 'VDRL';
       else if (key === 'hbsag') label = 'HBSAG';
       else if (key === 'urea') label = 'UREA';
-      else if (key === 'creatinine') label = 'CREATININE';
+      else if (key === 'creatinine' || key === 'creatine') label = 'CREATININE';
       else if (key === 'uricacid') label = 'URIC ACID';
       else if (key === 'rbs') label = 'RBS';
 
@@ -156,9 +157,28 @@ export function formatConditionOnDischarge(text?: string | null): FormattedCondi
   return res;
 }
 
-export function formatMedications(text?: string | null): FormattedMedication[] {
+export function formatMedications(text?: string | any[] | null): FormattedMedication[] {
   if (!text) return [];
-  const lines = text.split(/\r?\n/).map((l) => l.trim().replace(/^[*•-]\s*/, '')).filter(Boolean);
+
+  if (Array.isArray(text)) {
+    return text.map((item) => ({
+      medicine: item.medicine || item.name || '—',
+      frequency: item.frequency || item.freq || '—',
+      duration: item.duration || item.dur || '—',
+      timing: item.timing || '—',
+    }));
+  }
+
+  if (typeof text === 'string' && text.trim().startsWith('[') && text.trim().endsWith(']')) {
+    try {
+      const parsed = JSON.parse(text);
+      if (Array.isArray(parsed)) return formatMedications(parsed);
+    } catch (e) {
+      // fallback
+    }
+  }
+
+  const lines = (typeof text === 'string' ? text : '').split(/\r?\n/).map((l) => l.trim().replace(/^[*•-]\s*/, '')).filter(Boolean);
   const rows: FormattedMedication[] = [];
 
   for (let line of lines) {
@@ -196,7 +216,7 @@ export function formatMedications(text?: string | null): FormattedMedication[] {
   return rows;
 }
 
-export function formatAdviceAndReview(adviceText?: string | null, followUpText?: string | null, dischargeAt?: string | null): FormattedAdviceAndReview {
+export function formatAdviceAndReview(adviceText?: string | null, followUpText?: string | null, dischargeAt?: string | null, extraContext?: string | null): FormattedAdviceAndReview {
   let items: string[] = [];
   let reviewText = 'Review after one week';
   let reviewDate = '03/09/2026';
@@ -209,8 +229,10 @@ export function formatAdviceAndReview(adviceText?: string | null, followUpText?:
     reviewDate = `${day}/${month}/${d.getFullYear()}`;
   }
 
-  const source = `${adviceText || ''}\n${followUpText || ''}`;
+  const source = `${adviceText || ''}\n${followUpText || ''}\n${extraContext || ''}`;
   const lines = source.split(/\r?\n/).map((l) => l.trim().replace(/^[*•-]\s*/, '')).filter(Boolean);
+
+  let tamil_note: string | undefined = undefined;
 
   for (let line of lines) {
     const rm = line.match(/review\s+after\s+([^\(\)]+)(?:\((.*?)\))?/i);
@@ -225,6 +247,11 @@ export function formatAdviceAndReview(adviceText?: string | null, followUpText?:
       reviewDate = dm[1];
     }
 
+    if (/[\u0B80-\u0BFF]/.test(line)) {
+      tamil_note = line;
+      continue;
+    }
+
     if (/post\s*natal\s*exercise/i.test(line)) line = 'Post natal exercise';
     else if (/exclusive\s*breast\s*feeding/i.test(line)) line = 'Exclusive breast feeding for 6 months';
     else if (/immunisation|immunization/i.test(line)) line = 'Immunisation';
@@ -232,12 +259,16 @@ export function formatAdviceAndReview(adviceText?: string | null, followUpText?:
     items.push(line);
   }
 
+  if (!tamil_note && /stent/i.test(source)) {
+    tamil_note = `வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு ${reviewDate} அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.`;
+  }
+
   items = Array.from(new Set(items));
   if (items.length === 0) {
     items = ['Immunisation', 'Exclusive breast feeding for 6 months', 'Post natal exercise'];
   }
 
-  return { advice_items: items, review_text: reviewText, review_date: reviewDate };
+  return { advice_items: items, review_text: reviewText, review_date: reviewDate, tamil_note };
 }
 
 export function formatNewborns(admission: any): FormattedNewbornCard[] {

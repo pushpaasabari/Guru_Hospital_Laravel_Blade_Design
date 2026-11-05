@@ -477,5 +477,98 @@ class AdmissionWorkflowTest extends TestCase
         $admission = Admission::where('ip_no', 'IP-MRD-8899')->first();
         $this->assertEquals('MRD-2026/8899', $admission->mrd_no);
     }
+
+    public function test_immediate_postoperative_orders_persists_row_by_row(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'Deepa R',
+            'uhid' => 'GH-POSTOP-01',
+            'ip_no' => 'IP-POSTOP-01',
+            'admission_at' => now()->subDay(),
+            'diagnosis' => 'Emergency LSCS',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+            'status' => 'draft',
+            'created_by' => $this->nurse->id,
+        ]);
+
+        $orders = "1. NPO for 6 hours\n2. IV Fluids RL @ 100ml/hr\n3. Inj. Tramadol 50mg IV SOS\n4. Monitor vitals q1h x 4h";
+
+        $response = $this->actingAs($this->nurse)->put(route('admissions.surgery.update', $admission), [
+            'procedure_at' => now()->toDateTimeString(),
+            'procedure_name' => 'Emergency LSCS under SA',
+            'postoperative_orders' => $orders,
+            'next_step' => 'stay',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $this->assertDatabaseHas('admissions', [
+            'id' => $admission->id,
+            'postoperative_orders' => $orders,
+        ]);
+    }
+
+    public function test_lab_results_and_medications_structured_formatting(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'Anitha V',
+            'uhid' => 'GH-LAB-MED-01',
+            'ip_no' => 'IP-LAB-MED-01',
+            'admission_at' => now()->subDays(3),
+            'discharge_at' => now(),
+            'diagnosis' => 'Twins / LSCS',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+            'status' => 'draft',
+            'created_by' => $this->nurse->id,
+            'investigations' => "Hb : 12.9mgs %\nBG : O positive\nHCV : Negative\nHIV : Negative\nVDRL : Negative\nHBsAG : Negative\nUREA : 9.7g/dl\nCREATINE : 0.86 mg/dl\nURIC ACID : 4.3 mg/dl\nRBS : 100.8 mg/dl",
+            'medication_orders' => "* Tab. Cefixime + sulbactum (1-0-1) x 7 Days - After food\n* Tab. Acendol-P (1-0-1) x 7 Days - After food\n* Cap. Cyra-D (1-0-1) x 7 Days - Before food",
+        ]);
+
+        // Formatted investigations
+        $inv = $admission->formatted_investigations;
+        $this->assertCount(10, $inv);
+        $this->assertEquals('HB', $inv[0]['label']);
+        $this->assertEquals('12.9mgs %', $inv[0]['value']);
+        $this->assertEquals('BLOOD GROUP', $inv[1]['label']);
+        $this->assertEquals('O positive', $inv[1]['value']);
+        $this->assertEquals('CREATININE', $inv[7]['label']);
+        $this->assertEquals('0.86 mg/dl', $inv[7]['value']);
+
+        // Formatted medications 4-column
+        $meds = $admission->formatted_medications;
+        $this->assertCount(3, $meds);
+        $this->assertEquals('Tab. Cefixime + Sulbactam', $meds[0]['medicine']);
+        $this->assertEquals('1-0-1', $meds[0]['frequency']);
+        $this->assertEquals('7 days', $meds[0]['duration']);
+        $this->assertEquals('After food', $meds[0]['timing']);
+    }
+
+    public function test_patient_with_stent_in_procedure_includes_official_tamil_stent_notice(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'Gopalakrishnan K',
+            'uhid' => 'GH-STENT-01',
+            'ip_no' => 'IP-STENT-01',
+            'admission_at' => now()->subDays(2),
+            'discharge_at' => now(),
+            'diagnosis' => 'Right Lower Ureteric Calculus',
+            'format' => 'general',
+            'surgery_type' => 'other',
+            'procedure_name' => 'Right URSL & DJ Stenting',
+            'procedure_note' => 'Stone fragmented. Right DJ stent 5F/26cm placed.',
+            'findings' => 'Calculus fragmented completely. DJ stent in situ.',
+            'follow_up' => 'Review on 21.08.2026 for stent removal',
+            'status' => 'draft',
+            'created_by' => $this->nurse->id,
+        ]);
+
+        $this->assertTrue($admission->has_stent);
+        $notice = $admission->stent_removal_notice;
+        $this->assertNotNull($notice);
+        $this->assertStringContainsString('வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு', $notice);
+        $this->assertStringContainsString('21.08.2026', $notice);
+        $this->assertStringContainsString('ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்', $notice);
+    }
 }
 

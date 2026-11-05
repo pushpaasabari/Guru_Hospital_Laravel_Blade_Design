@@ -529,6 +529,13 @@
         </div>
     </div>
 
+    @if(!empty($adviceData['tamil_note']))
+        <div style="margin-top: 4px; margin-bottom: 5px; padding: 4px 8px; background: #f8fafc; border: 1px solid #111; border-left: 3px solid #111; font-family: 'Nirmala', Arial, sans-serif; font-size: 8.2pt; line-height: 1.35; color: #111;">
+            <strong style="font-size: 7.8pt; display: block; margin-bottom: 1px;">ஸ்டெண்ட் குறிப்பு (STENT REMOVAL NOTICE):</strong>
+            {{ $adviceData['tamil_note'] }}
+        </div>
+    @endif
+
     <div class="emergency-container">
         <div style="margin-bottom: 3px;">
             <span style="font-size: 7.5pt; font-weight: bold; color: #111; width: 130px; display: inline-block; vertical-align: top;">WHEN TO CONTACT</span>

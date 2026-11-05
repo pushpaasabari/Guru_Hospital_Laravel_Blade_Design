@@ -150,7 +150,18 @@ class Admission extends Model
 
     public function getFormattedAdviceAndReviewAttribute(): array
     {
-        return \App\Services\DischargeSummaryFormatter::formatAdviceAndReview($this->discharge_advice, $this->follow_up, $this->discharge_at);
+        return \App\Services\DischargeSummaryFormatter::formatAdviceAndReview($this->discharge_advice, $this->follow_up, $this->discharge_at, $this);
+    }
+
+    public function getHasStentAttribute(): bool
+    {
+        return \App\Services\DischargeSummaryFormatter::hasStent($this);
+    }
+
+    public function getStentRemovalNoticeAttribute(): ?string
+    {
+        $review = $this->formatted_advice_and_review;
+        return $review['tamil_note'] ?? ($this->has_stent ? \App\Services\DischargeSummaryFormatter::getStentRemovalNotice($review['review_date'] ?? null) : null);
     }
 
     public function getFormattedNewbornsAttribute(): array

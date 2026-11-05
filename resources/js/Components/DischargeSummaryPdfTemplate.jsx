@@ -78,6 +78,7 @@ export default function DischargeSummaryPdfTemplate({ data }) {
             'Post Natal Exercise'
         ],
         review_date = '03/09/2026',
+        tamil_note = null,
         emergency_contacts = '04342-262266, +91-7418084266'
     } = data || {};
 
@@ -577,6 +578,26 @@ export default function DischargeSummaryPdfTemplate({ data }) {
                             {review_date}
                         </div>
                     </div>
+
+                    {tamil_note && (
+                        <div style={{
+                            marginTop: '3px',
+                            marginBottom: '4px',
+                            padding: '4px 8px',
+                            background: '#f8fafc',
+                            border: '1px solid #111111',
+                            borderLeft: '3px solid #111111',
+                            fontFamily: "'Nirmala', 'Arial Unicode MS', sans-serif",
+                            fontSize: '8pt',
+                            lineHeight: 1.35,
+                            color: '#111111'
+                        }}>
+                            <strong style={{ fontSize: '7.5pt', display: 'block', marginBottom: '1px' }}>
+                                ஸ்டெண்ட் குறிப்பு (STENT REMOVAL NOTICE):
+                            </strong>
+                            {tamil_note}
+                        </div>
+                    )}
 
                     {/* When to Contact / Emergency Box */}
                     <div className="emergency-box">

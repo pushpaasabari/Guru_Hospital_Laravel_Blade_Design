@@ -78,6 +78,7 @@ function DischargeSummaryPdfTemplate({ data }) {
       "Post Natal Exercise"
     ],
     review_date = "03/09/2026",
+    tamil_note = null,
     emergency_contacts = "04342-262266, +91-7418084266"
   } = data || {};
   const invChunks = [];
@@ -523,6 +524,21 @@ function DischargeSummaryPdfTemplate({ data }) {
         /* @__PURE__ */ jsxs("div", { className: "review-bar", children: [
           /* @__PURE__ */ jsx("div", { style: { display: "table-cell", fontWeight: "bold", fontSize: "9pt", verticalAlign: "middle" }, children: "Review after one week" }),
           /* @__PURE__ */ jsx("div", { style: { display: "table-cell", textAlign: "right", fontWeight: "bold", fontSize: "10.5pt", verticalAlign: "middle" }, children: review_date })
+        ] }),
+        tamil_note && /* @__PURE__ */ jsxs("div", { style: {
+          marginTop: "3px",
+          marginBottom: "4px",
+          padding: "4px 8px",
+          background: "#f8fafc",
+          border: "1px solid #111111",
+          borderLeft: "3px solid #111111",
+          fontFamily: "'Nirmala', 'Arial Unicode MS', sans-serif",
+          fontSize: "8pt",
+          lineHeight: 1.35,
+          color: "#111111"
+        }, children: [
+          /* @__PURE__ */ jsx("strong", { style: { fontSize: "7.5pt", display: "block", marginBottom: "1px" }, children: "\u0BB8\u0BCD\u0B9F\u0BC6\u0BA3\u0BCD\u0B9F\u0BCD \u0B95\u0BC1\u0BB1\u0BBF\u0BAA\u0BCD\u0BAA\u0BC1 (STENT REMOVAL NOTICE):" }),
+          tamil_note
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "emergency-box", children: [
           /* @__PURE__ */ jsxs("div", { style: { marginBottom: "2.5px" }, children: [
