@@ -180,9 +180,65 @@
                 <label class="form-label">Drain Placed</label>
                 <input class="form-control" name="drain" value="{{ old('drain', $admission->drain) }}" placeholder="e.g. Nil">
             </div>
-            <div class="col-12">
-                <label class="form-label">Immediate Postoperative Orders</label>
-                <textarea class="form-control" name="postoperative_orders" rows="2">{{ old('postoperative_orders', $admission->postoperative_orders) }}</textarea>
+            <div class="col-12 mt-2 pt-2 border-top">
+                <div class="card bg-light-subtle border">
+                    <div class="card-body p-3">
+                        <div class="form-check form-switch mb-1">
+                            <input class="form-check-input" type="checkbox" id="stentSwitch" onchange="toggleStentNotice(this.checked)" {{ preg_match('/stent/i', ($admission->procedure_name ?? '') . ' ' . ($admission->procedure_done ?? '') . ' ' . ($admission->findings ?? '') . ' ' . ($admission->drain ?? '')) ? 'checked' : '' }}>
+                            <label class="form-check-label fw-bold text-dark" for="stentSwitch">
+                                <i class="bi bi-shield-plus text-primary me-1"></i> Patient has STENT (e.g. DJ Stent inserted)
+                            </label>
+                        </div>
+                        <div id="stentNoticeAlert" class="alert alert-warning py-2 px-3 mb-0 border-0 rounded-2 mt-2 {{ preg_match('/stent/i', ($admission->procedure_name ?? '') . ' ' . ($admission->procedure_done ?? '') . ' ' . ($admission->findings ?? '') . ' ' . ($admission->drain ?? '')) ? '' : 'd-none' }}">
+                            <div class="d-flex align-items-center gap-2">
+                                <i class="bi bi-info-circle-fill text-warning fs-5"></i>
+                                <div class="small">
+                                    <strong>Stent Placement Notice:</strong> When a patient has a stent, the mandatory Tamil stent removal instruction:
+                                    <div class="font-monospace fw-bold text-dark mt-1" style="font-size: 0.85rem;">
+                                        &ldquo;வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு (Date) அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.&rdquo;
+                                    </div>
+                                    will automatically appear on the patient&rsquo;s Discharge Summary.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- Immediate Postoperative Orders (Separate Rows) --}}
+            <div class="col-12 mt-3">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <label class="form-label fw-bold text-dark mb-0">
+                        <i class="bi bi-list-check text-primary me-1"></i> Immediate Postoperative Orders (Row by Row)
+                    </label>
+                    <button type="button" onclick="addPostOpRow()" class="btn btn-sm btn-outline-primary fw-semibold">
+                        <i class="bi bi-plus-circle me-1"></i> Add Order Row
+                    </button>
+                </div>
+
+                {{-- Quick Presets --}}
+                <div className="mb-2" style="margin-bottom: 8px;">
+                    <span class="small text-muted me-1">Quick add:</span>
+                    <button type="button" class="btn btn-xs btn-light border text-secondary" style="font-size: 0.76rem; padding: 2px 8px;" onclick="addPostOpRow('NPO for 6 hours')">+ NPO for 6 hours</button>
+                    <button type="button" class="btn btn-xs btn-light border text-secondary" style="font-size: 0.76rem; padding: 2px 8px;" onclick="addPostOpRow('IV Fluids: RL @ 100 ml/hr')">+ IV Fluids RL</button>
+                    <button type="button" class="btn btn-xs btn-light border text-secondary" style="font-size: 0.76rem; padding: 2px 8px;" onclick="addPostOpRow('Monitor vitals q1h x 4h, then q4h')">+ Monitor vitals</button>
+                    <button type="button" class="btn btn-xs btn-light border text-secondary" style="font-size: 0.76rem; padding: 2px 8px;" onclick="addPostOpRow('Inj. Tramadol 50mg IV SOS (severe pain)')">+ Inj. Tramadol</button>
+                    <button type="button" class="btn btn-xs btn-light border text-secondary" style="font-size: 0.76rem; padding: 2px 8px;" onclick="addPostOpRow('Inj. Ondansetron 4mg IV SOS (vomiting)')">+ Inj. Ondansetron</button>
+                    <button type="button" class="btn btn-xs btn-light border text-secondary" style="font-size: 0.76rem; padding: 2px 8px;" onclick="addPostOpRow('Catheter care & monitor hourly urine output')">+ Catheter care</button>
+                    <button type="button" class="btn btn-xs btn-light border text-secondary" style="font-size: 0.76rem; padding: 2px 8px;" onclick="addPostOpRow('Check dressing site for soakage / bleeding')">+ Check dressing</button>
+                </div>
+
+                {{-- Rows Container --}}
+                <div class="bg-light p-3 rounded-3 border">
+                    <div id="postOpRowsContainer"></div>
+                    <div class="mt-2 text-end">
+                        <button type="button" onclick="addPostOpRow()" class="btn btn-sm btn-primary fw-semibold">
+                            <i class="bi bi-plus-lg me-1"></i> Add Another Order Row
+                        </button>
+                    </div>
+                </div>
+
+                <input type="hidden" name="postoperative_orders" id="postoperativeOrdersField" value="{{ old('postoperative_orders', $admission->postoperative_orders) }}">
             </div>
         </div>
     </div>
@@ -202,5 +258,83 @@
     </div>
 </div>
 </form>
+
+<script>
+let postOpOrders = [];
+
+function initPostOpOrders() {
+    const raw = document.getElementById('postoperativeOrdersField').value || '';
+    const lines = raw.split(/\r?\n/).map(s => s.replace(/^[-*•\d+.\s]+/, '').trim()).filter(Boolean);
+    if (lines.length > 0) {
+        postOpOrders = lines;
+    } else {
+        postOpOrders = [''];
+    }
+    renderPostOpRows();
+}
+
+function renderPostOpRows() {
+    const container = document.getElementById('postOpRowsContainer');
+    if (!container) return;
+    container.innerHTML = '';
+
+    postOpOrders.forEach((order, idx) => {
+        const div = document.createElement('div');
+        div.className = 'input-group mb-2 shadow-xs';
+        div.innerHTML = `
+            <span class="input-group-text bg-white fw-bold text-secondary" style="width: 48px; justify-content: center;">#${idx + 1}</span>
+            <input type="text" class="form-control" value="${escapeHtml(order)}" placeholder="Order #${idx + 1} (e.g. NPO x 6 hours, IV fluids RL @ 100ml/hr)" oninput="updatePostOpRow(${idx}, this.value)">
+            <button type="button" class="btn btn-outline-secondary" onclick="movePostOpRow(${idx}, -1)" ${idx === 0 ? 'disabled' : ''}><i class="bi bi-arrow-up"></i></button>
+            <button type="button" class="btn btn-outline-secondary" onclick="movePostOpRow(${idx}, 1)" ${idx === postOpOrders.length - 1 ? 'disabled' : ''}><i class="bi bi-arrow-down"></i></button>
+            <button type="button" class="btn btn-outline-danger" onclick="removePostOpRow(${idx})"><i class="bi bi-trash"></i></button>
+        `;
+        container.appendChild(div);
+    });
+
+    syncPostOpField();
+}
+
+function addPostOpRow(val = '') {
+    postOpOrders.push(val);
+    renderPostOpRows();
+}
+
+function updatePostOpRow(idx, val) {
+    postOpOrders[idx] = val;
+    syncPostOpField();
+}
+
+function removePostOpRow(idx) {
+    postOpOrders.splice(idx, 1);
+    if (postOpOrders.length === 0) postOpOrders.push('');
+    renderPostOpRows();
+}
+
+function movePostOpRow(idx, delta) {
+    const target = idx + delta;
+    if (target < 0 || target >= postOpOrders.length) return;
+    const temp = postOpOrders[idx];
+    postOpOrders[idx] = postOpOrders[target];
+    postOpOrders[target] = temp;
+    renderPostOpRows();
+}
+
+function syncPostOpField() {
+    const valid = postOpOrders.map(s => s.trim()).filter(Boolean);
+    const serialized = valid.map((s, i) => `${i + 1}. ${s}`).join('\n');
+    document.getElementById('postoperativeOrdersField').value = serialized;
+}
+
+function toggleStentNotice(checked) {
+    const alert = document.getElementById('stentNoticeAlert');
+    if (alert) alert.classList.toggle('d-none', !checked);
+}
+
+function escapeHtml(str) {
+    return (str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+document.addEventListener('DOMContentLoaded', initPostOpOrders);
+</script>
 @endsection
 
