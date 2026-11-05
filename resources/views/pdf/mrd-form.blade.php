@@ -110,10 +110,6 @@
 </head>
 <body>
 
-@if($admission->status !== 'approved' && $admission->status !== 'generated')
-    <div class="watermark">DRAFT — NOT OFFICIAL</div>
-@endif
-
 @php
     $logoPath = public_path('images/guru-hospital-logo.png');
     $logoBase64 = file_exists($logoPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath)) : '';

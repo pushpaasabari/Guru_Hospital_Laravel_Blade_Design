@@ -276,25 +276,46 @@ class AdmissionController extends Controller
         $validated = $request->validated();
         $oldData = $admission->toArray();
 
+        // Stage 4 completion automatically marks the admission as approved and finalized.
+        // No separate approval from anyone is required.
+        if ($admission->status !== 'generated') {
+            $validated['status'] = 'approved';
+        }
+        if (!$admission->approved_by) {
+            $validated['approved_by'] = $request->user()?->id;
+            $validated['approved_at'] = now();
+        }
+
         $admission->update($validated);
 
         AuditService::log(
             'admission.discharge_updated',
             'Admission',
             $admission->id,
-            "Discharge details updated for {$admission->patient_name}",
+            "Discharge details completed for {$admission->patient_name} (Auto-approved, ready for direct download)",
             $oldData,
             $admission->fresh()->toArray()
         );
 
-        $nextStep = $request->input('next_step', 'preview');
+        $nextStep = $request->input('next_step', 'download_ds');
+
         if ($nextStep === 'stay') {
             return redirect()->route('admissions.discharge', $admission)
                 ->with('status', 'Discharge details saved successfully.');
         }
 
-        return redirect()->route('documents.preview', $admission)
-            ->with('status', 'Discharge details saved. Document pack is ready for review.');
+        if ($nextStep === 'preview') {
+            return redirect()->route('documents.preview', $admission)
+                ->with('status', 'Discharge details saved. Documents are ready for direct download.');
+        }
+
+        if ($nextStep === 'download_pack') {
+            return redirect()->route('documents.preview', ['admission' => $admission, 'auto_download' => 'pack'])
+                ->with('status', 'Discharge completed! Complete Dossier Pack PDF download started.');
+        }
+
+        return redirect()->route('documents.preview', ['admission' => $admission, 'auto_download' => 'discharge-summary'])
+            ->with('status', 'Discharge completed! Discharge Summary PDF download started.');
     }
 
     public function createRevision(Request $request, Admission $admission): RedirectResponse

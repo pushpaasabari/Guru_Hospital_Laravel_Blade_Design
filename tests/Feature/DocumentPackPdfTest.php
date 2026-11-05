@@ -102,14 +102,15 @@ class DocumentPackPdfTest extends TestCase
         $this->assertStringContainsString('attachment; filename="Guru_Hospital_MRD_Form_IP-7701.pdf"', $resMrd->headers->get('Content-Disposition'));
     }
 
-    public function test_unapproved_admission_cannot_generate_pdf(): void
+    public function test_admission_can_generate_pdf_directly_without_prior_approval(): void
     {
         $this->approvedAdmission->update(['status' => 'draft']);
 
         $response = $this->actingAs($this->doctor)
             ->get(route('documents.pdf', $this->approvedAdmission));
 
-        $response->assertForbidden();
+        $response->assertStatus(200);
+        $this->assertEquals('application/pdf', $response->headers->get('Content-Type'));
     }
 
     public function test_guest_cannot_download_pdf(): void

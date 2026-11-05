@@ -86,10 +86,6 @@
 </head>
 <body>
 
-@if($admission->status !== 'approved' && $admission->status !== 'generated')
-    <div class="watermark">DRAFT — NOT OFFICIAL</div>
-@endif
-
 <!-- ========================================== -->
 <!-- 2. OPERATION THEATRE NOTES                 -->
 <!-- ========================================== -->

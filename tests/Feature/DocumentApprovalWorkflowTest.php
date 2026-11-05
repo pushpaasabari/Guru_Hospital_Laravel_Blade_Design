@@ -142,12 +142,13 @@ class DocumentApprovalWorkflowTest extends TestCase
         $response->assertSessionHasErrors('correction_reason');
     }
 
-    public function test_draft_document_cannot_be_generated_as_pdf(): void
+    public function test_document_can_be_generated_as_pdf_directly_without_prior_approval(): void
     {
         $response = $this->actingAs($this->doctor)
             ->get(route('documents.pdf', $this->admission));
 
-        $response->assertForbidden();
+        $response->assertOk();
+        $this->assertEquals('application/pdf', $response->headers->get('Content-Type'));
     }
 
     public function test_creating_revision_preserves_snapshot_and_unlocks_admission(): void

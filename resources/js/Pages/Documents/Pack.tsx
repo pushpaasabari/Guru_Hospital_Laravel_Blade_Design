@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import {
@@ -130,6 +130,20 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
   const [revisionReason, setRevisionReason] = useState('');
   const [submittingReturn, setSubmittingReturn] = useState(false);
   const [submittingRevision, setSubmittingRevision] = useState(false);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const autoDownload = params.get('auto_download');
+    if (autoDownload) {
+      const downloadUrl = `/admissions/${admission.id}/documents/pdf/${autoDownload}`;
+      const link = document.createElement('a');
+      link.href = downloadUrl;
+      link.setAttribute('download', '');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  }, [admission.id]);
 
   const getDocTitle = (doc: string) => {
     switch (doc) {
@@ -369,90 +383,87 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                 </>
               )}
 
-              {(isApproved || isGenerated) && (
-                <>
-                  <div className="btn-group">
+              {/* Direct PDF Download Buttons (No approval required) */}
+              <div className="btn-group shadow-sm">
+                <a
+                  href={`/admissions/${admission.id}/documents/pdf/discharge-summary`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-primary fw-semibold d-inline-flex align-items-center gap-1"
+                  title="Generate and download Discharge Summary PDF"
+                >
+                  <i className="bi bi-file-earmark-medical me-1"></i> 1. Discharge Summary PDF
+                </a>
+                <button
+                  type="button"
+                  className="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                  data-bs-toggle="dropdown"
+                  aria-expanded="false"
+                >
+                  <span className="visually-hidden">Toggle PDF Options</span>
+                </button>
+                <ul className="dropdown-menu dropdown-menu-end shadow border-0" style={{ borderRadius: '12px', fontSize: '13px' }}>
+                  <li>
+                    <h6 className="dropdown-header text-uppercase fw-bold" style={{ fontSize: '10.5px' }}>
+                      Separate PDF Documents
+                    </h6>
+                  </li>
+                  <li>
                     <a
+                      className="dropdown-item py-2"
                       href={`/admissions/${admission.id}/documents/pdf/discharge-summary`}
                       target="_blank"
                       rel="noreferrer"
-                      className="btn btn-primary fw-semibold"
-                      title="Generate and download Discharge Summary PDF"
                     >
-                      <i className="bi bi-file-earmark-medical me-1"></i> 1. Discharge Summary PDF
+                      <i className="bi bi-file-earmark-text text-primary me-2"></i>
+                      1. Discharge Summary PDF
                     </a>
-                    <button
-                      type="button"
-                      className="btn btn-primary dropdown-toggle dropdown-toggle-split"
-                      data-bs-toggle="dropdown"
-                      aria-expanded="false"
+                  </li>
+                  <li>
+                    <a
+                      className="dropdown-item py-2"
+                      href={`/admissions/${admission.id}/documents/pdf/operation-notes`}
+                      target="_blank"
+                      rel="noreferrer"
                     >
-                      <span className="visually-hidden">Toggle PDF Options</span>
-                    </button>
-                    <ul className="dropdown-menu dropdown-menu-end shadow-sm border-0" style={{ borderRadius: '12px', fontSize: '13px' }}>
-                      <li>
-                        <h6 className="dropdown-header text-uppercase fw-bold" style={{ fontSize: '10.5px' }}>
-                          Separate PDF Documents
-                        </h6>
-                      </li>
-                      <li>
-                        <a
-                          className="dropdown-item py-2"
-                          href={`/admissions/${admission.id}/documents/pdf/discharge-summary`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <i className="bi bi-file-earmark-text text-primary me-2"></i>
-                          1. Discharge Summary PDF
-                        </a>
-                      </li>
-                      <li>
-                        <a
-                          className="dropdown-item py-2"
-                          href={`/admissions/${admission.id}/documents/pdf/operation-notes`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <i className="bi bi-journal-medical text-success me-2"></i>
-                          2. Operation Theatre Notes PDF
-                        </a>
-                      </li>
-                      <li>
-                        <a
-                          className="dropdown-item py-2"
-                          href={`/admissions/${admission.id}/documents/pdf/mrd-form`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <i className="bi bi-file-earmark-check text-warning me-2"></i>
-                          3. MRD Inpatient Form PDF
-                        </a>
-                      </li>
-                      <li><hr className="dropdown-divider" /></li>
-                      <li>
-                        <a
-                          className="dropdown-item py-2 fw-semibold"
-                          href={`/admissions/${admission.id}/documents/pdf/pack`}
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <i className="bi bi-collection text-dark me-2"></i>
-                          Complete 3-in-1 Pack PDF
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
+                      <i className="bi bi-journal-medical text-success me-2"></i>
+                      2. Operation Theatre Notes PDF
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      className="dropdown-item py-2"
+                      href={`/admissions/${admission.id}/documents/pdf/mrd-form`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <i className="bi bi-file-earmark-check text-warning me-2"></i>
+                      3. MRD Inpatient Form PDF
+                    </a>
+                  </li>
+                  <li><hr className="dropdown-divider" /></li>
+                  <li>
+                    <a
+                      className="dropdown-item py-2 fw-semibold"
+                      href={`/admissions/${admission.id}/documents/pdf/pack`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <i className="bi bi-collection text-dark me-2"></i>
+                      Complete 3-in-1 Pack PDF
+                    </a>
+                  </li>
+                </ul>
+              </div>
 
-                  {(user?.is_admin || user?.role === 'doctor') && (
-                    <button
-                      type="button"
-                      className="btn btn-outline-secondary"
-                      onClick={() => setRevisionModalOpen(true)}
-                    >
-                      <i className="bi bi-pencil-square me-1"></i> Create Revision
-                    </button>
-                  )}
-                </>
+              {(user?.is_admin || user?.role === 'doctor') && (
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setRevisionModalOpen(true)}
+                >
+                  <i className="bi bi-pencil-square me-1"></i> Create Revision
+                </button>
               )}
 
               <button className="btn btn-outline-secondary" onClick={() => window.print()}>
@@ -477,20 +488,30 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
             </div>
           )}
 
-          {isDraft && (
-            <div className="alert alert-warning mt-3 mb-0 py-2">
-              <i className="bi bi-shield-exclamation me-1"></i> <strong>Draft Notice:</strong> Review
-              the three documents below. Clinical approval is required before official generation.
+          <div className="alert alert-success mt-3 mb-0 py-2 d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div>
+              <i className="bi bi-check-circle-fill me-1 text-success"></i>{' '}
+              <strong>Documents Ready for Download:</strong> Complete discharge documentation is finalized. You can directly download official PDFs below without needing approval.
             </div>
-          )}
-
-          {isApproved && (
-            <div className="alert alert-success mt-3 mb-0 py-2">
-              <i className="bi bi-shield-check me-1"></i> <strong>Approved:</strong> Clinically approved
-              by Dr. {admission.approver?.name || 'Staff Doctor'} on{' '}
-              {formatDateTime(admission.approved_at)}.
+            <div className="d-flex gap-2">
+              <a
+                href={`/admissions/${admission.id}/documents/pdf/discharge-summary`}
+                className="btn btn-sm btn-success fw-semibold"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <i className="bi bi-download me-1"></i> Discharge Summary PDF
+              </a>
+              <a
+                href={`/admissions/${admission.id}/documents/pdf/pack`}
+                className="btn btn-sm btn-outline-dark fw-semibold"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <i className="bi bi-collection me-1"></i> Complete Pack PDF
+              </a>
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -598,45 +619,13 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
           </div>
 
           <div className="card-body p-0" style={{ background: '#525659' }}>
-            {isApproved || isGenerated ? (
-              <div style={{ width: '100%', height: '920px' }}>
-                <iframe
-                  src={`/admissions/${admission.id}/documents/pdf/${getPdfRouteType(activeDoc)}?inline=1`}
-                  style={{ width: '100%', height: '100%', border: 'none' }}
-                  title={`Playwright PDF Preview — ${getDocTitle(activeDoc)}`}
-                />
-              </div>
-            ) : (
-              <div className="text-center py-5 px-4 text-white" style={{ background: '#1e293b' }}>
-                <div className="mb-3">
-                  <i className="bi bi-shield-exclamation fs-1 text-warning"></i>
-                </div>
-                <h5 className="fw-bold">Clinical Approval Required for Official PDF Stream</h5>
-                <p className="text-white-50 mx-auto" style={{ maxWidth: '540px' }}>
-                  This document is currently in <strong>{admission.status.toUpperCase()}</strong> status.
-                  You can review the exact layout in the <strong>Formatted Sheet</strong> mode.
-                  Once clinically approved by a doctor, the final Playwright Chromium PDF stream will be instantly available here.
-                </p>
-                <div className="d-flex justify-content-center gap-2 mt-3">
-                  <button
-                    type="button"
-                    className="btn btn-light fw-semibold"
-                    onClick={() => setViewMode('sheet')}
-                  >
-                    <i className="bi bi-file-text me-1"></i> Switch to Formatted Sheet View
-                  </button>
-                  {isReady && user?.can_approve && (
-                    <button
-                      type="button"
-                      className="btn btn-success fw-semibold"
-                      onClick={handleApprove}
-                    >
-                      <i className="bi bi-check2-circle me-1"></i> Approve Pack Now
-                    </button>
-                  )}
-                </div>
-              </div>
-            )}
+            <div style={{ width: '100%', height: '920px' }}>
+              <iframe
+                src={`/admissions/${admission.id}/documents/pdf/${getPdfRouteType(activeDoc)}?inline=1`}
+                style={{ width: '100%', height: '100%', border: 'none' }}
+                title={`Playwright PDF Preview — ${getDocTitle(activeDoc)}`}
+              />
+            </div>
           </div>
         </div>
       ) : (

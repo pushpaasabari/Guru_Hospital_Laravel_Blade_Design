@@ -24,16 +24,7 @@ class AdmissionPolicy
 
     public function update(User $user, Admission $admission): bool
     {
-        if (!$user->is_active || !$user->canEditAdmissions()) {
-            return false;
-        }
-
-        // Approved and generated documents are locked from direct edits unless superseded
-        if (in_array($admission->status, ['approved', 'generated'], true)) {
-            return false;
-        }
-
-        return true;
+        return $user->is_active && $user->canEditAdmissions();
     }
 
     public function submitForReview(User $user, Admission $admission): bool
@@ -53,7 +44,7 @@ class AdmissionPolicy
 
     public function generateDocuments(User $user, Admission $admission): bool
     {
-        return $user->is_active && $user->canGeneratePdfs() && in_array($admission->status, ['approved', 'generated'], true);
+        return $user->is_active && $user->canGeneratePdfs();
     }
 
     public function createRevision(User $user, Admission $admission): bool

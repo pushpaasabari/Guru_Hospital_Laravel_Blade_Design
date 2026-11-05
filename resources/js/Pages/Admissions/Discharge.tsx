@@ -54,16 +54,31 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
     next_step: 'preview',
   });
 
+  const submitWithStep = (step: 'download_ds' | 'download_pack' | 'preview' | 'stay', e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setData('next_step', step);
+    put(`/admissions/${admission.id}/discharge`, {
+      data: {
+        ...data,
+        next_step: step,
+      },
+    });
+  };
+
   const handleSaveOnly = (e: React.FormEvent) => {
-    e.preventDefault();
-    setData('next_step', 'stay');
-    put(`/admissions/${admission.id}/discharge`);
+    submitWithStep('stay', e);
   };
 
   const handleSaveAndPreview = (e: React.FormEvent) => {
-    e.preventDefault();
-    setData('next_step', 'preview');
-    put(`/admissions/${admission.id}/discharge`);
+    submitWithStep('preview', e);
+  };
+
+  const handleSaveAndDownloadDs = (e: React.FormEvent) => {
+    submitWithStep('download_ds', e);
+  };
+
+  const handleSaveAndDownloadPack = (e: React.FormEvent) => {
+    submitWithStep('download_pack', e);
   };
 
   return (
@@ -293,24 +308,65 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
           <Link href={`/admissions/${admission.id}/test-reports`} className="btn btn-outline-secondary">
             <i className="bi bi-arrow-left me-1"></i> Back to Stage 3: Test Reports
           </Link>
-          <div className="d-flex gap-2">
+          <div className="d-flex flex-wrap gap-2">
             <button
               type="button"
               onClick={handleSaveOnly}
               disabled={processing}
-              className="btn btn-outline-primary px-3 py-2 fw-semibold"
+              className="btn btn-outline-secondary px-3 py-2 fw-semibold"
             >
-              Save Stage 4 Changes
+              Save Draft
             </button>
             <button
               type="button"
               onClick={handleSaveAndPreview}
               disabled={processing}
-              className="btn btn-success px-4 py-2 fw-bold d-inline-flex align-items-center gap-2 shadow-sm"
+              className="btn btn-outline-primary px-3 py-2 fw-semibold"
             >
-              <span>Save &amp; Preview Document Pack</span>
-              <i className="bi bi-file-earmark-check"></i>
+              <i className="bi bi-eye me-1"></i> Save &amp; View Dossier
             </button>
+            <div className="btn-group shadow-sm">
+              <button
+                type="button"
+                onClick={handleSaveAndDownloadDs}
+                disabled={processing}
+                className="btn btn-success px-4 py-2 fw-bold d-inline-flex align-items-center gap-2"
+              >
+                <i className="bi bi-file-earmark-arrow-down-fill fs-5"></i>
+                <span>Complete &amp; Download Discharge Summary PDF</span>
+              </button>
+              <button
+                type="button"
+                className="btn btn-success dropdown-toggle dropdown-toggle-split"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                disabled={processing}
+              >
+                <span className="visually-hidden">Toggle PDF Options</span>
+              </button>
+              <ul className="dropdown-menu dropdown-menu-end shadow border-0" style={{ borderRadius: '12px', fontSize: '13px' }}>
+                <li>
+                  <button
+                    type="button"
+                    className="dropdown-item py-2 fw-semibold"
+                    onClick={handleSaveAndDownloadDs}
+                  >
+                    <i className="bi bi-file-earmark-medical text-success me-2"></i>
+                    1. Download Discharge Summary PDF
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    className="dropdown-item py-2 fw-semibold"
+                    onClick={handleSaveAndDownloadPack}
+                  >
+                    <i className="bi bi-collection text-primary me-2"></i>
+                    Complete 3-in-1 Dossier Pack PDF
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
         </div>
       </form>

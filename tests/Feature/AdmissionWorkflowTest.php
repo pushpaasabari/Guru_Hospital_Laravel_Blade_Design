@@ -324,7 +324,40 @@ class AdmissionWorkflowTest extends TestCase
         $this->assertDatabaseHas('admissions', [
             'id' => $admission->id,
             'discharge_condition' => 'Stable, asymptomatic, vitals normal',
+            'status' => 'approved',
         ]);
+    }
+
+    public function test_completing_discharge_step_directly_initiates_pdf_download_without_approval(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'Kavitha S',
+            'uhid' => 'GH-STAGE-04-AUTO',
+            'ip_no' => 'IP-STAGE-04-AUTO',
+            'admission_at' => now()->subDays(2),
+            'diagnosis' => 'Normal Delivery',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+            'status' => 'draft',
+            'created_by' => $this->nurse->id,
+        ]);
+
+        $updateResponse = $this->actingAs($this->nurse)->put(route('admissions.discharge.update', $admission), [
+            'discharge_at' => now()->toDateTimeString(),
+            'discharge_condition' => 'Good, vitals normal',
+            'next_step' => 'download_ds',
+        ]);
+
+        $updateResponse->assertRedirect(route('documents.preview', ['admission' => $admission, 'auto_download' => 'discharge-summary']));
+        $fresh = $admission->fresh();
+        $this->assertEquals('approved', $fresh->status);
+        $this->assertEquals($this->nurse->id, $fresh->approved_by);
+
+        // Can immediately download PDF directly without anyone's approval
+        $pdfResponse = $this->actingAs($this->nurse)
+            ->get(route('documents.pdf', [$admission, 'type' => 'discharge-summary']));
+        $pdfResponse->assertOk();
+        $this->assertEquals('application/pdf', $pdfResponse->headers->get('Content-Type'));
     }
 
     public function test_delivery_admission_saves_and_persists_picme_number(): void

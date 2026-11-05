@@ -30,13 +30,6 @@ class DocumentPackController extends Controller
     {
         $this->authorize('generateDocuments', $admission);
 
-        // Require clinician approval
-        abort_unless(
-            in_array($admission->status, ['approved', 'generated'], true),
-            403,
-            'Clinician approval is required before final PDF generation.'
-        );
-
         $documentType = $type ?: $request->query('type', 'pack');
         $isInline = $request->boolean('inline') || $request->query('mode') === 'inline';
 

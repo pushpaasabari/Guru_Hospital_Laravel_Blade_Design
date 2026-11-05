@@ -230,10 +230,6 @@
 </head>
 <body>
 
-@if($admission->status !== 'approved' && $admission->status !== 'generated')
-    <div class="watermark">DRAFT — NOT OFFICIAL</div>
-@endif
-
 @if($admission->isDelivery())
 <!-- ============================================================ -->
 <!-- DELIVERY / OBSTETRIC DISCHARGE SUMMARY (Mrs. Anitha Format)  -->
