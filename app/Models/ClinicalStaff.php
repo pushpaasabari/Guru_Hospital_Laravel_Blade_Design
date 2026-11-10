@@ -3,14 +3,36 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class ClinicalStaff extends Model
 {
     use HasFactory;
 
+    public const ACTIVE_CACHE_KEY = 'clinical_staff.active';
+
     protected $table = 'clinical_staff';
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => Cache::forget(self::ACTIVE_CACHE_KEY));
+        static::deleted(fn () => Cache::forget(self::ACTIVE_CACHE_KEY));
+    }
+
+    /**
+     * Retrieve active clinical staff list from cache ordered by name.
+     */
+    public static function cachedActive(): Collection
+    {
+        return Cache::remember(
+            self::ACTIVE_CACHE_KEY,
+            now()->addHours(12),
+            fn () => static::active()->orderBy('name')->get()
+        );
+    }
 
     public const ROLES = [
         'consultant_doctor' => 'Consultant Doctor',

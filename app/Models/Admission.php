@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\AdmissionInputNormalizer;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -65,6 +66,49 @@ class Admission extends Model
                 $admission->mrd_no = str_starts_with((string) $admission->uhid, 'MRD-')
                     ? $admission->uhid
                     : 'MRD-' . $admission->uhid;
+            }
+        });
+    }
+
+    /**
+     * Restrict queries to lightweight columns needed for list tables and dashboards.
+     */
+    public function scopeSummaryColumns(Builder $query): Builder
+    {
+        return $query->select([
+            'id',
+            'patient_name',
+            'uhid',
+            'ip_no',
+            'age',
+            'sex',
+            'format',
+            'surgery_type',
+            'status',
+            'admission_at',
+            'discharge_at',
+            'rejection_reason',
+        ]);
+    }
+
+    /**
+     * Apply search filtering across key patient identifiers and optionally consultant.
+     */
+    public function scopeFilterSearch(Builder $query, ?string $search, bool $includeConsultant = false): Builder
+    {
+        $term = trim((string) $search);
+        if ($term === '') {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($term, $includeConsultant) {
+            $like = "%{$term}%";
+            $q->where('patient_name', 'like', $like)
+                ->orWhere('uhid', 'like', $like)
+                ->orWhere('ip_no', 'like', $like);
+
+            if ($includeConsultant) {
+                $q->orWhere('consultant', 'like', $like);
             }
         });
     }

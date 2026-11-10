@@ -84,15 +84,11 @@ class DocumentPackPdfService
      */
     public function download(Admission $admission, string $type = 'pack', bool $asAttachment = true): Response
     {
-        $admission->load(['newborns', 'creator', 'approver']);
+        $admission->loadMissing(['newborns', 'creator', 'approver']);
         $meta = $this->resolveDocumentMetadata($type, $admission);
 
-        // Ensure private directory exists
-        $storageDirectory = 'documents/' . date('Y/m');
-        Storage::disk('local')->makeDirectory($storageDirectory);
-
         $fileName = $meta['fileName'];
-        $storagePath = "{$storageDirectory}/{$fileName}";
+        $storagePath = 'documents/' . date('Y/m') . "/{$fileName}";
 
         $output = $this->generateWithPlaywright($admission, $type);
 

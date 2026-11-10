@@ -24,31 +24,26 @@ class AdmissionController extends Controller
     {
         $this->authorize('viewAny', Admission::class);
 
-        $query = Admission::with(['creator', 'approver', 'newborns'])
+        $query = Admission::query()
+            ->summaryColumns()
+            ->filterSearch($request->input('search'))
             ->latest('id');
-
-        if ($search = $request->input('search')) {
-            $query->where(function ($q) use ($search) {
-                $q->where('patient_name', 'like', "%{$search}%")
-                  ->orWhere('uhid', 'like', "%{$search}%")
-                  ->orWhere('ip_no', 'like', "%{$search}%");
-            });
-        }
 
         if ($status = $request->input('status')) {
             $query->where('status', $status);
         }
 
         $admissions = $query->paginate(20)->withQueryString();
+        $filters = $request->only(['search', 'status']);
 
-        return Inertia::render('Admissions/Index', compact('admissions'));
+        return Inertia::render('Admissions/Index', compact('admissions', 'filters'));
     }
 
     public function create(): Response
     {
         $this->authorize('create', Admission::class);
-        $clinicalStaff = ClinicalStaff::active()->orderBy('name')->get();
-        $anesthesiaTypes = AnesthesiaType::active()->get();
+        $clinicalStaff = ClinicalStaff::cachedActive();
+        $anesthesiaTypes = AnesthesiaType::cachedActive();
 
         return Inertia::render('Admissions/Create', compact('clinicalStaff', 'anesthesiaTypes'));
     }
@@ -59,23 +54,13 @@ class AdmissionController extends Controller
         $newborns = $validated['newborns'] ?? [];
         unset($validated['newborns']);
 
-        if (empty($validated['assisted_by'])) {
-            $validated['assisted_by'] = $validated['assisted_surgeon'] ?? ($validated['staff_nurse'] ?? null);
-        }
-
+        $validated = $this->resolveAssistedBy($validated);
         $validated['created_by'] = $request->user()->id;
         $validated['status'] = 'draft';
 
         $admission = DB::transaction(function () use ($validated, $newborns) {
             $admission = Admission::create($validated);
-
-            if ($admission->isDelivery()) {
-                foreach ($newborns as $newborn) {
-                    if (collect($newborn)->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty()) {
-                        $admission->newborns()->create($newborn);
-                    }
-                }
-            }
+            $this->syncNewborns($admission, $newborns, false);
 
             AuditService::log(
                 'admission.created',
@@ -111,8 +96,8 @@ class AdmissionController extends Controller
     {
         $this->authorize('update', $admission);
         $admission->load('newborns');
-        $clinicalStaff = ClinicalStaff::active()->orderBy('name')->get();
-        $anesthesiaTypes = AnesthesiaType::active()->get();
+        $clinicalStaff = ClinicalStaff::cachedActive();
+        $anesthesiaTypes = AnesthesiaType::cachedActive();
 
         return Inertia::render('Admissions/Edit', compact('admission', 'clinicalStaff', 'anesthesiaTypes'));
     }
@@ -123,26 +108,12 @@ class AdmissionController extends Controller
         $newborns = $validated['newborns'] ?? [];
         unset($validated['newborns']);
 
-        if (empty($validated['assisted_by'])) {
-            $validated['assisted_by'] = $validated['assisted_surgeon'] ?? ($validated['staff_nurse'] ?? null);
-        }
-
+        $validated = $this->resolveAssistedBy($validated);
         $oldData = $admission->toArray();
 
         DB::transaction(function () use ($admission, $validated, $newborns, $oldData) {
             $admission->update($validated);
-
-            // Synchronize newborns if delivery
-            if ($admission->isDelivery()) {
-                $admission->newborns()->delete();
-                foreach ($newborns as $newborn) {
-                    if (collect($newborn)->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty()) {
-                        $admission->newborns()->create($newborn);
-                    }
-                }
-            } else {
-                $admission->newborns()->delete();
-            }
+            $this->syncNewborns($admission, $newborns);
 
             AuditService::log(
                 'admission.updated',
@@ -150,7 +121,7 @@ class AdmissionController extends Controller
                 $admission->id,
                 "Admission updated for {$admission->patient_name}",
                 $oldData,
-                $admission->fresh()->toArray()
+                $admission->toArray()
             );
         });
 
@@ -172,8 +143,8 @@ class AdmissionController extends Controller
     {
         $this->authorize('update', $admission);
         $admission->load('newborns');
-        $clinicalStaff = ClinicalStaff::active()->orderBy('name')->get();
-        $anesthesiaTypes = AnesthesiaType::active()->get();
+        $clinicalStaff = ClinicalStaff::cachedActive();
+        $anesthesiaTypes = AnesthesiaType::cachedActive();
 
         return Inertia::render('Admissions/Surgery', compact('admission', 'clinicalStaff', 'anesthesiaTypes'));
     }
@@ -184,25 +155,12 @@ class AdmissionController extends Controller
         $newborns = $validated['newborns'] ?? [];
         unset($validated['newborns']);
 
-        if (empty($validated['assisted_by'])) {
-            $validated['assisted_by'] = $validated['assisted_surgeon'] ?? ($validated['staff_nurse'] ?? null);
-        }
-
+        $validated = $this->resolveAssistedBy($validated);
         $oldData = $admission->toArray();
 
         DB::transaction(function () use ($admission, $validated, $newborns, $oldData) {
             $admission->update($validated);
-
-            if ($admission->isDelivery()) {
-                $admission->newborns()->delete();
-                foreach ($newborns as $newborn) {
-                    if (collect($newborn)->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty()) {
-                        $admission->newborns()->create($newborn);
-                    }
-                }
-            } else {
-                $admission->newborns()->delete();
-            }
+            $this->syncNewborns($admission, $newborns);
 
             AuditService::log(
                 'admission.surgery_updated',
@@ -210,7 +168,7 @@ class AdmissionController extends Controller
                 $admission->id,
                 "Surgery & OT details updated for {$admission->patient_name}",
                 $oldData,
-                $admission->fresh()->toArray()
+                $admission->toArray()
             );
         });
 
@@ -247,7 +205,7 @@ class AdmissionController extends Controller
             $admission->id,
             "Test reports / investigations updated for {$admission->patient_name}",
             $oldData,
-            $admission->fresh()->toArray()
+            $admission->toArray()
         );
 
         $nextStep = $request->input('next_step', 'discharge');
@@ -267,7 +225,7 @@ class AdmissionController extends Controller
     public function editDischarge(Admission $admission): Response
     {
         $this->authorize('update', $admission);
-        $clinicalStaff = ClinicalStaff::active()->orderBy('name')->get();
+        $clinicalStaff = ClinicalStaff::cachedActive();
         return Inertia::render('Admissions/Discharge', compact('admission', 'clinicalStaff'));
     }
 
@@ -294,7 +252,7 @@ class AdmissionController extends Controller
             $admission->id,
             "Discharge details completed for {$admission->patient_name} (Auto-approved, ready for direct download)",
             $oldData,
-            $admission->fresh()->toArray()
+            $admission->toArray()
         );
 
         $nextStep = $request->input('next_step', 'download_ds');
@@ -360,5 +318,31 @@ class AdmissionController extends Controller
 
         return redirect()->route('admissions.edit', $admission)
             ->with('status', 'New revision created. You may now modify the clinical records and submit for re-approval.');
+    }
+
+    private function resolveAssistedBy(array $validated): array
+    {
+        if (empty($validated['assisted_by'])) {
+            $validated['assisted_by'] = $validated['assisted_surgeon'] ?? ($validated['staff_nurse'] ?? null);
+        }
+
+        return $validated;
+    }
+
+    private function syncNewborns(Admission $admission, array $newborns, bool $replaceExisting = true): void
+    {
+        if ($replaceExisting) {
+            $admission->newborns()->delete();
+        }
+
+        if (!$admission->isDelivery()) {
+            return;
+        }
+
+        foreach ($newborns as $newborn) {
+            if (collect($newborn)->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty()) {
+                $admission->newborns()->create($newborn);
+            }
+        }
     }
 }
