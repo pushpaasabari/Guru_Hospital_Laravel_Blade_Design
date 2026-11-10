@@ -152,5 +152,37 @@ class DocumentPackPdfTest extends TestCase
         $this->assertStringNotContainsString('Dr. Karthik Rajan MS, MCh', $html);
         $this->assertStringContainsString('Dr. Ambika M.S (O&amp;G)', $html);
     }
+
+    public function test_investigations_uses_same_document_font_across_all_formats(): void
+    {
+        $formats = ['cmchistn', 'employee', 'private'];
+        $types = ['delivery', 'other'];
+
+        foreach ($formats as $format) {
+            foreach ($types as $type) {
+                $admission = Admission::create([
+                    'patient_name' => 'Font Check Patient',
+                    'uhid' => "FONT-{$format}-{$type}",
+                    'ip_no' => "IP-FONT-{$format}-{$type}",
+                    'age' => '25',
+                    'sex' => 'Female',
+                    'admission_at' => now()->subDays(2),
+                    'discharge_at' => now(),
+                    'diagnosis' => 'Test',
+                    'format' => $format,
+                    'surgery_type' => $type,
+                    'investigations' => "Hb : 12.9 mgs %\nBG : O positive",
+                    'created_by' => $this->doctor->id,
+                    'approved_by' => $this->doctor->id,
+                    'approved_at' => now(),
+                    'status' => 'approved',
+                ]);
+
+                $html = view("documents.discharge-summaries.{$format}.{$type}", ['admission' => $admission])->render();
+                $this->assertStringContainsString('INVESTIGATIONS', $html);
+                $this->assertStringNotContainsString('rounded font-monospace', $html);
+            }
+        }
+    }
 }
 

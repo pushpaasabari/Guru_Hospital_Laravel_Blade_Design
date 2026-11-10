@@ -88,7 +88,7 @@
     @if($admission->investigations)
     <div class="mb-3">
         <strong>INVESTIGATIONS :</strong>
-        <div class="bg-light p-2 border rounded font-monospace small">
+        <div class="bg-light p-2 border rounded">
             @if(is_array($admission->investigations))
                 <div class="row g-1">
                     @foreach($admission->investigations as $test => $val)
