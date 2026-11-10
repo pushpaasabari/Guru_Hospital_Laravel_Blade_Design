@@ -118,5 +118,39 @@ class DocumentPackPdfTest extends TestCase
         $response = $this->get(route('documents.pdf', $this->approvedAdmission));
         $response->assertRedirect(route('login'));
     }
+
+    public function test_discharge_summary_uses_uppercase_guru_hospital_and_removes_prepared_by_and_resident_column(): void
+    {
+        $deliveryAdmission = Admission::create([
+            'patient_name' => 'test',
+            'uhid' => '2026/0005',
+            'ip_no' => '2026/0005',
+            'age' => '24',
+            'sex' => 'Female',
+            'admission_at' => now()->subDays(3),
+            'discharge_at' => now(),
+            'consultant' => 'Dr. Ambika M.S (O&G)',
+            'department' => 'Obstetrics & Gynaecology',
+            'diagnosis' => 'Twins / Emergency LSCS',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+            'created_by' => $this->doctor->id,
+            'approved_by' => $this->doctor->id,
+            'approved_at' => now(),
+            'status' => 'approved',
+        ]);
+
+        $pdfService = app(\App\Services\DocumentPackPdfService::class);
+        $meta = $pdfService->resolveDocumentMetadata('discharge-summary', $deliveryAdmission);
+
+        $this->assertEquals('discharge_summary', $meta['type']);
+        $this->assertStringStartsWith('GURU HOSPITAL', $meta['headerTitle']);
+
+        $html = view('pdf.discharge-summary', ['admission' => $deliveryAdmission])->render();
+        $this->assertStringContainsString('GURU HOSPITAL - Discharge Summary (IP: 2026/0005) - test', $html);
+        $this->assertStringNotContainsString('Prepared by', $html);
+        $this->assertStringNotContainsString('Dr. Karthik Rajan MS, MCh', $html);
+        $this->assertStringContainsString('Dr. Ambika M.S (O&amp;G)', $html);
+    }
 }
 

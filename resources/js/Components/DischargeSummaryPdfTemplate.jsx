@@ -623,15 +623,7 @@ export default function DischargeSummaryPdfTemplate({ data }) {
                     <table className="sig-table">
                         <tbody>
                             <tr>
-                                <td style={{ width: '28%' }}>
-                                    <div style={{ fontSize: '7.5pt', color: '#475569', fontWeight: 'bold' }}>Prepared by</div>
-                                    <div style={{ fontSize: '9pt', fontWeight: 'bold', marginTop: '2px' }}>Staff Nurse Anitha</div>
-                                </td>
-                                <td style={{ width: '44%' }}>
-                                    <div style={{ fontSize: '9pt', fontWeight: 'bold' }}>Dr. Karthik Rajan MS, MCh</div>
-                                    <div style={{ fontSize: '7.5pt', color: '#475569' }}>Medical Officer / Resident Consultant Surgeon / O&amp;G</div>
-                                </td>
-                                <td style={{ width: '28%' }}>
+                                <td style={{ width: '100%', textAlign: 'right' }}>
                                     <div style={{ fontSize: '9pt', fontWeight: 'bold' }}>{consultant}</div>
                                     <div style={{ fontSize: '7.5pt', color: '#475569' }}>Reg: TNMC-64821</div>
                                 </td>
@@ -642,7 +634,7 @@ export default function DischargeSummaryPdfTemplate({ data }) {
                     {/* Running Footer Page 2 */}
                     <div className="running-footer-p2">
                         <div style={{ display: 'table-cell', textAlign: 'left' }}>
-                            Guru Hospital - Discharge Summary (IP: {ip_no}) - {patient_name}
+                            GURU HOSPITAL - Discharge Summary (IP: {ip_no}) - {patient_name}
                         </div>
                         <div style={{ display: 'table-cell', textAlign: 'right' }}>
                             Page 2 of 2

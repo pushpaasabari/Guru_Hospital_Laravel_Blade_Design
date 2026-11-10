@@ -432,16 +432,8 @@
     </div>
 
     {{-- Signatures --}}
-    <div class="ds-sig-row">
-        <div style="width: 28%;">
-            <div style="font-size: 7.5pt; color: #475569; font-weight: bold;">Prepared by</div>
-            <div style="font-size: 9pt; color: #000000; margin-top: 2px;">{{ $admission->handover_name ?: ($admission->creator?->name ?? 'Staff Nurse') }}</div>
-        </div>
-        <div style="width: 44%;">
-            <div style="font-size: 9pt; font-weight: bold; color: #000000;">Dr. Karthik Rajan MS, MCh</div>
-            <div style="font-size: 7.5pt; color: #475569; margin-top: 1px;">Medical Officer / Resident Consultant Surgeon / O&G</div>
-        </div>
-        <div style="width: 28%; text-align: right;">
+    <div class="ds-sig-row" style="justify-content: flex-end;">
+        <div style="text-align: right;">
             <div style="font-size: 9pt; font-weight: bold; color: #000000;">{{ $admission->consultant ?: ($admission->surgeon ?: 'Dr. Ambika MS OG') }}</div>
             <div style="font-size: 7.5pt; color: #475569; margin-top: 1px;">Reg: {{ $admission->approver?->doctor_reg_no ?? 'TNMC-64821' }}</div>
         </div>

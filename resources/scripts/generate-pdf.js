@@ -6,7 +6,7 @@ async function main() {
   const args = process.argv.slice(2);
   let inputFile = null;
   let outputFile = null;
-  let headerTitle = 'Guru Hospital — Confidential Medical Record';
+  let headerTitle = 'GURU HOSPITAL — Confidential Medical Record';
   let docType = 'pack';
 
   for (let i = 0; i < args.length; i++) {
@@ -61,7 +61,7 @@ async function main() {
   // Load content
   await page.setContent(htmlContent, { waitUntil: 'load' });
 
-  const isDischargeSummary = (docType === 'discharge_summary');
+  const isDischargeSummary = (docType === 'discharge_summary' || docType === 'discharge-summary');
 
   if (isDischargeSummary) {
     // Exact 2-page A4 discharge summary layout: CSS controls @page and zero margin injection

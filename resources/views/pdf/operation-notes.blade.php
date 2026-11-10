@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Guru Hospital — Operation Theatre Notes — {{ $admission->patient_name }} ({{ $admission->ip_no }})</title>
+    <title>GURU HOSPITAL — Operation Theatre Notes — {{ $admission->patient_name }} ({{ $admission->ip_no }})</title>
     <style>
         @font-face {
             font-family: 'Nirmala';

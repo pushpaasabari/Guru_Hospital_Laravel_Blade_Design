@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Guru Hospital — {{ $admission->patient_name }} ({{ $admission->ip_no }})</title>
+    <title>GURU HOSPITAL — {{ $admission->patient_name }} ({{ $admission->ip_no }})</title>
     <style>
         @font-face {
             font-family: 'Nirmala';
@@ -613,6 +613,13 @@
         </div>
     </div>
 
+    @if(!empty($adviceData['tamil_note']))
+        <div style="margin-top: 4px; margin-bottom: 5px; padding: 4px 8px; background: #f8fafc; border: 1px solid #111; border-left: 3px solid #111; font-family: 'Nirmala UI', 'Nirmala', 'Latha', Arial, sans-serif; font-size: 8.2pt; line-height: 1.35; color: #111;">
+            <strong style="font-size: 7.8pt; display: block; margin-bottom: 1px;">ஸ்டெண்ட் குறிப்பு (STENT REMOVAL NOTICE):</strong>
+            {{ $adviceData['tamil_note'] }}
+        </div>
+    @endif
+
     {{-- When to Contact / Emergency Box --}}
     <div class="emergency-container">
         <div style="margin-bottom: 3px;">
@@ -627,15 +634,7 @@
 
     {{-- Signatures --}}
     <div class="sig-container">
-        <div class="sig-cell" style="width: 28%;">
-            <div style="font-size: 7.5pt; color: #475569; font-weight: bold;">Prepared by</div>
-            <div style="font-size: 9pt; color: #000000; margin-top: 2px;">{{ $admission->handover_name ?: ($admission->creator?->name ?? 'Staff Nurse') }}</div>
-        </div>
-        <div class="sig-cell" style="width: 44%; text-align: left;">
-            <div style="font-size: 9pt; font-weight: bold; color: #000000;">Dr. Karthik Rajan MS, MCh</div>
-            <div style="font-size: 7.5pt; color: #475569; margin-top: 1px;">Medical Officer / Resident Consultant Surgeon / O&G</div>
-        </div>
-        <div class="sig-cell" style="width: 28%; text-align: left;">
+        <div class="sig-cell" style="width: 100%; text-align: right;">
             <div style="font-size: 9pt; font-weight: bold; color: #000000;">{{ $admission->consultant ?: ($admission->surgeon ?: 'Dr. Ambika MS OG') }}</div>
             <div style="font-size: 7.5pt; color: #475569; margin-top: 1px;">Reg: {{ $admission->approver?->doctor_reg_no ?? 'TNMC-64821' }}</div>
         </div>

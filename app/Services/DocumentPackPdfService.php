@@ -45,7 +45,7 @@ class DocumentPackPdfService
                 'view' => 'pdf.discharge-summary',
                 'title' => 'Discharge Summary',
                 'fileName' => "{$safeUhid}_{$safeName}_Discharge_Summary.pdf",
-                'headerTitle' => "Guru Hospital — Discharge Summary (IP: {$admission->ip_no})",
+                'headerTitle' => "GURU HOSPITAL — Discharge Summary (IP: {$admission->ip_no})",
             ];
         }
 
@@ -55,7 +55,7 @@ class DocumentPackPdfService
                 'view' => 'pdf.operation-notes',
                 'title' => 'Operation Theatre Notes',
                 'fileName' => "{$safeUhid}_{$safeName}_{$safeOpType}.pdf",
-                'headerTitle' => "Guru Hospital — Operation Theatre Notes (IP: {$admission->ip_no})",
+                'headerTitle' => "GURU HOSPITAL — Operation Theatre Notes (IP: {$admission->ip_no})",
             ];
         }
 
@@ -65,7 +65,7 @@ class DocumentPackPdfService
                 'view' => 'pdf.mrd-form',
                 'title' => 'MRD Inpatient Form',
                 'fileName' => "Guru_Hospital_MRD_Form_{$safeIp}.pdf",
-                'headerTitle' => "Guru Hospital — MRD Inpatient Form (IP: {$admission->ip_no})",
+                'headerTitle' => "GURU HOSPITAL — MRD Inpatient Form (IP: {$admission->ip_no})",
             ];
         }
 
@@ -74,7 +74,7 @@ class DocumentPackPdfService
             'view' => 'pdf.pack',
             'title' => 'Complete Document Dossier Pack',
             'fileName' => "Guru_Hospital_Discharge_Pack_{$safeIp}.pdf",
-            'headerTitle' => "Guru Hospital — Confidential Medical Record (IP: {$admission->ip_no})",
+            'headerTitle' => "GURU HOSPITAL — Confidential Medical Record (IP: {$admission->ip_no})",
         ];
     }
 
@@ -193,7 +193,7 @@ class DocumentPackPdfService
                 '--input', $tempHtml,
                 '--output', $tempPdf,
                 '--title', $headerTitle,
-                '--type', $type,
+                '--type', $meta['type'],
             ], null, $env);
 
             $process->setTimeout(30);
@@ -238,7 +238,7 @@ class DocumentPackPdfService
 
         $canvas = $domPdf->getCanvas();
 
-        if ($type !== self::TYPE_DISCHARGE_SUMMARY) {
+        if ($meta['type'] !== self::TYPE_DISCHARGE_SUMMARY) {
             $font = $domPdf->getFontMetrics()->getFont('DejaVu Sans', 'normal');
             $size = 9;
             $color = [0.4, 0.4, 0.4];

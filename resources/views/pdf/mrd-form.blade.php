@@ -3,7 +3,7 @@
 
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>Guru Hospital — Medical Records Department — {{ $admission->patient_name }} ({{ $admission->ip_no }})</title>
+    <title>GURU HOSPITAL — Medical Records Department — {{ $admission->patient_name }} ({{ $admission->ip_no }})</title>
     <style>
         @page {
             size: A4 portrait;

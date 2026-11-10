@@ -550,23 +550,13 @@ function DischargeSummaryPdfTemplate({ data }) {
             /* @__PURE__ */ jsx("span", { style: { fontSize: "9.8pt", fontWeight: "bold", color: "#000000", display: "inline-block", verticalAlign: "middle" }, children: emergency_contacts })
           ] })
         ] }),
-        /* @__PURE__ */ jsx("table", { className: "sig-table", children: /* @__PURE__ */ jsx("tbody", { children: /* @__PURE__ */ jsxs("tr", { children: [
-          /* @__PURE__ */ jsxs("td", { style: { width: "28%" }, children: [
-            /* @__PURE__ */ jsx("div", { style: { fontSize: "7.5pt", color: "#475569", fontWeight: "bold" }, children: "Prepared by" }),
-            /* @__PURE__ */ jsx("div", { style: { fontSize: "9pt", fontWeight: "bold", marginTop: "2px" }, children: "Staff Nurse Anitha" })
-          ] }),
-          /* @__PURE__ */ jsxs("td", { style: { width: "44%" }, children: [
-            /* @__PURE__ */ jsx("div", { style: { fontSize: "9pt", fontWeight: "bold" }, children: "Dr. Karthik Rajan MS, MCh" }),
-            /* @__PURE__ */ jsx("div", { style: { fontSize: "7.5pt", color: "#475569" }, children: "Medical Officer / Resident Consultant Surgeon / O&G" })
-          ] }),
-          /* @__PURE__ */ jsxs("td", { style: { width: "28%" }, children: [
-            /* @__PURE__ */ jsx("div", { style: { fontSize: "9pt", fontWeight: "bold" }, children: consultant }),
-            /* @__PURE__ */ jsx("div", { style: { fontSize: "7.5pt", color: "#475569" }, children: "Reg: TNMC-64821" })
-          ] })
-        ] }) }) }),
+        /* @__PURE__ */ jsx("table", { className: "sig-table", children: /* @__PURE__ */ jsx("tbody", { children: /* @__PURE__ */ jsx("tr", { children: /* @__PURE__ */ jsxs("td", { style: { width: "100%", textAlign: "right" }, children: [
+          /* @__PURE__ */ jsx("div", { style: { fontSize: "9pt", fontWeight: "bold" }, children: consultant }),
+          /* @__PURE__ */ jsx("div", { style: { fontSize: "7.5pt", color: "#475569" }, children: "Reg: TNMC-64821" })
+        ] }) }) }) }),
         /* @__PURE__ */ jsxs("div", { className: "running-footer-p2", children: [
           /* @__PURE__ */ jsxs("div", { style: { display: "table-cell", textAlign: "left" }, children: [
-            "Guru Hospital - Discharge Summary (IP: ",
+            "GURU HOSPITAL - Discharge Summary (IP: ",
             ip_no,
             ") - ",
             patient_name
