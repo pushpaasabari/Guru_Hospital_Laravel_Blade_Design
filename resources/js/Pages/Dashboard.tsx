@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AppLayout from '../Layouts/AppLayout';
 import Pagination from '../Components/Pagination';
+import ActionDropdown, {
+  buildDocumentPreviewMenuItems,
+  buildPdfDownloadMenuItems,
+} from '../Components/ActionDropdown';
 
 interface AdmissionItem {
   id: number;
@@ -313,102 +317,39 @@ export default function Dashboard({ counts, admissions, filters = {}, auth }: Pr
                     </td>
                     <td className="text-end">
                       <div className="btn-group btn-group-sm">
-                        <div className="btn-group btn-group-sm">
-                          <Link href={`/admissions/${item.id}/documents/preview`} className="btn btn-outline-secondary">
-                            <i className="bi bi-eye me-1"></i> Review
-                          </Link>
-                          <button
-                            type="button"
-                            className="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                            title="Preview separate documents"
-                          >
-                            <span className="visually-hidden">Preview options</span>
-                          </button>
-                          <ul className="dropdown-menu shadow-sm border-0" style={{ fontSize: '12px' }}>
-                            <li>
-                              <h6 className="dropdown-header text-uppercase fw-bold" style={{ fontSize: '10px' }}>
-                                Separate Document Previews
-                              </h6>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item py-1" href={`/admissions/${item.id}/documents/preview?doc=discharge_summary`}>
-                                <i className="bi bi-file-earmark-text text-primary me-2"></i>1. Discharge Summary
-                              </Link>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item py-1" href={`/admissions/${item.id}/documents/preview?doc=operation_notes`}>
-                                <i className="bi bi-journal-medical text-success me-2"></i>2. Operation Theatre Notes
-                              </Link>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item py-1" href={`/admissions/${item.id}/documents/preview?doc=mrd_form`}>
-                                <i className="bi bi-file-earmark-check text-warning me-2"></i>3. MRD Inpatient Form
-                              </Link>
-                            </li>
-                            <li><hr className="dropdown-divider my-1" /></li>
-                            <li>
-                              <Link className="dropdown-item py-1 fw-semibold" href={`/admissions/${item.id}/documents/preview?doc=all`}>
-                                <i className="bi bi-collection text-dark me-2"></i>All Documents (Pack)
-                              </Link>
-                            </li>
-                            <li>
-                              <Link className="dropdown-item py-1 text-danger fw-semibold" href={`/admissions/${item.id}/documents/preview?mode=pdf`}>
-                                <i className="bi bi-file-earmark-pdf-fill text-danger me-2"></i>Playwright PDF Preview
-                              </Link>
-                            </li>
-                          </ul>
-                        </div>
+                        <ActionDropdown
+                          toggleTitle="Preview separate documents"
+                          fontSize="12px"
+                          items={buildDocumentPreviewMenuItems(item.id)}
+                          primaryAction={
+                            <Link href={`/admissions/${item.id}/documents/preview`} prefetch className="btn btn-outline-secondary">
+                              <i className="bi bi-eye me-1"></i> Review
+                            </Link>
+                          }
+                        />
                         {auth.user?.can_edit && (item.status === 'draft' || item.status === 'returned_for_correction') && (
-                          <Link href={`/admissions/${item.id}/edit`} className="btn btn-outline-secondary">
+                          <Link href={`/admissions/${item.id}/edit`} prefetch className="btn btn-outline-secondary">
                             <i className="bi bi-pencil"></i>
                           </Link>
                         )}
                         {(item.status === 'approved' || item.status === 'generated') && (
-                          <div className="btn-group btn-group-sm">
-                            <a
-                              href={`/admissions/${item.id}/documents/pdf/discharge-summary`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="btn btn-outline-primary"
-                              title="Download Discharge Summary PDF"
-                            >
-                              <i className="bi bi-file-earmark-pdf"></i>
-                            </a>
-                            <button
-                              type="button"
-                              className="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
-                              data-bs-toggle="dropdown"
-                              aria-expanded="false"
-                              title="Download Separate PDFs"
-                            >
-                              <span className="visually-hidden">Toggle PDF Options</span>
-                            </button>
-                            <ul className="dropdown-menu dropdown-menu-end shadow-sm border-0" style={{ fontSize: '12px' }}>
-                              <li>
-                                <a className="dropdown-item py-1" href={`/admissions/${item.id}/documents/pdf/discharge-summary`} target="_blank" rel="noreferrer">
-                                  <i className="bi bi-file-earmark-text text-primary me-2"></i>1. Discharge Summary
-                                </a>
-                              </li>
-                              <li>
-                                <a className="dropdown-item py-1" href={`/admissions/${item.id}/documents/pdf/operation-notes`} target="_blank" rel="noreferrer">
-                                  <i className="bi bi-journal-medical text-success me-2"></i>2. Operation Theatre Notes
-                                </a>
-                              </li>
-                              <li>
-                                <a className="dropdown-item py-1" href={`/admissions/${item.id}/documents/pdf/mrd-form`} target="_blank" rel="noreferrer">
-                                  <i className="bi bi-file-earmark-check text-warning me-2"></i>3. MRD Inpatient Form
-                                </a>
-                              </li>
-                              <li><hr className="dropdown-divider my-1" /></li>
-                              <li>
-                                <a className="dropdown-item py-1 fw-semibold" href={`/admissions/${item.id}/documents/pdf/pack`} target="_blank" rel="noreferrer">
-                                  <i className="bi bi-collection text-dark me-2"></i>Complete 3-in-1 Pack
-                                </a>
-                              </li>
-                            </ul>
-                          </div>
+                          <ActionDropdown
+                            toggleClassName="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
+                            toggleTitle="Download Separate PDFs"
+                            fontSize="12px"
+                            items={buildPdfDownloadMenuItems(item.id)}
+                            primaryAction={
+                              <a
+                                href={`/admissions/${item.id}/documents/pdf/discharge-summary`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-outline-primary"
+                                title="Download Discharge Summary PDF"
+                              >
+                                <i className="bi bi-file-earmark-pdf"></i>
+                              </a>
+                            }
+                          />
                         )}
                       </div>
                     </td>

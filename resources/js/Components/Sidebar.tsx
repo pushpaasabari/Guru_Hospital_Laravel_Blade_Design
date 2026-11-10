@@ -125,6 +125,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
 
               <Link
                 href="/dashboard"
+                prefetch
                 className={`fg-sidebar-link ${isLinkActive('/dashboard', true) ? 'active' : ''}`}
                 onClick={closeMobile}
                 title="Dashboard"
@@ -135,6 +136,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
 
               <Link
                 href="/admissions"
+                prefetch
                 className={`fg-sidebar-link ${isLinkActive('/admissions') ? 'active' : ''}`}
                 onClick={closeMobile}
                 title="Admissions Archive"
@@ -146,6 +148,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
               {user?.can_edit && (
                 <Link
                   href="/admissions/create"
+                  prefetch
                   className={`fg-sidebar-link ${isLinkActive('/admissions/create', true) ? 'active' : ''}`}
                   onClick={closeMobile}
                   title="New Admission"
@@ -165,6 +168,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                   <>
                     <Link
                       href="/templates"
+                      prefetch
                       className={`fg-sidebar-link ${isLinkActive('/templates') ? 'active' : ''}`}
                       onClick={closeMobile}
                       title="Document Templates"
@@ -175,6 +179,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
 
                     <Link
                       href="/clinical-staff"
+                      prefetch
                       className={`fg-sidebar-link ${isLinkActive('/clinical-staff') ? 'active' : ''}`}
                       onClick={closeMobile}
                       title="Clinical Staff & Doctors"
@@ -185,6 +190,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
 
                     <Link
                       href="/anesthesia-types"
+                      prefetch
                       className={`fg-sidebar-link ${isLinkActive('/anesthesia-types') ? 'active' : ''}`}
                       onClick={closeMobile}
                       title="Anesthesia Types"
@@ -195,6 +201,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
 
                     <Link
                       href="/users"
+                      prefetch
                       className={`fg-sidebar-link ${isLinkActive('/users') ? 'active' : ''}`}
                       onClick={closeMobile}
                       title="Staff Users Management"
@@ -208,6 +215,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                 {user.can_view_audit && (
                   <Link
                     href="/audit-logs"
+                    prefetch
                     className={`fg-sidebar-link ${isLinkActive('/audit-logs') ? 'active' : ''}`}
                     onClick={closeMobile}
                     title="Audit Trail Logs"

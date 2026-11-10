@@ -113,6 +113,28 @@ class Admission extends Model
         });
     }
 
+    /**
+     * Eager-load document preview/history relations without pulling heavy revision JSON snapshots.
+     */
+    public function loadDocumentRelations(bool $withNewborns = true): self
+    {
+        $relations = [
+            'approvals.performer:id,name,role',
+            'revisions' => fn ($q) => $q->select([
+                'id', 'admission_id', 'revision_number', 'approved_by', 'approved_at', 'created_at', 'pdf_storage_path',
+            ]),
+            'revisions.approver:id,name,role',
+            'creator:id,name,role',
+            'approver:id,name,role,doctor_reg_no',
+        ];
+
+        if ($withNewborns) {
+            array_unshift($relations, 'newborns');
+        }
+
+        return $this->load($relations);
+    }
+
     public function newborns(): HasMany
     {
         return $this->hasMany(Newborn::class);

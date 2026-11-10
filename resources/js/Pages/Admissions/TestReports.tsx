@@ -123,48 +123,46 @@ export default function AdmissionsTestReports({ admission }: Props) {
   const [extraTests, setExtraTests] = useState<ExtraTest[]>(initial.extra);
   const [showRawEditor, setShowRawEditor] = useState<boolean>(false);
 
-  const { data, setData, put, processing, errors } = useForm({
+  const { data, setData, put, transform, processing, errors } = useForm({
     investigations: admission.investigations || serializeInvestigations(initial.core, initial.extra),
     next_step: 'discharge',
   });
 
-  const syncState = (newCore: LabValues, newExtra: ExtraTest[]) => {
-    setCoreValues(newCore);
-    setExtraTests(newExtra);
-    const serialized = serializeInvestigations(newCore, newExtra);
-    setData('investigations', serialized);
-  };
-
   const updateCore = (key: keyof LabValues, val: string) => {
-    const updated = { ...coreValues, [key]: val };
-    syncState(updated, extraTests);
+    setCoreValues((prev) => ({ ...prev, [key]: val }));
   };
 
   const setAllViralNegative = () => {
-    const updated = {
-      ...coreValues,
+    setCoreValues((prev) => ({
+      ...prev,
       hiv: 'Negative',
       hcv: 'Negative',
       vdrl: 'Negative',
       hbsag: 'Negative',
-    };
-    syncState(updated, extraTests);
+    }));
   };
 
   const addExtraTest = (name = '', value = '') => {
-    const updated = [...extraTests, { name, value }];
-    syncState(coreValues, updated);
+    setExtraTests((prev) => [...prev, { name, value }]);
   };
 
   const updateExtraTest = (idx: number, field: 'name' | 'value', val: string) => {
-    const updated = [...extraTests];
-    updated[idx] = { ...updated[idx], [field]: val };
-    syncState(coreValues, updated);
+    setExtraTests((prev) => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: val };
+      return updated;
+    });
   };
 
   const removeExtraTest = (idx: number) => {
-    const updated = extraTests.filter((_, i) => i !== idx);
-    syncState(coreValues, updated);
+    setExtraTests((prev) => prev.filter((_, i) => i !== idx));
+  };
+
+  const toggleRawEditor = () => {
+    if (!showRawEditor) {
+      setData('investigations', serializeInvestigations(coreValues, extraTests));
+    }
+    setShowRawEditor((prev) => !prev);
   };
 
   const handleRawChange = (raw: string) => {
@@ -174,17 +172,21 @@ export default function AdmissionsTestReports({ admission }: Props) {
     setExtraTests(parsed.extra);
   };
 
-  const handleSaveOnly = (e: React.FormEvent) => {
+  const submitStage = (step: 'stay' | 'discharge', e: React.FormEvent) => {
     e.preventDefault();
-    setData('next_step', 'stay');
+    transform((current) => ({
+      ...current,
+      investigations: showRawEditor
+        ? current.investigations
+        : serializeInvestigations(coreValues, extraTests),
+      next_step: step,
+    }));
     put(`/admissions/${admission.id}/test-reports`);
   };
 
-  const handleSaveAndNext = (e: React.FormEvent) => {
-    e.preventDefault();
-    setData('next_step', 'discharge');
-    put(`/admissions/${admission.id}/test-reports`);
-  };
+  const handleSaveOnly = (e: React.FormEvent) => submitStage('stay', e);
+
+  const handleSaveAndNext = (e: React.FormEvent) => submitStage('discharge', e);
 
   return (
     <AppLayout>
@@ -208,7 +210,7 @@ export default function AdmissionsTestReports({ admission }: Props) {
           </Link>
           <button
             type="button"
-            onClick={() => setShowRawEditor(!showRawEditor)}
+            onClick={toggleRawEditor}
             className="btn btn-outline-secondary"
           >
             <i className={`bi bi-${showRawEditor ? 'table' : 'code-slash'} me-1`}></i>

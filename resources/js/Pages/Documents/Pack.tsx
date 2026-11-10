@@ -1,6 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
+import ActionDropdown, {
+  buildEditStageMenuItems,
+  buildPdfDownloadMenuItems,
+} from '../../Components/ActionDropdown';
 import {
   formatTreatmentCourse,
   formatInvestigations,
@@ -179,10 +183,34 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
   const [viewMode, setViewMode] = useState<'sheet' | 'pdf'>(initialMode);
   const [returnModalOpen, setReturnModalOpen] = useState(false);
   const [revisionModalOpen, setRevisionModalOpen] = useState(false);
-  const [correctionReason, setCorrectionReason] = useState('');
-  const [revisionReason, setRevisionReason] = useState('');
-  const [submittingReturn, setSubmittingReturn] = useState(false);
-  const [submittingRevision, setSubmittingRevision] = useState(false);
+
+  const deliveryFormatted = useMemo(() => {
+    if (admission.surgery_type !== 'delivery') return null;
+    return {
+      treatmentRows: formatTreatmentCourse(admission.treatment_course || admission.treatment_given),
+      investigationList: formatInvestigations(admission.investigations),
+      conditionData: formatConditionOnDischarge(admission.discharge_condition || admission.condition_at_discharge),
+      medicationList: formatMedications(admission.medication_orders),
+      adviceData: formatAdviceAndReview(
+        admission.discharge_advice,
+        admission.follow_up,
+        admission.discharge_at,
+        `${admission.procedure_name || ''} ${admission.procedure_done || ''}`
+      ),
+      newbornCards: formatNewborns(admission),
+      surgeryPerformed: formatSurgeryPerformed(admission),
+    };
+  }, [admission]);
+
+  const surgicalFormatted = useMemo(() => {
+    if (admission.surgery_type === 'delivery') return null;
+    return {
+      hist: formatSurgicalPastHistory(admission),
+      inv: formatSurgicalInvestigations(admission),
+      surgAdvice: formatSurgicalAdvice(admission),
+      surgDrugs: formatSurgicalDrugs(admission.medication_orders),
+    };
+  }, [admission]);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -243,38 +271,6 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
     if (confirm('Are you sure you want to clinically approve this complete document pack?')) {
       router.post(`/documents/${admission.id}/approve`);
     }
-  };
-
-  const handleConfirmReturn = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!correctionReason.trim()) return;
-    setSubmittingReturn(true);
-    router.post(
-      `/documents/${admission.id}/return`,
-      { correction_reason: correctionReason },
-      {
-        onFinish: () => {
-          setSubmittingReturn(false);
-          setReturnModalOpen(false);
-        },
-      }
-    );
-  };
-
-  const handleConfirmRevision = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!revisionReason.trim()) return;
-    setSubmittingRevision(true);
-    router.post(
-      `/admissions/${admission.id}/revision`,
-      { revision_reason: revisionReason },
-      {
-        onFinish: () => {
-          setSubmittingRevision(false);
-          setRevisionModalOpen(false);
-        },
-      }
-    );
   };
 
   const formatDate = (dateStr?: string) => {
@@ -365,50 +361,26 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
             </div>
 
             <div className="d-flex flex-wrap gap-2">
-              <Link href="/admissions" className="btn btn-outline-secondary">
+              <Link href="/admissions" prefetch className="btn btn-outline-secondary">
                 <i className="bi bi-arrow-left me-1"></i> Back
               </Link>
 
-              <Link href={`/documents/${admission.id}/history`} className="btn btn-outline-secondary">
+              <Link href={`/documents/${admission.id}/history`} prefetch className="btn btn-outline-secondary">
                 <i className="bi bi-clock-history me-1"></i> Audit Trail
               </Link>
 
               {canBeEdited && user?.can_edit && (
-                <div className="btn-group">
-                  <Link href={`/admissions/${admission.id}/edit`} className="btn btn-outline-secondary">
-                    <i className="bi bi-pencil me-1"></i> Edit Data
-                  </Link>
-                  <button
-                    type="button"
-                    className="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    <span className="visually-hidden">Toggle Sub-Forms</span>
-                  </button>
-                  <ul className="dropdown-menu shadow-sm border-0" style={{ fontSize: '13px' }}>
-                    <li>
-                      <Link className="dropdown-item py-1.5" href={`/admissions/${admission.id}/edit`}>
-                        <i className="bi bi-person me-2 text-primary"></i>1. Admission Details
-                      </Link>
-                    </li>
-                    <li>
-                      <Link className="dropdown-item py-1.5" href={`/admissions/${admission.id}/surgery`}>
-                        <i className="bi bi-heart-pulse me-2 text-danger"></i>2. Labour / Surgery
-                      </Link>
-                    </li>
-                    <li>
-                      <Link className="dropdown-item py-1.5" href={`/admissions/${admission.id}/test-reports`}>
-                        <i className="bi bi-file-earmark-medical me-2 text-info"></i>3. Test Reports
-                      </Link>
-                    </li>
-                    <li>
-                      <Link className="dropdown-item py-1.5" href={`/admissions/${admission.id}/discharge`}>
-                        <i className="bi bi-clipboard2-check me-2 text-success"></i>4. Discharge Summary
-                      </Link>
-                    </li>
-                  </ul>
-                </div>
+                <ActionDropdown
+                  groupClassName="btn-group"
+                  toggleTitle="Toggle Sub-Forms"
+                  fontSize="13px"
+                  items={buildEditStageMenuItems(admission.id)}
+                  primaryAction={
+                    <Link href={`/admissions/${admission.id}/edit`} prefetch className="btn btn-outline-secondary">
+                      <i className="bi bi-pencil me-1"></i> Edit Data
+                    </Link>
+                  }
+                />
               )}
 
               {(isDraft || isReturned) && (
@@ -437,77 +409,24 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
               )}
 
               {/* Direct PDF Download Buttons (No approval required) */}
-              <div className="btn-group shadow-sm">
-                <a
-                  href={`/admissions/${admission.id}/documents/pdf/discharge-summary`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="btn btn-primary fw-semibold d-inline-flex align-items-center gap-1"
-                  title="Generate and download Discharge Summary PDF"
-                >
-                  <i className="bi bi-file-earmark-medical me-1"></i> 1. Discharge Summary PDF
-                </a>
-                <button
-                  type="button"
-                  className="btn btn-primary dropdown-toggle dropdown-toggle-split"
-                  data-bs-toggle="dropdown"
-                  aria-expanded="false"
-                >
-                  <span className="visually-hidden">Toggle PDF Options</span>
-                </button>
-                <ul className="dropdown-menu dropdown-menu-end shadow border-0" style={{ borderRadius: '12px', fontSize: '13px' }}>
-                  <li>
-                    <h6 className="dropdown-header text-uppercase fw-bold" style={{ fontSize: '10.5px' }}>
-                      Separate PDF Documents
-                    </h6>
-                  </li>
-                  <li>
-                    <a
-                      className="dropdown-item py-2"
-                      href={`/admissions/${admission.id}/documents/pdf/discharge-summary`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <i className="bi bi-file-earmark-text text-primary me-2"></i>
-                      1. Discharge Summary PDF
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      className="dropdown-item py-2"
-                      href={`/admissions/${admission.id}/documents/pdf/operation-notes`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <i className="bi bi-journal-medical text-success me-2"></i>
-                      2. Operation Theatre Notes PDF
-                    </a>
-                  </li>
-                  <li>
-                    <a
-                      className="dropdown-item py-2"
-                      href={`/admissions/${admission.id}/documents/pdf/mrd-form`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <i className="bi bi-file-earmark-check text-warning me-2"></i>
-                      3. MRD Inpatient Form PDF
-                    </a>
-                  </li>
-                  <li><hr className="dropdown-divider" /></li>
-                  <li>
-                    <a
-                      className="dropdown-item py-2 fw-semibold"
-                      href={`/admissions/${admission.id}/documents/pdf/pack`}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      <i className="bi bi-collection text-dark me-2"></i>
-                      Complete 3-in-1 Pack PDF
-                    </a>
-                  </li>
-                </ul>
-              </div>
+              <ActionDropdown
+                groupClassName="btn-group shadow-sm"
+                toggleClassName="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                toggleTitle="Toggle PDF Options"
+                fontSize="13px"
+                items={buildPdfDownloadMenuItems(admission.id, 'Separate PDF Documents')}
+                primaryAction={
+                  <a
+                    href={`/admissions/${admission.id}/documents/pdf/discharge-summary`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn-primary fw-semibold d-inline-flex align-items-center gap-1"
+                    title="Generate and download Discharge Summary PDF"
+                  >
+                    <i className="bi bi-file-earmark-medical me-1"></i> 1. Discharge Summary PDF
+                  </a>
+                }
+              />
 
               {(user?.is_admin || user?.role === 'doctor') && (
                 <button
@@ -685,14 +604,16 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
         <>
           {/* DOCUMENT 1: DISCHARGE SUMMARY */}
           {(activeDoc === 'all' || activeDoc === 'discharge_summary') && (() => {
-            if (admission.surgery_type === 'delivery') {
-              const treatmentRows = formatTreatmentCourse(admission.treatment_course || admission.treatment_given);
-              const investigationList = formatInvestigations(admission.investigations);
-              const conditionData = formatConditionOnDischarge(admission.discharge_condition || admission.condition_at_discharge);
-              const medicationList = formatMedications(admission.medication_orders);
-              const adviceData = formatAdviceAndReview(admission.discharge_advice, admission.follow_up, admission.discharge_at, `${admission.procedure_name || ''} ${admission.procedure_done || ''}`);
-              const newbornCards = formatNewborns(admission);
-              const surgeryPerformed = formatSurgeryPerformed(admission);
+            if (admission.surgery_type === 'delivery' && deliveryFormatted) {
+              const {
+                treatmentRows,
+                investigationList,
+                conditionData,
+                medicationList,
+                adviceData,
+                newbornCards,
+                surgeryPerformed,
+              } = deliveryFormatted;
 
             return (
               <div className="document-sheet mb-4">
@@ -1352,10 +1273,12 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
           }
 
           // SURGICAL / NON-OBSTETRIC DISCHARGE SUMMARY (Mr. Gopalakrishnan Hospital Standard)
-          const hist = formatSurgicalPastHistory(admission);
-          const inv = formatSurgicalInvestigations(admission);
-          const surgAdvice = formatSurgicalAdvice(admission);
-          const surgDrugs = formatSurgicalDrugs(admission.medication_orders);
+          const { hist, inv, surgAdvice, surgDrugs } = surgicalFormatted || {
+            hist: formatSurgicalPastHistory(admission),
+            inv: formatSurgicalInvestigations(admission),
+            surgAdvice: formatSurgicalAdvice(admission),
+            surgDrugs: formatSurgicalDrugs(admission.medication_orders),
+          };
 
           const formatDt = (dtStr?: string | null) => {
             if (!dtStr) return '—';
@@ -2143,123 +2066,140 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
       </>
       )}
 
-      {/* Return for Correction Modal */}
       {returnModalOpen && (
-        <div
-          className="modal fade show d-block"
-          tabIndex={-1}
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <form onSubmit={handleConfirmReturn} className="modal-content border-0 shadow-lg">
-              <div className="modal-header">
-                <h5 className="modal-title fw-bold" style={{ letterSpacing: '-0.01em' }}>
-                  Return Pack for Clinical Correction
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setReturnModalOpen(false)}
-                ></button>
-              </div>
-              <div className="modal-body p-4">
-                <p className="small text-muted mb-3">
-                  Please explain the required corrections or missing details. The record will return
-                  to draft status for editing.
-                </p>
-                <div className="mb-3">
-                  <label className="form-label required fw-semibold">
-                    Correction Reason / Discrepancy Note
-                  </label>
-                  <textarea
-                    className="form-control"
-                    rows={4}
-                    value={correctionReason}
-                    onChange={(e) => setCorrectionReason(e.target.value)}
-                    placeholder="e.g. Newborn weight mismatch; clarify anesthesia type; update medication orders."
-                    required
-                  ></textarea>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary"
-                  onClick={() => setReturnModalOpen(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-danger"
-                  disabled={submittingReturn || !correctionReason.trim()}
-                >
-                  {submittingReturn ? 'Returning...' : 'Confirm & Return'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <ReasonModal
+          title="Return Pack for Clinical Correction"
+          description="Please explain the required corrections or missing details. The record will return to draft status for editing."
+          label="Correction Reason / Discrepancy Note"
+          placeholder="e.g. Newborn weight mismatch; clarify anesthesia type; update medication orders."
+          rows={4}
+          submitLabel="Confirm & Return"
+          submittingLabel="Returning..."
+          submitButtonClass="btn btn-danger"
+          onClose={() => setReturnModalOpen(false)}
+          onSubmit={(reason, done) => {
+            router.post(
+              `/documents/${admission.id}/return`,
+              { correction_reason: reason },
+              {
+                onFinish: () => {
+                  done();
+                  setReturnModalOpen(false);
+                },
+              }
+            );
+          }}
+        />
       )}
 
-      {/* Create Revision Modal */}
       {revisionModalOpen && (
-        <div
-          className="modal fade show d-block"
-          tabIndex={-1}
-          style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
-        >
-          <div className="modal-dialog modal-dialog-centered">
-            <form onSubmit={handleConfirmRevision} className="modal-content border-0 shadow-lg">
-              <div className="modal-header">
-                <h5 className="modal-title fw-bold" style={{ letterSpacing: '-0.01em' }}>
-                  Create New Clinical Revision
-                </h5>
-                <button
-                  type="button"
-                  className="btn-close"
-                  onClick={() => setRevisionModalOpen(false)}
-                ></button>
-              </div>
-              <div className="modal-body p-4">
-                <p className="small text-muted mb-3">
-                  This admission is currently approved/generated. Creating a new revision will
-                  preserve an immutable historical snapshot and reset the admission to draft for
-                  correction.
-                </p>
-                <div className="mb-3">
-                  <label className="form-label required fw-semibold">Reason for Revision</label>
-                  <textarea
-                    className="form-control"
-                    rows={3}
-                    value={revisionReason}
-                    onChange={(e) => setRevisionReason(e.target.value)}
-                    placeholder="e.g. Retrospective pathology findings added; dosage adjustment."
-                    required
-                  ></textarea>
-                </div>
-              </div>
-              <div className="modal-footer">
-                <button
-                  type="button"
-                  className="btn btn-outline-secondary"
-                  onClick={() => setRevisionModalOpen(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={submittingRevision || !revisionReason.trim()}
-                >
-                  {submittingRevision ? 'Creating...' : 'Create Revision & Unlock'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <ReasonModal
+          title="Create New Clinical Revision"
+          description="This admission is currently approved/generated. Creating a new revision will preserve an immutable historical snapshot and reset the admission to draft for correction."
+          label="Reason for Revision"
+          placeholder="e.g. Retrospective pathology findings added; dosage adjustment."
+          rows={3}
+          submitLabel="Create Revision & Unlock"
+          submittingLabel="Creating..."
+          submitButtonClass="btn btn-primary"
+          onClose={() => setRevisionModalOpen(false)}
+          onSubmit={(reason, done) => {
+            router.post(
+              `/admissions/${admission.id}/revision`,
+              { revision_reason: reason },
+              {
+                onFinish: () => {
+                  done();
+                  setRevisionModalOpen(false);
+                },
+              }
+            );
+          }}
+        />
       )}
     </AppLayout>
+  );
+}
+
+interface ReasonModalProps {
+  title: string;
+  description: string;
+  label: string;
+  placeholder: string;
+  rows: number;
+  submitLabel: string;
+  submittingLabel: string;
+  submitButtonClass: string;
+  onClose: () => void;
+  onSubmit: (reason: string, done: () => void) => void;
+}
+
+function ReasonModal({
+  title,
+  description,
+  label,
+  placeholder,
+  rows,
+  submitLabel,
+  submittingLabel,
+  submitButtonClass,
+  onClose,
+  onSubmit,
+}: ReasonModalProps) {
+  const [reason, setReason] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reason.trim()) return;
+    setSubmitting(true);
+    onSubmit(reason, () => setSubmitting(false));
+  };
+
+  return (
+    <div
+      className="modal fade show d-block"
+      tabIndex={-1}
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}
+    >
+      <div className="modal-dialog modal-dialog-centered">
+        <form onSubmit={handleSubmit} className="modal-content border-0 shadow-lg">
+          <div className="modal-header">
+            <h5 className="modal-title fw-bold" style={{ letterSpacing: '-0.01em' }}>
+              {title}
+            </h5>
+            <button type="button" className="btn-close" onClick={onClose}></button>
+          </div>
+          <div className="modal-body p-4">
+            <p className="small text-muted mb-3">{description}</p>
+            <div className="mb-3">
+              <label className="form-label required fw-semibold">{label}</label>
+              <textarea
+                className="form-control"
+                rows={rows}
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder={placeholder}
+                required
+                autoFocus
+              ></textarea>
+            </div>
+          </div>
+          <div className="modal-footer">
+            <button type="button" className="btn btn-outline-secondary" onClick={onClose}>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className={submitButtonClass}
+              disabled={submitting || !reason.trim()}
+            >
+              {submitting ? submittingLabel : submitLabel}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
 

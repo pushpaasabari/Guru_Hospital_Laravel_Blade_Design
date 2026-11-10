@@ -16,7 +16,19 @@ class AuditLogController extends Controller
             abort(403, 'Unauthorized access to hospital audit logs.');
         }
 
-        $query = AuditLog::with('user')->latest('id');
+        $query = AuditLog::query()
+            ->select([
+                'id',
+                'user_name',
+                'user_role',
+                'action',
+                'auditable_type',
+                'auditable_id',
+                'description',
+                'ip_address',
+                'created_at',
+            ])
+            ->latest('id');
 
         if ($action = $request->input('action')) {
             $query->where('action', 'like', "%{$action}%");

@@ -87,7 +87,7 @@ class AdmissionController extends Controller
     public function show(Admission $admission): Response
     {
         $this->authorize('view', $admission);
-        $admission->load(['newborns', 'approvals.performer', 'revisions.approver', 'creator', 'approver']);
+        $admission->loadDocumentRelations(true);
 
         return Inertia::render('Documents/Pack', compact('admission'));
     }

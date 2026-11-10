@@ -120,6 +120,7 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
             <div className="d-flex gap-2">
               <Link
                 href={`/admissions/${admission.id}/documents/preview`}
+                prefetch
                 className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1.5"
               >
                 <i className="bi bi-file-earmark-text"></i>
@@ -185,7 +186,7 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
             return (
               <div key={stage.id} className="col-12 col-sm-6 col-lg-3">
                 {isClickable ? (
-                  <Link href={stage.href!} className="text-decoration-none d-block h-100">
+                  <Link href={stage.href!} prefetch className="text-decoration-none d-block h-100">
                     {content}
                   </Link>
                 ) : (

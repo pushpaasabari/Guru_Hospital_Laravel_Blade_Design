@@ -167,6 +167,8 @@ class SecurityAndRoleAccessTest extends TestCase
 
         $this->get(route('login'))
             ->assertOk()
+            ->assertDontSee('cdn.jsdelivr.net', false)
+            ->assertDontSee('fonts.googleapis.com', false)
             ->assertInertia(fn (Assert $page) => $page->component('Auth/Login'));
 
         $this->actingAs($this->admin)
@@ -192,7 +194,12 @@ class SecurityAndRoleAccessTest extends TestCase
         $this->actingAs($this->admin)
             ->get(route('audit.index'))
             ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page->component('Audit/Index'));
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Audit/Index')
+                ->where('auditLogs.data', fn ($rows) => collect($rows)->every(
+                    fn ($row) => !array_key_exists('payload_before', $row) && !array_key_exists('payload_after', $row)
+                ))
+            );
 
         $this->actingAs($this->admin)
             ->get(route('clinical-staff.index'))

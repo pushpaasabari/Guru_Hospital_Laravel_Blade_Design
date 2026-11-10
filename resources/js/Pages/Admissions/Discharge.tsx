@@ -4,6 +4,7 @@ import AppLayout from '../../Layouts/AppLayout';
 import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
 import PaymentInsuranceFields, { normalizePaymentMode } from '../../Components/PaymentInsuranceFields';
+import ActionDropdown from '../../Components/ActionDropdown';
 
 interface AdmissionData {
   id: number;
@@ -220,7 +221,7 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
     extractDate(admission.follow_up || admission.discharge_advice)
   );
 
-  const { data, setData, put, processing, errors } = useForm({
+  const { data, setData, put, transform, processing, errors } = useForm({
     discharge_at: admission.discharge_at ? admission.discharge_at.slice(0, 16) : '',
     discharge_condition: admission.discharge_condition || '',
     clinical_history: admission.clinical_history || '',
@@ -246,34 +247,35 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
     next_step: 'preview',
   });
 
-  const syncMeds = (rows: MedicationRow[]) => {
-    setMedRows(rows);
-    setData('medication_orders', serializeMedications(rows));
-  };
-
   const updateMedRow = (idx: number, field: keyof MedicationRow, val: string) => {
-    const updated = [...medRows];
-    updated[idx] = { ...updated[idx], [field]: val };
-    syncMeds(updated);
+    setMedRows((prev) => {
+      const updated = [...prev];
+      updated[idx] = { ...updated[idx], [field]: val };
+      return updated;
+    });
   };
 
   const addMedRow = (row?: MedicationRow) => {
     const newRow = row || { medicine: '', frequency: '1-0-1', duration: '7 Days', timing: 'After food' };
-    syncMeds([...medRows, newRow]);
+    setMedRows((prev) => [...prev, newRow]);
   };
 
   const removeMedRow = (idx: number) => {
-    const updated = medRows.filter((_, i) => i !== idx);
-    syncMeds(updated.length > 0 ? updated : [{ medicine: '', frequency: '1-0-1', duration: '7 Days', timing: 'After food' }]);
+    setMedRows((prev) => {
+      const updated = prev.filter((_, i) => i !== idx);
+      return updated.length > 0 ? updated : [{ medicine: '', frequency: '1-0-1', duration: '7 Days', timing: 'After food' }];
+    });
   };
 
   const moveMedRow = (idx: number, dir: 'up' | 'down') => {
     const target = dir === 'up' ? idx - 1 : idx + 1;
     if (target < 0 || target >= medRows.length) return;
-    const updated = [...medRows];
-    const [moved] = updated.splice(idx, 1);
-    updated.splice(target, 0, moved);
-    syncMeds(updated);
+    setMedRows((prev) => {
+      const updated = [...prev];
+      const [moved] = updated.splice(idx, 1);
+      updated.splice(target, 0, moved);
+      return updated;
+    });
   };
 
   const applyMedPack = (pack: 'anitha' | 'delivery' | 'ursl') => {
@@ -299,7 +301,7 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
         { medicine: 'Tab. Zerodol-P', frequency: '1-0-1', duration: '6 Nos', timing: 'After food' },
       ];
     }
-    syncMeds(rows);
+    setMedRows(rows);
   };
 
   const insertTamilStentNotice = () => {
@@ -318,13 +320,12 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
 
   const submitWithStep = (step: 'download_ds' | 'download_pack' | 'preview' | 'stay', e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    setData('next_step', step);
-    put(`/admissions/${admission.id}/discharge`, {
-      data: {
-        ...data,
-        next_step: step,
-      },
-    });
+    transform((current) => ({
+      ...current,
+      medication_orders: serializeMedications(medRows),
+      next_step: step,
+    }));
+    put(`/admissions/${admission.id}/discharge`);
   };
 
   const handleSaveOnly = (e: React.FormEvent) => {
@@ -508,13 +509,8 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
                           value={med.medicine}
                           onChange={(e) => updateMedRow(idx, 'medicine', e.target.value)}
                           placeholder="Select or enter medicine..."
-                          list={`medList-${idx}`}
+                          list="common-medications-list"
                         />
-                        <datalist id={`medList-${idx}`}>
-                          {COMMON_MEDICATIONS.map((m, mIdx) => (
-                            <option key={mIdx} value={m} />
-                          ))}
-                        </datalist>
                       </td>
                       <td>
                         <select
@@ -536,13 +532,8 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
                           value={med.duration}
                           onChange={(e) => updateMedRow(idx, 'duration', e.target.value)}
                           placeholder="7 Days"
-                          list={`durList-${idx}`}
+                          list="common-durations-list"
                         />
-                        <datalist id={`durList-${idx}`}>
-                          {DURATION_OPTIONS.map((d, dIdx) => (
-                            <option key={dIdx} value={d} />
-                          ))}
-                        </datalist>
                       </td>
                       <td>
                         <select
@@ -621,6 +612,16 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
                     ))}
                 </tbody>
               </table>
+              <datalist id="common-medications-list">
+                {COMMON_MEDICATIONS.map((m, mIdx) => (
+                  <option key={mIdx} value={m} />
+                ))}
+              </datalist>
+              <datalist id="common-durations-list">
+                {DURATION_OPTIONS.map((d, dIdx) => (
+                  <option key={dIdx} value={d} />
+                ))}
+              </datalist>
             </div>
 
             {/* Stent Placement Detection & Mandatory Tamil Instruction */}
@@ -804,48 +805,41 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
             >
               <i className="bi bi-eye me-1"></i> Save &amp; View Dossier
             </button>
-            <div className="btn-group shadow-sm">
-              <button
-                type="button"
-                onClick={handleSaveAndDownloadDs}
-                disabled={processing}
-                className="btn btn-success px-4 py-2 fw-bold d-inline-flex align-items-center gap-2"
-              >
-                <i className="bi bi-file-earmark-arrow-down-fill fs-5"></i>
-                <span>Complete &amp; Download Discharge Summary PDF</span>
-              </button>
-              <button
-                type="button"
-                className="btn btn-success dropdown-toggle dropdown-toggle-split"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-                disabled={processing}
-              >
-                <span className="visually-hidden">Toggle PDF Options</span>
-              </button>
-              <ul className="dropdown-menu dropdown-menu-end shadow border-0" style={{ borderRadius: '12px', fontSize: '13px' }}>
-                <li>
-                  <button
-                    type="button"
-                    className="dropdown-item py-2 fw-semibold"
-                    onClick={handleSaveAndDownloadDs}
-                  >
-                    <i className="bi bi-file-earmark-medical text-success me-2"></i>
-                    1. Download Discharge Summary PDF
-                  </button>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className="dropdown-item py-2 fw-semibold"
-                    onClick={handleSaveAndDownloadPack}
-                  >
-                    <i className="bi bi-collection text-primary me-2"></i>
-                    Complete 3-in-1 Dossier Pack PDF
-                  </button>
-                </li>
-              </ul>
-            </div>
+            <ActionDropdown
+              groupClassName="btn-group shadow-sm"
+              toggleClassName="btn btn-success dropdown-toggle dropdown-toggle-split"
+              toggleTitle="Toggle PDF Options"
+              fontSize="13px"
+              minMenuWidth={270}
+              disabled={processing}
+              primaryAction={
+                <button
+                  type="button"
+                  onClick={handleSaveAndDownloadDs}
+                  disabled={processing}
+                  className="btn btn-success px-4 py-2 fw-bold d-inline-flex align-items-center gap-2"
+                >
+                  <i className="bi bi-file-earmark-arrow-down-fill fs-5"></i>
+                  <span>Complete &amp; Download Discharge Summary PDF</span>
+                </button>
+              }
+              items={[
+                {
+                  type: 'button',
+                  label: '1. Download Discharge Summary PDF',
+                  iconClass: 'bi bi-file-earmark-medical text-success',
+                  className: 'fw-semibold',
+                  onClick: () => submitWithStep('download_ds'),
+                },
+                {
+                  type: 'button',
+                  label: 'Complete 3-in-1 Dossier Pack PDF',
+                  iconClass: 'bi bi-collection text-primary',
+                  className: 'fw-semibold',
+                  onClick: () => submitWithStep('download_pack'),
+                },
+              ]}
+            />
           </div>
         </div>
       </form>

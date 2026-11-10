@@ -76,7 +76,7 @@ export default function History({ admission }: Props) {
             {admission.uhid}, IP: {admission.ip_no})
           </p>
         </div>
-        <Link href={`/documents/${admission.id}`} className="btn btn-outline-secondary">
+        <Link href={`/admissions/${admission.id}/documents/preview`} prefetch className="btn btn-outline-secondary">
           <i className="bi bi-arrow-left me-1"></i> Back to Document Pack
         </Link>
       </div>

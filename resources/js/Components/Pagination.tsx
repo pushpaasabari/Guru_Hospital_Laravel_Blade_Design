@@ -34,7 +34,7 @@ export default function Pagination({ links }: PaginationProps) {
                 className={`page-item ${link.active ? 'active' : ''} ${!link.url ? 'disabled' : ''}`}
               >
                 {link.url ? (
-                  <Link href={link.url} className="page-link" preserveScroll>
+                  <Link href={link.url} prefetch className="page-link" preserveScroll>
                     {label}
                   </Link>
                 ) : (

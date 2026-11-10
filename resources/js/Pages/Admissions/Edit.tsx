@@ -82,7 +82,7 @@ interface Props {
 
 export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props) {
   const [customConsultant, setCustomConsultant] = useState(false);
-  const { data, setData, put, processing, errors } = useForm({
+  const { data, setData, put, transform, processing, errors } = useForm({
     patient_name: admission.patient_name || '',
     uhid: admission.uhid || '',
     ip_no: admission.ip_no || '',
@@ -172,17 +172,15 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
     }
   };
 
-  const handleSaveOnly = (e: React.FormEvent) => {
+  const submitWithStep = (step: 'stay' | 'surgery', e: React.FormEvent) => {
     e.preventDefault();
-    setData('next_step', 'stay');
+    transform((current) => ({ ...current, next_step: step }));
     put(`/admissions/${admission.id}`);
   };
 
-  const handleSaveAndNext = (e: React.FormEvent) => {
-    e.preventDefault();
-    setData('next_step', 'surgery');
-    put(`/admissions/${admission.id}`);
-  };
+  const handleSaveOnly = (e: React.FormEvent) => submitWithStep('stay', e);
+
+  const handleSaveAndNext = (e: React.FormEvent) => submitWithStep('surgery', e);
 
   return (
     <AppLayout>

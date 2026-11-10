@@ -96,7 +96,7 @@ export default function AdmissionsSurgery({
         ]
       : [];
 
-  const { data, setData, put, processing, errors } = useForm({
+  const { data, setData, put, transform, processing, errors } = useForm({
     picme_no: admission.picme_no || '',
     procedure_at: admission.procedure_at ? admission.procedure_at.slice(0, 16) : '',
     procedure_name: admission.procedure_name || '',
@@ -156,30 +156,24 @@ export default function AdmissionsSurgery({
   );
   const [hasStent, setHasStent] = useState<boolean>(hasStentInText);
 
-  const syncOrders = (rows: string[]) => {
+  const serializeOrders = (rows: string[]): string => {
     const valid = rows.map((r) => r.trim()).filter(Boolean);
-    const serialized = valid.map((r, i) => `${i + 1}. ${r}`).join('\n');
-    setData('postoperative_orders', serialized);
+    return valid.map((r, i) => `${i + 1}. ${r}`).join('\n');
   };
 
   const updateOrderRow = (idx: number, val: string) => {
     const updated = [...orderRows];
     updated[idx] = val;
     setOrderRows(updated);
-    syncOrders(updated);
   };
 
   const addOrderRow = (text = '') => {
-    const updated = [...orderRows, text];
-    setOrderRows(updated);
-    syncOrders(updated);
+    setOrderRows((prev) => [...prev, text]);
   };
 
   const removeOrderRow = (idx: number) => {
     const updated = orderRows.filter((_, i) => i !== idx);
-    const finalRows = updated.length > 0 ? updated : [''];
-    setOrderRows(finalRows);
-    syncOrders(finalRows);
+    setOrderRows(updated.length > 0 ? updated : ['']);
   };
 
   const moveOrderRow = (idx: number, direction: 'up' | 'down') => {
@@ -189,7 +183,6 @@ export default function AdmissionsSurgery({
     const [moved] = updated.splice(idx, 1);
     updated.splice(targetIdx, 0, moved);
     setOrderRows(updated);
-    syncOrders(updated);
   };
 
   const addBaby = () => {
@@ -220,17 +213,19 @@ export default function AdmissionsSurgery({
     setData('newborns', updated);
   };
 
-  const handleSaveOnly = (e: React.FormEvent) => {
+  const submitStage = (step: 'stay' | 'test-reports', e: React.FormEvent) => {
     e.preventDefault();
-    setData('next_step', 'stay');
+    transform((current) => ({
+      ...current,
+      postoperative_orders: serializeOrders(orderRows),
+      next_step: step,
+    }));
     put(`/admissions/${admission.id}/surgery`);
   };
 
-  const handleSaveAndNext = (e: React.FormEvent) => {
-    e.preventDefault();
-    setData('next_step', 'test-reports');
-    put(`/admissions/${admission.id}/surgery`);
-  };
+  const handleSaveOnly = (e: React.FormEvent) => submitStage('stay', e);
+
+  const handleSaveAndNext = (e: React.FormEvent) => submitStage('test-reports', e);
 
   return (
     <AppLayout>

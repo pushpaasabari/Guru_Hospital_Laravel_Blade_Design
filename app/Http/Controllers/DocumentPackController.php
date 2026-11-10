@@ -14,7 +14,7 @@ class DocumentPackController extends Controller
     public function preview(Request $request, Admission $admission): InertiaResponse
     {
         $this->authorize('view', $admission);
-        $admission->load(['newborns', 'approvals.performer', 'revisions.approver', 'creator', 'approver']);
+        $admission->loadDocumentRelations(true);
 
         $initialDoc = $request->query('doc', 'all');
         $initialMode = $request->query('mode', 'sheet');
@@ -39,7 +39,7 @@ class DocumentPackController extends Controller
     public function history(Admission $admission): InertiaResponse
     {
         $this->authorize('view', $admission);
-        $admission->load(['approvals.performer', 'revisions.approver', 'creator', 'approver']);
+        $admission->loadDocumentRelations(false);
 
         return Inertia::render('Documents/History', compact('admission'));
     }

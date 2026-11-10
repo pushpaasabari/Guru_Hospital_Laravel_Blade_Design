@@ -44,7 +44,7 @@ export default function Index({ auditLogs }: Props) {
   const handleFilter = (e: React.FormEvent) => {
     e.preventDefault();
     router.get(
-      '/audit',
+      '/audit-logs',
       {
         action: action || undefined,
         user_name: userName || undefined,
@@ -60,7 +60,7 @@ export default function Index({ auditLogs }: Props) {
     setUserName('');
     setDateFrom('');
     setDateTo('');
-    router.get('/audit');
+    router.get('/audit-logs');
   };
 
   const formatDateTime = (dateStr: string) => {
