@@ -4,11 +4,11 @@ namespace App\Services;
 
 use App\Models\Admission;
 use App\Models\DocumentRevision;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use RuntimeException;
 use Symfony\Component\Process\Process;
 
 class DocumentPackPdfService
@@ -80,7 +80,7 @@ class DocumentPackPdfService
 
     /**
      * Generates and returns a downloadable/streamable PDF response for the admission document.
-     * Uses Playwright with Google Chrome/Chromium for high-fidelity A4 rendering, with DomPDF fallback.
+     * Strictly uses Playwright + Chromium for high-fidelity A4 rendering.
      */
     public function download(Admission $admission, string $type = 'pack', bool $asAttachment = true): Response
     {
@@ -94,13 +94,7 @@ class DocumentPackPdfService
         $fileName = $meta['fileName'];
         $storagePath = "{$storageDirectory}/{$fileName}";
 
-        // 1. Primary Engine: Playwright Chrome / Chromium
         $output = $this->generateWithPlaywright($admission, $type);
-
-        // 2. Fallback Engine: DomPDF if Playwright is unavailable
-        if (!$output) {
-            $output = $this->generateWithDompdf($admission, $type);
-        }
 
         // Store privately in storage
         Storage::disk('local')->put($storagePath, $output);
@@ -154,102 +148,131 @@ class DocumentPackPdfService
     }
 
     /**
-     * Renders pixel-perfect hospital discharge pack PDF using Playwright Chromium / Google Chrome.
+     * Renders hospital document PDFs strictly using Playwright + Chromium.
+     *
+     * @throws RuntimeException When Playwright + Chromium fails to generate a valid PDF.
      */
-    public function generateWithPlaywright(Admission $admission, string $type = 'pack'): ?string
+    public function generateWithPlaywright(Admission $admission, string $type = 'pack'): string
     {
+        $meta = $this->resolveDocumentMetadata($type, $admission);
+        $html = view($meta['view'], compact('admission'))->render();
+
+        $tempDir = storage_path('app/temp_pdf');
+        if (!is_dir($tempDir)) {
+            @mkdir($tempDir, 0755, true);
+        }
+
+        $uniqueId = uniqid('pdf_', true);
+        $tempHtml = "{$tempDir}/{$uniqueId}.html";
+        $tempPdf = "{$tempDir}/{$uniqueId}.pdf";
+
+        file_put_contents($tempHtml, $html);
+
         try {
-            $meta = $this->resolveDocumentMetadata($type, $admission);
-            $html = view($meta['view'], compact('admission'))->render();
-
-            $tempDir = storage_path('app/temp_pdf');
-            if (!is_dir($tempDir)) {
-                @mkdir($tempDir, 0755, true);
-            }
-
-            $uniqueId = uniqid('pdf_', true);
-            $tempHtml = "{$tempDir}/{$uniqueId}.html";
-            $tempPdf = "{$tempDir}/{$uniqueId}.pdf";
-
-            file_put_contents($tempHtml, $html);
-
             $scriptPath = resource_path('scripts/generate-pdf.js');
-            $headerTitle = $meta['headerTitle'];
-
-            // Provide Windows environment variables to prevent Node.js 24 CSPRNG crash
-            $env = array_merge($_SERVER, $_ENV, [
-                'SystemRoot' => getenv('SystemRoot') ?: 'C:\\Windows',
-                'LOCALAPPDATA' => getenv('LOCALAPPDATA') ?: 'C:\\Users\\Admin\\AppData\\Local',
-                'USERPROFILE' => getenv('USERPROFILE') ?: 'C:\\Users\\Admin',
-                'PATH' => getenv('PATH') ?: 'C:\\Windows\\system32',
-                'APPDATA' => getenv('APPDATA') ?: 'C:\\Users\\Admin\\AppData\\Roaming',
-                'TEMP' => sys_get_temp_dir(),
-                'TMP' => sys_get_temp_dir(),
-            ]);
+            $nodeBinary = $this->resolveNodeBinary();
+            $env = $this->buildPlaywrightEnv();
 
             $process = new Process([
-                'node',
+                $nodeBinary,
                 $scriptPath,
                 '--input', $tempHtml,
                 '--output', $tempPdf,
-                '--title', $headerTitle,
+                '--title', $meta['headerTitle'],
                 '--type', $meta['type'],
-            ], null, $env);
+            ], base_path(), $env);
 
-            $process->setTimeout(30);
+            $process->setTimeout(60);
             $process->run();
 
             if ($process->isSuccessful() && file_exists($tempPdf) && filesize($tempPdf) > 0) {
-                $output = file_get_contents($tempPdf);
-                @unlink($tempHtml);
-                @unlink($tempPdf);
-                return $output;
+                return (string) file_get_contents($tempPdf);
             }
 
-            Log::warning('Playwright PDF process failed: ' . $process->getErrorOutput());
+            $errorDetail = trim($process->getErrorOutput() ?: $process->getOutput());
+            Log::error('Playwright Chromium PDF process failed', [
+                'type' => $meta['type'],
+                'exit_code' => $process->getExitCode(),
+                'error' => $errorDetail,
+            ]);
+
+            throw new RuntimeException(
+                'Chromium + Playwright PDF generation failed' . ($errorDetail ? ": {$errorDetail}" : '.')
+            );
+        } catch (RuntimeException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            Log::error('Playwright Chromium PDF exception: ' . $e->getMessage());
+            throw new RuntimeException('Chromium + Playwright PDF generation error: ' . $e->getMessage(), 0, $e);
+        } finally {
             @unlink($tempHtml);
             if (file_exists($tempPdf)) {
                 @unlink($tempPdf);
             }
-        } catch (\Throwable $e) {
-            Log::warning('Playwright PDF generation exception: ' . $e->getMessage());
         }
-
-        return null;
     }
 
-    /**
-     * Fallback rendering via Barryvdh DomPDF.
-     */
-    public function generateWithDompdf(Admission $admission, string $type = 'pack'): string
+    private function resolveNodeBinary(): string
     {
-        $meta = $this->resolveDocumentMetadata($type, $admission);
-        $pdf = Pdf::loadView($meta['view'], compact('admission'));
-        $pdf->setPaper('a4', 'portrait');
-        $pdf->setOption([
-            'isHtml5ParserEnabled' => true,
-            'isRemoteEnabled' => true,
-            'defaultFont' => 'DejaVu Sans',
-            'dpi' => 150,
-        ]);
-
-        $domPdf = $pdf->getDomPDF();
-        $domPdf->render();
-
-        $canvas = $domPdf->getCanvas();
-
-        if ($meta['type'] !== self::TYPE_DISCHARGE_SUMMARY) {
-            $font = $domPdf->getFontMetrics()->getFont('DejaVu Sans', 'normal');
-            $size = 9;
-            $color = [0.4, 0.4, 0.4];
-
-            // Bottom right page number
-            $canvas->page_text(450, 810, "Page {PAGE_NUM} of {PAGE_COUNT}", $font, $size, $color);
-
-            // Bottom left hospital confidential notice
-            $canvas->page_text(40, 810, $meta['headerTitle'], $font, $size, $color);
+        $configured = getenv('NODE_BINARY') ?: ($_ENV['NODE_BINARY'] ?? $_SERVER['NODE_BINARY'] ?? '');
+        if ($configured !== '') {
+            if (!is_file($configured)) {
+                throw new RuntimeException("Configured NODE_BINARY does not exist: {$configured}");
+            }
+            return $configured;
         }
 
-        return $domPdf->output();
+        $candidates = PHP_OS_FAMILY === 'Windows'
+            ? [
+                'C:\\Program Files\\nodejs\\node.exe',
+                'C:\\Program Files (x86)\\nodejs\\node.exe',
+            ]
+            : [
+                '/usr/local/bin/node',
+                '/usr/bin/node',
+            ];
+
+        foreach ($candidates as $candidate) {
+            if (is_file($candidate)) {
+                return $candidate;
+            }
+        }
+
+        return 'node';
+    }
+
+    private function buildPlaywrightEnv(): array
+    {
+        $env = array_merge($_SERVER, $_ENV);
+
+        if (PHP_OS_FAMILY === 'Windows') {
+            $userProfile = getenv('USERPROFILE') ?: ($env['USERPROFILE'] ?? 'C:\\Users\\Admin');
+            $localAppData = getenv('LOCALAPPDATA') ?: ($env['LOCALAPPDATA'] ?? ($userProfile . '\\AppData\\Local'));
+            $appData = getenv('APPDATA') ?: ($env['APPDATA'] ?? ($userProfile . '\\AppData\\Roaming'));
+
+            return array_merge($env, [
+                'SystemRoot' => getenv('SystemRoot') ?: ($env['SystemRoot'] ?? 'C:\\Windows'),
+                'USERPROFILE' => $userProfile,
+                'LOCALAPPDATA' => $localAppData,
+                'APPDATA' => $appData,
+                'PATH' => getenv('PATH') ?: ($env['PATH'] ?? 'C:\\Windows\\system32;C:\\Program Files\\nodejs'),
+                'TEMP' => sys_get_temp_dir(),
+                'TMP' => sys_get_temp_dir(),
+            ]);
+        }
+
+        $currentPath = getenv('PATH') ?: ($env['PATH'] ?? '');
+        $pathParts = array_filter(explode(':', $currentPath));
+        foreach (['/usr/local/bin', '/usr/bin', '/bin'] as $stdDir) {
+            if (!in_array($stdDir, $pathParts, true)) {
+                $pathParts[] = $stdDir;
+            }
+        }
+
+        return array_merge($env, [
+            'PATH' => implode(':', $pathParts),
+            'HOME' => getenv('HOME') ?: ($env['HOME'] ?? '/tmp'),
+            'TMPDIR' => sys_get_temp_dir(),
+        ]);
     }
 }

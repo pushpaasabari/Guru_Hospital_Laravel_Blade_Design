@@ -1,10 +1,10 @@
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { chromium } from 'playwright';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import esbuild from 'esbuild';
+import { launchChromium } from './resources/scripts/launch-chromium.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -120,45 +120,32 @@ export async function generateDischargeSummaryPdf(outputPath = 'Guru_Hospital_Di
     const tempHtmlPath = path.join(__dirname, '.temp_react_print.html');
     fs.writeFileSync(tempHtmlPath, fullHtml, 'utf-8');
 
-    // Launch Chromium via Playwright
-    let browser;
-    const launchArgs = ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'];
+    // Launch Chromium via shared Playwright helper
+    const browser = await launchChromium();
     try {
-        browser = await chromium.launch({
-            channel: 'chrome',
-            headless: true,
-            args: launchArgs
+        const context = await browser.newContext();
+        const page = await context.newPage();
+
+        await page.setContent(fullHtml, { waitUntil: 'load' });
+
+        console.log(`[React Chromium] Printing to PDF via Chromium Blink engine: ${outputPath}`);
+        await page.pdf({
+            path: outputPath,
+            format: 'A4',
+            printBackground: true,
+            preferCSSPageSize: true, // Honors exact @page size and CSS sheets
+            displayHeaderFooter: false, // Page 1 has zero header/footer; Page 2 has running header/footer in HTML
+            margin: {
+                top: '0px',
+                bottom: '0px',
+                left: '0px',
+                right: '0px'
+            }
         });
-    } catch {
-        browser = await chromium.launch({
-            executablePath: 'C:\\Users\\Admin\\AppData\\Local\\ms-playwright\\chromium-1228\\chrome-win64\\chrome.exe',
-            headless: true,
-            args: launchArgs
-        });
+    } finally {
+        await browser.close();
+        try { fs.unlinkSync(tempHtmlPath); } catch {}
     }
-
-    const context = await browser.newContext();
-    const page = await context.newPage();
-
-    await page.setContent(fullHtml, { waitUntil: 'load' });
-
-    console.log(`[React Chromium] Printing to PDF via Chromium Blink engine: ${outputPath}`);
-    await page.pdf({
-        path: outputPath,
-        format: 'A4',
-        printBackground: true,
-        preferCSSPageSize: true, // Honors exact @page size and CSS sheets
-        displayHeaderFooter: false, // Page 1 has zero header/footer; Page 2 has running header/footer in HTML
-        margin: {
-            top: '0px',
-            bottom: '0px',
-            left: '0px',
-            right: '0px'
-        }
-    });
-
-    await browser.close();
-    try { fs.unlinkSync(tempHtmlPath); } catch {}
 
     console.log(`[React Chromium] Successfully generated: ${outputPath}`);
     return outputPath;

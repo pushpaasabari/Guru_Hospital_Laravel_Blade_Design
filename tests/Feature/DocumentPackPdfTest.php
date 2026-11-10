@@ -184,5 +184,37 @@ class DocumentPackPdfTest extends TestCase
             }
         }
     }
+
+    public function test_pdfs_are_strictly_generated_by_playwright_chromium_not_dompdf(): void
+    {
+        $pdfService = app(\App\Services\DocumentPackPdfService::class);
+
+        foreach (['discharge_summary', 'pack'] as $docType) {
+            $pdfBytes = $pdfService->generateWithPlaywright($this->approvedAdmission, $docType);
+            $ascii = preg_replace('/[^\x20-\x7E]/', '', $pdfBytes);
+
+            $this->assertStringStartsWith('%PDF-', $pdfBytes);
+            $this->assertStringContainsString('Skia/PDF', $ascii);
+            $this->assertStringNotContainsStringIgnoringCase('dompdf', $ascii);
+        }
+    }
+
+    public function test_pdf_generation_throws_exception_instead_of_dompdf_fallback_when_playwright_fails(): void
+    {
+        $pdfService = app(\App\Services\DocumentPackPdfService::class);
+        $previous = getenv('NODE_BINARY');
+        putenv('NODE_BINARY=C:\\nonexistent\\node_missing.exe');
+
+        try {
+            $this->expectException(\RuntimeException::class);
+            $pdfService->download($this->approvedAdmission, 'discharge_summary');
+        } finally {
+            if ($previous === false) {
+                putenv('NODE_BINARY');
+            } else {
+                putenv("NODE_BINARY={$previous}");
+            }
+        }
+    }
 }
 
