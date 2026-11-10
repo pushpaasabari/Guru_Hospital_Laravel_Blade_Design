@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
+import Pagination from '../../Components/Pagination';
 
 interface AdmissionItem {
   id: number;
@@ -317,6 +318,7 @@ export default function AdmissionsIndex({ admissions, filters = {}, auth }: Prop
             </tbody>
           </table>
         </div>
+        <Pagination links={admissions.links} />
       </div>
     </AppLayout>
   );

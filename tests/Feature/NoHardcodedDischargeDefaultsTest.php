@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Admission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class NoHardcodedDischargeDefaultsTest extends TestCase
@@ -83,11 +84,22 @@ class NoHardcodedDischargeDefaultsTest extends TestCase
         }
 
         foreach (['general', 'cmchistn', 'employee', 'private'] as $format) {
-            $previewHtml = view("documents.discharge-summaries.{$format}.delivery", ['admission' => $admission])->render();
-            $this->assertStringNotContainsString('Dr. Ambika', $previewHtml);
-            $this->assertStringNotContainsString('Dr. M.S Karthick', $previewHtml);
-            $this->assertStringNotContainsString('Staff Nurse', $previewHtml);
-            $this->assertStringNotContainsString('TNMC-64821', $previewHtml);
+            $admission->update(['format' => $format]);
+
+            $previewResponse = $this->actingAs($doctor)->get(route('documents.preview', $admission));
+            $previewResponse->assertStatus(200);
+            $previewResponse->assertInertia(fn (Assert $page) => $page
+                ->component('Documents/Pack')
+                ->where('admission.format', $format)
+                ->where('admission.surgery_type', 'delivery')
+                ->where('admission.consultant', null)
+                ->where('admission.surgeon', null)
+            );
+
+            $packHtml = view('pdf.pack', ['admission' => $admission])->render();
+            $this->assertStringNotContainsString('Dr. Ambika', $packHtml);
+            $this->assertStringNotContainsString('Dr. M.S Karthick', $packHtml);
+            $this->assertStringNotContainsString('TNMC-64821', $packHtml);
         }
     }
 
@@ -158,12 +170,21 @@ class NoHardcodedDischargeDefaultsTest extends TestCase
         }
 
         foreach (['general', 'cmchistn', 'employee', 'private'] as $format) {
-            $previewHtml = view("documents.discharge-summaries.{$format}.other", ['admission' => $admission])->render();
-            $this->assertStringNotContainsString('DR. N. JAYAPRAKASH', $previewHtml);
-            $this->assertStringNotContainsString('DR. S.G. ARUN KUMAR', $previewHtml);
-            $this->assertStringNotContainsString('MISS. SOUNDHARYA', $previewHtml);
-            $this->assertStringNotContainsString('OT Staff Nurse', $previewHtml);
-            $this->assertStringNotContainsString('Staff Nurse', $previewHtml);
+            $admission->update(['format' => $format]);
+
+            $previewResponse = $this->actingAs($doctor)->get(route('documents.preview', $admission));
+            $previewResponse->assertStatus(200);
+            $previewResponse->assertInertia(fn (Assert $page) => $page
+                ->component('Documents/Pack')
+                ->where('admission.format', $format)
+                ->where('admission.surgery_type', 'other')
+                ->where('admission.surgeon', null)
+            );
+
+            $packHtml = view('pdf.pack', ['admission' => $admission])->render();
+            $this->assertStringNotContainsString('DR. N. JAYAPRAKASH', $packHtml);
+            $this->assertStringNotContainsString('DR. S.G. ARUN KUMAR', $packHtml);
+            $this->assertStringNotContainsString('MISS. SOUNDHARYA', $packHtml);
         }
     }
 

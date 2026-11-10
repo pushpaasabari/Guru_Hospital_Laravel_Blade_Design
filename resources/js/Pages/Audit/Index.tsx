@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
+import Pagination from '../../Components/Pagination';
 
 interface AuditLog {
   id: number;
@@ -216,33 +217,7 @@ export default function Index({ auditLogs }: Props) {
         </div>
 
         {/* Pagination */}
-        {auditLogs.links && auditLogs.links.length > 3 && (
-          <div className="card-footer bg-white py-3 border-top">
-            <nav className="d-flex justify-content-center">
-              <ul className="pagination pagination-sm mb-0">
-                {auditLogs.links.map((link, idx) => (
-                  <li
-                    key={idx}
-                    className={`page-item ${link.active ? 'active' : ''} ${!link.url ? 'disabled' : ''}`}
-                  >
-                    {link.url ? (
-                      <Link
-                        href={link.url}
-                        className="page-link"
-                        dangerouslySetInnerHTML={{ __html: link.label }}
-                      />
-                    ) : (
-                      <span
-                        className="page-link"
-                        dangerouslySetInnerHTML={{ __html: link.label }}
-                      />
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </div>
-        )}
+        <Pagination links={auditLogs.links} />
       </div>
     </AppLayout>
   );

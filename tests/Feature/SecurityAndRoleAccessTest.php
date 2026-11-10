@@ -149,5 +149,60 @@ class SecurityAndRoleAccessTest extends TestCase
     {
         $this->get('/up')->assertStatus(200);
     }
+
+    public function test_frontend_routes_use_react_inertia_and_no_legacy_ui_blades_remain(): void
+    {
+        $bladeFiles = collect(
+            glob(resource_path('views/{,*/,*/*/,*/*/*/}*.blade.php'), GLOB_BRACE) ?: []
+        )->map(fn (string $path) => str_replace('\\', '/', ltrim(str_replace(resource_path('views'), '', $path), '/\\')));
+
+        $nonPdfBlades = $bladeFiles->reject(
+            fn (string $relative) => $relative === 'app.blade.php' || str_starts_with($relative, 'pdf/')
+        );
+
+        $this->assertTrue(
+            $nonPdfBlades->isEmpty(),
+            'Found unexpected legacy frontend Blade views: '.$nonPdfBlades->implode(', ')
+        );
+
+        $this->get(route('login'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Auth/Login'));
+
+        $this->actingAs($this->admin)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Dashboard'));
+
+        $this->actingAs($this->admin)
+            ->get(route('admissions.index'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Admissions/Index'));
+
+        $this->actingAs($this->admin)
+            ->get(route('templates.index'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Templates/Index'));
+
+        $this->actingAs($this->admin)
+            ->get(route('users.index'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Users/Index'));
+
+        $this->actingAs($this->admin)
+            ->get(route('audit.index'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Audit/Index'));
+
+        $this->actingAs($this->admin)
+            ->get(route('clinical-staff.index'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('ClinicalStaff/Index'));
+
+        $this->actingAs($this->admin)
+            ->get(route('anesthesia-types.index'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('AnesthesiaTypes/Index'));
+    }
 }
 

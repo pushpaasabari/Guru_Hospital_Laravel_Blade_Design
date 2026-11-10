@@ -191,7 +191,17 @@ class DocumentPackPdfTest extends TestCase
                     'status' => 'approved',
                 ]);
 
-                $html = view("documents.discharge-summaries.{$format}.{$type}", ['admission' => $admission])->render();
+                $response = $this->actingAs($this->doctor)
+                    ->get(route('documents.preview', $admission));
+                $response->assertStatus(200);
+                $response->assertInertia(fn ($page) => $page
+                    ->component('Documents/Pack')
+                    ->where('admission.format', $format)
+                    ->where('admission.surgery_type', $type)
+                    ->where('admission.investigations', fn ($inv) => str_contains($inv, 'Hb'))
+                );
+
+                $html = view('pdf.discharge-summary', ['admission' => $admission])->render();
                 $this->assertStringContainsString('INVESTIGATIONS', $html);
                 $this->assertStringNotContainsString('rounded font-monospace', $html);
             }

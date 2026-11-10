@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Admission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class PaymentInsuranceWorkflowTest extends TestCase
@@ -129,11 +130,21 @@ class PaymentInsuranceWorkflowTest extends TestCase
         $this->assertStringContainsString('Star Health Insurance', $mrdHtml);
         $this->assertStringContainsString('SH-88412099', $mrdHtml);
 
-        $privatePreview = view('documents.discharge-summaries.private.other', compact('admission'))->render();
-        $this->assertStringContainsString('Star Health Insurance', $privatePreview);
-        $this->assertStringContainsString('SH-88412099', $privatePreview);
-        $this->assertStringContainsString('PA-2026-1102', $privatePreview);
-        $this->assertStringNotContainsString('GH-MED-', $privatePreview);
+        $this->actingAs($this->nurse)
+            ->get(route('documents.preview', $admission))
+            ->assertStatus(200)
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Documents/Pack')
+                ->where('admission.insurance_company', 'Star Health Insurance')
+                ->where('admission.policy_number', 'SH-88412099')
+                ->where('admission.pre_auth_no', 'PA-2026-1102')
+            );
+
+        $packHtml = view('pdf.pack', compact('admission'))->render();
+        $this->assertStringContainsString('Star Health Insurance', $packHtml);
+        $this->assertStringContainsString('SH-88412099', $packHtml);
+        $this->assertStringContainsString('PA-2026-1102', $packHtml);
+        $this->assertStringNotContainsString('GH-MED-', $packHtml);
 
         // Switching to Cash in Edit clears all insurance metadata
         $editResponse = $this->actingAs($this->nurse)->put(route('admissions.update', $admission), [
@@ -200,10 +211,19 @@ class PaymentInsuranceWorkflowTest extends TestCase
         $this->assertEquals('Approved', $fresh->pre_auth_status);
         $this->assertEquals('32000.00', $fresh->approved_amount);
 
-        $cmchistnPreview = view('documents.discharge-summaries.cmchistn.other', ['admission' => $fresh])->render();
-        $this->assertStringContainsString('URN-3301994422', $cmchistnPreview);
-        $this->assertStringContainsString('PA-CMCHIS-771', $cmchistnPreview);
-        $this->assertStringNotContainsString('TN-CMCHIS-', $cmchistnPreview);
+        $this->actingAs($this->nurse)
+            ->get(route('documents.preview', $fresh))
+            ->assertStatus(200)
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Documents/Pack')
+                ->where('admission.policy_number', 'URN-3301994422')
+                ->where('admission.pre_auth_no', 'PA-CMCHIS-771')
+            );
+
+        $cmchistnHtml = view('pdf.pack', ['admission' => $fresh])->render();
+        $this->assertStringContainsString('URN-3301994422', $cmchistnHtml);
+        $this->assertStringContainsString('PA-CMCHIS-771', $cmchistnHtml);
+        $this->assertStringNotContainsString('TN-CMCHIS-', $cmchistnHtml);
 
         // Stream real PDF for Insurance admission
         $pdfRes = $this->actingAs($this->nurse)->get(route('documents.pdf', ['admission' => $fresh, 'type' => 'mrd_form']));
