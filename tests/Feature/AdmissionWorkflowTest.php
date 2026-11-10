@@ -546,6 +546,15 @@ class AdmissionWorkflowTest extends TestCase
         $this->assertEquals('1-0-1', $meds[0]['frequency']);
         $this->assertEquals('7 days', $meds[0]['duration']);
         $this->assertEquals('After food', $meds[0]['timing']);
+
+        // Formatted condition on discharge including P/A with slash
+        $cond = \App\Services\DischargeSummaryFormatter::formatConditionOnDischarge(
+            "Pt's general condition good. BP: 110/70 mmHg, Pulse: 86 b/min, P/A: Uterus contracted well; no undue bleeding pv"
+        );
+        $this->assertEquals('Good', $cond['general']);
+        $this->assertEquals('110/70 mmHg', $cond['bp']);
+        $this->assertEquals('86 b/min', $cond['pulse']);
+        $this->assertEquals('Uterus contracted well; no undue bleeding pv', $cond['pa']);
     }
 
     public function test_patient_with_stent_in_procedure_includes_official_tamil_stent_notice(): void

@@ -1,125 +1,116 @@
-# Guru Hospital — Discharge Summary, OT Notes & MRD Automation System
+# Guru Hospital — Clinical Document Workflow & Discharge Automation
 
-A production-ready clinical document automation system built with **Laravel 12**, **Blade**, **Bootstrap 5**, and **Dompdf**. This application allows hospital staff to enter shared patient and admission data once to generate three coordinated, print-ready hospital documents:
+A production clinical document automation system built with **Laravel 12**, **React + Inertia.js**, **MySQL**, and **Playwright + Chromium**. Hospital staff enter shared patient, admission, surgery, lab, and discharge records once to generate three coordinated print-ready clinical documents:
 
-1. **Discharge Summary** (with 4 format variants and 2 surgery workflows = 8 combinations)
-2. **Operation Theatre (OT) Notes**
-3. **Medical Records Department (MRD) Record Form**
-
----
-
-## 🏥 Hospital Format Variants & Workflows
-
-### 4 Formats:
-- **General**: Standard hospital format aligned with Guru Hospital clinical templates.
-- **CMCHISTN**: Chief Minister's Comprehensive Health Insurance Scheme (Tamil Nadu Govt.) with Pre-Auth / URN tracking.
-- **Private**: Private Inpatient & Mediclaim TPA with policy / claim identifiers.
-- **Employee**: Hospital Employee and Dependent Healthcare Benefit format.
-
-### 2 Clinical Workflows:
-- **Delivery**: Obstetric / LSCS workflow featuring live newborn details (birth weight, Apgar 1m/5m, gender, delivery timestamp, neonatal care, pediatrician handover). Supports multiple births (twins, triplets).
-- **Other Surgery**: General and specialized surgeries (e.g. Lap Appendectomy) with vitals, incisions, operative findings, drain tubes, and anesthesia monitoring. Newborn fields are strictly suppressed.
+1. **Discharge Summary** (`223 mm × 304 mm` two-page portrait layout designed for Guru Hospital's pre-printed stationery with `70 mm` top and `30 mm` bottom blank margins).
+2. **Operation Theatre (OT) Notes** (`A4` portrait).
+3. **Medical Records Department (MRD) Form** (`A4` portrait) and combined **3-in-1 Dossier Pack**.
 
 ---
 
-## 🔒 Security, Roles & Approval Lifecycle
+## Clinical Formats & Workflows
 
-### Role-Based Access Control:
-- **`administrator`**: Full system access, staff account management, template versioning, audit trail inspection.
-- **`doctor`**: Clinical review, document approval, return for correction with mandatory clinician reason, revision unlocking.
-- **`nursing_staff` / `medical_records`**: Admission intake, draft creation and editing, submission for review.
-- **`ot_staff`**: Intraoperative and surgical narrative documentation.
-- **`auditor`**: Read-only compliance inspection; strictly blocked from clinical mutations and document approvals.
+### Formats & Insurance Tracking
+- **General**: Standard cash / general inpatient summary.
+- **CMCHISTN**: Chief Minister's Comprehensive Health Insurance Scheme (Tamil Nadu Govt.).
+- **Private Insurance / TPA**: Private mediclaim / TPA with policy, pre-auth, and holder metadata.
+- **Employee**: Hospital employee healthcare benefit format.
 
-### Document State Machine:
-```
-[Draft] ──(Staff Submit)──> [Ready for Review] ──(Doctor Approve)──> [Approved] ──(Generate PDF)──> [Generated]
-   ▲                               │
-   │                               ▼
-   └──(Doctor Return)────── [Returned for Correction]
-```
-- **Revisions**: Modifying an approved or generated document automatically archives an immutable revision snapshot (`document_revisions`) and transitions the admission back to an editable review state.
-- **Audit Trail**: Every authentication event, document state transition, PDF download, and clinical revision is recorded in a tamper-resistant audit log (`audit_logs`) with IP address, user agent, actor ID, and timestamps.
-- **Private PDF Storage**: Generated PDF files are stored in `storage/app/private/documents/` and served strictly via authenticated, policy-checked controller streams.
+### Clinical Workflows
+- **Delivery / Obstetric**: Supports single and multiple newborn birth entries (sex, birth time, weight, APGAR 1m/5m, neonatal care) and mandatory Tamil Nadu PICME / RCH ID.
+- **Other Surgery**: General / laparoscopic / urological surgical procedures (including DJ stent Tamil removal notice support) with newborn fields suppressed.
+- **Medical Case**: Non-surgical conservative medical admissions.
+
+### Normalized Clinical Inputs
+- Automatically enforces **UPPERCASE** persistence for `patient_name`, `address_line1..3` (and combined `address`), `consultant`, and Stage 2 **Surgical & Anaesthesia Team** fields.
+- Enforces **digits-only (`0-9`)** restriction and validation on `Phone / Contact`.
 
 ---
 
-## 🧪 Real Hospital Test Data & Automated Tests
+## Security, Roles & Approval Lifecycle
 
-The repository includes real clinical seeders based on verified Guru Hospital patient cases:
-- **Case 1 (Obstetric Delivery)**: `Mrs. Ashwini`, IP `2026/582`, UHID `2022/151`, Emergency LSCS performed by Dr. Ambika M.S (O&G), Dr. M.S Karthick (Anaesthetist), Paediatrician Dr. Nithyapriya.
-- **Case 2 (Other Surgery)**: `Mr. Ajith kumar`, IP `2026/488`, UHID `2026/2892`, Lap Appendectomy performed by Dr. Jayaprakash M.S, Dr. S.G. ArunKumar (Anesthetist).
+- **`administrator`**: Full access, staff users, clinical staff directory, anaesthesia types, templates, and audit logs.
+- **`doctor`**: Clinical review, document approvals, return for correction, revision creation, and PDF export.
+- **`nursing_staff` / `ot_staff` / `mrd_staff`**: Stage-by-stage admission intake, editing, and PDF generation.
+- **`auditor`**: Read-only inspection and audit trail access.
+- **Audit Trail & Private Storage**: Key actions log actor, IP, user agent, and diffs into `audit_logs`. Generated PDFs are archived privately under `storage/app/private/documents/` behind authenticated policy-checked endpoints.
 
-### Running Automated Tests:
+---
+
+## Automated Tests
+
 ```bash
 php artisan test
 ```
-**Test Suite Coverage:**
-- 25 automated feature and unit tests (127 assertions).
-- Multi-role permission checks (admin, doctor, nurse, auditor, deactivated users).
-- Multi-newborn repeater persistence and validation.
-- Format isolation between delivery and other-surgery workflows.
-- Approval workflow state transitions and reason enforcement.
-- Dompdf PDF generation, 2-pass dynamic canvas page numbering (`Page {PAGE_NUM} of {PAGE_COUNT}`), and private file streaming.
+
+*(Uses isolated in-memory SQLite via `phpunit.xml`, or pass `DB_CONNECTION=mysql` with a dedicated test schema to test directly against MySQL.)*
 
 ---
 
-## 🚀 Local Development Setup
+## Local Development Setup
 
-1. **Clone & Install Dependencies:**
+1. **Install dependencies:**
    ```bash
    composer install
+   npm install
+   npx playwright install chromium
    ```
-2. **Environment Configuration:**
+2. **Configure `.env` (MySQL):**
    ```bash
    cp .env.example .env
    php artisan key:generate
    ```
-3. **Database Migration & Seeding:**
+3. **Create the MySQL database (`guru_hospital`) and run migrations + seeders:**
    ```bash
-   php artisan migrate:fresh --seed
+   php artisan migrate --seed
    ```
-4. **Default Logins (Demo Accounts):**
-   - **Administrator**: `admin@guruhospital.com` / `password123`
-   - **Surgeon / Doctor**: `doctor@guruhospital.com` / `password123` (Reg: `TN-MCI-74892`)
-   - **Staff Nurse**: `nurse@guruhospital.com` / `password123`
-   - **MRD Officer**: `mrd@guruhospital.com` / `password123`
-   - **Compliance Auditor**: `auditor@guruhospital.com` / `password123`
-5. **Start Development Server:**
+4. **Build frontend or run dev servers:**
    ```bash
+   npm run build
    php artisan serve
    ```
-   Access at `http://127.0.0.1:8000`.
 
 ---
 
-## 🏭 Production Deployment Runbook (Hospital Server)
+## Production Deployment Runbook (AWS / Linux / Nginx / Apache)
 
-### 1. Database Configuration (MySQL / MariaDB)
-Update `.env` on your production server:
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=guru_hospital
-DB_USERNAME=hospital_db_user
-DB_PASSWORD=SecurePasswordHere
-```
-Run production migrations:
-```bash
-php artisan migrate --force
-```
+1. **Server Prerequisites:**
+   - PHP `>= 8.2` (`pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `fileinfo`), Composer, MySQL 8 / MariaDB 10.4+, Node.js `>= 20`, and Playwright Chromium system dependencies (`npx playwright install-deps chromium`).
+2. **Environment Configuration (`.env`):**
+   ```env
+   APP_NAME="Guru Hospital"
+   APP_ENV=production
+   APP_KEY=...
+   APP_DEBUG=false
+   APP_URL=https://your-domain.com
 
-### 2. File Permissions & Font Cache
-Ensure the web server (`www-data` or Apache `SYSTEM`) has write permissions to:
-```bash
-chmod -R 775 storage bootstrap/cache
-```
-The application bundles Tamil & Indic TrueType fonts (`Nirmala.ttf` and `NirmalaB.ttf`) in `public/fonts/` and utilizes `storage/fonts/` for Dompdf UFM font metrics cache.
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=guru_hospital
+   DB_USERNAME=hospital_db_user
+   DB_PASSWORD=StrongPasswordHere
 
-### 3. Production Optimization
-```bash
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-```
+   SESSION_DRIVER=database
+   SESSION_ENCRYPT=true
+   QUEUE_CONNECTION=database
+   CACHE_STORE=database
+   LOG_CHANNEL=daily
+   LOG_LEVEL=warning
+   TRUSTED_PROXIES=*
+   ```
+3. **Install, Build, Migrate & Optimize:**
+   ```bash
+   composer install --no-dev --optimize-autoloader
+   npm ci
+   npm run build
+   npx playwright install chromium
+   rm -f public/hot
+   php artisan migrate --force
+   php artisan storage:link
+   php artisan optimize
+   ```
+4. **File Permissions & Verification:**
+   - Ensure web server / PHP-FPM user (`www-data`) owns or has write access to `storage/` and `bootstrap/cache/`.
+   - Confirm `public/fonts/Nirmala.ttf` and `public/fonts/NirmalaB.ttf` are present for Tamil stent notice rendering.
+   - Verify health endpoint `GET /up` returns HTTP `200`.

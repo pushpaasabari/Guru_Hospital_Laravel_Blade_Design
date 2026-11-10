@@ -153,10 +153,13 @@ export function formatConditionOnDischarge(text?: string | null): FormattedCondi
     matchedAny = true;
   }
 
-  const pam = text.match(/PA\s*[-:]\s*(.*?)(?=\n|$)/i);
+  const pam = text.match(/\bP\/?A\s*[:\-]\s*(.*?)(?=\n|$)/i);
   if (pam) {
     const pa = pam[1].trim().replace(/\.$/, '');
-    res.pa = /no\s+undue\s+bleeding/i.test(text) ? `${pa}; no undue bleeding P/V` : pa;
+    res.pa =
+      /no\s+undue\s+bleeding/i.test(text) && !/no\s+undue\s+bleeding/i.test(pa)
+        ? `${pa}; no undue bleeding P/V`
+        : pa;
     matchedAny = true;
   }
 
@@ -214,7 +217,13 @@ export function formatMedications(text?: string | any[] | null): FormattedMedica
       line = line.replace(dm[0], '');
     }
 
-    let med = line.replace(/[-–x]+$/, '').trim().replace(/\s+/, ' ');
+    let med = line
+      .replace(/\s+/g, ' ')
+      .trim()
+      .replace(/(?:\s*[-–:]+\s*)+$/u, '')
+      .replace(/\s+x$/i, '')
+      .replace(/(?:\s*[-–:]+\s*)+$/u, '')
+      .trim();
     med = med.replace(/\b(tab|cap|syp|inj)\b/gi, (m) => m.charAt(0).toUpperCase() + m.slice(1).toLowerCase() + '.');
     med = med.replace(/Tab\.\./g, 'Tab.').replace(/Cap\.\./g, 'Cap.').replace(/Inj\.\./g, 'Inj.');
     med = med.replace(/\+\s*([a-zA-Z]+)/g, (_, word) => `+ ${word.charAt(0).toUpperCase()}${word.slice(1).toLowerCase()}`);

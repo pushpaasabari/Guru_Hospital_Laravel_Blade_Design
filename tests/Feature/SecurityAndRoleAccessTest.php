@@ -144,5 +144,10 @@ class SecurityAndRoleAccessTest extends TestCase
             ->has('admissions')
         );
     }
+
+    public function test_health_endpoint_returns_ok(): void
+    {
+        $this->get('/up')->assertStatus(200);
+    }
 }
 

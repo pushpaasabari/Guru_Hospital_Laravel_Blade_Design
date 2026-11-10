@@ -34,8 +34,8 @@
         }
         .ot-title {
             text-align: center;
-            margin-top: 4px;
-            margin-bottom: 18px;
+            margin-top: 2px;
+            margin-bottom: 12px;
             font-size: 13pt;
             font-weight: bold;
             text-decoration: underline;
@@ -78,8 +78,8 @@
         }
         .signature-block {
             text-align: right;
-            margin-top: 45px;
-            padding-top: 15px;
+            margin-top: 22px;
+            padding-top: 8px;
             page-break-inside: avoid;
         }
     </style>

@@ -186,9 +186,9 @@ class DischargeSummaryFormatter
             $matchedAny = true;
         }
 
-        if (preg_match('/PA\s*[-:]\s*(.*?)(?=\n|$)/i', $text, $m)) {
+        if (preg_match('/\bP\/?A\s*[:\-]\s*(.*?)(?=\n|$)/i', $text, $m)) {
             $paText = trim($m[1]);
-            if (preg_match('/no\s+undue\s+bleeding/i', $text)) {
+            if (preg_match('/no\s+undue\s+bleeding/i', $text) && !preg_match('/no\s+undue\s+bleeding/i', $paText)) {
                 $res['pa'] = rtrim($paText, '.') . '; no undue bleeding P/V';
             } else {
                 $res['pa'] = $paText;

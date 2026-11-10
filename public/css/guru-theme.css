@@ -1420,3 +1420,7 @@ body {
   border-color: #10b981;
 }
 
+input[style*="text-transform: uppercase"]::placeholder {
+  text-transform: none;
+}
+
