@@ -174,11 +174,11 @@
         <tr>
             <td style="width: 33.3%;">
                 <span class="ds-cell-lbl">CONSULTANT DOCTOR</span>
-                <span class="ds-cell-val">{{ $admission->consultant ?: ($admission->surgeon ?: 'Dr. Ambika MS OG') }}</span>
+                <span class="ds-cell-val">{{ $admission->consultant ?: ($admission->surgeon ?: '—') }}</span>
             </td>
             <td style="width: 33.3%;">
                 <span class="ds-cell-lbl">DEPARTMENT</span>
-                <span class="ds-cell-val">{{ $admission->department ?? 'Obstetrics & Gynaecology' }}</span>
+                <span class="ds-cell-val">{{ $admission->department ?: '—' }}</span>
             </td>
             <td style="width: 33.4%;">
                 <span class="ds-cell-lbl">DATE OF SURGERY</span>
@@ -188,7 +188,7 @@
         <tr>
             <td style="width: 33.3%;">
                 <span class="ds-cell-lbl">SURGEON</span>
-                <span class="ds-cell-val">{{ $admission->surgeon ?: ($admission->consultant ?: 'Dr. Ambika MS OG') }}</span>
+                <span class="ds-cell-val">{{ $admission->surgeon ?: ($admission->consultant ?: '—') }}</span>
             </td>
             <td style="width: 33.3%;">
                 <span class="ds-cell-lbl">ANAESTHETIST</span>
@@ -400,6 +400,7 @@
     @php
         $adviceData = $admission->formatted_advice_and_review;
     @endphp
+    @if(!empty($adviceData['advice_items']))
     <div class="ds-section-header">ADVICE</div>
     <div style="font-size: 8.8pt; line-height: 1.5; margin-bottom: 6px;">
         @foreach($adviceData['advice_items'] as $item)
@@ -408,16 +409,23 @@
             </span>
         @endforeach
     </div>
+    @endif
 
+    @if(!empty($adviceData['review_text']) || !empty($adviceData['review_date']))
     <div class="ds-section-header">REVIEW & SUTURE REMOVAL</div>
     <div class="ds-review-box">
+        @if(!empty($adviceData['review_text']))
         <div style="font-size: 9.5pt; font-weight: bold;">
             {{ $adviceData['review_text'] }}
         </div>
+        @endif
+        @if(!empty($adviceData['review_date']))
         <div style="font-size: 11.5pt; font-weight: bold;">
             {{ $adviceData['review_date'] }}
         </div>
+        @endif
     </div>
+    @endif
 
     {{-- When to Contact / Emergency Box --}}
     <div class="ds-emergency-box">
@@ -434,8 +442,12 @@
     {{-- Signatures --}}
     <div class="ds-sig-row" style="justify-content: flex-end;">
         <div style="text-align: right;">
-            <div style="font-size: 9pt; font-weight: bold; color: #000000;">{{ $admission->consultant ?: ($admission->surgeon ?: 'Dr. Ambika MS OG') }}</div>
-            <div style="font-size: 7.5pt; color: #475569; margin-top: 1px;">Reg: {{ $admission->approver?->doctor_reg_no ?? 'TNMC-64821' }}</div>
+            @if($admission->consultant || $admission->surgeon)
+                <div style="font-size: 9pt; font-weight: bold; color: #000000;">{{ $admission->consultant ?: $admission->surgeon }}</div>
+            @endif
+            @if($admission->approver?->doctor_reg_no)
+                <div style="font-size: 7.5pt; color: #475569; margin-top: 1px;">Reg: {{ $admission->approver->doctor_reg_no }}</div>
+            @endif
         </div>
     </div>
 </div>

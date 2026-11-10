@@ -758,11 +758,11 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                       <tr>
                         <td style={{ width: '33.3%', border: '1px solid #cbd5e1', padding: '4px 6px' }}>
                           <span style={{ fontSize: '7pt', fontWeight: 700, color: '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '1px' }}>CONSULTANT DOCTOR</span>
-                          <span style={{ fontSize: '9.2pt', fontWeight: 700, color: '#000', display: 'block' }}>{admission.consultant || admission.surgeon || 'Dr. Ambika MS OG'}</span>
+                          <span style={{ fontSize: '9.2pt', fontWeight: 700, color: '#000', display: 'block' }}>{admission.consultant || admission.surgeon || '—'}</span>
                         </td>
                         <td style={{ width: '33.3%', border: '1px solid #cbd5e1', padding: '4px 6px' }}>
                           <span style={{ fontSize: '7pt', fontWeight: 700, color: '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '1px' }}>DEPARTMENT</span>
-                          <span style={{ fontSize: '9.2pt', fontWeight: 700, color: '#000', display: 'block' }}>{admission.department || 'Obstetrics & Gynaecology'}</span>
+                          <span style={{ fontSize: '9.2pt', fontWeight: 700, color: '#000', display: 'block' }}>{admission.department || '—'}</span>
                         </td>
                         <td style={{ width: '33.4%', border: '1px solid #cbd5e1', padding: '4px 6px' }}>
                           <span style={{ fontSize: '7pt', fontWeight: 700, color: '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '1px' }}>DATE OF SURGERY</span>
@@ -772,7 +772,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                       <tr>
                         <td style={{ width: '33.3%', border: '1px solid #cbd5e1', padding: '4px 6px' }}>
                           <span style={{ fontSize: '7pt', fontWeight: 700, color: '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '1px' }}>SURGEON</span>
-                          <span style={{ fontSize: '9.2pt', fontWeight: 700, color: '#000', display: 'block' }}>{admission.surgeon || admission.consultant || 'Dr. Ambika MS OG'}</span>
+                          <span style={{ fontSize: '9.2pt', fontWeight: 700, color: '#000', display: 'block' }}>{admission.surgeon || admission.consultant || '—'}</span>
                         </td>
                         <td style={{ width: '33.3%', border: '1px solid #cbd5e1', padding: '4px 6px' }}>
                           <span style={{ fontSize: '7pt', fontWeight: 700, color: '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '1px' }}>ANAESTHETIST</span>
@@ -1172,56 +1172,64 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                   )}
 
                   {/* Advice & Review */}
-                  <div
-                    style={{
-                      fontSize: '10pt',
-                      fontWeight: 'bold',
-                      color: '#111',
-                      textTransform: 'uppercase',
-                      borderBottom: '1.5px solid #222',
-                      paddingBottom: '2px',
-                      marginTop: '12px',
-                      marginBottom: '4px',
-                    }}
-                  >
-                    ADVICE
-                  </div>
-                  <div style={{ fontSize: '8.8pt', lineHeight: 1.5, marginBottom: '8px' }}>
-                    {adviceData.advice_items.map((item, i) => (
-                      <span key={i} style={{ display: 'inline-block', marginRight: '18px' }}>
-                        <strong>&bull;</strong> {item}
-                      </span>
-                    ))}
-                  </div>
+                  {adviceData.advice_items.length > 0 && (
+                    <>
+                      <div
+                        style={{
+                          fontSize: '10pt',
+                          fontWeight: 'bold',
+                          color: '#111',
+                          textTransform: 'uppercase',
+                          borderBottom: '1.5px solid #222',
+                          paddingBottom: '2px',
+                          marginTop: '12px',
+                          marginBottom: '4px',
+                        }}
+                      >
+                        ADVICE
+                      </div>
+                      <div style={{ fontSize: '8.8pt', lineHeight: 1.5, marginBottom: '8px' }}>
+                        {adviceData.advice_items.map((item, i) => (
+                          <span key={i} style={{ display: 'inline-block', marginRight: '18px' }}>
+                            <strong>&bull;</strong> {item}
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  )}
 
-                  <div
-                    style={{
-                      fontSize: '10pt',
-                      fontWeight: 'bold',
-                      color: '#111',
-                      textTransform: 'uppercase',
-                      borderBottom: '1.5px solid #222',
-                      paddingBottom: '2px',
-                      marginTop: '12px',
-                      marginBottom: '4px',
-                    }}
-                  >
-                    REVIEW & SUTURE REMOVAL
-                  </div>
-                  <div
-                    style={{
-                      border: '1.5px solid #000',
-                      backgroundColor: '#f1f5f9',
-                      padding: '6px 12px',
-                      marginBottom: '8px',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <div style={{ fontSize: '9.5pt', fontWeight: 'bold' }}>{adviceData.review_text}</div>
-                    <div style={{ fontSize: '11.5pt', fontWeight: 'bold' }}>{adviceData.review_date}</div>
-                  </div>
+                  {(adviceData.review_text || adviceData.review_date) && (
+                    <>
+                      <div
+                        style={{
+                          fontSize: '10pt',
+                          fontWeight: 'bold',
+                          color: '#111',
+                          textTransform: 'uppercase',
+                          borderBottom: '1.5px solid #222',
+                          paddingBottom: '2px',
+                          marginTop: '12px',
+                          marginBottom: '4px',
+                        }}
+                      >
+                        REVIEW & SUTURE REMOVAL
+                      </div>
+                      <div
+                        style={{
+                          border: '1.5px solid #000',
+                          backgroundColor: '#f1f5f9',
+                          padding: '6px 12px',
+                          marginBottom: '8px',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
+                        {adviceData.review_text && <div style={{ fontSize: '9.5pt', fontWeight: 'bold' }}>{adviceData.review_text}</div>}
+                        {adviceData.review_date && <div style={{ fontSize: '11.5pt', fontWeight: 'bold' }}>{adviceData.review_date}</div>}
+                      </div>
+                    </>
+                  )}
 
                   {adviceData.tamil_note && (
                     <div
@@ -1231,7 +1239,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                         backgroundColor: '#f8fafc',
                         padding: '6px 10px',
                         marginBottom: '8px',
-                        fontFamily: "'Nirmala', 'Arial Unicode MS', sans-serif",
+                        fontFamily: "'Nirmala UI', 'Nirmala', 'Arial Unicode MS', sans-serif",
                         fontSize: '8.5pt',
                         lineHeight: 1.4,
                         color: '#111',
@@ -1275,8 +1283,12 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                     }}
                   >
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '9pt', fontWeight: 'bold', color: '#000' }}>{admission.consultant || admission.surgeon || 'Dr. Ambika MS OG'}</div>
-                      <div style={{ fontSize: '7.5pt', color: '#475569', marginTop: '1px' }}>Reg: {admission.approver?.doctor_reg_no ?? 'TNMC-64821'}</div>
+                      {(admission.consultant || admission.surgeon) && (
+                        <div style={{ fontSize: '9pt', fontWeight: 'bold', color: '#000' }}>{admission.consultant || admission.surgeon}</div>
+                      )}
+                      {admission.approver?.doctor_reg_no && (
+                        <div style={{ fontSize: '7.5pt', color: '#475569', marginTop: '1px' }}>Reg: {admission.approver.doctor_reg_no}</div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1338,9 +1350,9 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                       <td style={{ width: '12%', fontWeight: 'bold', background: '#f8fafc' }}>NAME</td>
                       <td style={{ width: '44%', fontWeight: 'bold', fontSize: '9.5pt' }}>{admission.patient_name?.toUpperCase()}</td>
                       <td style={{ width: '10%', fontWeight: 'bold', textAlign: 'center' }}>{admission.age}</td>
-                      <td style={{ width: '6%', fontWeight: 'bold', textAlign: 'center' }}>{(admission.sex || 'M').charAt(0).toUpperCase()}</td>
+                      <td style={{ width: '6%', fontWeight: 'bold', textAlign: 'center' }}>{admission.sex ? admission.sex.charAt(0).toUpperCase() : '—'}</td>
                       <td style={{ width: '14%', fontWeight: 'bold', background: '#f8fafc' }}>CONSULTANT</td>
-                      <td style={{ width: '14%', fontWeight: 'bold' }}>{(admission.consultant || admission.surgeon || 'DR. N. JAYAPRAKASH').toUpperCase()}</td>
+                      <td style={{ width: '14%', fontWeight: 'bold' }}>{(admission.consultant || admission.surgeon || '—').toUpperCase()}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1361,7 +1373,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                     </tr>
                     <tr>
                       <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>MRD No</td>
-                      <td>{admission.mrd_no || '2026-1247'}</td>
+                      <td>{admission.mrd_no || '—'}</td>
                       <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>ICD CODE</td>
                       <td>{admission.icd_code || '—'}</td>
                     </tr>
@@ -1397,7 +1409,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                   <tbody>
                     <tr>
                       <td style={{ padding: '6px 8px', fontSize: '8.8pt' }}>
-                        {admission.clinical_history ? admission.clinical_history.split('\n')[0] : 'Admitted for elective surgical procedure.'}
+                        {admission.clinical_history ? admission.clinical_history.split('\n')[0] : '—'}
                       </td>
                     </tr>
                   </tbody>
@@ -1466,7 +1478,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                   <tbody>
                     <tr>
                       <td style={{ padding: '6px 8px', fontSize: '8.8pt' }}>
-                        {admission.examination || 'CVS: NAD  RS: Clear  Abdomen: Soft, no mass, no free fluid, no organomegaly.'}
+                        {admission.examination || '—'}
                       </td>
                     </tr>
                   </tbody>
@@ -1533,29 +1545,29 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                   <tbody>
                     <tr>
                       <td style={{ width: '15%', fontWeight: 'bold', background: '#f8fafc' }}>SURGERY</td>
-                      <td colSpan={3} style={{ fontWeight: 'bold' }}>{(admission.procedure_name || admission.procedure_done || 'RIGHT URSL & DJ STENTING').toUpperCase()}</td>
+                      <td colSpan={3} style={{ fontWeight: 'bold' }}>{(admission.procedure_name || admission.procedure_done || '—').toUpperCase()}</td>
                     </tr>
                     <tr>
                       <td style={{ width: '15%', fontWeight: 'bold', background: '#f8fafc' }}>DATE</td>
                       <td style={{ width: '35%' }}>{formatDt(admission.procedure_at)}</td>
                       <td style={{ width: '15%', fontWeight: 'bold', background: '#f8fafc' }}>ANAESTHESIA</td>
-                      <td style={{ width: '35%' }}>{admission.anaesthesia_type || 'SA'}</td>
+                      <td style={{ width: '35%' }}>{admission.anaesthesia_type || '—'}</td>
                     </tr>
                     <tr>
                       <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>SURGEON</td>
-                      <td>{(admission.surgeon || 'DR. N. JAYAPRAKASH').toUpperCase()}</td>
+                      <td>{(admission.surgeon || '—').toUpperCase()}</td>
                       <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>ANESTHETIST</td>
-                      <td>{(admission.anaesthetist || 'DR. S.G. ARUN KUMAR').toUpperCase()}</td>
+                      <td>{(admission.anaesthetist || '—').toUpperCase()}</td>
                     </tr>
                     <tr>
                       <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>ASSISTED BY</td>
-                      <td>{(admission.assisted_by || admission.assistant || 'MISS. SOUNDHARYA').toUpperCase()}</td>
+                      <td>{(admission.assisted_by || admission.assistant || '—').toUpperCase()}</td>
                       <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>ICD CODE</td>
-                      <td>{admission.icd_code || 'N20.0'}</td>
+                      <td>{admission.icd_code || '—'}</td>
                     </tr>
                     <tr>
                       <td colSpan={4} style={{ padding: '6px 8px', fontSize: '8.5pt', lineHeight: 1.4, textAlign: 'justify', whiteSpace: 'pre-line' }}>
-                        {admission.procedure_note || 'Right lower ureteric calculus fragmented with pneumatic lithotripter. 4.5F 26cm DJ stent placed.'}
+                        {admission.procedure_note || '—'}
                       </td>
                     </tr>
                   </tbody>
@@ -1571,7 +1583,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                   <tbody>
                     <tr>
                       <td style={{ padding: '6px 8px', fontSize: '8.8pt', lineHeight: 1.4, textAlign: 'justify', whiteSpace: 'pre-line' }}>
-                        {admission.treatment_course || 'Admitted electively and underwent procedure. Received peri-operative antibiotics. Uneventful hospital stay.'}
+                        {admission.treatment_course || '—'}
                       </td>
                     </tr>
                   </tbody>
@@ -1582,7 +1594,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                   <tbody>
                     <tr>
                       <td style={{ width: '25%', fontWeight: 'bold', background: '#f1f5f9', fontSize: '8.5pt' }}>CONDITION AT DISCHARGE</td>
-                      <td style={{ width: '75%', fontWeight: 'bold', fontSize: '9pt' }}>{(admission.discharge_condition ? admission.discharge_condition.split('\n')[0] : 'STABLE').toUpperCase()}</td>
+                      <td style={{ width: '75%', fontWeight: 'bold', fontSize: '9pt' }}>{(admission.discharge_condition ? admission.discharge_condition.split('\n')[0] : '—').toUpperCase()}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -1595,19 +1607,23 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td rowSpan={surgDrugs.length + 1} style={{ width: '12%', fontWeight: 'bold', background: '#f8fafc', verticalAlign: 'top', textAlign: 'center' }}>DRUGS</td>
-                      <td style={{ width: '48%', fontWeight: 'bold', fontSize: '8pt', background: '#f8fafc' }}>DRUG</td>
-                      <td style={{ width: '25%', fontWeight: 'bold', fontSize: '8pt', background: '#f8fafc' }}>DOSAGE</td>
-                      <td style={{ width: '15%', fontWeight: 'bold', fontSize: '8pt', background: '#f8fafc', textAlign: 'center' }}>NO</td>
-                    </tr>
-                    {surgDrugs.map((d, i) => (
-                      <tr key={i}>
-                        <td style={{ fontSize: '8.8pt', fontWeight: 500 }}>{d.drug}</td>
-                        <td style={{ fontSize: '8.8pt' }}>{d.dosage}</td>
-                        <td style={{ fontSize: '8.8pt', textAlign: 'center' }}>{d.no}</td>
-                      </tr>
-                    ))}
+                    {surgDrugs.length > 0 && (
+                      <>
+                        <tr>
+                          <td rowSpan={surgDrugs.length + 1} style={{ width: '12%', fontWeight: 'bold', background: '#f8fafc', verticalAlign: 'top', textAlign: 'center' }}>DRUGS</td>
+                          <td style={{ width: '48%', fontWeight: 'bold', fontSize: '8pt', background: '#f8fafc' }}>DRUG</td>
+                          <td style={{ width: '25%', fontWeight: 'bold', fontSize: '8pt', background: '#f8fafc' }}>DOSAGE</td>
+                          <td style={{ width: '15%', fontWeight: 'bold', fontSize: '8pt', background: '#f8fafc', textAlign: 'center' }}>NO</td>
+                        </tr>
+                        {surgDrugs.map((d, i) => (
+                          <tr key={i}>
+                            <td style={{ fontSize: '8.8pt', fontWeight: 500 }}>{d.drug}</td>
+                            <td style={{ fontSize: '8.8pt' }}>{d.dosage}</td>
+                            <td style={{ fontSize: '8.8pt', textAlign: 'center' }}>{d.no}</td>
+                          </tr>
+                        ))}
+                      </>
+                    )}
                     <tr>
                       <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>IMPLANT</td>
                       <td colSpan={3} style={{ fontWeight: 'bold', fontSize: '8.8pt' }}>{surgAdvice.implant}</td>
@@ -1628,14 +1644,16 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                       <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>WHEN TO CONTACT</td>
                       <td colSpan={3} style={{ fontSize: '8.8pt', color: '#b91c1c', fontWeight: 600 }}>{surgAdvice.when_to_contact}</td>
                     </tr>
-                    <tr>
-                      <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>REVIEW</td>
-                      <td colSpan={3} style={{ fontWeight: 'bold', fontSize: '8.8pt' }}>{surgAdvice.review}</td>
-                    </tr>
+                    {surgAdvice.review && (
+                      <tr>
+                        <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>REVIEW</td>
+                        <td colSpan={3} style={{ fontWeight: 'bold', fontSize: '8.8pt' }}>{surgAdvice.review}</td>
+                      </tr>
+                    )}
                     {surgAdvice.tamil_note && (
                       <tr>
                         <td style={{ background: '#f8fafc' }}></td>
-                        <td colSpan={3} style={{ fontSize: '8.5pt', lineHeight: 1.4, color: '#1e293b' }}>
+                        <td colSpan={3} style={{ fontSize: '8.5pt', fontFamily: "'Nirmala UI', 'Nirmala', 'Arial Unicode MS', sans-serif", lineHeight: 1.4, color: '#1e293b' }}>
                           {surgAdvice.tamil_note}
                         </td>
                       </tr>
@@ -1650,13 +1668,13 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                       <td style={{ width: '50%', padding: '10px 8px 0 8px' }}>
                         <div style={{ fontSize: '8pt', fontWeight: 'bold', color: '#475569' }}>PREPARED BY</div>
                         <div style={{ fontSize: '9.5pt', fontWeight: 'bold', color: '#000', marginTop: '2px' }}>
-                          {(admission.handover_name || admission.consultant || admission.surgeon || 'DR. N. JAYAPRAKASH').toUpperCase()}
+                          {(admission.handover_name || admission.consultant || admission.surgeon || '—').toUpperCase()}
                         </div>
                       </td>
                       <td style={{ width: '50%', padding: '10px 8px 0 8px', textAlign: 'right' }}>
                         <div style={{ fontSize: '8pt', fontWeight: 'bold', color: '#475569' }}>COUNTERSIGNED BY</div>
                         <div style={{ fontSize: '9.5pt', fontWeight: 'bold', color: '#000', marginTop: '2px' }}>
-                          {(admission.consultant || admission.surgeon || 'DR. N. JAYAPRAKASH').toUpperCase()}
+                          {(admission.consultant || admission.surgeon || '—').toUpperCase()}
                         </div>
                       </td>
                     </tr>

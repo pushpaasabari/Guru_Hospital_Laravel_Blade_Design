@@ -60,8 +60,8 @@
 
     <table class="table table-sm table-borderless mb-2">
         <tr>
-            <td style="width: 50%;"><strong>Surgeon :</strong> {{ $admission->surgeon ?: 'Dr. Ambika M.S (O&G)' }}</td>
-            <td style="width: 50%;"><strong>Anaesthetist :</strong> {{ $admission->anaesthetist ?: 'Dr. M.S Karthick' }}</td>
+            <td style="width: 50%;"><strong>Surgeon :</strong> {{ $admission->surgeon ?: '—' }}</td>
+            <td style="width: 50%;"><strong>Anaesthetist :</strong> {{ $admission->anaesthetist ?: '—' }}</td>
         </tr>
         <tr>
             <td><strong>Assisted By S/N :</strong> {{ $admission->assisted_by ?: ($admission->assistant ?: 'Miss Soudnharya') }}</td>
@@ -162,11 +162,11 @@
     <div class="d-flex justify-content-between align-items-end mt-5 pt-3">
         <div class="text-center" style="width: 30%;">
             <div style="border-top: 1px dashed #666; padding-top: 4px;">Prepared by</div>
-            <div class="small text-muted">{{ $admission->creator?->name ?? 'Staff Nurse' }}</div>
+            <div class="small text-muted">{{ $admission->creator?->name ?? '—' }}</div>
         </div>
         <div class="text-center" style="width: 35%;">
             <div style="border-top: 1px dashed #666; padding-top: 4px;"><strong>Consultant Operating Surgeon</strong></div>
-            <div class="small text-muted">{{ $admission->surgeon ?: 'Dr. Ambika M.S (O&G)' }}</div>
+            <div class="small text-muted">{{ $admission->surgeon ?: '—' }}</div>
             @if($admission->approver && $admission->approver->doctor_reg_no)
                 <div class="small font-monospace" style="font-size: 0.75rem;">Reg No: {{ $admission->approver->doctor_reg_no }}</div>
             @endif

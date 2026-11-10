@@ -108,9 +108,7 @@ const TIMING_OPTIONS = [
 const parseMedications = (raw?: string | null): MedicationRow[] => {
   if (!raw || !raw.trim()) {
     return [
-      { medicine: 'Tab. Cefixime + Sulbactam', frequency: '1-0-1', duration: '7 Days', timing: 'After food' },
-      { medicine: 'Tab. Acendol-P', frequency: '1-0-1', duration: '7 Days', timing: 'After food' },
-      { medicine: 'Cap. Cyra-D', frequency: '1-0-1', duration: '7 Days', timing: 'Before food' },
+      { medicine: '', frequency: '1-0-1', duration: '7 Days', timing: 'After food' },
     ];
   }
 
@@ -203,9 +201,9 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
 
   // Extract stent date
   const extractDate = (text?: string | null): string => {
-    if (!text) return '21.08.2026';
+    if (!text) return '';
     const m = text.match(/(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/);
-    return m ? m[1] : '21.08.2026';
+    return m ? m[1] : '';
   };
 
   const [stentRemovalDate, setStentRemovalDate] = useState<string>(

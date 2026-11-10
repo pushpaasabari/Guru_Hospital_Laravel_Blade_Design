@@ -2,82 +2,41 @@ import { Fragment, jsx, jsxs } from "react/jsx-runtime";
 import React from "react";
 function DischargeSummaryPdfTemplate({ data }) {
   const {
-    patient_name = "Mrs. Anitha",
-    age_sex = "23 / Female",
-    ip_no = "2026/567",
-    uhid = "2023/3931",
-    phone = "7373667465",
-    admission_at = "26.08.2026 at 02.45 AM",
-    discharge_at = "29.08.2026 at 04.00 PM",
-    address = "W/O Sarath, Veerasanur",
+    patient_name = "",
+    age_sex = "",
+    ip_no = "",
+    uhid = "",
+    phone = "",
+    admission_at = "",
+    discharge_at = "",
+    address = "",
     picme_no = "",
-    consultant = "Dr. Ambika MS OG",
-    department = "Obstetrics & Gynaecology",
-    procedure_at = "26.08.2026 at 03:18 AM",
-    surgeon = "Dr. Ambika MS OG",
-    anaesthetist = "Dr. M.S Karthick (SA)",
-    assisted_by = "Staff Nurse Anitha",
-    diagnosis = "G3P1L1A1 / TWINS / Preterm / PROM",
-    surgery_performed = "Twin A: Labour natural with episiotomy | Twin B: Emergency LSCS",
-    presenting_complaints = "G3P1L1A1 / TWINS / EDD 22-9-2026 / FH Good / admitted for safe confinement\nC/O abdominal Pain",
-    clinical_examination = "O/E \u2013 A febrile, No Pallor, No Pedal edema / CVS & RS \u2013 NAD\nP/A: Uterus Overdistended, Not Acting, Both FH good",
-    procedure_note_p1 = "Labour natural with episiotomy with good uterine contraction, full cervix dilated. After putting episiotomy, Patient Delivered a alive Twin A male baby By Breech, Baby Handed over to pediatrician. Twin B baby not progressed Delivered Hence Planned To proceed C-Section.",
-    procedure_note_p2 = "Under SA, Abdomen opened in layers by SPT incision. LSCS done to deliver a alive Twin B male baby, cried soon after birth. Baby Handed over to pediatrician AMTSL followed. Uterine wound closed in 2 layers. After securing perfect Hemostasis, Abdomen closed in layer. AMTSL Followed. Uterus firm & contracted well. Episiotomy wound closed in layers. No Undue Bleeding P/V.",
-    babies = [
-      {
-        title: "Newborn #1 - Twin A",
-        sex: "Alive male baby",
-        born: "26.08.2026 at 03:18 AM",
-        mode: "Labour natural breech with episiotomy",
-        weight: "2.250 kg",
-        apgar: "7/10, 8/10",
-        neonatal_care: "RDS (+). Handed over to pediatrician; shifted to NICU."
-      },
-      {
-        title: "Newborn #2 - Twin B",
-        sex: "Alive male baby",
-        born: "26.08.2026 at 03:44 AM",
-        mode: "Emergency LSCS under SA",
-        weight: "2.250 kg",
-        apgar: "8/10, 9/10",
-        neonatal_care: "Cried soon after birth. Baby handed over to pediatrician. AMTSL followed."
-      }
-    ],
-    treatment_given = [
-      { medicine: "IV Fluids", dose: "\u2014" },
-      { medicine: "Inj. Pipzo", dose: "4.5 g BD IV" },
-      { medicine: "Inj. Metrogyl", dose: "100 mg BD" },
-      { medicine: "Inj. Pan", dose: "40 IV BD" }
-    ],
-    investigations = [
-      { label: "HB", value: "12.9 mgs %" },
-      { label: "BLOOD GROUP", value: "O positive" },
-      { label: "HIV", value: "Negative" },
-      { label: "HCV", value: "Negative" },
-      { label: "VDRL", value: "Negative" },
-      { label: "HBSAG", value: "Negative" },
-      { label: "UREA", value: "9.7 g/dl" },
-      { label: "CREATININE", value: "0.86 mg/dl" },
-      { label: "URIC ACID", value: "4.3 mg/dl" },
-      { label: "RBS", value: "100.8 mg/dl" }
-    ],
+    consultant = "",
+    department = "",
+    procedure_at = "",
+    surgeon = "",
+    anaesthetist = "",
+    assisted_by = "",
+    reg_no = "",
+    diagnosis = "",
+    surgery_performed = "",
+    presenting_complaints = "",
+    clinical_examination = "",
+    procedure_note_p1 = "",
+    procedure_note_p2 = "",
+    babies = [],
+    treatment_given = [],
+    investigations = [],
     condition_on_discharge = {
-      general: "Pt\u2019s general condition good",
-      bp: "110/70 mmHg",
-      pulse: "86 b/min",
-      pa: "Uterus contracted well; no undue bleeding pv"
+      general: "\u2014",
+      bp: "\u2014",
+      pulse: "\u2014",
+      pa: "\u2014"
     },
-    medications = [
-      { medicine: "Tab. Cefixime + Sulbactam", frequency: "1-0-1", duration: "7 days", timing: "After food" },
-      { medicine: "Tab. Acendol-P", frequency: "1-0-1", duration: "7 days", timing: "After food" },
-      { medicine: "Cap. Cyra-D", frequency: "1-0-1", duration: "7 days", timing: "Before food" }
-    ],
-    advice_list = [
-      "Immunisation",
-      "Exclusive breast feeding for 6 months",
-      "Post Natal Exercise"
-    ],
-    review_date = "03/09/2026",
+    medications = [],
+    advice_list = [],
+    review_text = "",
+    review_date = "",
     tamil_note = null,
     emergency_contacts = "04342-262266, +91-7418084266"
   } = data || {};
@@ -368,49 +327,55 @@ function DischargeSummaryPdfTemplate({ data }) {
           /* @__PURE__ */ jsxs("tr", { children: [
             /* @__PURE__ */ jsxs("td", { style: { width: "33.3%" }, children: [
               /* @__PURE__ */ jsx("span", { className: "cell-lbl", children: "CONSULTANT DOCTOR" }),
-              /* @__PURE__ */ jsx("span", { className: "cell-val", children: consultant })
+              /* @__PURE__ */ jsx("span", { className: "cell-val", children: consultant || "\u2014" })
             ] }),
             /* @__PURE__ */ jsxs("td", { style: { width: "33.3%" }, children: [
               /* @__PURE__ */ jsx("span", { className: "cell-lbl", children: "DEPARTMENT" }),
-              /* @__PURE__ */ jsx("span", { className: "cell-val", children: department })
+              /* @__PURE__ */ jsx("span", { className: "cell-val", children: department || "\u2014" })
             ] }),
             /* @__PURE__ */ jsxs("td", { style: { width: "33.4%" }, children: [
               /* @__PURE__ */ jsx("span", { className: "cell-lbl", children: "DATE OF SURGERY" }),
-              /* @__PURE__ */ jsx("span", { className: "cell-val", children: procedure_at })
+              /* @__PURE__ */ jsx("span", { className: "cell-val", children: procedure_at || "\u2014" })
             ] })
           ] }),
           /* @__PURE__ */ jsxs("tr", { children: [
             /* @__PURE__ */ jsxs("td", { children: [
               /* @__PURE__ */ jsx("span", { className: "cell-lbl", children: "SURGEON" }),
-              /* @__PURE__ */ jsx("span", { className: "cell-val", children: surgeon })
+              /* @__PURE__ */ jsx("span", { className: "cell-val", children: surgeon || "\u2014" })
             ] }),
             /* @__PURE__ */ jsxs("td", { children: [
               /* @__PURE__ */ jsx("span", { className: "cell-lbl", children: "ANAESTHETIST" }),
-              /* @__PURE__ */ jsx("span", { className: "cell-val", children: anaesthetist })
+              /* @__PURE__ */ jsx("span", { className: "cell-val", children: anaesthetist || "\u2014" })
             ] }),
             /* @__PURE__ */ jsxs("td", { children: [
               /* @__PURE__ */ jsx("span", { className: "cell-lbl", children: "ASSISTED BY" }),
-              /* @__PURE__ */ jsx("span", { className: "cell-val", children: assisted_by })
+              /* @__PURE__ */ jsx("span", { className: "cell-val", children: assisted_by || "\u2014" })
             ] })
           ] })
         ] }) }),
         /* @__PURE__ */ jsx("div", { className: "highlight-box", children: /* @__PURE__ */ jsx("table", { style: { width: "100%", borderCollapse: "collapse" }, children: /* @__PURE__ */ jsxs("tbody", { children: [
           /* @__PURE__ */ jsxs("tr", { children: [
             /* @__PURE__ */ jsx("td", { style: { width: "22%", verticalAlign: "top", padding: "1px 0" }, children: /* @__PURE__ */ jsx("span", { className: "cell-lbl", style: { fontSize: "7.2pt" }, children: "DIAGNOSIS" }) }),
-            /* @__PURE__ */ jsx("td", { style: { width: "78%", verticalAlign: "top", padding: "1px 0" }, children: /* @__PURE__ */ jsx("span", { className: "cell-val", style: { fontSize: "9.2pt" }, children: diagnosis }) })
+            /* @__PURE__ */ jsx("td", { style: { width: "78%", verticalAlign: "top", padding: "1px 0" }, children: /* @__PURE__ */ jsx("span", { className: "cell-val", style: { fontSize: "9.2pt" }, children: diagnosis || "\u2014" }) })
           ] }),
           /* @__PURE__ */ jsxs("tr", { children: [
             /* @__PURE__ */ jsx("td", { style: { verticalAlign: "top", padding: "1px 0" }, children: /* @__PURE__ */ jsx("span", { className: "cell-lbl", style: { fontSize: "7.2pt" }, children: "SURGERY PERFORMED" }) }),
-            /* @__PURE__ */ jsx("td", { style: { verticalAlign: "top", padding: "1px 0" }, children: /* @__PURE__ */ jsx("span", { className: "cell-val", style: { fontSize: "9pt" }, children: surgery_performed }) })
+            /* @__PURE__ */ jsx("td", { style: { verticalAlign: "top", padding: "1px 0" }, children: /* @__PURE__ */ jsx("span", { className: "cell-val", style: { fontSize: "9pt" }, children: surgery_performed || "\u2014" }) })
           ] })
         ] }) }) }),
-        /* @__PURE__ */ jsx("div", { className: "section-header", children: "PRESENTING COMPLAINTS" }),
-        /* @__PURE__ */ jsx("div", { className: "prose-text", style: { whiteSpace: "pre-line" }, children: presenting_complaints }),
-        /* @__PURE__ */ jsx("div", { className: "section-header", children: "CLINICAL EXAMINATION" }),
-        /* @__PURE__ */ jsx("div", { className: "prose-text", style: { whiteSpace: "pre-line" }, children: clinical_examination }),
-        /* @__PURE__ */ jsx("div", { className: "section-header", children: "PROCEDURE NOTE" }),
-        /* @__PURE__ */ jsx("div", { className: "prose-text", children: procedure_note_p1 }),
-        /* @__PURE__ */ jsx("div", { className: "prose-text", children: procedure_note_p2 }),
+        presenting_complaints && /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsx("div", { className: "section-header", children: "PRESENTING COMPLAINTS" }),
+          /* @__PURE__ */ jsx("div", { className: "prose-text", style: { whiteSpace: "pre-line" }, children: presenting_complaints })
+        ] }),
+        clinical_examination && /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsx("div", { className: "section-header", children: "CLINICAL EXAMINATION" }),
+          /* @__PURE__ */ jsx("div", { className: "prose-text", style: { whiteSpace: "pre-line" }, children: clinical_examination })
+        ] }),
+        (procedure_note_p1 || procedure_note_p2) && /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsx("div", { className: "section-header", children: "PROCEDURE NOTE" }),
+          procedure_note_p1 && /* @__PURE__ */ jsx("div", { className: "prose-text", children: procedure_note_p1 }),
+          procedure_note_p2 && /* @__PURE__ */ jsx("div", { className: "prose-text", children: procedure_note_p2 })
+        ] }),
         babies && babies.length > 0 && /* @__PURE__ */ jsxs(Fragment, { children: [
           /* @__PURE__ */ jsx("div", { className: "section-header", style: { marginTop: "3.5px" }, children: "BABY / NEWBORN DETAILS" }),
           /* @__PURE__ */ jsx("div", { className: "baby-cards-container", children: babies.map((baby, idx) => /* @__PURE__ */ jsxs("div", { className: "baby-col", children: [
@@ -461,69 +426,79 @@ function DischargeSummaryPdfTemplate({ data }) {
             uhid
           ] })
         ] }),
-        /* @__PURE__ */ jsx("div", { className: "section-header", children: "TREATMENT GIVEN" }),
-        /* @__PURE__ */ jsxs("table", { className: "data-table", children: [
-          /* @__PURE__ */ jsx("thead", { children: /* @__PURE__ */ jsxs("tr", { children: [
-            /* @__PURE__ */ jsx("th", { style: { width: "60%" }, children: "Medication / fluid" }),
-            /* @__PURE__ */ jsx("th", { style: { width: "40%" }, children: "Dose & route" })
-          ] }) }),
-          /* @__PURE__ */ jsx("tbody", { children: treatment_given.map((row, idx) => /* @__PURE__ */ jsxs("tr", { style: { background: idx % 2 === 1 ? "#f8fafc" : "#ffffff" }, children: [
-            /* @__PURE__ */ jsx("td", { style: { fontWeight: 600 }, children: row.medicine }),
-            /* @__PURE__ */ jsx("td", { children: row.dose })
-          ] }, idx)) })
+        treatment_given && treatment_given.length > 0 && /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsx("div", { className: "section-header", children: "TREATMENT GIVEN" }),
+          /* @__PURE__ */ jsxs("table", { className: "data-table", children: [
+            /* @__PURE__ */ jsx("thead", { children: /* @__PURE__ */ jsxs("tr", { children: [
+              /* @__PURE__ */ jsx("th", { style: { width: "60%" }, children: "Medication / fluid" }),
+              /* @__PURE__ */ jsx("th", { style: { width: "40%" }, children: "Dose & route" })
+            ] }) }),
+            /* @__PURE__ */ jsx("tbody", { children: treatment_given.map((row, idx) => /* @__PURE__ */ jsxs("tr", { style: { background: idx % 2 === 1 ? "#f8fafc" : "#ffffff" }, children: [
+              /* @__PURE__ */ jsx("td", { style: { fontWeight: 600 }, children: row.medicine }),
+              /* @__PURE__ */ jsx("td", { children: row.dose })
+            ] }, idx)) })
+          ] })
         ] }),
-        /* @__PURE__ */ jsx("div", { className: "section-header", children: "INVESTIGATIONS" }),
-        /* @__PURE__ */ jsx("table", { className: "grid-table bg-white", children: /* @__PURE__ */ jsx("tbody", { children: invChunks.map((chunk, rIdx) => /* @__PURE__ */ jsxs("tr", { children: [
-          chunk.map((inv, cIdx) => /* @__PURE__ */ jsxs("td", { style: { width: "20%" }, children: [
-            /* @__PURE__ */ jsx("span", { className: "cell-lbl", children: inv.label }),
-            /* @__PURE__ */ jsx("span", { className: "cell-val", children: inv.value })
-          ] }, cIdx)),
-          chunk.length < 5 && Array.from({ length: 5 - chunk.length }).map((_, emptyIdx) => /* @__PURE__ */ jsx("td", { style: { width: "20%" }, children: "\xA0" }, emptyIdx))
-        ] }, rIdx)) }) }),
+        investigations && investigations.length > 0 && /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsx("div", { className: "section-header", children: "INVESTIGATIONS" }),
+          /* @__PURE__ */ jsx("table", { className: "grid-table bg-white", children: /* @__PURE__ */ jsx("tbody", { children: invChunks.map((chunk, rIdx) => /* @__PURE__ */ jsxs("tr", { children: [
+            chunk.map((inv, cIdx) => /* @__PURE__ */ jsxs("td", { style: { width: "20%" }, children: [
+              /* @__PURE__ */ jsx("span", { className: "cell-lbl", children: inv.label }),
+              /* @__PURE__ */ jsx("span", { className: "cell-val", children: inv.value })
+            ] }, cIdx)),
+            chunk.length < 5 && Array.from({ length: 5 - chunk.length }).map((_, emptyIdx) => /* @__PURE__ */ jsx("td", { style: { width: "20%" }, children: "\xA0" }, emptyIdx))
+          ] }, rIdx)) }) })
+        ] }),
         /* @__PURE__ */ jsx("div", { className: "section-header", children: "CONDITION ON DISCHARGE" }),
         /* @__PURE__ */ jsx("table", { className: "grid-table bg-white", children: /* @__PURE__ */ jsx("tbody", { children: /* @__PURE__ */ jsxs("tr", { children: [
           /* @__PURE__ */ jsxs("td", { style: { width: "22%" }, children: [
             /* @__PURE__ */ jsx("span", { className: "cell-lbl", children: "General condition" }),
-            /* @__PURE__ */ jsx("span", { className: "cell-val", children: condition_on_discharge.general })
+            /* @__PURE__ */ jsx("span", { className: "cell-val", children: condition_on_discharge?.general || "\u2014" })
           ] }),
           /* @__PURE__ */ jsxs("td", { style: { width: "18%" }, children: [
             /* @__PURE__ */ jsx("span", { className: "cell-lbl", children: "BP" }),
-            /* @__PURE__ */ jsx("span", { className: "cell-val", children: condition_on_discharge.bp })
+            /* @__PURE__ */ jsx("span", { className: "cell-val", children: condition_on_discharge?.bp || "\u2014" })
           ] }),
           /* @__PURE__ */ jsxs("td", { style: { width: "18%" }, children: [
             /* @__PURE__ */ jsx("span", { className: "cell-lbl", children: "Pulse" }),
-            /* @__PURE__ */ jsx("span", { className: "cell-val", children: condition_on_discharge.pulse })
+            /* @__PURE__ */ jsx("span", { className: "cell-val", children: condition_on_discharge?.pulse || "\u2014" })
           ] }),
           /* @__PURE__ */ jsxs("td", { style: { width: "42%" }, children: [
             /* @__PURE__ */ jsx("span", { className: "cell-lbl", children: "P/A" }),
-            /* @__PURE__ */ jsx("span", { className: "cell-val", children: condition_on_discharge.pa })
+            /* @__PURE__ */ jsx("span", { className: "cell-val", children: condition_on_discharge?.pa || "\u2014" })
           ] })
         ] }) }) }),
-        /* @__PURE__ */ jsx("div", { className: "section-header", children: "DISCHARGE MEDICATIONS" }),
-        /* @__PURE__ */ jsxs("table", { className: "data-table", children: [
-          /* @__PURE__ */ jsx("thead", { children: /* @__PURE__ */ jsxs("tr", { children: [
-            /* @__PURE__ */ jsx("th", { style: { width: "45%" }, children: "Medicine" }),
-            /* @__PURE__ */ jsx("th", { style: { width: "18%" }, children: "Frequency" }),
-            /* @__PURE__ */ jsx("th", { style: { width: "17%" }, children: "Duration" }),
-            /* @__PURE__ */ jsx("th", { style: { width: "20%" }, children: "Timing" })
-          ] }) }),
-          /* @__PURE__ */ jsx("tbody", { children: medications.map((med, idx) => /* @__PURE__ */ jsxs("tr", { style: { background: idx % 2 === 1 ? "#f8fafc" : "#ffffff" }, children: [
-            /* @__PURE__ */ jsx("td", { style: { fontWeight: 600 }, children: med.medicine }),
-            /* @__PURE__ */ jsx("td", { children: med.frequency }),
-            /* @__PURE__ */ jsx("td", { children: med.duration }),
-            /* @__PURE__ */ jsx("td", { children: med.timing })
+        medications && medications.length > 0 && /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsx("div", { className: "section-header", children: "DISCHARGE MEDICATIONS" }),
+          /* @__PURE__ */ jsxs("table", { className: "data-table", children: [
+            /* @__PURE__ */ jsx("thead", { children: /* @__PURE__ */ jsxs("tr", { children: [
+              /* @__PURE__ */ jsx("th", { style: { width: "45%" }, children: "Medicine" }),
+              /* @__PURE__ */ jsx("th", { style: { width: "18%" }, children: "Frequency" }),
+              /* @__PURE__ */ jsx("th", { style: { width: "17%" }, children: "Duration" }),
+              /* @__PURE__ */ jsx("th", { style: { width: "20%" }, children: "Timing" })
+            ] }) }),
+            /* @__PURE__ */ jsx("tbody", { children: medications.map((med, idx) => /* @__PURE__ */ jsxs("tr", { style: { background: idx % 2 === 1 ? "#f8fafc" : "#ffffff" }, children: [
+              /* @__PURE__ */ jsx("td", { style: { fontWeight: 600 }, children: med.medicine }),
+              /* @__PURE__ */ jsx("td", { children: med.frequency }),
+              /* @__PURE__ */ jsx("td", { children: med.duration }),
+              /* @__PURE__ */ jsx("td", { children: med.timing })
+            ] }, idx)) })
+          ] })
+        ] }),
+        advice_list && advice_list.length > 0 && /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsx("div", { className: "section-header", children: "ADVICE" }),
+          /* @__PURE__ */ jsx("div", { style: { fontSize: "8.5pt", lineHeight: 1.35, margin: "2px 0 4px 0" }, children: advice_list.map((item, idx) => /* @__PURE__ */ jsxs("span", { style: { display: "inline-block", marginRight: "16px" }, children: [
+            /* @__PURE__ */ jsx("strong", { children: "\u2022" }),
+            " ",
+            item
           ] }, idx)) })
         ] }),
-        /* @__PURE__ */ jsx("div", { className: "section-header", children: "ADVICE" }),
-        /* @__PURE__ */ jsx("div", { style: { fontSize: "8.5pt", lineHeight: 1.35, margin: "2px 0 4px 0" }, children: advice_list.map((item, idx) => /* @__PURE__ */ jsxs("span", { style: { display: "inline-block", marginRight: "16px" }, children: [
-          /* @__PURE__ */ jsx("strong", { children: "\u2022" }),
-          " ",
-          item
-        ] }, idx)) }),
-        /* @__PURE__ */ jsx("div", { className: "section-header", children: "REVIEW & SUTURE REMOVAL" }),
-        /* @__PURE__ */ jsxs("div", { className: "review-bar", children: [
-          /* @__PURE__ */ jsx("div", { style: { display: "table-cell", fontWeight: "bold", fontSize: "9pt", verticalAlign: "middle" }, children: "Review after one week" }),
-          /* @__PURE__ */ jsx("div", { style: { display: "table-cell", textAlign: "right", fontWeight: "bold", fontSize: "10.5pt", verticalAlign: "middle" }, children: review_date })
+        (review_text || review_date) && /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsx("div", { className: "section-header", children: "REVIEW & SUTURE REMOVAL" }),
+          /* @__PURE__ */ jsxs("div", { className: "review-bar", children: [
+            /* @__PURE__ */ jsx("div", { style: { display: "table-cell", fontWeight: "bold", fontSize: "9pt", verticalAlign: "middle" }, children: review_text || "Review" }),
+            /* @__PURE__ */ jsx("div", { style: { display: "table-cell", textAlign: "right", fontWeight: "bold", fontSize: "10.5pt", verticalAlign: "middle" }, children: review_date })
+          ] })
         ] }),
         tamil_note && /* @__PURE__ */ jsxs("div", { style: {
           marginTop: "3px",
@@ -532,7 +507,7 @@ function DischargeSummaryPdfTemplate({ data }) {
           background: "#f8fafc",
           border: "1px solid #111111",
           borderLeft: "3px solid #111111",
-          fontFamily: "'Nirmala', 'Arial Unicode MS', sans-serif",
+          fontFamily: "'Nirmala UI', 'Nirmala', 'Arial Unicode MS', sans-serif",
           fontSize: "8pt",
           lineHeight: 1.35,
           color: "#111111"
@@ -551,8 +526,11 @@ function DischargeSummaryPdfTemplate({ data }) {
           ] })
         ] }),
         /* @__PURE__ */ jsx("table", { className: "sig-table", children: /* @__PURE__ */ jsx("tbody", { children: /* @__PURE__ */ jsx("tr", { children: /* @__PURE__ */ jsxs("td", { style: { width: "100%", textAlign: "right" }, children: [
-          /* @__PURE__ */ jsx("div", { style: { fontSize: "9pt", fontWeight: "bold" }, children: consultant }),
-          /* @__PURE__ */ jsx("div", { style: { fontSize: "7.5pt", color: "#475569" }, children: "Reg: TNMC-64821" })
+          /* @__PURE__ */ jsx("div", { style: { fontSize: "9pt", fontWeight: "bold" }, children: consultant || "\u2014" }),
+          reg_no && /* @__PURE__ */ jsxs("div", { style: { fontSize: "7.5pt", color: "#475569" }, children: [
+            "Reg: ",
+            reg_no
+          ] })
         ] }) }) }) }),
         /* @__PURE__ */ jsxs("div", { className: "running-footer-p2", children: [
           /* @__PURE__ */ jsxs("div", { style: { display: "table-cell", textAlign: "left" }, children: [

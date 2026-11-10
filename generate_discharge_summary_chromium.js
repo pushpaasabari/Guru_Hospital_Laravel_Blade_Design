@@ -96,7 +96,9 @@ const ANITHA_DATA = {
         'Exclusive breast feeding for 6 months',
         'Post Natal Exercise'
     ],
+    review_text: 'Review after one week',
     review_date: '03/09/2026',
+    reg_no: 'TNMC-64821',
     emergency_contacts: '04342-262266, +91-7418084266'
 };
 

@@ -178,19 +178,19 @@
                                 <label class="form-label fw-bold small text-dark mb-0">Stent Removal Due Date:</label>
                             </div>
                             <div class="col-auto">
-                                <input type="text" id="stentDateBladeInput" class="form-control form-control-sm" style="width: 140px;" value="21.08.2026" oninput="updateTamilStentNoticePreview()">
+                                <input type="text" id="stentDateBladeInput" class="form-control form-control-sm" style="width: 140px;" value="" placeholder="e.g. 21.08.2026" oninput="updateTamilStentNoticePreview()">
                             </div>
                             <div class="col-auto">
                                 <span class="text-muted small">(Date to appear in Tamil Stent Notice)</span>
                             </div>
                         </div>
                     </div>
-                    <div class="p-2.5 bg-light rounded border" style="font-family: 'Nirmala', Arial, sans-serif; font-size: 0.92rem; line-height: 1.5;">
+                    <div class="p-2.5 bg-light rounded border" style="font-family: 'Nirmala UI', 'Nirmala', Arial, sans-serif; font-size: 0.92rem; line-height: 1.5;">
                         <strong class="text-primary d-block mb-1">
                             <i class="bi bi-info-circle-fill me-1"></i> அதிகாரப்பூர்வ ஸ்டெண்ட் அகற்றல் குறிப்பு (Official Stent Notice):
                         </strong>
                         <span id="tamilNoticePreviewSpan" class="text-dark fw-semibold">
-                            &ldquo;வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு 21.08.2026 அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.&rdquo;
+                            &ldquo;வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு (Date) அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.&rdquo;
                         </span>
                     </div>
                 </div>
@@ -305,9 +305,7 @@ function initBladeMedications() {
 function parseBladeMedications(raw) {
     if (!raw.trim()) {
         return [
-            { medicine: 'Tab. Cefixime + Sulbactam', frequency: '1-0-1', duration: '7 Days', timing: 'After food' },
-            { medicine: 'Tab. Acendol-P', frequency: '1-0-1', duration: '7 Days', timing: 'After food' },
-            { medicine: 'Cap. Cyra-D', frequency: '1-0-1', duration: '7 Days', timing: 'Before food' }
+            { medicine: '', frequency: '1-0-1', duration: '7 Days', timing: 'After food' }
         ];
     }
 
@@ -463,7 +461,7 @@ function updateTamilStentNoticePreview() {
 }
 
 function insertTamilStentNoticeBlade() {
-    const d = document.getElementById('stentDateBladeInput').value.trim() || '21.08.2026';
+    const d = document.getElementById('stentDateBladeInput').value.trim() || '(Date)';
     const text = `வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு ${d} அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.`;
     const adviceEl = document.getElementById('dischargeAdviceField');
     if (adviceEl && !adviceEl.value.includes('வயிற்றுக்குள்')) {

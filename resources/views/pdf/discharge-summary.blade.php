@@ -207,7 +207,7 @@
             z-index: -1000;
         }
 
-        /* Surgical Tabular Format Styles (Mr. Gopalakrishnan Specification) */
+        /* Surgical Tabular Format Styles */
         .surgical-table {
             width: 100%;
             border-collapse: collapse;
@@ -232,7 +232,7 @@
 
 @if($admission->isDelivery())
 <!-- ============================================================ -->
-<!-- DELIVERY / OBSTETRIC DISCHARGE SUMMARY (Mrs. Anitha Format)  -->
+<!-- DELIVERY / OBSTETRIC DISCHARGE SUMMARY FORMAT -->
 <!-- ============================================================ -->
 <div class="page-1">
     <div class="letterhead-space"></div>
@@ -289,11 +289,11 @@
         <tr>
             <td style="width: 33.3%;">
                 <span class="cell-lbl">CONSULTANT DOCTOR</span>
-                <span class="cell-val">{{ $admission->consultant ?: ($admission->surgeon ?: 'Dr. Ambika MS OG') }}</span>
+                <span class="cell-val">{{ $admission->consultant ?: ($admission->surgeon ?: '—') }}</span>
             </td>
             <td style="width: 33.3%;">
                 <span class="cell-lbl">DEPARTMENT</span>
-                <span class="cell-val">{{ $admission->department ?? 'Obstetrics & Gynaecology' }}</span>
+                <span class="cell-val">{{ $admission->department ?: '—' }}</span>
             </td>
             <td style="width: 33.4%;">
                 <span class="cell-lbl">DATE OF SURGERY</span>
@@ -303,7 +303,7 @@
         <tr>
             <td style="width: 33.3%;">
                 <span class="cell-lbl">SURGEON</span>
-                <span class="cell-val">{{ $admission->surgeon ?: ($admission->consultant ?: 'Dr. Ambika MS OG') }}</span>
+                <span class="cell-val">{{ $admission->surgeon ?: ($admission->consultant ?: '—') }}</span>
             </td>
             <td style="width: 33.3%;">
                 <span class="cell-lbl">ANAESTHETIST</span>
@@ -510,24 +510,28 @@
     @php
         $adviceData = $admission->formatted_advice_and_review;
     @endphp
-    <div class="section-header">ADVICE</div>
-    <div style="font-size: 8.8pt; line-height: 1.5; margin-bottom: 6px;">
-        @foreach($adviceData['advice_items'] as $item)
-            <span style="display: inline-block; margin-right: 18px;">
-                <strong>&bull;</strong> {{ $item }}
-            </span>
-        @endforeach
-    </div>
+    @if(!empty($adviceData['advice_items']))
+        <div class="section-header">ADVICE</div>
+        <div style="font-size: 8.8pt; line-height: 1.5; margin-bottom: 6px;">
+            @foreach($adviceData['advice_items'] as $item)
+                <span style="display: inline-block; margin-right: 18px;">
+                    <strong>&bull;</strong> {{ $item }}
+                </span>
+            @endforeach
+        </div>
+    @endif
 
-    <div class="section-header">REVIEW & SUTURE REMOVAL</div>
-    <div class="review-box">
-        <div style="display: table-cell; font-size: 9.5pt; font-weight: bold; vertical-align: middle;">
-            {{ $adviceData['review_text'] }}
+    @if(!empty($adviceData['review_text']) || !empty($adviceData['review_date']))
+        <div class="section-header">REVIEW & SUTURE REMOVAL</div>
+        <div class="review-box">
+            <div style="display: table-cell; font-size: 9.5pt; font-weight: bold; vertical-align: middle;">
+                {{ $adviceData['review_text'] ?: 'Review' }}
+            </div>
+            <div style="display: table-cell; text-align: right; font-size: 11.5pt; font-weight: bold; vertical-align: middle;">
+                {{ $adviceData['review_date'] }}
+            </div>
         </div>
-        <div style="display: table-cell; text-align: right; font-size: 11.5pt; font-weight: bold; vertical-align: middle;">
-            {{ $adviceData['review_date'] }}
-        </div>
-    </div>
+    @endif
 
     @if(!empty($adviceData['tamil_note']))
         <div style="margin-top: 4px; margin-bottom: 5px; padding: 4px 8px; background: #f8fafc; border: 1px solid #111; border-left: 3px solid #111; font-family: 'Nirmala UI', 'Nirmala', 'Latha', Arial, sans-serif; font-size: 8.2pt; line-height: 1.35; color: #111;">
@@ -549,8 +553,10 @@
 
     <div class="sig-container">
         <div class="sig-cell" style="width: 100%; text-align: right;">
-            <div style="font-size: 9pt; font-weight: bold; color: #000000;">{{ $admission->consultant ?: ($admission->surgeon ?: 'Dr. Ambika MS OG') }}</div>
-            <div style="font-size: 7.5pt; color: #475569; margin-top: 1px;">Reg: {{ $admission->approver?->doctor_reg_no ?? 'TNMC-64821' }}</div>
+            <div style="font-size: 9pt; font-weight: bold; color: #000000;">{{ $admission->consultant ?: ($admission->surgeon ?: '—') }}</div>
+            @if($admission->approver?->doctor_reg_no)
+                <div style="font-size: 7.5pt; color: #475569; margin-top: 1px;">Reg: {{ $admission->approver->doctor_reg_no }}</div>
+            @endif
         </div>
     </div>
 
@@ -562,7 +568,7 @@
 
 @else
 <!-- ============================================================ -->
-<!-- SURGICAL / NON-OBSTETRIC DISCHARGE SUMMARY (Mr. Gopalakrishnan) -->
+<!-- SURGICAL / NON-OBSTETRIC DISCHARGE SUMMARY FORMAT -->
 <!-- ============================================================ -->
 <div class="page-1 surgical-doc">
     <div class="letterhead-space"></div>
@@ -577,7 +583,7 @@
             <td style="width: 10%; font-weight: bold; text-align: center;">{{ $admission->age }}</td>
             <td style="width: 6%; font-weight: bold; text-align: center;">{{ strtoupper(substr($admission->sex ?? 'M', 0, 1)) }}</td>
             <td style="width: 14%; font-weight: bold; background: #f8fafc;">CONSULTANT</td>
-            <td style="width: 14%; font-weight: bold;">{{ strtoupper($admission->consultant ?: ($admission->surgeon ?: 'DR. N. JAYAPRAKASH')) }}</td>
+            <td style="width: 14%; font-weight: bold;">{{ strtoupper($admission->consultant ?: ($admission->surgeon ?: '—')) }}</td>
         </tr>
     </table>
 
@@ -600,7 +606,7 @@
         </tr>
         <tr>
             <td style="font-weight: bold; background: #f8fafc;">MRD No</td>
-            <td>{{ $admission->mrd_no ?: '2026-1247' }}</td>
+            <td>{{ $admission->mrd_no ?: ($admission->uhid ? 'MRD-' . $admission->uhid : '—') }}</td>
             <td style="font-weight: bold; background: #f8fafc;">ICD CODE</td>
             <td>{{ $admission->icd_code ?: '—' }}</td>
         </tr>
@@ -630,7 +636,7 @@
         </tr>
         <tr>
             <td style="padding: 5px 8px; font-size: 8.8pt;">
-                {{ $admission->clinical_history ? strtok($admission->clinical_history, "\n") : 'Admitted for elective surgical procedure.' }}
+                {{ $admission->clinical_history ? strtok($admission->clinical_history, "\n") : '—' }}
             </td>
         </tr>
     </table>
@@ -692,7 +698,7 @@
         </tr>
         <tr>
             <td style="padding: 5px 8px; font-size: 8.8pt;">
-                {{ $admission->examination ?: 'CVS: NAD  RS: Clear  Abdomen: Soft, no mass, no free fluid, no organomegaly.' }}
+                {{ $admission->examination ?: '—' }}
             </td>
         </tr>
     </table>
@@ -752,29 +758,29 @@
         </tr>
         <tr>
             <td style="width: 15%; font-weight: bold; background: #f8fafc;">SURGERY</td>
-            <td colspan="3" style="font-weight: bold;">{{ strtoupper($admission->procedure_name ?: ($admission->procedure_done ?: 'RIGHT URSL & DJ STENTING')) }}</td>
+            <td colspan="3" style="font-weight: bold;">{{ strtoupper($admission->procedure_name ?: ($admission->procedure_done ?: '—')) }}</td>
         </tr>
         <tr>
             <td style="width: 15%; font-weight: bold; background: #f8fafc;">DATE</td>
-            <td style="width: 35%;">{{ $admission->procedure_at?->format('d.m.Y @ h.iA') ?? '07.08.2026 @ 05.00PM' }}</td>
+            <td style="width: 35%;">{{ $admission->procedure_at?->format('d.m.Y @ h.iA') ?? '—' }}</td>
             <td style="width: 15%; font-weight: bold; background: #f8fafc;">ANAESTHESIA</td>
-            <td style="width: 35%;">{{ $admission->anaesthesia_type ?: 'SA' }}</td>
+            <td style="width: 35%;">{{ $admission->anaesthesia_type ?: '—' }}</td>
         </tr>
         <tr>
             <td style="font-weight: bold; background: #f8fafc;">SURGEON</td>
-            <td>{{ strtoupper($admission->surgeon ?: 'DR. N. JAYAPRAKASH') }}</td>
+            <td>{{ strtoupper($admission->surgeon ?: '—') }}</td>
             <td style="font-weight: bold; background: #f8fafc;">ANESTHETIST</td>
-            <td>{{ strtoupper($admission->anaesthetist ?: 'DR. S.G. ARUN KUMAR') }}</td>
+            <td>{{ strtoupper($admission->anaesthetist ?: '—') }}</td>
         </tr>
         <tr>
             <td style="font-weight: bold; background: #f8fafc;">ASSISTED BY</td>
-            <td>{{ strtoupper($admission->assisted_by ?: ($admission->assistant ?: 'MISS. SOUNDHARYA')) }}</td>
+            <td>{{ strtoupper($admission->assisted_by ?: ($admission->assistant ?: '—')) }}</td>
             <td style="font-weight: bold; background: #f8fafc;">ICD CODE</td>
-            <td>{{ $admission->icd_code ?: 'N20.0' }}</td>
+            <td>{{ $admission->icd_code ?: '—' }}</td>
         </tr>
         <tr>
             <td colspan="4" style="padding: 6px 8px; font-size: 8.5pt; line-height: 1.4; text-align: justify;">
-                {!! nl2br(e($admission->procedure_note)) !!}
+                {!! nl2br(e($admission->procedure_note ?: '—')) !!}
             </td>
         </tr>
     </table>
@@ -786,7 +792,7 @@
         </tr>
         <tr>
             <td style="padding: 5px 8px; font-size: 8.8pt; line-height: 1.4; text-align: justify;">
-                {!! nl2br(e($admission->treatment_course ?: 'Admitted electively and underwent procedure. Received peri-operative antibiotics. Uneventful hospital stay.')) !!}
+                {!! nl2br(e($admission->treatment_course ?: '—')) !!}
             </td>
         </tr>
     </table>
@@ -795,7 +801,7 @@
     <table class="surgical-table mb-2">
         <tr>
             <td style="width: 25%; font-weight: bold; background: #f1f5f9; font-size: 8.5pt;">CONDITION AT DISCHARGE</td>
-            <td style="width: 75%; font-weight: bold; font-size: 9pt;">{{ strtoupper($admission->discharge_condition ? strtok($admission->discharge_condition, "\n-:") : 'STABLE') }}</td>
+            <td style="width: 75%; font-weight: bold; font-size: 9pt;">{{ strtoupper($admission->discharge_condition ? strtok($admission->discharge_condition, "\n-:") : '—') }}</td>
         </tr>
     </table>
 
@@ -808,19 +814,21 @@
         <tr>
             <th style="background: #f1f5f9; text-align: left; font-size: 8.5pt;" colspan="4">DISCHARGE ADVICE</th>
         </tr>
-        <tr>
-            <td rowspan="{{ count($surgDrugs) + 1 }}" style="width: 12%; font-weight: bold; background: #f8fafc; vertical-align: top; text-align: center;">DRUGS</td>
-            <td style="width: 48%; font-weight: bold; font-size: 8pt; background: #f8fafc;">DRUG</td>
-            <td style="width: 25%; font-weight: bold; font-size: 8pt; background: #f8fafc;">DOSAGE</td>
-            <td style="width: 15%; font-weight: bold; font-size: 8pt; background: #f8fafc; text-align: center;">NO</td>
-        </tr>
-        @foreach($surgDrugs as $drug)
+        @if(!empty($surgDrugs))
             <tr>
-                <td style="font-size: 8.8pt; font-weight: 500;">{{ $drug['drug'] }}</td>
-                <td style="font-size: 8.8pt;">{{ $drug['dosage'] }}</td>
-                <td style="font-size: 8.8pt; text-align: center;">{{ $drug['no'] }}</td>
+                <td rowspan="{{ count($surgDrugs) + 1 }}" style="width: 12%; font-weight: bold; background: #f8fafc; vertical-align: top; text-align: center;">DRUGS</td>
+                <td style="width: 48%; font-weight: bold; font-size: 8pt; background: #f8fafc;">DRUG</td>
+                <td style="width: 25%; font-weight: bold; font-size: 8pt; background: #f8fafc;">DOSAGE</td>
+                <td style="width: 15%; font-weight: bold; font-size: 8pt; background: #f8fafc; text-align: center;">NO</td>
             </tr>
-        @endforeach
+            @foreach($surgDrugs as $drug)
+                <tr>
+                    <td style="font-size: 8.8pt; font-weight: 500;">{{ $drug['drug'] }}</td>
+                    <td style="font-size: 8.8pt;">{{ $drug['dosage'] }}</td>
+                    <td style="font-size: 8.8pt; text-align: center;">{{ $drug['no'] }}</td>
+                </tr>
+            @endforeach
+        @endif
         <tr>
             <td style="font-weight: bold; background: #f8fafc;">IMPLANT</td>
             <td colspan="3" style="font-weight: bold; font-size: 8.8pt;">{{ $surgAdvice['implant'] }}</td>
@@ -841,14 +849,16 @@
             <td style="font-weight: bold; background: #f8fafc;">WHEN TO CONTACT</td>
             <td colspan="3" style="font-size: 8.8pt; color: #b91c1c; font-weight: 600;">{{ $surgAdvice['when_to_contact'] }}</td>
         </tr>
-        <tr>
-            <td style="font-weight: bold; background: #f8fafc;">REVIEW</td>
-            <td colspan="3" style="font-weight: bold; font-size: 8.8pt;">{{ $surgAdvice['review'] }}</td>
-        </tr>
+        @if(!empty($surgAdvice['review']))
+            <tr>
+                <td style="font-weight: bold; background: #f8fafc;">REVIEW</td>
+                <td colspan="3" style="font-weight: bold; font-size: 8.8pt;">{{ $surgAdvice['review'] }}</td>
+            </tr>
+        @endif
         @if(!empty($surgAdvice['tamil_note']))
             <tr>
                 <td style="background: #f8fafc;"></td>
-                <td colspan="3" style="font-size: 8.5pt; font-family: 'Nirmala', 'Arial Unicode MS', sans-serif; line-height: 1.4; color: #1e293b;">
+                <td colspan="3" style="font-size: 8.5pt; font-family: 'Nirmala UI', 'Nirmala', 'Arial Unicode MS', sans-serif; line-height: 1.4; color: #1e293b;">
                     {{ $surgAdvice['tamil_note'] }}
                 </td>
             </tr>
@@ -861,13 +871,13 @@
             <td style="width: 50%; border: none; padding: 10px 8px 0 8px;">
                 <div style="font-size: 8pt; font-weight: bold; color: #475569;">PREPARED BY</div>
                 <div style="font-size: 9.5pt; font-weight: bold; color: #000; margin-top: 2px;">
-                    {{ strtoupper($admission->handover_name ?: ($admission->consultant ?: ($admission->surgeon ?: 'DR. N. JAYAPRAKASH'))) }}
+                    {{ strtoupper($admission->handover_name ?: ($admission->consultant ?: ($admission->surgeon ?: '—'))) }}
                 </div>
             </td>
             <td style="width: 50%; border: none; padding: 10px 8px 0 8px; text-align: right;">
                 <div style="font-size: 8pt; font-weight: bold; color: #475569;">COUNTERSIGNED BY</div>
                 <div style="font-size: 9.5pt; font-weight: bold; color: #000; margin-top: 2px;">
-                    {{ strtoupper($admission->consultant ?: ($admission->surgeon ?: 'DR. N. JAYAPRAKASH')) }}
+                    {{ strtoupper($admission->consultant ?: ($admission->surgeon ?: '—')) }}
                 </div>
             </td>
         </tr>

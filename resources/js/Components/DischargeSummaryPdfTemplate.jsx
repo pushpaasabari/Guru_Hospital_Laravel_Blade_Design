@@ -2,82 +2,41 @@ import React from 'react';
 
 export default function DischargeSummaryPdfTemplate({ data }) {
     const {
-        patient_name = 'Mrs. Anitha',
-        age_sex = '23 / Female',
-        ip_no = '2026/567',
-        uhid = '2023/3931',
-        phone = '7373667465',
-        admission_at = '26.08.2026 at 02.45 AM',
-        discharge_at = '29.08.2026 at 04.00 PM',
-        address = 'W/O Sarath, Veerasanur',
+        patient_name = '',
+        age_sex = '',
+        ip_no = '',
+        uhid = '',
+        phone = '',
+        admission_at = '',
+        discharge_at = '',
+        address = '',
         picme_no = '',
-        consultant = 'Dr. Ambika MS OG',
-        department = 'Obstetrics & Gynaecology',
-        procedure_at = '26.08.2026 at 03:18 AM',
-        surgeon = 'Dr. Ambika MS OG',
-        anaesthetist = 'Dr. M.S Karthick (SA)',
-        assisted_by = 'Staff Nurse Anitha',
-        diagnosis = 'G3P1L1A1 / TWINS / Preterm / PROM',
-        surgery_performed = 'Twin A: Labour natural with episiotomy | Twin B: Emergency LSCS',
-        presenting_complaints = 'G3P1L1A1 / TWINS / EDD 22-9-2026 / FH Good / admitted for safe confinement\nC/O abdominal Pain',
-        clinical_examination = 'O/E – A febrile, No Pallor, No Pedal edema / CVS & RS – NAD\nP/A: Uterus Overdistended, Not Acting, Both FH good',
-        procedure_note_p1 = 'Labour natural with episiotomy with good uterine contraction, full cervix dilated. After putting episiotomy, Patient Delivered a alive Twin A male baby By Breech, Baby Handed over to pediatrician. Twin B baby not progressed Delivered Hence Planned To proceed C-Section.',
-        procedure_note_p2 = 'Under SA, Abdomen opened in layers by SPT incision. LSCS done to deliver a alive Twin B male baby, cried soon after birth. Baby Handed over to pediatrician AMTSL followed. Uterine wound closed in 2 layers. After securing perfect Hemostasis, Abdomen closed in layer. AMTSL Followed. Uterus firm & contracted well. Episiotomy wound closed in layers. No Undue Bleeding P/V.',
-        babies = [
-            {
-                title: 'Newborn #1 - Twin A',
-                sex: 'Alive male baby',
-                born: '26.08.2026 at 03:18 AM',
-                mode: 'Labour natural breech with episiotomy',
-                weight: '2.250 kg',
-                apgar: '7/10, 8/10',
-                neonatal_care: 'RDS (+). Handed over to pediatrician; shifted to NICU.'
-            },
-            {
-                title: 'Newborn #2 - Twin B',
-                sex: 'Alive male baby',
-                born: '26.08.2026 at 03:44 AM',
-                mode: 'Emergency LSCS under SA',
-                weight: '2.250 kg',
-                apgar: '8/10, 9/10',
-                neonatal_care: 'Cried soon after birth. Baby handed over to pediatrician. AMTSL followed.'
-            }
-        ],
-        treatment_given = [
-            { medicine: 'IV Fluids', dose: '—' },
-            { medicine: 'Inj. Pipzo', dose: '4.5 g BD IV' },
-            { medicine: 'Inj. Metrogyl', dose: '100 mg BD' },
-            { medicine: 'Inj. Pan', dose: '40 IV BD' }
-        ],
-        investigations = [
-            { label: 'HB', value: '12.9 mgs %' },
-            { label: 'BLOOD GROUP', value: 'O positive' },
-            { label: 'HIV', value: 'Negative' },
-            { label: 'HCV', value: 'Negative' },
-            { label: 'VDRL', value: 'Negative' },
-            { label: 'HBSAG', value: 'Negative' },
-            { label: 'UREA', value: '9.7 g/dl' },
-            { label: 'CREATININE', value: '0.86 mg/dl' },
-            { label: 'URIC ACID', value: '4.3 mg/dl' },
-            { label: 'RBS', value: '100.8 mg/dl' }
-        ],
+        consultant = '',
+        department = '',
+        procedure_at = '',
+        surgeon = '',
+        anaesthetist = '',
+        assisted_by = '',
+        reg_no = '',
+        diagnosis = '',
+        surgery_performed = '',
+        presenting_complaints = '',
+        clinical_examination = '',
+        procedure_note_p1 = '',
+        procedure_note_p2 = '',
+        babies = [],
+        treatment_given = [],
+        investigations = [],
         condition_on_discharge = {
-            general: 'Pt’s general condition good',
-            bp: '110/70 mmHg',
-            pulse: '86 b/min',
-            pa: 'Uterus contracted well; no undue bleeding pv'
+            general: '—',
+            bp: '—',
+            pulse: '—',
+            pa: '—'
         },
-        medications = [
-            { medicine: 'Tab. Cefixime + Sulbactam', frequency: '1-0-1', duration: '7 days', timing: 'After food' },
-            { medicine: 'Tab. Acendol-P', frequency: '1-0-1', duration: '7 days', timing: 'After food' },
-            { medicine: 'Cap. Cyra-D', frequency: '1-0-1', duration: '7 days', timing: 'Before food' }
-        ],
-        advice_list = [
-            'Immunisation',
-            'Exclusive breast feeding for 6 months',
-            'Post Natal Exercise'
-        ],
-        review_date = '03/09/2026',
+        medications = [],
+        advice_list = [],
+        review_text = '',
+        review_date = '',
         tamil_note = null,
         emergency_contacts = '04342-262266, +91-7418084266'
     } = data || {};
@@ -375,29 +334,29 @@ export default function DischargeSummaryPdfTemplate({ data }) {
                             <tr>
                                 <td style={{ width: '33.3%' }}>
                                     <span className="cell-lbl">CONSULTANT DOCTOR</span>
-                                    <span className="cell-val">{consultant}</span>
+                                    <span className="cell-val">{consultant || '—'}</span>
                                 </td>
                                 <td style={{ width: '33.3%' }}>
                                     <span className="cell-lbl">DEPARTMENT</span>
-                                    <span className="cell-val">{department}</span>
+                                    <span className="cell-val">{department || '—'}</span>
                                 </td>
                                 <td style={{ width: '33.4%' }}>
                                     <span className="cell-lbl">DATE OF SURGERY</span>
-                                    <span className="cell-val">{procedure_at}</span>
+                                    <span className="cell-val">{procedure_at || '—'}</span>
                                 </td>
                             </tr>
                             <tr>
                                 <td>
                                     <span className="cell-lbl">SURGEON</span>
-                                    <span className="cell-val">{surgeon}</span>
+                                    <span className="cell-val">{surgeon || '—'}</span>
                                 </td>
                                 <td>
                                     <span className="cell-lbl">ANAESTHETIST</span>
-                                    <span className="cell-val">{anaesthetist}</span>
+                                    <span className="cell-val">{anaesthetist || '—'}</span>
                                 </td>
                                 <td>
                                     <span className="cell-lbl">ASSISTED BY</span>
-                                    <span className="cell-val">{assisted_by}</span>
+                                    <span className="cell-val">{assisted_by || '—'}</span>
                                 </td>
                             </tr>
                         </tbody>
@@ -412,7 +371,7 @@ export default function DischargeSummaryPdfTemplate({ data }) {
                                         <span className="cell-lbl" style={{ fontSize: '7.2pt' }}>DIAGNOSIS</span>
                                     </td>
                                     <td style={{ width: '78%', verticalAlign: 'top', padding: '1px 0' }}>
-                                        <span className="cell-val" style={{ fontSize: '9.2pt' }}>{diagnosis}</span>
+                                        <span className="cell-val" style={{ fontSize: '9.2pt' }}>{diagnosis || '—'}</span>
                                     </td>
                                 </tr>
                                 <tr>
@@ -420,7 +379,7 @@ export default function DischargeSummaryPdfTemplate({ data }) {
                                         <span className="cell-lbl" style={{ fontSize: '7.2pt' }}>SURGERY PERFORMED</span>
                                     </td>
                                     <td style={{ verticalAlign: 'top', padding: '1px 0' }}>
-                                        <span className="cell-val" style={{ fontSize: '9pt' }}>{surgery_performed}</span>
+                                        <span className="cell-val" style={{ fontSize: '9pt' }}>{surgery_performed || '—'}</span>
                                     </td>
                                 </tr>
                             </tbody>
@@ -428,17 +387,29 @@ export default function DischargeSummaryPdfTemplate({ data }) {
                     </div>
 
                     {/* Presenting Complaints */}
-                    <div className="section-header">PRESENTING COMPLAINTS</div>
-                    <div className="prose-text" style={{ whiteSpace: 'pre-line' }}>{presenting_complaints}</div>
+                    {presenting_complaints && (
+                        <>
+                            <div className="section-header">PRESENTING COMPLAINTS</div>
+                            <div className="prose-text" style={{ whiteSpace: 'pre-line' }}>{presenting_complaints}</div>
+                        </>
+                    )}
 
                     {/* Clinical Examination */}
-                    <div className="section-header">CLINICAL EXAMINATION</div>
-                    <div className="prose-text" style={{ whiteSpace: 'pre-line' }}>{clinical_examination}</div>
+                    {clinical_examination && (
+                        <>
+                            <div className="section-header">CLINICAL EXAMINATION</div>
+                            <div className="prose-text" style={{ whiteSpace: 'pre-line' }}>{clinical_examination}</div>
+                        </>
+                    )}
 
                     {/* Procedure Note */}
-                    <div className="section-header">PROCEDURE NOTE</div>
-                    <div className="prose-text">{procedure_note_p1}</div>
-                    <div className="prose-text">{procedure_note_p2}</div>
+                    {(procedure_note_p1 || procedure_note_p2) && (
+                        <>
+                            <div className="section-header">PROCEDURE NOTE</div>
+                            {procedure_note_p1 && <div className="prose-text">{procedure_note_p1}</div>}
+                            {procedure_note_p2 && <div className="prose-text">{procedure_note_p2}</div>}
+                        </>
+                    )}
 
                     {/* Baby / Newborn Details */}
                     {babies && babies.length > 0 && (
@@ -472,43 +443,51 @@ export default function DischargeSummaryPdfTemplate({ data }) {
                     </div>
 
                     {/* Treatment Given */}
-                    <div className="section-header">TREATMENT GIVEN</div>
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th style={{ width: '60%' }}>Medication / fluid</th>
-                                <th style={{ width: '40%' }}>Dose &amp; route</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {treatment_given.map((row, idx) => (
-                                <tr key={idx} style={{ background: idx % 2 === 1 ? '#f8fafc' : '#ffffff' }}>
-                                    <td style={{ fontWeight: 600 }}>{row.medicine}</td>
-                                    <td>{row.dose}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    {treatment_given && treatment_given.length > 0 && (
+                        <>
+                            <div className="section-header">TREATMENT GIVEN</div>
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style={{ width: '60%' }}>Medication / fluid</th>
+                                        <th style={{ width: '40%' }}>Dose &amp; route</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {treatment_given.map((row, idx) => (
+                                        <tr key={idx} style={{ background: idx % 2 === 1 ? '#f8fafc' : '#ffffff' }}>
+                                            <td style={{ fontWeight: 600 }}>{row.medicine}</td>
+                                            <td>{row.dose}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </>
+                    )}
 
                     {/* Investigations */}
-                    <div className="section-header">INVESTIGATIONS</div>
-                    <table className="grid-table bg-white">
-                        <tbody>
-                            {invChunks.map((chunk, rIdx) => (
-                                <tr key={rIdx}>
-                                    {chunk.map((inv, cIdx) => (
-                                        <td key={cIdx} style={{ width: '20%' }}>
-                                            <span className="cell-lbl">{inv.label}</span>
-                                            <span className="cell-val">{inv.value}</span>
-                                        </td>
+                    {investigations && investigations.length > 0 && (
+                        <>
+                            <div className="section-header">INVESTIGATIONS</div>
+                            <table className="grid-table bg-white">
+                                <tbody>
+                                    {invChunks.map((chunk, rIdx) => (
+                                        <tr key={rIdx}>
+                                            {chunk.map((inv, cIdx) => (
+                                                <td key={cIdx} style={{ width: '20%' }}>
+                                                    <span className="cell-lbl">{inv.label}</span>
+                                                    <span className="cell-val">{inv.value}</span>
+                                                </td>
+                                            ))}
+                                            {chunk.length < 5 && Array.from({ length: 5 - chunk.length }).map((_, emptyIdx) => (
+                                                <td key={emptyIdx} style={{ width: '20%' }}>&nbsp;</td>
+                                            ))}
+                                        </tr>
                                     ))}
-                                    {chunk.length < 5 && Array.from({ length: 5 - chunk.length }).map((_, emptyIdx) => (
-                                        <td key={emptyIdx} style={{ width: '20%' }}>&nbsp;</td>
-                                    ))}
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                </tbody>
+                            </table>
+                        </>
+                    )}
 
                     {/* Condition on Discharge */}
                     <div className="section-header">CONDITION ON DISCHARGE</div>
@@ -517,67 +496,79 @@ export default function DischargeSummaryPdfTemplate({ data }) {
                             <tr>
                                 <td style={{ width: '22%' }}>
                                     <span className="cell-lbl">General condition</span>
-                                    <span className="cell-val">{condition_on_discharge.general}</span>
+                                    <span className="cell-val">{condition_on_discharge?.general || '—'}</span>
                                 </td>
                                 <td style={{ width: '18%' }}>
                                     <span className="cell-lbl">BP</span>
-                                    <span className="cell-val">{condition_on_discharge.bp}</span>
+                                    <span className="cell-val">{condition_on_discharge?.bp || '—'}</span>
                                 </td>
                                 <td style={{ width: '18%' }}>
                                     <span className="cell-lbl">Pulse</span>
-                                    <span className="cell-val">{condition_on_discharge.pulse}</span>
+                                    <span className="cell-val">{condition_on_discharge?.pulse || '—'}</span>
                                 </td>
                                 <td style={{ width: '42%' }}>
                                     <span className="cell-lbl">P/A</span>
-                                    <span className="cell-val">{condition_on_discharge.pa}</span>
+                                    <span className="cell-val">{condition_on_discharge?.pa || '—'}</span>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
 
                     {/* Discharge Medications */}
-                    <div className="section-header">DISCHARGE MEDICATIONS</div>
-                    <table className="data-table">
-                        <thead>
-                            <tr>
-                                <th style={{ width: '45%' }}>Medicine</th>
-                                <th style={{ width: '18%' }}>Frequency</th>
-                                <th style={{ width: '17%' }}>Duration</th>
-                                <th style={{ width: '20%' }}>Timing</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {medications.map((med, idx) => (
-                                <tr key={idx} style={{ background: idx % 2 === 1 ? '#f8fafc' : '#ffffff' }}>
-                                    <td style={{ fontWeight: 600 }}>{med.medicine}</td>
-                                    <td>{med.frequency}</td>
-                                    <td>{med.duration}</td>
-                                    <td>{med.timing}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                    {medications && medications.length > 0 && (
+                        <>
+                            <div className="section-header">DISCHARGE MEDICATIONS</div>
+                            <table className="data-table">
+                                <thead>
+                                    <tr>
+                                        <th style={{ width: '45%' }}>Medicine</th>
+                                        <th style={{ width: '18%' }}>Frequency</th>
+                                        <th style={{ width: '17%' }}>Duration</th>
+                                        <th style={{ width: '20%' }}>Timing</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {medications.map((med, idx) => (
+                                        <tr key={idx} style={{ background: idx % 2 === 1 ? '#f8fafc' : '#ffffff' }}>
+                                            <td style={{ fontWeight: 600 }}>{med.medicine}</td>
+                                            <td>{med.frequency}</td>
+                                            <td>{med.duration}</td>
+                                            <td>{med.timing}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </>
+                    )}
 
                     {/* Advice */}
-                    <div className="section-header">ADVICE</div>
-                    <div style={{ fontSize: '8.5pt', lineHeight: 1.35, margin: '2px 0 4px 0' }}>
-                        {advice_list.map((item, idx) => (
-                            <span key={idx} style={{ display: 'inline-block', marginRight: '16px' }}>
-                                <strong>&bull;</strong> {item}
-                            </span>
-                        ))}
-                    </div>
+                    {advice_list && advice_list.length > 0 && (
+                        <>
+                            <div className="section-header">ADVICE</div>
+                            <div style={{ fontSize: '8.5pt', lineHeight: 1.35, margin: '2px 0 4px 0' }}>
+                                {advice_list.map((item, idx) => (
+                                    <span key={idx} style={{ display: 'inline-block', marginRight: '16px' }}>
+                                        <strong>&bull;</strong> {item}
+                                    </span>
+                                ))}
+                            </div>
+                        </>
+                    )}
 
                     {/* Review & Suture Removal */}
-                    <div className="section-header">REVIEW &amp; SUTURE REMOVAL</div>
-                    <div className="review-bar">
-                        <div style={{ display: 'table-cell', fontWeight: 'bold', fontSize: '9pt', verticalAlign: 'middle' }}>
-                            Review after one week
-                        </div>
-                        <div style={{ display: 'table-cell', textAlign: 'right', fontWeight: 'bold', fontSize: '10.5pt', verticalAlign: 'middle' }}>
-                            {review_date}
-                        </div>
-                    </div>
+                    {(review_text || review_date) && (
+                        <>
+                            <div className="section-header">REVIEW &amp; SUTURE REMOVAL</div>
+                            <div className="review-bar">
+                                <div style={{ display: 'table-cell', fontWeight: 'bold', fontSize: '9pt', verticalAlign: 'middle' }}>
+                                    {review_text || 'Review'}
+                                </div>
+                                <div style={{ display: 'table-cell', textAlign: 'right', fontWeight: 'bold', fontSize: '10.5pt', verticalAlign: 'middle' }}>
+                                    {review_date}
+                                </div>
+                            </div>
+                        </>
+                    )}
 
                     {tamil_note && (
                         <div style={{
@@ -587,7 +578,7 @@ export default function DischargeSummaryPdfTemplate({ data }) {
                             background: '#f8fafc',
                             border: '1px solid #111111',
                             borderLeft: '3px solid #111111',
-                            fontFamily: "'Nirmala', 'Arial Unicode MS', sans-serif",
+                            fontFamily: "'Nirmala UI', 'Nirmala', 'Arial Unicode MS', sans-serif",
                             fontSize: '8pt',
                             lineHeight: 1.35,
                             color: '#111111'
@@ -624,8 +615,8 @@ export default function DischargeSummaryPdfTemplate({ data }) {
                         <tbody>
                             <tr>
                                 <td style={{ width: '100%', textAlign: 'right' }}>
-                                    <div style={{ fontSize: '9pt', fontWeight: 'bold' }}>{consultant}</div>
-                                    <div style={{ fontSize: '7.5pt', color: '#475569' }}>Reg: TNMC-64821</div>
+                                    <div style={{ fontSize: '9pt', fontWeight: 'bold' }}>{consultant || '—'}</div>
+                                    {reg_no && <div style={{ fontSize: '7.5pt', color: '#475569' }}>Reg: {reg_no}</div>}
                                 </td>
                             </tr>
                         </tbody>

@@ -66,7 +66,7 @@
             <td style="width: 50%;"><strong>Anesthetist :</strong> {{ $admission->anaesthetist ?: 'Anesthesiologist' }}</td>
         </tr>
         <tr>
-            <td><strong>Assistant By S/N :</strong> {{ $admission->assisted_by ?: ($admission->assistant ?: 'OT Staff Nurse') }}</td>
+            <td><strong>Assistant By S/N :</strong> {{ $admission->assisted_by ?: ($admission->assistant ?: '—') }}</td>
             <td><strong>Anesthesia :</strong> {{ $admission->anaesthesia_type ?: 'General / Spinal' }}</td>
         </tr>
     </table>
@@ -137,7 +137,7 @@
     <div class="d-flex justify-content-between align-items-end mt-5 pt-3">
         <div class="text-center" style="width: 30%;">
             <div style="border-top: 1px dashed #666; padding-top: 4px;">Prepared by</div>
-            <div class="small text-muted">{{ $admission->creator?->name ?? 'Staff Nurse' }}</div>
+            <div class="small text-muted">{{ $admission->creator?->name ?? '—' }}</div>
         </div>
         <div class="text-center" style="width: 35%;">
             <div style="border-top: 1px dashed #666; padding-top: 4px;"><strong>Consultant Operating Surgeon</strong></div>

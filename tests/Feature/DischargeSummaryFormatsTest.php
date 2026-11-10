@@ -311,7 +311,7 @@ class DischargeSummaryFormatsTest extends TestCase
         $this->assertEquals('110/70 mmHg', $pastHist['bp']);
 
         $inv = $admission->formatted_surgical_investigations;
-        $this->assertEquals('15.5g/dl', $inv['group1']['Hb']);
+        $this->assertEquals('15.5 g/dl', $inv['group1']['Hb']);
         $this->assertEquals('Neg', $inv['group2']['HIV']);
 
         $advice = $admission->formatted_surgical_advice;

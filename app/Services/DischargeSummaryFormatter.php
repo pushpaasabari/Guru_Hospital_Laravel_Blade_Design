@@ -153,18 +153,21 @@ class DischargeSummaryFormatter
     public static function formatConditionOnDischarge(?string $text): array
     {
         $res = [
-            'general' => 'Good',
-            'bp' => '110/70 mmHg',
-            'pulse' => '86 b/min',
-            'pa' => 'Uterus contracted well; no undue bleeding P/V',
+            'general' => '—',
+            'bp' => '—',
+            'pulse' => '—',
+            'pa' => '—',
         ];
 
-        if (!$text) {
+        if (!$text || !trim($text)) {
             return $res;
         }
 
+        $matchedAny = false;
+
         if (preg_match('/general\s+condition\s*[:\-]?\s*([a-zA-Z]+)/i', $text, $m)) {
             $res['general'] = ucfirst(strtolower($m[1]));
+            $matchedAny = true;
         }
 
         if (preg_match('/BP\s*[:\-]?\s*([0-9\/\s]+(?:mmHg)?)/i', $text, $m)) {
@@ -173,10 +176,12 @@ class DischargeSummaryFormatter
                 $bp .= ' mmHg';
             }
             $res['bp'] = $bp;
+            $matchedAny = true;
         }
 
         if (preg_match('/Pulse\s*[:\-]?\s*(\d+)\s*(?:b\/mt|b\/min|bpm)?/i', $text, $m)) {
             $res['pulse'] = $m[1] . ' b/min';
+            $matchedAny = true;
         }
 
         if (preg_match('/PA\s*[-:]\s*(.*?)(?=\n|$)/i', $text, $m)) {
@@ -186,6 +191,11 @@ class DischargeSummaryFormatter
             } else {
                 $res['pa'] = $paText;
             }
+            $matchedAny = true;
+        }
+
+        if (!$matchedAny) {
+            $res['general'] = trim(preg_replace('/\s+/', ' ', $text));
         }
 
         return $res;
@@ -322,8 +332,8 @@ class DischargeSummaryFormatter
     public static function formatAdviceAndReview(?string $adviceText, ?string $followUpText, ?Carbon $dischargeAt = null, ?Admission $admission = null): array
     {
         $items = [];
-        $reviewText = 'Review after one week';
-        $reviewDate = $dischargeAt ? $dischargeAt->copy()->addDays(5)->format('d/m/Y') : '03/09/2026';
+        $reviewText = '';
+        $reviewDate = '';
 
         $source = ($adviceText ?? '') . "\n" . ($followUpText ?? '');
         $lines = preg_split('/\r\n|\r|\n/', trim($source));
@@ -344,6 +354,10 @@ class DischargeSummaryFormatter
 
             if (preg_match('/(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/', $line, $dm)) {
                 $reviewDate = $dm[1];
+                if (!$reviewText && str_contains(strtolower($line), 'review')) {
+                    $reviewText = $line;
+                    continue;
+                }
             }
 
             if (preg_match('/post\s*natal\s*exercise/i', $line)) {
@@ -360,20 +374,28 @@ class DischargeSummaryFormatter
             }
         }
 
+        if (!$reviewText && !empty(trim((string) $followUpText))) {
+            $cleanFollowUp = trim(preg_replace('/[\x{0B80}-\x{0BFF}].*/u', '', (string) $followUpText));
+            if ($cleanFollowUp && !preg_match('/^\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}$/', $cleanFollowUp)) {
+                $reviewText = $cleanFollowUp;
+            } elseif ($reviewDate) {
+                $reviewText = 'Review Date';
+            }
+        } elseif (!$reviewText && $reviewDate) {
+            $reviewText = 'Review Date';
+        }
+
         $hasStent = self::hasStent($admission, $source);
         $tamilNote = null;
         if ($hasStent) {
             if (preg_match('/([\x{0B80}-\x{0BFF}].*)/u', $source, $m)) {
                 $tamilNote = trim($m[1]);
             } else {
-                $tamilNote = self::getStentRemovalNotice($reviewDate);
+                $tamilNote = self::getStentRemovalNotice($reviewDate ?: null);
             }
         }
 
         $items = array_unique(array_filter($items));
-        if (empty($items)) {
-            $items = ['Immunisation', 'Exclusive breast feeding for 6 months', 'Post natal exercise'];
-        }
 
         return [
             'advice_items' => array_values($items),
@@ -410,7 +432,7 @@ class DischargeSummaryFormatter
 
             $title = $isMultiple ? "Newborn #" . ($idx + 1) . " - " . $twinLabel : "Newborn Details";
 
-            $sex = 'Alive ' . strtolower($baby->sex ?? 'male') . ' baby';
+            $sex = $baby->sex ? 'Alive ' . strtolower($baby->sex) . ' baby' : '—';
 
             $bornTime = $baby->birth_at
                 ? $baby->birth_at->format('d.m.Y \a\t h:i A')
@@ -424,19 +446,15 @@ class DischargeSummaryFormatter
             } elseif (preg_match('/normal|natural/i', $babyNotes)) {
                 $mode = 'Labour natural with episiotomy';
             } else {
-                if ($isMultiple && $idx === 0) {
-                    $mode = 'Breech delivery with episiotomy';
-                } elseif ($isMultiple && $idx === 1) {
-                    $mode = 'Emergency LSCS under SA';
-                } else {
-                    $mode = $admission->procedure_name ?: 'Normal Vaginal Delivery';
-                }
+                $mode = $admission->procedure_name ?: ($admission->procedure_done ?: '—');
             }
 
-            $weight = $baby->birth_weight_kg ? number_format($baby->birth_weight_kg, 2) . ' kg' : '2.25 kg';
-            $apgar = ($baby->apgar_1_min ?? '7') . '/10, ' . ($baby->apgar_5_min ?? '8') . '/10';
+            $weight = $baby->birth_weight_kg ? number_format($baby->birth_weight_kg, 2) . ' kg' : '—';
+            $apgar = ($baby->apgar_1_min !== null || $baby->apgar_5_min !== null)
+                ? ($baby->apgar_1_min ?? '—') . '/10, ' . ($baby->apgar_5_min ?? '—') . '/10'
+                : '—';
 
-            $neonatalCare = $baby->neonatal_care ?: 'Handed over to pediatrician.';
+            $neonatalCare = $baby->neonatal_care ?: '—';
             if ($idx === 0 && str_contains(strtolower($neonatalCare), 'rds')) {
                 $neonatalCare = 'RDS (+). Handed over to pediatrician; shifted to NICU.';
             }
@@ -506,8 +524,8 @@ class DischargeSummaryFormatter
             'past_surgical' => 'Nil',
             'allergies' => 'Nil',
             'medications' => 'Nil',
-            'pulse' => '82 b/min',
-            'bp' => '110/70mmhg',
+            'pulse' => '—',
+            'bp' => '—',
         ];
 
         if (preg_match('/DM\s*[:\-]\s*([^\s\|]+)/i', $text, $m)) $res['dm'] = trim($m[1]);
@@ -543,18 +561,18 @@ class DischargeSummaryFormatter
         $lines = preg_split('/\r?\n/', trim($text));
 
         $group1 = [
-            'Hb' => '15.5g/dl',
-            'Urea' => '32.2mg/dl',
-            'Creatinine' => '1.14mg/dl',
-            'Uric Acid' => '4.72 mg/dl',
-            'RBS' => '115.2 mg/dl',
+            'Hb' => '—',
+            'Urea' => '—',
+            'Creatinine' => '—',
+            'Uric Acid' => '—',
+            'RBS' => '—',
         ];
 
         $group2 = [
-            'HBs Ag' => 'Neg',
-            'HIV' => 'Neg',
-            'HCV' => 'Neg',
-            'BG' => 'Apositive',
+            'HBs Ag' => '—',
+            'HIV' => '—',
+            'HCV' => '—',
+            'BG' => '—',
         ];
 
         $imaging = [];
@@ -566,11 +584,11 @@ class DischargeSummaryFormatter
             if (preg_match('/^([^:=]+)[:=](.+)$/', $line, $m)) {
                 $rawK = trim($m[1]);
                 $v = trim($m[2]);
-                $cleanK = strtolower(preg_replace('/[^a-z0-9]/', '', $rawK));
+                $cleanK = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $rawK));
 
                 if (in_array($cleanK, ['hb', 'haemoglobin'])) $group1['Hb'] = $v;
                 elseif ($cleanK === 'urea') $group1['Urea'] = $v;
-                elseif ($cleanK === 'creatinine') $group1['Creatinine'] = $v;
+                elseif (in_array($cleanK, ['creatinine', 'creatine'])) $group1['Creatinine'] = $v;
                 elseif ($cleanK === 'uricacid') $group1['Uric Acid'] = $v;
                 elseif ($cleanK === 'rbs') $group1['RBS'] = $v;
                 elseif (in_array($cleanK, ['hbsag', 'hbs'])) $group2['HBs Ag'] = str_ireplace('negative', 'Neg', $v);
@@ -581,10 +599,6 @@ class DischargeSummaryFormatter
                     $imaging[strtoupper($rawK)] = $v;
                 }
             }
-        }
-
-        if (empty($imaging)) {
-            $imaging['USG of KUB'] = strtoupper($admission->diagnosis ?? 'RIGHT LOWER URETERIC CALCULUS');
         }
 
         return [
@@ -603,15 +617,16 @@ class DischargeSummaryFormatter
     public static function formatSurgicalAdvice(Admission $admission): array
     {
         $text = ($admission->discharge_advice ?? '') . "\n" . ($admission->follow_up ?? '');
+        $hasStent = self::hasStent($admission, $text);
 
         $res = [
-            'implant' => 'RIGHT DJ STENT',
-            'diet' => 'Normal Diet',
-            'exercise' => 'Normal activity',
+            'implant' => $hasStent ? 'DJ Stent' : 'Nil',
+            'diet' => '—',
+            'exercise' => '—',
             'emergency_contact' => 'Reception: 04342-262266, 7418084266',
-            'when_to_contact' => 'Bleeding Urethra  Fever  Anything unusual',
-            'review' => '21.08.2026 for stent removal of stent',
-            'tamil_note' => 'வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு 21.08.2026 அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.',
+            'when_to_contact' => 'Report immediately if bleeding, fever, or severe pain',
+            'review' => '',
+            'tamil_note' => '',
         ];
 
         if (preg_match('/Implant\s*[:\-]\s*(.*?)(?=\n|$)/i', $text, $m)) $res['implant'] = trim($m[1]);
@@ -622,9 +637,9 @@ class DischargeSummaryFormatter
         if (preg_match('/Review\s*[:\-]\s*(.*?)(?=\n|$)/i', $text, $m)) $res['review'] = trim($m[1]);
         if (preg_match('/([\x{0B80}-\x{0BFF}].*)/u', $text, $m)) {
             $res['tamil_note'] = trim($m[1]);
-        } elseif (self::hasStent($admission, $text)) {
-            $date = '21.08.2026';
-            if (preg_match('/(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/', $res['review'], $dm)) {
+        } elseif ($hasStent) {
+            $date = null;
+            if (preg_match('/(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/', $res['review'] ?: ($admission->follow_up ?? ''), $dm)) {
                 $date = $dm[1];
             }
             $res['tamil_note'] = self::getStentRemovalNotice($date);
@@ -641,14 +656,8 @@ class DischargeSummaryFormatter
      */
     public static function formatSurgicalDrugs(?string $text): array
     {
-        if (!$text) {
-            return [
-                ['drug' => 'T.Niftas', 'dosage' => '1-0-1', 'no' => '6'],
-                ['drug' => 'T.P650mg', 'dosage' => '1-1-1', 'no' => '9'],
-                ['drug' => 'C.Cyra-D', 'dosage' => '1-0-1', 'no' => '6'],
-                ['drug' => 'Zerodol P', 'dosage' => '1-0-1', 'no' => '6'],
-                ['drug' => 'Review after 7 days', 'dosage' => '14.08.2026', 'no' => ''],
-            ];
+        if (!$text || !trim($text)) {
+            return [];
         }
 
         $lines = preg_split('/\r?\n/', trim($text));
@@ -661,7 +670,7 @@ class DischargeSummaryFormatter
             if (preg_match('/review\s+after\s*([^\(\)]+)(?:\((.*?)\))?/i', $line, $m)) {
                 $rows[] = [
                     'drug' => 'Review after ' . trim($m[1]),
-                    'dosage' => !empty($m[2]) ? trim($m[2]) : '14.08.2026',
+                    'dosage' => !empty($m[2]) ? trim($m[2]) : '—',
                     'no' => '',
                 ];
                 continue;

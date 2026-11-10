@@ -123,17 +123,20 @@ export function formatInvestigations(text?: string | null): FormattedInvestigati
 
 export function formatConditionOnDischarge(text?: string | null): FormattedCondition {
   const res: FormattedCondition = {
-    general: 'Good',
-    bp: '110/70 mmHg',
-    pulse: '86 b/min',
-    pa: 'Uterus contracted well; no undue bleeding P/V',
+    general: '—',
+    bp: '—',
+    pulse: '—',
+    pa: '—',
   };
 
-  if (!text) return res;
+  if (!text || !text.trim()) return res;
+
+  let matchedAny = false;
 
   const gm = text.match(/general\s+condition\s*[:\-]?\s*([a-zA-Z]+)/i);
   if (gm) {
     res.general = gm[1].charAt(0).toUpperCase() + gm[1].slice(1).toLowerCase();
+    matchedAny = true;
   }
 
   const bpm = text.match(/BP\s*[:\-]?\s*([0-9\/\s]+(?:mmHg)?)/i);
@@ -141,17 +144,24 @@ export function formatConditionOnDischarge(text?: string | null): FormattedCondi
     let bp = bpm[1].trim();
     if (!bp.toLowerCase().includes('mmhg')) bp += ' mmHg';
     res.bp = bp;
+    matchedAny = true;
   }
 
   const pm = text.match(/Pulse\s*[:\-]?\s*(\d+)\s*(?:b\/mt|b\/min|bpm)?/i);
   if (pm) {
     res.pulse = `${pm[1]} b/min`;
+    matchedAny = true;
   }
 
   const pam = text.match(/PA\s*[-:]\s*(.*?)(?=\n|$)/i);
   if (pam) {
     const pa = pam[1].trim().replace(/\.$/, '');
     res.pa = /no\s+undue\s+bleeding/i.test(text) ? `${pa}; no undue bleeding P/V` : pa;
+    matchedAny = true;
+  }
+
+  if (!matchedAny) {
+    res.general = text.trim().replace(/\s+/g, ' ');
   }
 
   return res;
@@ -218,16 +228,8 @@ export function formatMedications(text?: string | any[] | null): FormattedMedica
 
 export function formatAdviceAndReview(adviceText?: string | null, followUpText?: string | null, dischargeAt?: string | null, extraContext?: string | null): FormattedAdviceAndReview {
   let items: string[] = [];
-  let reviewText = 'Review after one week';
-  let reviewDate = '03/09/2026';
-
-  if (dischargeAt) {
-    const d = new Date(dischargeAt);
-    d.setDate(d.getDate() + 5);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    reviewDate = `${day}/${month}/${d.getFullYear()}`;
-  }
+  let reviewText = '';
+  let reviewDate = '';
 
   const source = `${adviceText || ''}\n${followUpText || ''}\n${extraContext || ''}`;
   const lines = source.split(/\r?\n/).map((l) => l.trim().replace(/^[*•-]\s*/, '')).filter(Boolean);
@@ -245,6 +247,10 @@ export function formatAdviceAndReview(adviceText?: string | null, followUpText?:
     const dm = line.match(/(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/);
     if (dm) {
       reviewDate = dm[1];
+      if (!reviewText && /review/i.test(line)) {
+        reviewText = line;
+        continue;
+      }
     }
 
     if (/[\u0B80-\u0BFF]/.test(line)) {
@@ -259,14 +265,22 @@ export function formatAdviceAndReview(adviceText?: string | null, followUpText?:
     items.push(line);
   }
 
+  if (!reviewText && followUpText && followUpText.trim()) {
+    const cleanFollow = followUpText.replace(/[\u0B80-\u0BFF].*/, '').trim();
+    if (cleanFollow && !/^\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4}$/.test(cleanFollow)) {
+      reviewText = cleanFollow;
+    } else if (reviewDate) {
+      reviewText = 'Review Date';
+    }
+  } else if (!reviewText && reviewDate) {
+    reviewText = 'Review Date';
+  }
+
   if (!tamil_note && /stent/i.test(source)) {
-    tamil_note = `வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு ${reviewDate} அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.`;
+    tamil_note = `வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு ${reviewDate || '(Date)'} அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.`;
   }
 
   items = Array.from(new Set(items));
-  if (items.length === 0) {
-    items = ['Immunisation', 'Exclusive breast feeding for 6 months', 'Post natal exercise'];
-  }
 
   return { advice_items: items, review_text: reviewText, review_date: reviewDate, tamil_note };
 }
@@ -281,7 +295,7 @@ export function formatNewborns(admission: any): FormattedNewbornCard[] {
   newborns.forEach((baby: any, idx: number) => {
     const twinLabel = idx === 0 ? 'Twin A' : idx === 1 ? 'Twin B' : idx === 2 ? 'Twin C' : `Baby ${idx + 1}`;
     const title = isMultiple ? `Newborn #${idx + 1} - ${twinLabel}` : 'Newborn Details';
-    const sex = `Alive ${(baby.sex || 'male').toLowerCase()} baby`;
+    const sex = baby.sex ? `Alive ${baby.sex.toLowerCase()} baby` : '—';
 
     let bornTime = '—';
     if (baby.birth_at) {
@@ -294,16 +308,17 @@ export function formatNewborns(admission: any): FormattedNewbornCard[] {
     }
 
     const babyNotes = `${baby.notes || ''} ${baby.neonatal_care || ''}`;
-    let mode = 'Breech delivery with episiotomy';
+    let mode = admission.procedure_name || admission.procedure_done || '—';
     if (/breech/i.test(babyNotes)) mode = 'Breech delivery with episiotomy';
     else if (/lscs|c-section/i.test(babyNotes)) mode = 'Emergency LSCS under SA';
     else if (/normal|natural/i.test(babyNotes)) mode = 'Labour natural with episiotomy';
-    else if (isMultiple && idx === 1) mode = 'Emergency LSCS under SA';
 
-    const weight = baby.birth_weight_kg ? `${Number(baby.birth_weight_kg).toFixed(2)} kg` : '2.25 kg';
-    const apgar = `${baby.apgar_1_min || '7'}/10, ${baby.apgar_5_min || '8'}/10`;
+    const weight = baby.birth_weight_kg ? `${Number(baby.birth_weight_kg).toFixed(2)} kg` : '—';
+    const apgar = (baby.apgar_1_min !== null && baby.apgar_1_min !== undefined) || (baby.apgar_5_min !== null && baby.apgar_5_min !== undefined)
+      ? `${baby.apgar_1_min ?? '—'}/10, ${baby.apgar_5_min ?? '—'}/10`
+      : '—';
 
-    let neonatalCare = baby.neonatal_care || 'Handed over to pediatrician.';
+    let neonatalCare = baby.neonatal_care || '—';
     if (idx === 0 && /rds/i.test(neonatalCare)) {
       neonatalCare = 'RDS (+). Handed over to pediatrician; shifted to NICU.';
     }
@@ -349,8 +364,8 @@ export function formatSurgicalPastHistory(admission: any): FormattedSurgicalPast
     past_surgical: 'Nil',
     allergies: 'Nil',
     medications: 'Nil',
-    pulse: '82 b/min',
-    bp: '110/70mmhg',
+    pulse: '—',
+    bp: '—',
   };
 
   const dmM = text.match(/DM\s*[:\-]\s*([^\s\|]+)/i);
@@ -394,18 +409,18 @@ export function formatSurgicalInvestigations(admission: any): FormattedSurgicalI
   const lines = text.split(/\r?\n/).map((l: string) => l.trim().replace(/^[*•-]\s*/, '')).filter(Boolean);
 
   const group1: Record<string, string> = {
-    Hb: '15.5g/dl',
-    Urea: '32.2mg/dl',
-    Creatinine: '1.14mg/dl',
-    'Uric Acid': '4.72 mg/dl',
-    RBS: '115.2 mg/dl',
+    Hb: '—',
+    Urea: '—',
+    Creatinine: '—',
+    'Uric Acid': '—',
+    RBS: '—',
   };
 
   const group2: Record<string, string> = {
-    'HBs Ag': 'Neg',
-    HIV: 'Neg',
-    HCV: 'Neg',
-    BG: 'Apositive',
+    'HBs Ag': '—',
+    HIV: '—',
+    HCV: '—',
+    BG: '—',
   };
 
   const imaging: Record<string, string> = {};
@@ -419,7 +434,7 @@ export function formatSurgicalInvestigations(admission: any): FormattedSurgicalI
 
       if (cleanK === 'hb' || cleanK === 'haemoglobin') group1['Hb'] = v;
       else if (cleanK === 'urea') group1['Urea'] = v;
-      else if (cleanK === 'creatinine') group1['Creatinine'] = v;
+      else if (cleanK === 'creatinine' || cleanK === 'creatine') group1['Creatinine'] = v;
       else if (cleanK === 'uricacid') group1['Uric Acid'] = v;
       else if (cleanK === 'rbs') group1['RBS'] = v;
       else if (cleanK === 'hbsag' || cleanK === 'hbs') group2['HBs Ag'] = v.replace(/negative/i, 'Neg');
@@ -430,10 +445,6 @@ export function formatSurgicalInvestigations(admission: any): FormattedSurgicalI
         imaging[rawK.toUpperCase()] = v;
       }
     }
-  }
-
-  if (Object.keys(imaging).length === 0) {
-    imaging['USG of KUB'] = (admission.diagnosis || 'RIGHT LOWER URETERIC CALCULUS').toUpperCase();
   }
 
   return { group1, group2, imaging };
@@ -451,14 +462,17 @@ export interface FormattedSurgicalAdvice {
 
 export function formatSurgicalAdvice(admission: any): FormattedSurgicalAdvice {
   const text = `${admission.discharge_advice || ''}\n${admission.follow_up || ''}`;
+  const fullContext = `${text} ${admission.procedure_name || ''} ${admission.procedure_done || ''} ${admission.procedure_note || ''} ${admission.findings || ''} ${admission.drain || ''}`;
+  const hasStent = /\bstent\b/i.test(fullContext);
+
   const res: FormattedSurgicalAdvice = {
-    implant: 'RIGHT DJ STENT',
-    diet: 'Normal Diet',
-    exercise: 'Normal activity',
+    implant: hasStent ? 'DJ Stent' : 'Nil',
+    diet: '—',
+    exercise: '—',
     emergency_contact: 'Reception: 04342-262266, 7418084266',
-    when_to_contact: 'Bleeding Urethra  Fever  Anything unusual',
-    review: '21.08.2026 for stent removal of stent',
-    tamil_note: 'வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு 21.08.2026 அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.',
+    when_to_contact: 'Report immediately if bleeding, fever, or severe pain',
+    review: '',
+    tamil_note: '',
   };
 
   const impM = text.match(/Implant\s*[:\-]\s*(.*?)(?=\n|$)/i);
@@ -475,7 +489,13 @@ export function formatSurgicalAdvice(admission: any): FormattedSurgicalAdvice {
   if (revM) res.review = revM[1].trim();
 
   const tamilM = text.match(/([\u0B80-\u0BFF].*)/);
-  if (tamilM) res.tamil_note = tamilM[1].trim();
+  if (tamilM) {
+    res.tamil_note = tamilM[1].trim();
+  } else if (hasStent) {
+    const dm = (res.review || admission.follow_up || '').match(/(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/);
+    const d = dm ? dm[1] : '(Date)';
+    res.tamil_note = `வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு ${d} அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.`;
+  }
 
   return res;
 }
@@ -487,14 +507,8 @@ export interface FormattedSurgicalDrug {
 }
 
 export function formatSurgicalDrugs(text?: string | null): FormattedSurgicalDrug[] {
-  if (!text) {
-    return [
-      { drug: 'T.Niftas', dosage: '1-0-1', no: '6' },
-      { drug: 'T.P650mg', dosage: '1-1-1', no: '9' },
-      { drug: 'C.Cyra-D', dosage: '1-0-1', no: '6' },
-      { drug: 'Zerodol P', dosage: '1-0-1', no: '6' },
-      { drug: 'Review after 7 days', dosage: '14.08.2026', no: '' },
-    ];
+  if (!text || !text.trim()) {
+    return [];
   }
 
   const lines = text.split(/\r?\n/).map((l) => l.trim().replace(/^[*•-]\s*/, '')).filter(Boolean);
@@ -505,7 +519,7 @@ export function formatSurgicalDrugs(text?: string | null): FormattedSurgicalDrug
     if (revM) {
       rows.push({
         drug: `Review after ${revM[1].trim()}`,
-        dosage: revM[2]?.trim() || '14.08.2026',
+        dosage: revM[2]?.trim() || '—',
         no: '',
       });
       continue;
