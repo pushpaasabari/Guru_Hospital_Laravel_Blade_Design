@@ -170,6 +170,33 @@
             updateUI(next);
         });
     })();
+
+    (function() {
+        function applyNormalizedTransform(input, transform) {
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+            const raw = input.value || '';
+            const next = transform(raw);
+            if (raw === next) return;
+            input.value = next;
+            if (start !== null && end !== null && document.activeElement === input) {
+                const diff = raw.length - next.length;
+                try {
+                    input.setSelectionRange(Math.max(0, start - diff), Math.max(0, end - diff));
+                } catch (err) {}
+            }
+        }
+
+        document.addEventListener('input', function(e) {
+            const target = e.target;
+            if (!(target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement)) return;
+            if (target.hasAttribute('data-uppercase-input')) {
+                applyNormalizedTransform(target, function(v) { return v.toUpperCase(); });
+            } else if (target.hasAttribute('data-numeric-only-input')) {
+                applyNormalizedTransform(target, function(v) { return v.replace(/\D+/g, ''); });
+            }
+        });
+    })();
 </script>
 @yield('scripts')
 </body>

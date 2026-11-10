@@ -55,7 +55,7 @@ class DischargeSummaryFormatsTest extends TestCase
             $response->assertStatus(200);
             $response->assertInertia(fn (Assert $page) => $page
                 ->component('Documents/Pack')
-                ->where('admission.patient_name', "Patient {$format}")
+                ->where('admission.patient_name', mb_strtoupper("Patient {$format}", 'UTF-8'))
                 ->where('admission.ip_no', "IP-{$format}")
                 ->where('admission.format', $format)
             );
@@ -106,7 +106,7 @@ class DischargeSummaryFormatsTest extends TestCase
 
         $admission = Admission::where('ip_no', '2026/582')->first();
         $this->assertNotNull($admission);
-        $this->assertEquals('Mrs. Ashwini', $admission->patient_name);
+        $this->assertEquals('MRS. ASHWINI', $admission->patient_name);
         $this->assertEquals('2022/151', $admission->uhid);
         $this->assertEquals('Emergency LSCS', $admission->procedure_name);
         $this->assertCount(1, $admission->newborns);
@@ -118,14 +118,14 @@ class DischargeSummaryFormatsTest extends TestCase
         $previewResponse->assertStatus(200);
         $previewResponse->assertInertia(fn (Assert $page) => $page
             ->component('Documents/Pack')
-            ->where('admission.patient_name', 'Mrs. Ashwini')
+            ->where('admission.patient_name', 'MRS. ASHWINI')
             ->where('admission.ip_no', '2026/582')
             ->where('admission.uhid', '2022/151')
             ->where('admission.procedure_name', 'Emergency LSCS')
-            ->where('admission.surgeon', 'Dr. Ambika M.S (O&G)')
-            ->where('admission.anaesthetist', 'Dr. M.S Karthick')
-            ->where('admission.assisted_by', 'Miss Soudnharya')
-            ->where('admission.pediatrician_name', 'Dr. Nithyapriya (Paediatrician)')
+            ->where('admission.surgeon', 'DR. AMBIKA M.S (O&G)')
+            ->where('admission.anaesthetist', 'DR. M.S KARTHICK')
+            ->where('admission.assisted_by', 'MISS SOUDNHARYA')
+            ->where('admission.pediatrician_name', 'DR. NITHYAPRIYA (PAEDIATRICIAN)')
             ->where('admission.investigations', fn ($inv) => str_contains($inv, '10.6'))
         );
 
@@ -144,7 +144,7 @@ class DischargeSummaryFormatsTest extends TestCase
 
         $admission = Admission::where('ip_no', '2026/488')->first();
         $this->assertNotNull($admission);
-        $this->assertEquals('Mr. Ajith kumar', $admission->patient_name);
+        $this->assertEquals('MR. AJITH KUMAR', $admission->patient_name);
         $this->assertEquals('2026/2892', $admission->uhid);
         $this->assertEquals('Lap Appendectomy', $admission->procedure_name);
         $this->assertCount(0, $admission->newborns);
@@ -156,13 +156,13 @@ class DischargeSummaryFormatsTest extends TestCase
         $previewResponse->assertStatus(200);
         $previewResponse->assertInertia(fn (Assert $page) => $page
             ->component('Documents/Pack')
-            ->where('admission.patient_name', 'Mr. Ajith kumar')
+            ->where('admission.patient_name', 'MR. AJITH KUMAR')
             ->where('admission.ip_no', '2026/488')
             ->where('admission.uhid', '2026/2892')
             ->where('admission.procedure_name', 'Lap Appendectomy')
-            ->where('admission.surgeon', 'Dr. Jayaprakash M.S')
-            ->where('admission.anaesthetist', 'Dr. S.G. ArunKumar')
-            ->where('admission.assisted_by', 'Mr. Vijaykumar')
+            ->where('admission.surgeon', 'DR. JAYAPRAKASH M.S')
+            ->where('admission.anaesthetist', 'DR. S.G. ARUNKUMAR')
+            ->where('admission.assisted_by', 'MR. VIJAYKUMAR')
             ->where('admission.anaesthesia_type', 'GA')
             ->where('admission.surgery_type', 'other')
             ->has('admission.newborns', 0)
@@ -183,7 +183,7 @@ class DischargeSummaryFormatsTest extends TestCase
 
         $admission = Admission::where('ip_no', '2026/778')->first();
         $this->assertNotNull($admission);
-        $this->assertEquals('Mrs. MANJUPRIYA', $admission->patient_name);
+        $this->assertEquals('MRS. MANJUPRIYA', $admission->patient_name);
         $this->assertEquals('2026/2952', $admission->uhid);
         $this->assertEquals('ELECTIVE LSCS', $admission->procedure_name);
 
@@ -194,14 +194,14 @@ class DischargeSummaryFormatsTest extends TestCase
         $previewResponse->assertStatus(200);
         $previewResponse->assertInertia(fn (Assert $page) => $page
             ->component('Documents/Pack')
-            ->where('admission.patient_name', 'Mrs. MANJUPRIYA')
+            ->where('admission.patient_name', 'MRS. MANJUPRIYA')
             ->where('admission.ip_no', '2026/778')
             ->where('admission.uhid', '2026/2952')
             ->where('admission.procedure_name', 'ELECTIVE LSCS')
-            ->where('admission.surgeon', 'Dr.Ambika MS(OG)')
+            ->where('admission.surgeon', 'DR.AMBIKA MS(OG)')
             ->where('admission.contact', '9677371431')
-            ->where('admission.anaesthetist', 'Dr.S.G.Arun kumar')
-            ->where('admission.assisted_by', 'Mr. Vijayakumar')
+            ->where('admission.anaesthetist', 'DR.S.G.ARUN KUMAR')
+            ->where('admission.assisted_by', 'MR. VIJAYAKUMAR')
             ->where('admission.anaesthesia_type', 'Spinal')
         );
 
@@ -220,7 +220,7 @@ class DischargeSummaryFormatsTest extends TestCase
 
         $admission = Admission::where('ip_no', '2026/567')->first();
         $this->assertNotNull($admission);
-        $this->assertEquals('Mrs. Anitha', $admission->patient_name);
+        $this->assertEquals('MRS. ANITHA', $admission->patient_name);
         $this->assertEquals('2023/3931', $admission->uhid);
         $this->assertEquals('G3P1L1A1 / TWINS / Preterm / PROM', $admission->diagnosis);
         $this->assertCount(2, $admission->newborns);
@@ -232,7 +232,7 @@ class DischargeSummaryFormatsTest extends TestCase
         $previewResponse->assertStatus(200);
         $previewResponse->assertInertia(fn (Assert $page) => $page
             ->component('Documents/Pack')
-            ->where('admission.patient_name', 'Mrs. Anitha')
+            ->where('admission.patient_name', 'MRS. ANITHA')
             ->where('admission.ip_no', '2026/567')
             ->where('admission.uhid', '2023/3931')
             ->where('admission.diagnosis', 'G3P1L1A1 / TWINS / Preterm / PROM')
@@ -270,7 +270,7 @@ class DischargeSummaryFormatsTest extends TestCase
 
         $admission = Admission::where('ip_no', '2026/507')->first();
         $this->assertNotNull($admission);
-        $this->assertEquals('Mr. Gopalakrishnan', $admission->patient_name);
+        $this->assertEquals('MR. GOPALAKRISHNAN', $admission->patient_name);
         $this->assertEquals('2026/1247', $admission->uhid);
         $this->assertEquals('Right Lower Ureteric Calculus', $admission->diagnosis);
         $this->assertEquals('other', $admission->surgery_type);
@@ -282,7 +282,7 @@ class DischargeSummaryFormatsTest extends TestCase
         $previewResponse->assertStatus(200);
         $previewResponse->assertInertia(fn (Assert $page) => $page
             ->component('Documents/Pack')
-            ->where('admission.patient_name', 'Mr. Gopalakrishnan')
+            ->where('admission.patient_name', 'MR. GOPALAKRISHNAN')
             ->where('admission.ip_no', '2026/507')
             ->where('admission.uhid', '2026/1247')
             ->where('admission.diagnosis', 'Right Lower Ureteric Calculus')

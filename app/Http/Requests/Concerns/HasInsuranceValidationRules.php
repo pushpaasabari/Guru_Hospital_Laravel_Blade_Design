@@ -70,11 +70,19 @@ trait HasInsuranceValidationRules
         if (!empty($updates)) {
             $this->merge($updates);
         }
+
+        if (method_exists($this, 'normalizeUppercaseClinicalInputs')) {
+            $this->normalizeUppercaseClinicalInputs();
+        }
     }
 
     public function messages(): array
     {
-        return $this->insuranceMessages();
+        $clinicalMessages = method_exists($this, 'clinicalValidationMessages')
+            ? $this->clinicalValidationMessages()
+            : [];
+
+        return array_merge($this->insuranceMessages(), $clinicalMessages);
     }
 }
 

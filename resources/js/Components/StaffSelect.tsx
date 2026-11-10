@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { handleNormalizedInputChange, toUpperCaseValue } from '../utils/inputNormalizers';
 
 export interface ClinicalStaffMember {
   id: number;
@@ -20,6 +21,7 @@ interface StaffSelectProps {
   showCustomToggle?: boolean;
   isCustom?: boolean;
   onCustomToggle?: (isCustom: boolean) => void;
+  uppercase?: boolean;
 }
 
 export default function StaffSelect({
@@ -33,6 +35,7 @@ export default function StaffSelect({
   showCustomToggle = false,
   isCustom,
   onCustomToggle,
+  uppercase = false,
 }: StaffSelectProps) {
   const [internalCustom, setInternalCustom] = useState(false);
 
@@ -46,13 +49,16 @@ export default function StaffSelect({
     setInternalCustom(val);
   };
 
+  const normalize = (val: string) => (uppercase ? toUpperCaseValue(val) : val);
+  const currentValue = normalize(value || '');
+
   // Filter staff by the requested role
   const filtered = staffList.filter(
     (s) => s.category === role || (s.roles && s.roles.includes(role))
   );
 
   // Check if current value matches one in the filtered list
-  const hasMatch = filtered.some((s) => s.name === value);
+  const hasMatch = filtered.some((s) => normalize(s.name) === currentValue);
 
   return (
     <div>
@@ -77,8 +83,13 @@ export default function StaffSelect({
           <input
             type="text"
             className="form-control"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
+            style={uppercase ? { textTransform: 'uppercase' } : undefined}
+            value={currentValue}
+            onChange={(e) =>
+              uppercase
+                ? handleNormalizedInputChange(e, toUpperCaseValue, onChange)
+                : onChange(e.target.value)
+            }
             placeholder={`Enter custom ${label}`}
             required={required}
           />
@@ -96,25 +107,28 @@ export default function StaffSelect({
       ) : (
         <select
           className="form-select"
-          value={value}
+          value={currentValue}
           onChange={(e) => {
             if (e.target.value === '__custom__') {
               setCustomMode(true);
             } else {
-              onChange(e.target.value);
+              onChange(normalize(e.target.value));
             }
           }}
           required={required}
         >
           <option value="">{placeholder}</option>
-          {value && !hasMatch && (
-            <option value={value}>{value} (Current)</option>
+          {currentValue && !hasMatch && (
+            <option value={currentValue}>{currentValue} (Current)</option>
           )}
-          {filtered.map((s) => (
-            <option key={s.id} value={s.name}>
-              {s.name} {s.qualification ? `(${s.qualification})` : s.department ? `(${s.department})` : ''}
-            </option>
-          ))}
+          {filtered.map((s) => {
+            const optionValue = normalize(s.name);
+            return (
+              <option key={s.id} value={optionValue}>
+                {optionValue} {s.qualification ? `(${s.qualification})` : s.department ? `(${s.department})` : ''}
+              </option>
+            );
+          })}
           <option value="__custom__">+ Enter custom name...</option>
         </select>
       )}

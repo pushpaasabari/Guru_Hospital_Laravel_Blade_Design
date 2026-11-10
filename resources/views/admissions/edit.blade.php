@@ -73,7 +73,7 @@
         <div class="row g-3">
             <div class="col-md-4">
                 <label class="form-label required">Patient Full Name</label>
-                <input class="form-control" name="patient_name" type="text" value="{{ old('patient_name', $admission->patient_name) }}" required>
+                <input class="form-control" style="text-transform: uppercase;" data-uppercase-input name="patient_name" type="text" value="{{ old('patient_name', $admission->patient_name) }}" required>
             </div>
             <div class="col-md-4">
                 <label class="form-label required">UHID / MRN</label>
@@ -98,8 +98,9 @@
                 </select>
             </div>
             <div class="col-md-4">
-                <label class="form-label">Contact / Phone</label>
-                <input class="form-control" name="contact" type="text" value="{{ old('contact', $admission->contact) }}">
+                <label class="form-label">Phone / Contact</label>
+                <input class="form-control @error('contact') is-invalid @enderror" name="contact" type="tel" inputmode="numeric" pattern="[0-9]*" data-numeric-only-input value="{{ old('contact', $admission->contact) }}">
+                @error('contact')<div class="invalid-feedback">{{ $message }}</div>@enderror
             </div>
             <div class="col-md-4">
                 <label class="form-label required">Surgery / Clinical Workflow</label>
@@ -116,15 +117,15 @@
 
             <div class="col-md-4">
                 <label class="form-label required">Address Line 1</label>
-                <input class="form-control" name="address_line1" type="text" value="{{ old('address_line1', $admission->address_line1 ?? $admission->address) }}" required placeholder="e.g. Door No. / Street / Building">
+                <input class="form-control" style="text-transform: uppercase;" data-uppercase-input name="address_line1" type="text" value="{{ old('address_line1', $admission->address_line1 ?? $admission->address) }}" required placeholder="e.g. DOOR NO. / STREET / BUILDING">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Address Line 2</label>
-                <input class="form-control" name="address_line2" type="text" value="{{ old('address_line2', $admission->address_line2) }}" placeholder="e.g. Area / Locality / Village">
+                <input class="form-control" style="text-transform: uppercase;" data-uppercase-input name="address_line2" type="text" value="{{ old('address_line2', $admission->address_line2) }}" placeholder="e.g. AREA / LOCALITY / VILLAGE">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Address Line 3</label>
-                <input class="form-control" name="address_line3" type="text" value="{{ old('address_line3', $admission->address_line3) }}" placeholder="e.g. City / Taluk / Pincode">
+                <input class="form-control" style="text-transform: uppercase;" data-uppercase-input name="address_line3" type="text" value="{{ old('address_line3', $admission->address_line3) }}" placeholder="e.g. CITY / TALUK / PINCODE">
             </div>
 
             <div class="col-md-4" id="picmeFieldWrapper" style="{{ old('surgery_type', $admission->surgery_type) === 'delivery' ? '' : 'display: none;' }}">
@@ -151,7 +152,7 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label">Consultant Doctor</label>
-                <input class="form-control" name="consultant" type="text" value="{{ old('consultant', $admission->consultant) }}">
+                <input class="form-control" style="text-transform: uppercase;" data-uppercase-input name="consultant" type="text" value="{{ old('consultant', $admission->consultant) }}">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Department / Specialty</label>

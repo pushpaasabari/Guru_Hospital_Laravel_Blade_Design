@@ -108,19 +108,19 @@
         <div class="row g-3">
             <div class="col-md-4">
                 <label class="form-label">Surgeon</label>
-                <input class="form-control" name="surgeon" value="{{ old('surgeon', $admission->surgeon) }}" placeholder="e.g. Dr. Ambika MS OG">
+                <input class="form-control" style="text-transform: uppercase;" data-uppercase-input name="surgeon" value="{{ old('surgeon', $admission->surgeon) }}" placeholder="e.g. DR. AMBIKA MS OG">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Assisted Surgeon</label>
-                <input class="form-control" name="assisted_surgeon" value="{{ old('assisted_surgeon', $admission->assisted_surgeon) }}">
+                <input class="form-control" style="text-transform: uppercase;" data-uppercase-input name="assisted_surgeon" value="{{ old('assisted_surgeon', $admission->assisted_surgeon) }}">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Anaesthetist</label>
-                <input class="form-control" name="anaesthetist" value="{{ old('anaesthetist', $admission->anaesthetist) }}" placeholder="e.g. Dr. M.S Karthick (SA)">
+                <input class="form-control" style="text-transform: uppercase;" data-uppercase-input name="anaesthetist" value="{{ old('anaesthetist', $admission->anaesthetist) }}" placeholder="e.g. DR. M.S KARTHICK (SA)">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Assisted Anaesthetist</label>
-                <input class="form-control" name="assisted_anaesthetist" value="{{ old('assisted_anaesthetist', $admission->assisted_anaesthetist) }}">
+                <input class="form-control" style="text-transform: uppercase;" data-uppercase-input name="assisted_anaesthetist" value="{{ old('assisted_anaesthetist', $admission->assisted_anaesthetist) }}">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Anaesthesia Type</label>
@@ -128,19 +128,19 @@
             </div>
             <div class="col-md-4">
                 <label class="form-label">Staff Nurse</label>
-                <input class="form-control" name="staff_nurse" value="{{ old('staff_nurse', $admission->staff_nurse) }}" placeholder="e.g. Staff Nurse Anitha">
+                <input class="form-control" style="text-transform: uppercase;" data-uppercase-input name="staff_nurse" value="{{ old('staff_nurse', $admission->staff_nurse) }}" placeholder="e.g. STAFF NURSE ANITHA">
             </div>
             <div class="col-md-4">
                 <label class="form-label">OT Technician</label>
-                <input class="form-control" name="ot_technician" value="{{ old('ot_technician', $admission->ot_technician) }}">
+                <input class="form-control" style="text-transform: uppercase;" data-uppercase-input name="ot_technician" value="{{ old('ot_technician', $admission->ot_technician) }}">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Pediatrician</label>
-                <input class="form-control" name="pediatrician_name" value="{{ old('pediatrician_name', $admission->pediatrician_name) }}">
+                <input class="form-control" style="text-transform: uppercase;" data-uppercase-input name="pediatrician_name" value="{{ old('pediatrician_name', $admission->pediatrician_name) }}">
             </div>
             <div class="col-md-4">
                 <label class="form-label">Assistant / Other Clinical Help</label>
-                <input class="form-control" name="assisted_by" value="{{ old('assisted_by', $admission->assisted_by) }}">
+                <input class="form-control" style="text-transform: uppercase;" data-uppercase-input name="assisted_by" value="{{ old('assisted_by', $admission->assisted_by) }}">
             </div>
         </div>
     </div>

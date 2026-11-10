@@ -2,11 +2,18 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\HasClinicalInputNormalization;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateSurgeryRequest extends FormRequest
 {
+    use HasClinicalInputNormalization;
+
+    protected function prepareForValidation(): void
+    {
+        $this->normalizeUppercaseClinicalInputs();
+    }
     public function authorize(): bool
     {
         $admission = $this->route('admission');

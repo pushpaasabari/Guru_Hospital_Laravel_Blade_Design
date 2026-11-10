@@ -188,14 +188,15 @@ class ClinicalStaffManagementTest extends TestCase
 
         $this->assertDatabaseHas('admissions', [
             'ip_no' => '2026/8888',
-            'consultant' => 'Dr. Karthik Rajan MS, MCh',
-            'surgeon' => 'Dr. Karthik Rajan MS, MCh',
-            'assisted_surgeon' => 'Dr. K. Senthil MBBS',
-            'anaesthetist' => 'Dr. M.S Karthick',
-            'assisted_anaesthetist' => 'Dr. R. Vignesh MBBS, DA',
-            'staff_nurse' => 'Staff Nurse Anitha',
-            'ot_technician' => 'OT Tech Selvam',
-            'pediatrician_name' => 'Dr. Nithyapriya (Paediatrician)',
+            'patient_name' => 'TEST PATIENT',
+            'consultant' => 'DR. KARTHIK RAJAN MS, MCH',
+            'surgeon' => 'DR. KARTHIK RAJAN MS, MCH',
+            'assisted_surgeon' => 'DR. K. SENTHIL MBBS',
+            'anaesthetist' => 'DR. M.S KARTHICK',
+            'assisted_anaesthetist' => 'DR. R. VIGNESH MBBS, DA',
+            'staff_nurse' => 'STAFF NURSE ANITHA',
+            'ot_technician' => 'OT TECH SELVAM',
+            'pediatrician_name' => 'DR. NITHYAPRIYA (PAEDIATRICIAN)',
             'anaesthesia_type' => 'Spinal Anesthesia (SA)',
         ]);
     }

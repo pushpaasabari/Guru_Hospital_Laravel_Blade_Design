@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
+import { digitsOnlyValue, handleNormalizedInputChange, toUpperCaseValue } from '../../utils/inputNormalizers';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
 import PaymentInsuranceFields, { normalizePaymentMode } from '../../Components/PaymentInsuranceFields';
 
@@ -225,8 +226,11 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                 <input
                   type="text"
                   className={`form-control ${errors.patient_name ? 'is-invalid' : ''}`}
+                  style={{ textTransform: 'uppercase' }}
                   value={data.patient_name}
-                  onChange={(e) => setData('patient_name', e.target.value)}
+                  onChange={(e) =>
+                    handleNormalizedInputChange(e, toUpperCaseValue, (val) => setData('patient_name', val))
+                  }
                   required
                 />
                 {errors.patient_name && <div className="invalid-feedback">{errors.patient_name}</div>}
@@ -290,12 +294,17 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
               <div className="col-md-4">
                 <label className="form-label">Phone / Contact</label>
                 <input
-                  type="text"
-                  className="form-control"
+                  type="tel"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  className={`form-control ${errors.contact ? 'is-invalid' : ''}`}
                   value={data.contact || ''}
-                  onChange={(e) => setData('contact', e.target.value)}
+                  onChange={(e) =>
+                    handleNormalizedInputChange(e, digitsOnlyValue, (val) => setData('contact', val))
+                  }
                   placeholder="e.g. 7373667465"
                 />
+                {errors.contact && <div className="invalid-feedback">{errors.contact}</div>}
               </div>
               <div className="col-md-4">
                 <div className="d-flex justify-content-between align-items-center mb-1">
@@ -328,9 +337,12 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                 <input
                   type="text"
                   className={`form-control ${errors.address_line1 ? 'is-invalid' : ''}`}
+                  style={{ textTransform: 'uppercase' }}
                   value={data.address_line1 || ''}
-                  onChange={(e) => setData('address_line1', e.target.value)}
-                  placeholder="e.g. Door No. / Street / Building"
+                  onChange={(e) =>
+                    handleNormalizedInputChange(e, toUpperCaseValue, (val) => setData('address_line1', val))
+                  }
+                  placeholder="e.g. DOOR NO. / STREET / BUILDING"
                   required
                 />
                 {errors.address_line1 && <div className="invalid-feedback">{errors.address_line1}</div>}
@@ -340,9 +352,12 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                 <input
                   type="text"
                   className="form-control"
+                  style={{ textTransform: 'uppercase' }}
                   value={data.address_line2 || ''}
-                  onChange={(e) => setData('address_line2', e.target.value)}
-                  placeholder="e.g. Area / Locality / Village"
+                  onChange={(e) =>
+                    handleNormalizedInputChange(e, toUpperCaseValue, (val) => setData('address_line2', val))
+                  }
+                  placeholder="e.g. AREA / LOCALITY / VILLAGE"
                 />
               </div>
               <div className="col-md-4">
@@ -350,9 +365,12 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                 <input
                   type="text"
                   className="form-control"
+                  style={{ textTransform: 'uppercase' }}
                   value={data.address_line3 || ''}
-                  onChange={(e) => setData('address_line3', e.target.value)}
-                  placeholder="e.g. City / Taluk / Pincode"
+                  onChange={(e) =>
+                    handleNormalizedInputChange(e, toUpperCaseValue, (val) => setData('address_line3', val))
+                  }
+                  placeholder="e.g. CITY / TALUK / PINCODE"
                 />
               </div>
 
@@ -417,7 +435,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                   role="consultant_doctor"
                   value={data.consultant || ''}
                   onChange={(val) => {
-                    const match = clinicalStaff.find((s) => s.name === val);
+                    const match = clinicalStaff.find((s) => s.name.toUpperCase() === val.toUpperCase());
                     setData((prev) => ({
                       ...prev,
                       consultant: val,
@@ -429,6 +447,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                   showCustomToggle={false}
                   isCustom={customConsultant}
                   onCustomToggle={setCustomConsultant}
+                  uppercase
                 />
               </div>
               <div className="col-md-4">

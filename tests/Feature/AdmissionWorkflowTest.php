@@ -61,7 +61,10 @@ class AdmissionWorkflowTest extends TestCase
         ]);
 
         $this->assertDatabaseHas('admissions', [
-            'patient_name' => 'Meena Kumar',
+            'patient_name' => 'MEENA KUMAR',
+            'consultant' => 'DR. KARTHIK MS',
+            'surgeon' => 'DR. KARTHIK MS',
+            'anaesthetist' => 'DR. RAMESH DA',
             'ip_no' => 'IP-8891',
             'status' => 'draft',
             'format' => 'general',
@@ -413,18 +416,19 @@ class AdmissionWorkflowTest extends TestCase
 
         $this->assertDatabaseHas('admissions', [
             'ip_no' => 'IP-ADDR-01',
-            'address_line1' => 'No. 45, Anna Salai',
-            'address_line2' => 'Pennagaram Road',
-            'address_line3' => 'Dharmapuri - 636701',
-            'address' => 'No. 45, Anna Salai, Pennagaram Road, Dharmapuri - 636701',
+            'patient_name' => 'KAVITHA SELVAM',
+            'address_line1' => 'NO. 45, ANNA SALAI',
+            'address_line2' => 'PENNAGARAM ROAD',
+            'address_line3' => 'DHARMAPURI - 636701',
+            'address' => 'NO. 45, ANNA SALAI, PENNAGARAM ROAD, DHARMAPURI - 636701',
             'picme_no' => '331024998877',
         ]);
 
         $admission = Admission::where('ip_no', 'IP-ADDR-01')->first();
-        $this->assertEquals('No. 45, Anna Salai', $admission->address_line1);
-        $this->assertEquals('Pennagaram Road', $admission->address_line2);
-        $this->assertEquals('Dharmapuri - 636701', $admission->address_line3);
-        $this->assertEquals('No. 45, Anna Salai, Pennagaram Road, Dharmapuri - 636701', $admission->address);
+        $this->assertEquals('NO. 45, ANNA SALAI', $admission->address_line1);
+        $this->assertEquals('PENNAGARAM ROAD', $admission->address_line2);
+        $this->assertEquals('DHARMAPURI - 636701', $admission->address_line3);
+        $this->assertEquals('NO. 45, ANNA SALAI, PENNAGARAM ROAD, DHARMAPURI - 636701', $admission->address);
     }
 
     public function test_nurse_can_create_medical_case_workflow_admission(): void

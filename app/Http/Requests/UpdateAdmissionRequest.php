@@ -2,12 +2,14 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\HasClinicalInputNormalization;
 use App\Http\Requests\Concerns\HasInsuranceValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateAdmissionRequest extends FormRequest
 {
+    use HasClinicalInputNormalization;
     use HasInsuranceValidationRules;
     public function authorize(): bool
     {
@@ -31,7 +33,7 @@ class UpdateAdmissionRequest extends FormRequest
             'address_line1' => ['nullable', 'string', 'max:255'],
             'address_line2' => ['nullable', 'string', 'max:255'],
             'address_line3' => ['nullable', 'string', 'max:255'],
-            'contact' => ['nullable', 'string', 'max:50'],
+            'contact' => $this->contactValidationRules(),
 
             // Core Dates & Doctors
             'admission_at' => ['required', 'date'],

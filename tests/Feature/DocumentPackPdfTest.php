@@ -85,14 +85,14 @@ class DocumentPackPdfTest extends TestCase
             ->get("/admissions/{$this->approvedAdmission->id}/documents/pdf/discharge-summary");
         $resDischarge->assertStatus(200);
         $this->assertEquals('application/pdf', $resDischarge->headers->get('Content-Type'));
-        $this->assertStringContainsString('attachment; filename="GH-7701_Ramesh_Natarajan_Discharge_Summary.pdf"', $resDischarge->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('attachment; filename="GH-7701_RAMESH_NATARAJAN_Discharge_Summary.pdf"', $resDischarge->headers->get('Content-Disposition'));
 
         // 2. Operation Theatre Notes (UHID_Patentname_OPerationtype)
         $resOt = $this->actingAs($this->doctor)
             ->get("/admissions/{$this->approvedAdmission->id}/documents/pdf/operation-notes");
         $resOt->assertStatus(200);
         $this->assertEquals('application/pdf', $resOt->headers->get('Content-Type'));
-        $this->assertStringContainsString('attachment; filename="GH-7701_Ramesh_Natarajan_Laparoscopic_Cholecystectomy.pdf"', $resOt->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('attachment; filename="GH-7701_RAMESH_NATARAJAN_Laparoscopic_Cholecystectomy.pdf"', $resOt->headers->get('Content-Disposition'));
 
         // 3. MRD Inpatient Form
         $resMrd = $this->actingAs($this->doctor)
@@ -153,7 +153,7 @@ class DocumentPackPdfTest extends TestCase
         $this->assertStringNotContainsString('Page 2 of 2', $html);
         $this->assertStringNotContainsString('Prepared by', $html);
         $this->assertStringNotContainsString('Dr. Karthik Rajan MS, MCh', $html);
-        $this->assertStringContainsString('Dr. Ambika M.S (O&amp;G)', $html);
+        $this->assertStringContainsString('DR. AMBIKA M.S (O&amp;G)', $html);
 
         $pdfBytes = $pdfService->generateWithPlaywright($deliveryAdmission, 'discharge_summary');
         preg_match('/\/Type\s*\/Pages[^>]*\/Count\s+(\d+)/', $pdfBytes, $pageMatch);

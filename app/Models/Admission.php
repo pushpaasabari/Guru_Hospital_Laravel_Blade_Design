@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\AdmissionInputNormalizer;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -39,6 +40,16 @@ class Admission extends Model
     protected static function booted(): void
     {
         static::saving(function ($admission) {
+            foreach (AdmissionInputNormalizer::UPPERCASE_FIELDS as $field) {
+                if ($admission->$field !== null) {
+                    $admission->$field = AdmissionInputNormalizer::toUpper((string) $admission->$field);
+                }
+            }
+
+            if ($admission->contact !== null) {
+                $admission->contact = AdmissionInputNormalizer::digitsOnly((string) $admission->contact);
+            }
+
             if (!empty($admission->address_line1) || !empty($admission->address_line2) || !empty($admission->address_line3)) {
                 $admission->address = implode(', ', array_filter([
                     $admission->address_line1,

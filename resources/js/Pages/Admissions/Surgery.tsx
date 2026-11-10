@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
+import { handleNormalizedInputChange, toUpperCaseValue } from '../../utils/inputNormalizers';
 import AnesthesiaSelect, { AnesthesiaTypeItem } from '../../Components/AnesthesiaSelect';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
 
@@ -101,15 +102,15 @@ export default function AdmissionsSurgery({
     procedure_name: admission.procedure_name || '',
     procedure_done: admission.procedure_done || '',
     icd_code: admission.icd_code || '',
-    surgeon: admission.surgeon || '',
-    assisted_surgeon: admission.assisted_surgeon || '',
-    pediatrician_name: admission.pediatrician_name || '',
-    anaesthetist: admission.anaesthetist || '',
-    assisted_anaesthetist: admission.assisted_anaesthetist || '',
-    assistant: admission.assistant || '',
-    assisted_by: admission.assisted_by || '',
-    staff_nurse: admission.staff_nurse || '',
-    ot_technician: admission.ot_technician || '',
+    surgeon: toUpperCaseValue(admission.surgeon || ''),
+    assisted_surgeon: toUpperCaseValue(admission.assisted_surgeon || ''),
+    pediatrician_name: toUpperCaseValue(admission.pediatrician_name || ''),
+    anaesthetist: toUpperCaseValue(admission.anaesthetist || ''),
+    assisted_anaesthetist: toUpperCaseValue(admission.assisted_anaesthetist || ''),
+    assistant: toUpperCaseValue(admission.assistant || ''),
+    assisted_by: toUpperCaseValue(admission.assisted_by || ''),
+    staff_nurse: toUpperCaseValue(admission.staff_nurse || ''),
+    ot_technician: toUpperCaseValue(admission.ot_technician || ''),
     anaesthesia_type: admission.anaesthesia_type || '',
     procedure_note: admission.procedure_note || '',
     incision: admission.incision || '',
@@ -369,6 +370,7 @@ export default function AdmissionsSurgery({
                   onChange={(val) => setData('surgeon', val)}
                   staffList={clinicalStaff}
                   placeholder="-- Select Surgeon --"
+                  uppercase
                 />
               </div>
 
@@ -380,6 +382,7 @@ export default function AdmissionsSurgery({
                   onChange={(val) => setData('assisted_surgeon', val)}
                   staffList={clinicalStaff}
                   placeholder="-- Select Assisted Surgeon --"
+                  uppercase
                 />
               </div>
 
@@ -391,6 +394,7 @@ export default function AdmissionsSurgery({
                   onChange={(val) => setData('anaesthetist', val)}
                   staffList={clinicalStaff}
                   placeholder="-- Select Anaesthetist --"
+                  uppercase
                 />
               </div>
 
@@ -402,6 +406,7 @@ export default function AdmissionsSurgery({
                   onChange={(val) => setData('assisted_anaesthetist', val)}
                   staffList={clinicalStaff}
                   placeholder="-- Select Assisted Anaesthetist --"
+                  uppercase
                 />
               </div>
 
@@ -423,6 +428,7 @@ export default function AdmissionsSurgery({
                   onChange={(val) => setData('staff_nurse', val)}
                   staffList={clinicalStaff}
                   placeholder="-- Select Staff Nurse --"
+                  uppercase
                 />
               </div>
 
@@ -434,6 +440,7 @@ export default function AdmissionsSurgery({
                   onChange={(val) => setData('ot_technician', val)}
                   staffList={clinicalStaff}
                   placeholder="-- Select OT Technician --"
+                  uppercase
                 />
               </div>
 
@@ -445,6 +452,7 @@ export default function AdmissionsSurgery({
                   onChange={(val) => setData('pediatrician_name', val)}
                   staffList={clinicalStaff}
                   placeholder="-- Select Pediatrician --"
+                  uppercase
                 />
               </div>
 
@@ -453,9 +461,12 @@ export default function AdmissionsSurgery({
                 <input
                   type="text"
                   className="form-control"
+                  style={{ textTransform: 'uppercase' }}
                   value={data.assisted_by}
-                  onChange={(e) => setData('assisted_by', e.target.value)}
-                  placeholder="e.g. Staff Nurse Kavitha"
+                  onChange={(e) =>
+                    handleNormalizedInputChange(e, toUpperCaseValue, (val) => setData('assisted_by', val))
+                  }
+                  placeholder="e.g. STAFF NURSE KAVITHA"
                 />
               </div>
             </div>
