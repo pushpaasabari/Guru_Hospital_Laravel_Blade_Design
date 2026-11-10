@@ -32,20 +32,44 @@ interface PaginatedData<T> {
 
 interface Props {
   auditLogs: PaginatedData<AuditLog>;
+  filters?: {
+    category?: string;
+    action?: string;
+    user_name?: string;
+    date_from?: string;
+    date_to?: string;
+  };
 }
 
-export default function Index({ auditLogs }: Props) {
+export default function Index({ auditLogs, filters = {} }: Props) {
   const urlParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-  const [action, setAction] = useState(urlParams.get('action') || '');
-  const [userName, setUserName] = useState(urlParams.get('user_name') || '');
-  const [dateFrom, setDateFrom] = useState(urlParams.get('date_from') || '');
-  const [dateTo, setDateTo] = useState(urlParams.get('date_to') || '');
+  const [category, setCategory] = useState(filters.category || urlParams.get('category') || '');
+  const [action, setAction] = useState(filters.action || urlParams.get('action') || '');
+  const [userName, setUserName] = useState(filters.user_name || urlParams.get('user_name') || '');
+  const [dateFrom, setDateFrom] = useState(filters.date_from || urlParams.get('date_from') || '');
+  const [dateTo, setDateTo] = useState(filters.date_to || urlParams.get('date_to') || '');
 
   const handleFilter = (e: React.FormEvent) => {
     e.preventDefault();
     router.get(
       '/audit-logs',
       {
+        category: category || undefined,
+        action: action || undefined,
+        user_name: userName || undefined,
+        date_from: dateFrom || undefined,
+        date_to: dateTo || undefined,
+      },
+      { preserveState: true }
+    );
+  };
+
+  const applyCategory = (nextCat: string) => {
+    setCategory(nextCat);
+    router.get(
+      '/audit-logs',
+      {
+        category: nextCat || undefined,
         action: action || undefined,
         user_name: userName || undefined,
         date_from: dateFrom || undefined,
@@ -56,6 +80,7 @@ export default function Index({ auditLogs }: Props) {
   };
 
   const handleReset = () => {
+    setCategory('');
     setAction('');
     setUserName('');
     setDateFrom('');
@@ -102,6 +127,25 @@ export default function Index({ auditLogs }: Props) {
         <span className="badge bg-secondary py-2 px-3">
           <i className="bi bi-shield-lock-fill me-1"></i> NABH / HIPAA Compliant Audit Log
         </span>
+      </div>
+
+      {/* Category Quick Tabs + Filter Card */}
+      <div className="d-flex flex-wrap gap-2 mb-3">
+        {[
+          { key: '', label: 'All Activity' },
+          { key: 'ui_clicks', label: 'UI Clicks & Controls' },
+          { key: 'page_views', label: 'Page Visits' },
+          { key: 'clinical', label: 'Clinical & Auth Actions' },
+        ].map((tab) => (
+          <button
+            key={tab.key || 'all'}
+            type="button"
+            onClick={() => applyCategory(tab.key)}
+            className={`btn btn-sm ${category === tab.key ? 'btn-primary' : 'btn-outline-secondary'}`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
 
       {/* Filter Card */}

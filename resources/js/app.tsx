@@ -9,6 +9,7 @@ import '@fontsource/inter/800.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 import '../css/guru-theme.css';
+import { initActivityLogger } from './utils/activityLogger';
 
 const pages = import.meta.glob('./Pages/**/*.tsx');
 
@@ -55,6 +56,7 @@ createInertiaApp({
   },
   setup({ el, App, props }) {
     createRoot(el).render(<App {...props} />);
+    initActivityLogger();
     scheduleCoreChunkPreload();
   },
   progress: {

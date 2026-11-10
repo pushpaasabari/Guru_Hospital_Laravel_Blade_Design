@@ -12,6 +12,11 @@ use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
+// Granular UI Click & Interaction Telemetry (Guest + Authenticated)
+Route::post('/audit-logs/events', [AuditLogController::class, 'storeEvents'])
+    ->middleware('throttle:180,1')
+    ->name('audit.events.store');
+
 // Authentication Routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
