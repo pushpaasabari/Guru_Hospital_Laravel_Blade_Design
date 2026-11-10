@@ -138,13 +138,6 @@ class DatabaseSeeder extends Seeder
 
         // 4. Seed Anesthesia Types
         $this->call(AnesthesiaTypeSeeder::class);
-
-        // 5. Seed Guru Hospital Real Patient Cases
-        $this->call(AshwiniDischargeSummarySeeder::class);
-        $this->call(AjithKumarDischargeSummarySeeder::class);
-        $this->call(ManjupriyaOperationNotesSeeder::class);
-        $this->call(AnithaTwinDeliverySeeder::class);
-        $this->call(GopalakrishnanDischargeSummarySeeder::class);
     }
 }
 
