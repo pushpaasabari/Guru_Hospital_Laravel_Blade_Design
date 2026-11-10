@@ -285,6 +285,8 @@
         </tr>
     </table>
 
+    @include('pdf.partials.insurance-strip', ['admission' => $admission, 'tableClass' => 'info-table'])
+
     <table class="info-table bg-white">
         <tr>
             <td style="width: 33.3%;">
@@ -616,6 +618,8 @@
             <td style="font-weight: bold;">{{ $admission->ip_no }}</td>
         </tr>
     </table>
+
+    @include('pdf.partials.insurance-strip', ['admission' => $admission, 'tableClass' => 'surgical-table mb-2'])
 
     {{-- Dates Row --}}
     <table class="surgical-table mb-2">

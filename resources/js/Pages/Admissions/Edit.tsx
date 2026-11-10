@@ -3,6 +3,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
+import PaymentInsuranceFields, { normalizePaymentMode } from '../../Components/PaymentInsuranceFields';
 
 interface AdmissionData {
   id: number;
@@ -57,6 +58,15 @@ interface AdmissionData {
   postoperative_orders?: string | null;
   mrd_no?: string | null;
   payment_mode?: string | null;
+  insurance_type?: string | null;
+  insurance_company?: string | null;
+  policy_number?: string | null;
+  pre_auth_no?: string | null;
+  pre_auth_status?: string | null;
+  approved_amount?: string | number | null;
+  policy_holder_name?: string | null;
+  policy_holder_relation?: string | null;
+  policy_validity?: string | null;
   handover_name?: string | null;
   floor_incharge_name?: string | null;
   mrd_incharge_name?: string | null;
@@ -91,7 +101,16 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
     surgery_type: admission.surgery_type || 'other',
     diagnosis: admission.diagnosis || '',
     mrd_no: admission.mrd_no || (admission.uhid ? (admission.uhid.startsWith('MRD-') ? admission.uhid : `MRD-${admission.uhid}`) : ''),
-    payment_mode: admission.payment_mode || '',
+    payment_mode: normalizePaymentMode(admission.payment_mode),
+    insurance_type: admission.insurance_type || '',
+    insurance_company: admission.insurance_company || '',
+    policy_number: admission.policy_number || '',
+    pre_auth_no: admission.pre_auth_no || '',
+    pre_auth_status: admission.pre_auth_status || '',
+    approved_amount: admission.approved_amount ?? '',
+    policy_holder_name: admission.policy_holder_name || '',
+    policy_holder_relation: admission.policy_holder_relation || '',
+    policy_validity: admission.policy_validity ? String(admission.policy_validity).slice(0, 10) : '',
     // Preserve existing fields
     procedure_at: admission.procedure_at ? admission.procedure_at.slice(0, 16) : '',
     procedure_name: admission.procedure_name || '',
@@ -450,16 +469,12 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                   Default format: <span className="font-monospace">MRD-{'{UHID}'}</span>
                 </div>
               </div>
-              <div className="col-md-4">
-                <label className="form-label">Payment / Insurance Mode</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={data.payment_mode || ''}
-                  onChange={(e) => setData('payment_mode', e.target.value)}
-                  placeholder="e.g. Cash / CMCHISTN / Star Health"
-                />
-              </div>
+              <PaymentInsuranceFields
+                data={data}
+                errors={errors}
+                onPatch={(patch) => setData((prev) => ({ ...prev, ...patch }))}
+                syncFormat={true}
+              />
             </div>
           </div>
         </div>

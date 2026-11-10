@@ -3,6 +3,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
+import PaymentInsuranceFields from '../../Components/PaymentInsuranceFields';
 
 interface Props {
   clinicalStaff?: ClinicalStaffMember[];
@@ -31,6 +32,15 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
     diagnosis: '',
     mrd_no: '',
     payment_mode: 'Cash',
+    insurance_type: '',
+    insurance_company: '',
+    policy_number: '',
+    pre_auth_no: '',
+    pre_auth_status: '',
+    approved_amount: '',
+    policy_holder_name: '',
+    policy_holder_relation: '',
+    policy_validity: '',
     next_step: 'surgery',
   });
 
@@ -338,16 +348,12 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
                   Default format: <span className="font-monospace">MRD-{'{UHID}'}</span>
                 </div>
               </div>
-              <div className="col-md-4">
-                <label className="form-label">Payment / Insurance Mode</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  value={data.payment_mode}
-                  onChange={(e) => setData('payment_mode', e.target.value)}
-                  placeholder="e.g. Cash / CMCHISTN / Star Health"
-                />
-              </div>
+              <PaymentInsuranceFields
+                data={data}
+                errors={errors}
+                onPatch={(patch) => setData((prev) => ({ ...prev, ...patch }))}
+                syncFormat={true}
+              />
             </div>
           </div>
         </div>

@@ -188,7 +188,7 @@
             <tr>
                 <td class="field-label">Payment Mode</td>
                 <td class="colon-col">:</td>
-                <td class="field-value"></td>
+                <td class="field-value">{{ $admission->payment_summary }}</td>
             </tr>
             <tr>
                 <td class="field-label">Hand Over Sign</td>

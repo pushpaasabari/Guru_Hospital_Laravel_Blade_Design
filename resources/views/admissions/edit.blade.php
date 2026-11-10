@@ -166,10 +166,7 @@
                 <input class="form-control" name="mrd_no" id="mrdNoInput" type="text" value="{{ old('mrd_no', $admission->mrd_no ?: ($admission->uhid ? (str_starts_with($admission->uhid, 'MRD-') ? $admission->uhid : 'MRD-' . $admission->uhid) : '')) }}" placeholder="e.g. MRD-{UHID}">
                 <div class="form-text text-muted small">Default format: <span class="font-monospace">MRD-{UHID}</span></div>
             </div>
-            <div class="col-md-4">
-                <label class="form-label">Payment / Insurance Mode</label>
-                <input class="form-control" name="payment_mode" type="text" value="{{ old('payment_mode', $admission->payment_mode) }}">
-            </div>
+            @include('admissions.partials.payment-insurance-fields', ['admission' => $admission, 'syncFormat' => true, 'uid' => 'edit_pi'])
         </div>
     </div>
 </div>

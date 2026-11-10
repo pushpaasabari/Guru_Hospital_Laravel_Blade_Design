@@ -13,6 +13,8 @@ import {
   formatSurgicalInvestigations,
   formatSurgicalAdvice,
   formatSurgicalDrugs,
+  getInsuranceDetailsList,
+  formatPaymentSummary,
 } from '../../utils/dischargeFormatter';
 
 interface Newborn {
@@ -71,6 +73,15 @@ interface Admission {
   mrd_no?: string;
   icd_code?: string;
   payment_mode?: string;
+  insurance_type?: string;
+  insurance_company?: string;
+  policy_number?: string;
+  pre_auth_no?: string;
+  pre_auth_status?: string;
+  approved_amount?: string | number;
+  policy_holder_name?: string;
+  policy_holder_relation?: string;
+  policy_validity?: string;
   status: string;
   format: 'general' | 'cmchistn' | 'employee' | 'private';
   surgery_type: 'delivery' | 'other' | 'medical';
@@ -116,6 +127,48 @@ interface Props {
   admission: Admission;
   initialDoc?: string;
   initialMode?: 'sheet' | 'pdf';
+}
+
+function InsuranceCoverageStrip({ admission }: { admission: Admission }) {
+  const items = getInsuranceDetailsList(admission);
+  if (items.length === 0) return null;
+
+  const chunks: Array<typeof items> = [];
+  for (let i = 0; i < items.length; i += 3) {
+    chunks.push(items.slice(i, i + 3));
+  }
+
+  return (
+    <table
+      className="w-100 mb-2"
+      style={{
+        borderCollapse: 'collapse',
+        tableLayout: 'fixed',
+        border: '1px solid #94a3b8',
+        backgroundColor: '#f8fafc',
+      }}
+    >
+      <tbody>
+        {chunks.map((row, rIdx) => (
+          <tr key={rIdx}>
+            {row.map((item, cIdx) => (
+              <td key={cIdx} style={{ border: '1px solid #cbd5e1', padding: '4px 6px', verticalAlign: 'top' }}>
+                <span style={{ fontSize: '6.8pt', fontWeight: 700, color: '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '1px' }}>
+                  {item.label}
+                </span>
+                <span style={{ fontSize: '8.8pt', fontWeight: 700, color: '#000', display: 'block' }}>
+                  {item.value}
+                </span>
+              </td>
+            ))}
+            {Array.from({ length: Math.max(0, 3 - row.length) }).map((_, emptyIdx) => (
+              <td key={`e-${emptyIdx}`} style={{ border: '1px solid #cbd5e1', padding: '4px 6px' }} />
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
 }
 
 export default function Pack({ admission, initialDoc = 'all', initialMode = 'sheet' }: Props) {
@@ -743,6 +796,8 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                       </tr>
                     </tbody>
                   </table>
+
+                  <InsuranceCoverageStrip admission={admission} />
 
                   {/* Box 2: Clinical / Surgical Team */}
                   <table
@@ -1384,6 +1439,8 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                     </tr>
                   </tbody>
                 </table>
+
+                <InsuranceCoverageStrip admission={admission} />
 
                 {/* Dates Row */}
                 <table className="table table-bordered mb-2 border-dark" style={{ fontSize: '8.5pt' }}>
@@ -2061,7 +2118,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
               <tr>
                 <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>Payment Mode</td>
                 <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
-                <td style={{ padding: '20px 4px' }}></td>
+                <td style={{ padding: '20px 4px' }}>{formatPaymentSummary(admission)}</td>
               </tr>
               <tr>
                 <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>Hand Over Sign</td>

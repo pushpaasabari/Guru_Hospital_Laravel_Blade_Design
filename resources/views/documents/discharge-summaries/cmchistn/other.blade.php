@@ -10,9 +10,11 @@
     </div>
 
     <div class="alert alert-secondary py-1 px-3 mb-2 small d-flex justify-content-between">
-        <span><strong>Scheme :</strong> CMCHISTN (Tamil Nadu Govt. Health Scheme)</span>
-        <span><strong>Pre-Auth / URN Ref :</strong> TN-CMCHIS-{{ str_replace('/', '-', $admission->ip_no) }}</span>
+        <span><strong>Scheme :</strong> {{ $admission->insurance_type ?: 'CMCHISTN (Tamil Nadu Govt. Health Scheme)' }}@if($admission->insurance_company) — {{ $admission->insurance_company }}@endif</span>
+        <span><strong>Policy / Pre-Auth :</strong> {{ $admission->policy_number ?: '—' }}@if($admission->pre_auth_no) / {{ $admission->pre_auth_no }}@endif</span>
     </div>
+
+    @include('pdf.partials.insurance-strip', ['admission' => $admission, 'tableClass' => 'table table-sm table-bordered mb-3'])
 
     <table class="table table-sm table-bordered mb-3">
         <tr>

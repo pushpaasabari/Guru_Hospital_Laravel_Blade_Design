@@ -357,6 +357,8 @@
         </tr>
     </table>
 
+    @include('pdf.partials.insurance-strip', ['admission' => $admission, 'tableClass' => 'info-table'])
+
     {{-- Box 2: Clinical / Surgical Team (White Fill) --}}
     <table class="info-table bg-white">
         <tr>
@@ -697,6 +699,8 @@
             <td style="font-weight: bold;">{{ $admission->ip_no }}</td>
         </tr>
     </table>
+
+    @include('pdf.partials.insurance-strip', ['admission' => $admission, 'tableClass' => 'surgical-table mb-2'])
 
     {{-- Dates Row --}}
     <table class="surgical-table mb-2">
@@ -1222,7 +1226,7 @@
         <tr>
             <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">Payment Mode</td>
             <td style="font-weight: bold; text-align: center; color: #111; padding: 21px 4px; font-size: 14pt;">:</td>
-            <td style="color: #111; padding: 21px 4px; font-size: 14pt;"></td>
+            <td style="color: #111; padding: 21px 4px; font-size: 14pt;">{{ $admission->payment_summary }}</td>
         </tr>
         <tr>
             <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">Hand Over Sign</td>

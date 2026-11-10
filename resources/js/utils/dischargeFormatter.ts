@@ -548,3 +548,79 @@ export function formatSurgicalDrugs(text?: string | null): FormattedSurgicalDrug
   return rows;
 }
 
+export interface InsuranceDetailItem {
+  label: string;
+  value: string;
+}
+
+export function isInsuranceAdmission(admission: any): boolean {
+  return String(admission?.payment_mode || '').trim().toLowerCase() === 'insurance';
+}
+
+export function getInsuranceDetailsList(admission: any): InsuranceDetailItem[] {
+  if (!admission) return [];
+  if (!isInsuranceAdmission(admission) && !admission.insurance_company && !admission.policy_number) {
+    return [];
+  }
+
+  const items: InsuranceDetailItem[] = [];
+  if (admission.insurance_type) {
+    items.push({ label: 'Scheme / Category', value: admission.insurance_type });
+  }
+  if (admission.insurance_company) {
+    items.push({ label: 'Insurer / TPA', value: admission.insurance_company });
+  }
+  if (admission.policy_number) {
+    items.push({ label: 'Policy / URN No.', value: admission.policy_number });
+  }
+  if (admission.pre_auth_no) {
+    items.push({ label: 'Pre-Auth / Claim No.', value: admission.pre_auth_no });
+  }
+  if (admission.pre_auth_status) {
+    items.push({ label: 'Pre-Auth Status', value: admission.pre_auth_status });
+  }
+  if (admission.approved_amount !== null && admission.approved_amount !== undefined && admission.approved_amount !== '') {
+    const amt = Number(admission.approved_amount);
+    items.push({
+      label: 'Approved Amount',
+      value: Number.isFinite(amt)
+        ? `Rs. ${amt.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        : String(admission.approved_amount),
+    });
+  }
+  if (admission.policy_holder_name) {
+    const holder = admission.policy_holder_relation
+      ? `${admission.policy_holder_name} (${admission.policy_holder_relation})`
+      : admission.policy_holder_name;
+    items.push({ label: 'Policy Holder', value: holder });
+  }
+  if (admission.policy_validity) {
+    const dt = new Date(admission.policy_validity);
+    const val = Number.isNaN(dt.getTime())
+      ? String(admission.policy_validity)
+      : `${String(dt.getDate()).padStart(2, '0')}/${String(dt.getMonth() + 1).padStart(2, '0')}/${dt.getFullYear()}`;
+    items.push({ label: 'Valid Till', value: val });
+  }
+
+  return items;
+}
+
+export function formatPaymentSummary(admission: any): string {
+  if (!admission?.payment_mode && !admission?.insurance_company && !admission?.policy_number) {
+    return '—';
+  }
+  if (!isInsuranceAdmission(admission) && !admission?.insurance_company && !admission?.policy_number) {
+    return admission?.payment_mode || '—';
+  }
+
+  const parts = [
+    admission.insurance_type || null,
+    admission.insurance_company || null,
+    admission.policy_number ? `Policy/URN: ${admission.policy_number}` : null,
+    admission.pre_auth_no ? `Pre-Auth: ${admission.pre_auth_no}` : null,
+    admission.pre_auth_status ? `Status: ${admission.pre_auth_status}` : null,
+  ].filter(Boolean);
+
+  return parts.length > 0 ? `Insurance — ${parts.join(' | ')}` : 'Insurance';
+}
+

@@ -2,11 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\HasInsuranceValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
 class UpdateAdmissionRequest extends FormRequest
 {
+    use HasInsuranceValidationRules;
     public function authorize(): bool
     {
         $admission = $this->route('admission');
@@ -79,7 +81,7 @@ class UpdateAdmissionRequest extends FormRequest
 
             // MRD Administrative Fields
             'mrd_no' => ['nullable', 'string', 'max:60'],
-            'payment_mode' => ['nullable', 'string', 'max:100'],
+            ...$this->insuranceRules(),
             'handover_name' => ['nullable', 'string', 'max:160'],
             'floor_incharge_name' => ['nullable', 'string', 'max:160'],
             'mrd_incharge_name' => ['nullable', 'string', 'max:160'],

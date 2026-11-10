@@ -222,10 +222,7 @@
                 <input class="form-control" name="mrd_no" value="{{ old('mrd_no', $admission->mrd_no ?: ($admission->uhid ? (str_starts_with($admission->uhid, 'MRD-') ? $admission->uhid : 'MRD-' . $admission->uhid) : '')) }}" placeholder="e.g. MRD-{UHID}">
                 <div class="form-text text-muted small">Default format: <span class="font-monospace">MRD-{UHID}</span></div>
             </div>
-            <div class="col-md-4">
-                <label class="form-label">Payment / Insurance Scheme</label>
-                <input class="form-control" name="payment_mode" value="{{ old('payment_mode', $admission->payment_mode) }}" placeholder="e.g. CMCHISTN / Cash">
-            </div>
+            @include('admissions.partials.payment-insurance-fields', ['admission' => $admission, 'syncFormat' => false, 'label' => 'Payment / Insurance Scheme', 'uid' => 'discharge_pi'])
             <div class="col-md-4">
                 <label class="form-label">Handed Over By (Ward Nurse)</label>
                 <input class="form-control" name="handover_name" value="{{ old('handover_name', $admission->handover_name) }}" placeholder="e.g. Staff Nurse Anitha">

@@ -2,10 +2,13 @@
 
 namespace App\Http\Requests;
 
+use App\Http\Requests\Concerns\HasInsuranceValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateDischargeRequest extends FormRequest
 {
+    use HasInsuranceValidationRules;
+
     public function authorize(): bool
     {
         $admission = $this->route('admission');
@@ -24,7 +27,7 @@ class UpdateDischargeRequest extends FormRequest
             'discharge_advice' => ['nullable', 'string', 'max:10000'],
             'follow_up' => ['nullable', 'string', 'max:5000'],
             'mrd_no' => ['nullable', 'string', 'max:60'],
-            'payment_mode' => ['nullable', 'string', 'max:100'],
+            ...$this->insuranceRules(),
             'handover_name' => ['nullable', 'string', 'max:160'],
             'floor_incharge_name' => ['nullable', 'string', 'max:160'],
             'mrd_incharge_name' => ['nullable', 'string', 'max:160'],

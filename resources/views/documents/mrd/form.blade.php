@@ -2,10 +2,12 @@
     {{-- Header with Logo --}}
     <div class="text-center mb-4">
         <div class="mb-2">
-            <img src="{{ asset('images/guru-hospital-logo.png') }}" alt="Guru Hospital Logo" style="width: 76px; height: auto; display: inline-block;" />
+            <img src="{{ asset('images/guru-hospital-logo.png') }}" alt="Guru Hospital Logo"
+                style="width: 76px; height: auto; display: inline-block;" />
         </div>
 
-        <h2 class="fw-bold mb-1 text-dark text-uppercase" style="font-size: 21pt; letter-spacing: 1px; font-weight: 800;">
+        <h2 class="fw-bold mb-1 text-dark text-uppercase"
+            style="font-size: 21pt; letter-spacing: 1px; font-weight: 800;">
             GURU HOSPITAL
         </h2>
         <div style="font-size: 10pt; color: #222; line-height: 1.4;">
@@ -21,7 +23,8 @@
 
     {{-- Title --}}
     <div class="text-center my-4">
-        <span style="font-family: 'Times New Roman', Times, Georgia, serif; font-size: 16.5pt; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #111; display: inline-block; border-bottom: 3px double #111; padding-bottom: 3px;">
+        <span
+            style="font-family: 'Times New Roman', Times, Georgia, serif; font-size: 16.5pt; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; color: #111; display: inline-block; border-bottom: 3px double #111; padding-bottom: 3px;">
             MEDICAL RECORDS DEPARTMENT
         </span>
     </div>
@@ -63,7 +66,7 @@
             <tr>
                 <td style="font-weight: bold; padding: 20px 4px;">Payment Mode</td>
                 <td style="font-weight: bold; text-align: center; padding: 20px 4px;">:</td>
-                <td style="padding: 20px 4px;"></td>
+                <td style="padding: 20px 4px;">{{ $admission->payment_summary }}</td>
             </tr>
             <tr>
                 <td style="font-weight: bold; padding: 20px 4px;">Hand Over Sign</td>

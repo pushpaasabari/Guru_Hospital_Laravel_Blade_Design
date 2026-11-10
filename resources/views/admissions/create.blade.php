@@ -145,10 +145,7 @@
                 <input class="form-control" name="mrd_no" id="mrdNoInput" type="text" value="{{ old('mrd_no') }}" placeholder="e.g. MRD-{UHID}">
                 <div class="form-text text-muted small">Default format: <span class="font-monospace">MRD-{UHID}</span></div>
             </div>
-            <div class="col-md-4">
-                <label class="form-label">Payment / Insurance Mode</label>
-                <input class="form-control" name="payment_mode" type="text" value="{{ old('payment_mode', 'Cash') }}" placeholder="e.g. Cash / CMCHISTN">
-            </div>
+            @include('admissions.partials.payment-insurance-fields', ['admission' => null, 'syncFormat' => true, 'uid' => 'create_pi'])
         </div>
     </div>
 </div>
