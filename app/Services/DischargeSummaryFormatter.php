@@ -54,7 +54,9 @@ class DischargeSummaryFormatter
 
             $normalized = preg_replace('/^(Inj|Tab|Cap|Syp)-/i', '$1. ', $line);
 
-            if (preg_match('/^(Inj\.\s+[A-Za-z0-9_\-+]+|Tab\.\s+[A-Za-z0-9_\-+\s]+|Cap\.\s+[A-Za-z0-9_\-+\s]+|[A-Za-z0-9_\-+]+)\s+(.+)$/i', $normalized, $m)) {
+            $isProseSentence = str_word_count($normalized) > 8 && !preg_match('/^(Inj|Tab|Cap|Syp)\./i', $normalized);
+
+            if (!$isProseSentence && preg_match('/^(Inj\.\s+[A-Za-z0-9_\-+]+|Tab\.\s+[A-Za-z0-9_\-+\s]+|Cap\.\s+[A-Za-z0-9_\-+\s]+|Syp\.\s+[A-Za-z0-9_\-+\s]+|[A-Za-z0-9_\-+]+)\s+(.+)$/i', $normalized, $m)) {
                 $med = trim($m[1]);
                 $dose = trim($m[2]);
 
@@ -261,13 +263,15 @@ class DischargeSummaryFormatter
                 $line = str_replace($tm[0], '', $line);
             }
 
-            if (preg_match('/(?:x\s*|for\s*)?(\d+\s*(?:days|weeks|months|day))/i', $line, $dm)) {
+            if (preg_match('/(?:x\s*|for\s*)?(\d+\s*(?:days?|weeks?|months?|nos?|tablets?|tabs|caps))\b/i', $line, $dm)) {
                 $dur = strtolower(trim($dm[1]));
                 $line = str_replace($dm[0], '', $line);
             }
 
-            $med = trim(preg_replace('/[-–x]+$/', '', trim($line)));
-            $med = preg_replace('/\s+/', ' ', $med);
+            $med = trim(preg_replace('/\s+/', ' ', $line));
+            $med = trim(preg_replace('/(?:\s*[-–:]+\s*)+$/u', '', $med));
+            $med = trim(preg_replace('/\s+x$/i', '', $med));
+            $med = trim(preg_replace('/(?:\s*[-–:]+\s*)+$/u', '', $med));
 
             $med = preg_replace_callback('/\b(tab|cap|syp|inj)\b/i', fn($m) => ucfirst(strtolower($m[0])) . '.', $med);
             $med = str_replace(['Tab..', 'Cap..', 'Inj..', 'Syp..'], ['Tab.', 'Cap.', 'Inj.', 'Syp.'], $med);
@@ -706,5 +710,68 @@ class DischargeSummaryFormatter
         }
 
         return $rows;
+    }
+
+    /**
+     * Extract clinical history subsections (complaints, HPI, past history, hospital course)
+     * without inventing or dropping clinical text.
+     *
+     * @param Admission $admission
+     * @return array{complaints: string, hpi: string, has_past_history: bool, past_history: array<string, string>, hospital_course: string}
+     */
+    public static function formatClinicalSections(Admission $admission): array
+    {
+        $rawHistory = trim((string) ($admission->clinical_history ?? ''));
+        $rawExam = trim((string) ($admission->examination ?? ''));
+        $combined = $rawHistory . "\n" . $rawExam;
+
+        $hasPastHistory = (bool) preg_match(
+            '/(Past\s+(?:Medical|Surgical)\s+History|Allergies|DM\s*[:\-]|HT\s*[:\-]|Asthma\s*[:\-]|Tuberculosis\s*[:\-]|TB\s*[:\-])/i',
+            $combined
+        );
+        $pastHistory = self::formatSurgicalPastHistory($admission);
+
+        $complaintsLines = [];
+        $hpiLines = [];
+        $otherLines = [];
+
+        foreach (preg_split('/\r\n|\r|\n/', $rawHistory) as $line) {
+            $trimmed = trim($line);
+            if ($trimmed === '') {
+                continue;
+            }
+            // Structured Past History lines already captured in Section 7 (unless no DM/HT pattern matches)
+            if (preg_match('/^(Past\s+Medical\s+History|Past\s+Surgical\s+History|Allergies\s*[:\-]|Medications\s*[:\-]|Pulse\s*[:\-].*BP\s*[:\-])/i', $trimmed)) {
+                continue;
+            }
+            if (preg_match('/^(?:C\/O|Chief\s+Complaints?|Presenting\s+Complaints?)\b/i', $trimmed)) {
+                $complaintsLines[] = $trimmed;
+            } else {
+                $otherLines[] = $trimmed;
+            }
+        }
+
+        if (empty($complaintsLines) && !empty($otherLines)) {
+            $firstLine = array_shift($otherLines);
+            if (empty($otherLines) && preg_match('/^([^.!?]+[.!?])\s+(.+)$/', $firstLine, $sm)) {
+                $complaintsLines[] = trim($sm[1]);
+                $otherLines[] = trim($sm[2]);
+            } else {
+                $complaintsLines[] = $firstLine;
+            }
+        }
+
+        $hpiLines = $otherLines;
+
+        // Preserve clinical examination free of standalone extracted Past History lines if needed
+        $hospitalCourse = trim((string) ($admission->treatment_course ?? ''));
+
+        return [
+            'complaints' => implode("\n", $complaintsLines) ?: '—',
+            'hpi' => implode("\n", $hpiLines) ?: '—',
+            'has_past_history' => $hasPastHistory,
+            'past_history' => $pastHistory,
+            'hospital_course' => $hospitalCourse ?: '—',
+        ];
     }
 }

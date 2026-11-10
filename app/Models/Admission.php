@@ -260,4 +260,9 @@ class Admission extends Model
     {
         return \App\Services\DischargeSummaryFormatter::formatSurgicalDrugs($this->medication_orders);
     }
+
+    public function getFormattedClinicalSectionsAttribute(): array
+    {
+        return \App\Services\DischargeSummaryFormatter::formatClinicalSections($this);
+    }
 }

@@ -147,10 +147,23 @@ class DocumentPackPdfTest extends TestCase
         $this->assertStringStartsWith('GURU HOSPITAL', $meta['headerTitle']);
 
         $html = view('pdf.discharge-summary', ['admission' => $deliveryAdmission])->render();
-        $this->assertStringContainsString('GURU HOSPITAL - Discharge Summary (IP: 2026/0005) - test', $html);
+        $this->assertStringContainsString('size: 223mm 304mm;', $html);
+        $this->assertStringContainsString('padding: 70mm 13mm 30mm 13mm;', $html);
+        $this->assertStringNotContainsStringIgnoringCase('GURU HOSPITAL', $html);
+        $this->assertStringNotContainsString('Page 2 of 2', $html);
         $this->assertStringNotContainsString('Prepared by', $html);
         $this->assertStringNotContainsString('Dr. Karthik Rajan MS, MCh', $html);
         $this->assertStringContainsString('Dr. Ambika M.S (O&amp;G)', $html);
+
+        $pdfBytes = $pdfService->generateWithPlaywright($deliveryAdmission, 'discharge_summary');
+        preg_match('/\/Type\s*\/Pages[^>]*\/Count\s+(\d+)/', $pdfBytes, $pageMatch);
+        $this->assertEquals(2, (int) ($pageMatch[1] ?? 0));
+
+        preg_match('/\/MediaBox\s*\[\s*0\s+0\s+([0-9.]+)\s+([0-9.]+)\s*\]/', $pdfBytes, $boxMatch);
+        $widthMm = ((float) ($boxMatch[1] ?? 0)) * 25.4 / 72;
+        $heightMm = ((float) ($boxMatch[2] ?? 0)) * 25.4 / 72;
+        $this->assertEqualsWithDelta(223.0, $widthMm, 0.5);
+        $this->assertEqualsWithDelta(304.0, $heightMm, 0.5);
     }
 
     public function test_investigations_uses_same_document_font_across_all_formats(): void

@@ -49,9 +49,43 @@ async function main() {
     const isDischargeSummary = docType === 'discharge_summary' || docType === 'discharge-summary';
 
     if (isDischargeSummary) {
+      // Balance Page 1 -> Page 2 overflow cleanly so nothing clips into the 30mm bottom blank zone or spills to a 3rd page
+      await page.evaluate(() => {
+        const sheets = document.querySelectorAll('.ds-page-content');
+        if (sheets.length !== 2) return;
+        const p1 = sheets[0];
+        const p2 = sheets[1];
+        const overflowTarget = p2.querySelector('[data-overflow-target="page2"]');
+
+        if (overflowTarget) {
+          const movables = Array.from(p1.querySelectorAll('[data-overflow-movable="page1"]')).reverse();
+          for (const block of movables) {
+            if (p1.scrollHeight <= p1.clientHeight + 1) break;
+            const note = document.createElement('div');
+            note.className = 'continued-note';
+            note.textContent = 'Continued from Page 1';
+            overflowTarget.insertBefore(block, overflowTarget.firstChild);
+            overflowTarget.insertBefore(note, block);
+          }
+        }
+
+        const densityClasses = ['density-compact-1', 'density-compact-2', 'density-compact-3', 'density-compact-4'];
+        for (const contentEl of [p1, p2]) {
+          const sheetEl = contentEl.closest('.ds-page');
+          for (const cls of densityClasses) {
+            if (contentEl.scrollHeight <= contentEl.clientHeight + 1) break;
+            sheetEl?.classList.add(cls);
+          }
+          // Last-resort precision proportional scale if extreme text still exceeds 204mm
+          if (contentEl.scrollHeight > contentEl.clientHeight + 1) {
+            const ratio = Math.max(0.86, contentEl.clientHeight / contentEl.scrollHeight);
+            contentEl.style.zoom = ratio.toFixed(3);
+          }
+        }
+      });
+
       await page.pdf({
         path: outputFile,
-        format: 'A4',
         printBackground: true,
         preferCSSPageSize: true,
         displayHeaderFooter: false,
