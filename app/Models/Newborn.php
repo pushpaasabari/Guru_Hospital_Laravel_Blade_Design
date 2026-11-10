@@ -12,7 +12,10 @@ class Newborn extends Model
         'apgar_1_min', 'apgar_5_min', 'neonatal_care', 'notes'
     ];
 
-    protected $casts = ['birth_at' => 'datetime'];
+    protected $casts = [
+        'birth_at' => 'datetime',
+        'birth_weight_kg' => 'float',
+    ];
 
     public function admission(): BelongsTo
     {
