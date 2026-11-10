@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Admission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class SecurityAndRoleAccessTest extends TestCase
@@ -131,6 +132,17 @@ class SecurityAndRoleAccessTest extends TestCase
             'doctor_reg_no' => 'TNMC-99999',
             'role' => 'doctor',
         ]);
+    }
+
+    public function test_authenticated_user_can_view_dashboard(): void
+    {
+        $response = $this->actingAs($this->nurse)->get(route('dashboard'));
+        $response->assertStatus(200);
+        $response->assertInertia(fn (Assert $page) => $page
+            ->component('Dashboard')
+            ->has('counts')
+            ->has('admissions')
+        );
     }
 }
 
