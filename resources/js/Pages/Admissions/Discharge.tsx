@@ -5,6 +5,7 @@ import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
 import PaymentInsuranceFields, { normalizePaymentMode } from '../../Components/PaymentInsuranceFields';
 import ActionDropdown from '../../Components/ActionDropdown';
+import { defaultMrdFromIp, resolveMrdNo } from '../../utils/inputNormalizers';
 
 interface AdmissionData {
   id: number;
@@ -230,7 +231,7 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
     medication_orders: admission.medication_orders || serializeMedications(initialMedRows),
     discharge_advice: admission.discharge_advice || '',
     follow_up: admission.follow_up || '',
-    mrd_no: admission.mrd_no || (admission.uhid ? (admission.uhid.startsWith('MRD-') ? admission.uhid : `MRD-${admission.uhid}`) : ''),
+    mrd_no: resolveMrdNo(admission.mrd_no, admission.ip_no),
     payment_mode: normalizePaymentMode(admission.payment_mode),
     insurance_type: admission.insurance_type || '',
     insurance_company: admission.insurance_company || '',
@@ -724,7 +725,7 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
                 <div className="d-flex justify-content-between align-items-center mb-1">
                   <label className="form-label mb-0">MRD File Number</label>
                   <span className="badge bg-light text-muted border" style={{ fontSize: '0.68rem' }}>
-                    Auto: MRD-{'{UHID}'}
+                    Auto: MRD-{'{IP No}'}
                   </span>
                 </div>
                 <input
@@ -732,10 +733,10 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
                   className="form-control"
                   value={data.mrd_no}
                   onChange={(e) => setData('mrd_no', e.target.value)}
-                  placeholder={admission.uhid ? `MRD-${admission.uhid}` : 'e.g. MRD-{UHID}'}
+                  placeholder={admission.ip_no ? defaultMrdFromIp(admission.ip_no) : 'e.g. MRD-{IP No}'}
                 />
                 <div className="form-text text-muted small">
-                  Default format: <span className="font-monospace">MRD-{'{UHID}'}</span>
+                  Default format: <span className="font-monospace">MRD-{'{IP No}'}</span>
                 </div>
               </div>
 

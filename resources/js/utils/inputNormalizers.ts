@@ -46,3 +46,23 @@ export function handleNormalizedInputChange(
   }
 }
 
+/**
+ * Format default MRD file number from an IP No (`MRD-{IP No}`).
+ */
+export function defaultMrdFromIp(ipNo?: string | null): string {
+  const trimmed = (ipNo || '').trim();
+  if (!trimmed) {
+    return '';
+  }
+
+  return trimmed.startsWith('MRD-') ? trimmed : `MRD-${trimmed}`;
+}
+
+/**
+ * Resolve an explicit MRD number or fall back to `MRD-{IP No}`.
+ */
+export function resolveMrdNo(mrdNo?: string | null, ipNo?: string | null): string {
+  const explicit = (mrdNo || '').trim();
+  return explicit || defaultMrdFromIp(ipNo);
+}
+

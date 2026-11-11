@@ -457,12 +457,12 @@ class AdmissionWorkflowTest extends TestCase
         $this->assertFalse($admission->isSurgical());
     }
 
-    public function test_mrd_file_number_defaults_to_mrd_dash_uhid(): void
+    public function test_mrd_file_number_defaults_to_mrd_dash_ip_no(): void
     {
         $response = $this->actingAs($this->nurse)->post(route('admissions.store'), [
             'patient_name' => 'Kaviarasan S',
             'uhid' => '2026/8899',
-            'ip_no' => 'IP-MRD-8899',
+            'ip_no' => '2026/7755',
             'address_line1' => '5 Main Street, Dharmapuri',
             'age' => '32',
             'sex' => 'Male',
@@ -474,12 +474,17 @@ class AdmissionWorkflowTest extends TestCase
 
         $this->assertDatabaseHas('admissions', [
             'uhid' => '2026/8899',
-            'ip_no' => 'IP-MRD-8899',
-            'mrd_no' => 'MRD-2026/8899',
+            'ip_no' => '2026/7755',
+            'mrd_no' => 'MRD-2026/7755',
         ]);
 
-        $admission = Admission::where('ip_no', 'IP-MRD-8899')->first();
-        $this->assertEquals('MRD-2026/8899', $admission->mrd_no);
+        $admission = Admission::where('ip_no', '2026/7755')->first();
+        $this->assertEquals('MRD-2026/7755', $admission->mrd_no);
+        $this->assertEquals('MRD-2026/7755', $admission->resolved_mrd_no);
+
+        $mrdHtml = view('pdf.mrd-form', compact('admission'))->render();
+        $this->assertStringContainsString('MRD-2026/7755', $mrdHtml);
+        $this->assertStringNotContainsString('MRD-2026/8899', $mrdHtml);
     }
 
     public function test_immediate_postoperative_orders_persists_row_by_row(): void

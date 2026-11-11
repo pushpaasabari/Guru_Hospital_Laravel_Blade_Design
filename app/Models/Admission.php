@@ -61,11 +61,9 @@ class Admission extends Model
                 $admission->address_line1 = $admission->address;
             }
 
-            // Temporarily MRD File Number will be (MRD-{UHID})
-            if (empty($admission->mrd_no) && !empty($admission->uhid)) {
-                $admission->mrd_no = str_starts_with((string) $admission->uhid, 'MRD-')
-                    ? $admission->uhid
-                    : 'MRD-' . $admission->uhid;
+            // Default MRD File Number format is MRD-{IP No}
+            if (empty($admission->mrd_no) && !empty($admission->ip_no)) {
+                $admission->mrd_no = self::defaultMrdNo($admission->ip_no);
             }
         });
     }
@@ -341,5 +339,31 @@ class Admission extends Model
     public function getFormattedClinicalSectionsAttribute(): array
     {
         return \App\Services\DischargeSummaryFormatter::formatClinicalSections($this);
+    }
+
+    /**
+     * Build the default MRD number from an IP No (`MRD-{IP No}`).
+     */
+    public static function defaultMrdNo(?string $ipNo): string
+    {
+        $trimmed = trim((string) $ipNo);
+        if ($trimmed === '') {
+            return '';
+        }
+
+        return str_starts_with($trimmed, 'MRD-') ? $trimmed : 'MRD-' . $trimmed;
+    }
+
+    /**
+     * Resolve the explicit MRD number or fall back to the `MRD-{IP No}` format.
+     */
+    public function getResolvedMrdNoAttribute(): string
+    {
+        $explicit = trim((string) $this->mrd_no);
+        if ($explicit !== '') {
+            return $explicit;
+        }
+
+        return self::defaultMrdNo($this->ip_no);
     }
 }

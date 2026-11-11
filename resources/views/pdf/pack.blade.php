@@ -689,7 +689,7 @@
         </tr>
         <tr>
             <td style="font-weight: bold; background: #f8fafc;">MRD No</td>
-            <td>{{ $admission->mrd_no ?: ($admission->uhid ? 'MRD-' . $admission->uhid : '—') }}</td>
+            <td>{{ $admission->resolved_mrd_no ?: '—' }}</td>
             <td style="font-weight: bold; background: #f8fafc;">ICD CODE</td>
             <td>{{ $admission->icd_code ?: '—' }}</td>
         </tr>
@@ -1208,7 +1208,7 @@
             <td style="font-weight: bold; color: #111; padding: 21px 4px; font-size: 14pt;">MRD No.</td>
             <td style="font-weight: bold; text-align: center; color: #111; padding: 21px 4px; font-size: 14pt;">:</td>
             <td style="color: #111; padding: 21px 4px; font-size: 14pt;">
-                {{ $admission->uhid ? (str_starts_with($admission->uhid, 'MRD-') ? $admission->uhid : 'MRD-' . $admission->uhid) : ($admission->mrd_no ?: ($admission->ip_no ? 'MRD-' . $admission->ip_no : '')) }}
+                {{ $admission->resolved_mrd_no }}
             </td>
         </tr>
         <tr>

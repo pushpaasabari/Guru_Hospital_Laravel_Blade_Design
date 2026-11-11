@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
-import { digitsOnlyValue, handleNormalizedInputChange, toUpperCaseValue } from '../../utils/inputNormalizers';
+import { defaultMrdFromIp, digitsOnlyValue, handleNormalizedInputChange, resolveMrdNo, toUpperCaseValue } from '../../utils/inputNormalizers';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
 import PaymentInsuranceFields, { normalizePaymentMode } from '../../Components/PaymentInsuranceFields';
 
@@ -101,7 +101,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
     format: admission.format || 'general',
     surgery_type: admission.surgery_type || 'other',
     diagnosis: admission.diagnosis || '',
-    mrd_no: admission.mrd_no || (admission.uhid ? (admission.uhid.startsWith('MRD-') ? admission.uhid : `MRD-${admission.uhid}`) : ''),
+    mrd_no: resolveMrdNo(admission.mrd_no, admission.ip_no),
     payment_mode: normalizePaymentMode(admission.payment_mode),
     insurance_type: admission.insurance_type || '',
     insurance_company: admission.insurance_company || '',
@@ -239,14 +239,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                   type="text"
                   className={`form-control ${errors.uhid ? 'is-invalid' : ''}`}
                   value={data.uhid}
-                  onChange={(e) => {
-                    const newUhid = e.target.value;
-                    setData((prev) => ({
-                      ...prev,
-                      uhid: newUhid,
-                      mrd_no: (!prev.mrd_no || prev.mrd_no === `MRD-${prev.uhid}`) && newUhid.trim() ? `MRD-${newUhid.trim()}` : prev.mrd_no,
-                    }));
-                  }}
+                  onChange={(e) => setData('uhid', e.target.value)}
                   required
                 />
                 {errors.uhid && <div className="invalid-feedback">{errors.uhid}</div>}
@@ -257,7 +250,18 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                   type="text"
                   className={`form-control ${errors.ip_no ? 'is-invalid' : ''}`}
                   value={data.ip_no}
-                  onChange={(e) => setData('ip_no', e.target.value)}
+                  onChange={(e) => {
+                    const newIpNo = e.target.value;
+                    setData((prev) => {
+                      const prevAuto = defaultMrdFromIp(prev.ip_no);
+                      const isAutoOrEmpty = !prev.mrd_no || prev.mrd_no === prevAuto;
+                      return {
+                        ...prev,
+                        ip_no: newIpNo,
+                        mrd_no: isAutoOrEmpty ? defaultMrdFromIp(newIpNo) : prev.mrd_no,
+                      };
+                    });
+                  }}
                   required
                 />
                 {errors.ip_no && <div className="invalid-feedback">{errors.ip_no}</div>}
@@ -472,7 +476,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                 <div className="d-flex justify-content-between align-items-center mb-1">
                   <label className="form-label mb-0">MRD File Number</label>
                   <span className="badge bg-light text-muted border" style={{ fontSize: '0.68rem' }}>
-                    Auto: MRD-{'{UHID}'}
+                    Auto: MRD-{'{IP No}'}
                   </span>
                 </div>
                 <input
@@ -480,10 +484,10 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                   className="form-control"
                   value={data.mrd_no || ''}
                   onChange={(e) => setData('mrd_no', e.target.value)}
-                  placeholder={data.uhid ? `MRD-${data.uhid}` : 'e.g. MRD-{UHID}'}
+                  placeholder={data.ip_no ? defaultMrdFromIp(data.ip_no) : 'e.g. MRD-{IP No}'}
                 />
                 <div className="form-text text-muted small">
-                  Default format: <span className="font-monospace">MRD-{'{UHID}'}</span>
+                  Default format: <span className="font-monospace">MRD-{'{IP No}'}</span>
                 </div>
               </div>
               <PaymentInsuranceFields

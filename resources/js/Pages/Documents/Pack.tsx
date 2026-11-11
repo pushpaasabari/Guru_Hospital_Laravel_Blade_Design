@@ -5,6 +5,7 @@ import ActionDropdown, {
   buildEditStageMenuItems,
   buildPdfDownloadMenuItems,
 } from '../../Components/ActionDropdown';
+import { resolveMrdNo } from '../../utils/inputNormalizers';
 import {
   formatTreatmentCourse,
   formatInvestigations,
@@ -1351,7 +1352,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                     </tr>
                     <tr>
                       <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>MRD No</td>
-                      <td>{admission.mrd_no || '—'}</td>
+                      <td>{resolveMrdNo(admission.mrd_no, admission.ip_no) || '—'}</td>
                       <td style={{ fontWeight: 'bold', background: '#f8fafc' }}>ICD CODE</td>
                       <td>{admission.icd_code || '—'}</td>
                     </tr>
@@ -2021,9 +2022,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                 <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>MRD No.</td>
                 <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
                 <td style={{ padding: '20px 4px' }}>
-                  {admission.uhid
-                    ? (admission.uhid.startsWith('MRD-') ? admission.uhid : `MRD-${admission.uhid}`)
-                    : (admission.mrd_no || (admission.ip_no ? `MRD-${admission.ip_no}` : ''))}
+                  {resolveMrdNo(admission.mrd_no, admission.ip_no)}
                 </td>
               </tr>
               <tr>

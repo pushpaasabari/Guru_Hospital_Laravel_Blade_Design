@@ -102,7 +102,7 @@
                 <td>
                     <span class="ds-lbl">MRD File No. / Ward</span>
                     <span class="ds-val">
-                        {{ $admission->mrd_no ?: ($admission->uhid ? 'MRD-' . $admission->uhid : '—') }}@if($admission->ward_room_no) &bull; {{ $admission->ward_room_no }}@endif
+                        {{ $admission->resolved_mrd_no ?: '—' }}@if($admission->ward_room_no) &bull; {{ $admission->ward_room_no }}@endif
                     </span>
                 </td>
             </tr>

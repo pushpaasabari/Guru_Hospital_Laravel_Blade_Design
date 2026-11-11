@@ -170,7 +170,7 @@
                 <td class="field-label">MRD No.</td>
                 <td class="colon-col">:</td>
                 <td class="field-value">
-                    {{ $admission->uhid ? (str_starts_with($admission->uhid, 'MRD-') ? $admission->uhid : 'MRD-' . $admission->uhid) : ($admission->mrd_no ?: ($admission->ip_no ? 'MRD-' . $admission->ip_no : '')) }}
+                    {{ $admission->resolved_mrd_no }}
                 </td>
             </tr>
             <tr>
