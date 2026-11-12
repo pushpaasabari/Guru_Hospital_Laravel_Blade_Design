@@ -229,7 +229,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
           </div>
         </div>
 
-        {/* Sidebar Footer: Staff User Card & Logout */}
+        {/* Sidebar Footer: Staff User Card & Inline Logout */}
         {user && (
           <div className="fg-sidebar-footer">
             <div className="fg-sidebar-user-card" title={`${user.name} (${user.role?.replace(/_/g, ' ')})`}>
@@ -252,14 +252,17 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                   </div>
                 )}
               </div>
+              <form onSubmit={handleLogout} className="m-0 p-0 flex-shrink-0">
+                <button
+                  type="submit"
+                  className="fg-sidebar-logout-icon-btn"
+                  title="Sign Out"
+                  aria-label="Sign Out"
+                >
+                  <i className="bi bi-box-arrow-right"></i>
+                </button>
+              </form>
             </div>
-
-            <form onSubmit={handleLogout}>
-              <button type="submit" className="fg-sidebar-logout-btn" title="Sign Out">
-                <i className="bi bi-box-arrow-right"></i>
-                <span>Sign Out</span>
-              </button>
-            </form>
           </div>
         )}
       </aside>

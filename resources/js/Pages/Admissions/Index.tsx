@@ -96,11 +96,11 @@ export default function AdmissionsIndex({ admissions, filters = {}, auth }: Prop
         <div className="card-body p-3">
           <form onSubmit={handleFilter} className="row g-2 align-items-center">
             <div className="col-md-4">
-              <div className="input-group input-group-sm">
-                <span className="input-group-text bg-light"><i className="bi bi-search"></i></span>
+              <div className="fg-search-input-wrap">
+                <i className="bi bi-search fg-search-icon" aria-hidden="true"></i>
                 <input
                   type="text"
-                  className="form-control"
+                  className="form-control form-control-sm"
                   placeholder="Search Patient, UHID, IP No..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}

@@ -184,13 +184,11 @@ export default function Dashboard({ counts, admissions, filters = {}, auth }: Pr
         <div className="card-body p-3">
           <form onSubmit={handleFilter} className="row g-2 align-items-center">
             <div className="col-md-4">
-              <div className="input-group input-group-sm">
-                <span className="input-group-text bg-white border-end-0">
-                  <i className="bi bi-search text-muted"></i>
-                </span>
+              <div className="fg-search-input-wrap">
+                <i className="bi bi-search fg-search-icon" aria-hidden="true"></i>
                 <input
                   type="text"
-                  className="form-control border-start-0"
+                  className="form-control form-control-sm"
                   placeholder="Search patient, UHID, IP No..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
@@ -306,8 +304,8 @@ export default function Dashboard({ counts, admissions, filters = {}, auth }: Pr
                         {item.surgery_type === 'delivery'
                           ? `Delivery (${item.newborns?.length || 0})`
                           : item.surgery_type === 'medical'
-                          ? 'Medical'
-                          : 'Other'}
+                            ? 'Medical'
+                            : 'Other'}
                       </span>
                     </td>
                     <td>
