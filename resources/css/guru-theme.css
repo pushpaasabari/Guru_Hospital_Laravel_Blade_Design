@@ -532,6 +532,66 @@ body {
   padding-left: 36px !important;
 }
 
+/* ─── Merged Patient Name Input (Prefix Select + Full Name in 1 Input Box) ─── */
+.fg-merged-name-group {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--fg-border, #e9e9e9);
+  border-radius: var(--fg-radius-sm, 10px);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  overflow: hidden;
+}
+
+.fg-merged-name-group:focus-within {
+  border-color: #111111;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.06);
+}
+
+.fg-merged-name-group.is-invalid {
+  border-color: #dc2626 !important;
+}
+
+.fg-merged-name-group .fg-prefix-select {
+  width: 95px !important;
+  min-width: 95px !important;
+  flex: 0 0 95px !important;
+  border: none !important;
+  border-right: 1px solid var(--fg-border, #e9e9e9) !important;
+  border-radius: 0 !important;
+  background-color: var(--fg-surface-soft, #fafbfc) !important;
+  padding: 9px 26px 9px 12px !important;
+  font-size: 13.5px !important;
+  color: var(--fg-text, #111111) !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.fg-merged-name-group .fg-prefix-select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: #ffffff !important;
+}
+
+.fg-merged-name-group .fg-name-text-input {
+  flex: 1 1 auto;
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  padding: 9px 14px !important;
+  font-size: 13.5px !important;
+  color: var(--fg-text, #111111) !important;
+  box-shadow: none !important;
+  min-width: 0;
+  text-transform: uppercase;
+}
+
+.fg-merged-name-group .fg-name-text-input:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 .fg-prefix-select {
   width: 112px !important;
   min-width: 112px !important;

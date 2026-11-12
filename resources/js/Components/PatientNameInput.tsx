@@ -55,7 +55,7 @@ export default function PatientNameInput({
 
   return (
     <>
-      <div className="d-flex gap-2">
+      <div className={`fg-merged-name-group ${error ? 'is-invalid' : ''}`}>
         <select
           className="form-select fg-prefix-select"
           aria-label="Patient Prefix"
@@ -70,7 +70,7 @@ export default function PatientNameInput({
         </select>
         <input
           type="text"
-          className={`form-control flex-grow-1 ${error ? 'is-invalid' : ''}`}
+          className="form-control fg-name-text-input"
           style={{ textTransform: 'uppercase', minWidth: 0 }}
           aria-label="Patient Full Name"
           value={nameBody}
