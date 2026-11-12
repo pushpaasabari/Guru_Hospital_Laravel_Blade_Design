@@ -5,6 +5,7 @@ import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
 import { handleNormalizedInputChange, toUpperCaseValue } from '../../utils/inputNormalizers';
 import AnesthesiaSelect, { AnesthesiaTypeItem } from '../../Components/AnesthesiaSelect';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
+import { PROCEDURE_TEMPLATES } from '../../constants/procedureTemplates';
 
 interface Newborn {
   id?: number;
@@ -155,6 +156,28 @@ export default function AdmissionsSurgery({
     (admission.drain || '').match(/stent/i)
   );
   const [hasStent, setHasStent] = useState<boolean>(hasStentInText);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+
+  const handleLoadProcedureTemplate = (templateId: string) => {
+    setSelectedTemplateId(templateId);
+    if (!templateId) return;
+    const tpl = PROCEDURE_TEMPLATES.find((t) => t.id === templateId);
+    if (!tpl) return;
+
+    setData((prev) => ({
+      ...prev,
+      procedure_note: tpl.procedureNote,
+      procedure_name: prev.procedure_name ? prev.procedure_name : tpl.procedureName,
+      procedure_done: prev.procedure_done ? prev.procedure_done : tpl.procedureDone,
+      incision: prev.incision ? prev.incision : tpl.incision,
+      findings: prev.findings ? prev.findings : tpl.findings,
+      blood_loss_ml: prev.blood_loss_ml ? prev.blood_loss_ml : (tpl.bloodLossMl !== undefined ? String(tpl.bloodLossMl) : prev.blood_loss_ml),
+    }));
+
+    if (tpl.hasStent) {
+      setHasStent(true);
+    }
+  };
 
   const serializeOrders = (rows: string[]): string => {
     const valid = rows.map((r) => r.trim()).filter(Boolean);
@@ -470,19 +493,50 @@ export default function AdmissionsSurgery({
 
         {/* Section 3: Operative Notes & Findings */}
         <div className="card mb-4 border-0 shadow-sm">
-          <div className="card-header bg-white py-3 fw-bold text-dark">
-            <span className="badge bg-primary me-2">2.3</span> Operative Narrative &amp; Clinical Findings
+          <div className="card-header bg-white py-3 fw-bold text-dark d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+              <span className="badge bg-primary me-2">2.3</span> Operative Narrative &amp; Clinical Findings
+            </div>
+            <div className="d-flex align-items-center gap-2">
+              <label className="small text-muted mb-0 fw-semibold d-none d-md-inline" htmlFor="procedure-template-select">
+                <i className="bi bi-magic me-1 text-primary"></i> Quick Load Template:
+              </label>
+              <select
+                id="procedure-template-select"
+                className="form-select form-select-sm"
+                style={{ minWidth: '270px', borderRadius: '8px' }}
+                value={selectedTemplateId}
+                onChange={(e) => handleLoadProcedureTemplate(e.target.value)}
+                aria-label="Quick Load Operative Procedure Template"
+              >
+                <option value="">-- Quick Load Standard Note (Max 5 Lines) --</option>
+                {Array.from(new Set(PROCEDURE_TEMPLATES.map((t) => t.category))).map((cat) => (
+                  <optgroup key={cat} label={cat}>
+                    {PROCEDURE_TEMPLATES.filter((t) => t.category === cat).map((tpl) => (
+                      <option key={tpl.id} value={tpl.id}>
+                        {tpl.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="card-body">
             <div className="row g-3">
               <div className="col-12">
-                <label className="form-label">Detailed Operative Procedure Note</label>
+                <div className="d-flex justify-content-between align-items-center mb-1">
+                  <label className="form-label mb-0">Detailed Operative Procedure Note</label>
+                  <span className="text-muted" style={{ fontSize: '11.5px' }}>
+                    Standard concise format (max 5 lines recommended)
+                  </span>
+                </div>
                 <textarea
                   className="form-control"
-                  rows={4}
+                  rows={5}
                   value={data.procedure_note}
                   onChange={(e) => setData('procedure_note', e.target.value)}
-                  placeholder="Describe step-by-step operative technique, closure, and findings..."
+                  placeholder="Describe step-by-step operative technique, closure, and findings (or select from Quick Load Template above)..."
                 />
               </div>
 
