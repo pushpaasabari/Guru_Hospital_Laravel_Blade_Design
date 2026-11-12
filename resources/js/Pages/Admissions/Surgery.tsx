@@ -6,6 +6,8 @@ import { handleNormalizedInputChange, toUpperCaseValue } from '../../utils/input
 import AnesthesiaSelect, { AnesthesiaTypeItem } from '../../Components/AnesthesiaSelect';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
 import { PROCEDURE_TEMPLATES } from '../../constants/procedureTemplates';
+import Icd10SelectorModal from '../../Components/Icd10SelectorModal';
+import { ICD10_CATALOG } from '../../constants/icd10Catalog';
 
 interface Newborn {
   id?: number;
@@ -157,6 +159,7 @@ export default function AdmissionsSurgery({
   );
   const [hasStent, setHasStent] = useState<boolean>(hasStentInText);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  const [showIcdModal, setShowIcdModal] = useState<boolean>(false);
 
   const handleLoadProcedureTemplate = (templateId: string) => {
     setSelectedTemplateId(templateId);
@@ -172,6 +175,7 @@ export default function AdmissionsSurgery({
       incision: prev.incision ? prev.incision : tpl.incision,
       findings: prev.findings ? prev.findings : tpl.findings,
       blood_loss_ml: prev.blood_loss_ml ? prev.blood_loss_ml : (tpl.bloodLossMl !== undefined ? String(tpl.bloodLossMl) : prev.blood_loss_ml),
+      icd_code: prev.icd_code ? prev.icd_code : (tpl.icdCode || prev.icd_code),
     }));
 
     if (tpl.hasStent) {
@@ -349,14 +353,36 @@ export default function AdmissionsSurgery({
               </div>
 
               <div className={isDelivery ? 'col-md-4' : 'col-md-3'}>
-                <label className="form-label">ICD-10 Code</label>
+                <div className="d-flex justify-content-between align-items-center mb-1">
+                  <label className="form-label mb-0">ICD-10 Code</label>
+                  <button
+                    type="button"
+                    className="btn btn-link btn-sm p-0 text-decoration-none fw-medium"
+                    style={{ fontSize: '11.5px', color: '#0d6efd' }}
+                    onClick={() => setShowIcdModal(true)}
+                  >
+                    <i className="bi bi-search me-1"></i>Search ICD-10
+                  </button>
+                </div>
                 <input
                   type="text"
+                  list="icd10-quick-datalist"
                   className="form-control"
                   value={data.icd_code}
                   onChange={(e) => setData('icd_code', e.target.value)}
-                  placeholder="e.g. O82.0 / K35.8"
+                  placeholder="e.g. O82 / N20.1 / K35.80"
                 />
+                <datalist id="icd10-quick-datalist">
+                  {ICD10_CATALOG.filter((item) => {
+                    const q = (data.icd_code || '').trim().toLowerCase();
+                    if (!q) return ['O80', 'O82', 'O84.2', 'N20.0', 'N20.1', 'N40.1', 'K35.80', 'K80.00', 'K40.90', 'D25.9'].includes(item.code);
+                    return item.code.toLowerCase().includes(q) || item.description.toLowerCase().includes(q);
+                  }).slice(0, 30).map((item) => (
+                    <option key={item.code} value={item.code}>
+                      {item.code} — {item.description}
+                    </option>
+                  ))}
+                </datalist>
               </div>
 
               <div className="col-12">
@@ -907,6 +933,13 @@ export default function AdmissionsSurgery({
           </div>
         </div>
       </form>
+
+      <Icd10SelectorModal
+        isOpen={showIcdModal}
+        onClose={() => setShowIcdModal(false)}
+        onSelect={(code) => setData('icd_code', code)}
+        currentCode={data.icd_code}
+      />
     </AppLayout>
   );
 }
