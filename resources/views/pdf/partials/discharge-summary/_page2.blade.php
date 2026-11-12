@@ -14,7 +14,7 @@
             <div class="ds-watermark">DRAFT COPY</div>
         @endif
 
-        {{-- Minimal Patient Identification Bar (below 70mm reserved top area) --}}
+        {{-- Minimal Patient Identification Bar (full-page continuation sheet) --}}
         <div class="ds-p2-idbar">
             <div class="ds-p2-idbar-left">DISCHARGE SUMMARY</div>
             <div class="ds-p2-idbar-right">
@@ -260,7 +260,7 @@
             @endif
         @endif
 
-        {{-- Bottom-anchored Emergency Advice + Signature (always strictly above 30mm bottom blank zone) --}}
+        {{-- Bottom-anchored Emergency Advice + Signature (full-page continuation footer) --}}
         <div class="ds-page2-bottom">
             {{-- 7. Warning Signs / Emergency Advice --}}
             <div class="ds-section-hdr" style="margin-top: 2px;">WARNING SIGNS / EMERGENCY ADVICE</div>

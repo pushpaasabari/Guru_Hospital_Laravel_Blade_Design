@@ -34,7 +34,7 @@
         color: #0f172a;
     }
 
-    /* Physical pre-printed stationery geometry:
+    /* Page 1: Physical pre-printed letterhead stationery geometry:
        223mm x 304mm sheet, 70mm blank top, 30mm blank bottom => 204mm printable height */
     .ds-page {
         width: 223mm;
@@ -48,7 +48,9 @@
         page-break-after: always;
         break-after: page;
     }
+    /* Page 2: Continuation sheet utilizing the full 223mm x 304mm page */
     .ds-page-2 {
+        padding: 12mm 13mm 12mm 13mm;
         page-break-after: auto;
         break-after: auto;
     }
@@ -59,6 +61,45 @@
         position: relative;
         display: flex;
         flex-direction: column;
+    }
+    .ds-page-2 .ds-page-content {
+        height: 280mm;
+        max-height: 280mm;
+    }
+    .ds-page-2:not(.density-spacing):not(.density-compact-1):not(.density-compact-2):not(.density-compact-3):not(.density-compact-4) .ds-p2-idbar {
+        padding-bottom: 4px;
+        margin-bottom: 8px;
+        font-size: 8.2pt;
+    }
+    .ds-page-2:not(.density-spacing):not(.density-compact-1):not(.density-compact-2):not(.density-compact-3):not(.density-compact-4) .ds-section-hdr {
+        margin-top: 8px;
+        margin-bottom: 4px;
+        padding: 3px 7px;
+        font-size: 8.5pt;
+    }
+    .ds-page-2:not(.density-spacing):not(.density-compact-1):not(.density-compact-2):not(.density-compact-3):not(.density-compact-4) .ds-grid,
+    .ds-page-2:not(.density-spacing):not(.density-compact-1):not(.density-compact-2):not(.density-compact-3):not(.density-compact-4) .ds-table {
+        margin-bottom: 6px;
+    }
+    .ds-page-2:not(.density-spacing):not(.density-compact-1):not(.density-compact-2):not(.density-compact-3):not(.density-compact-4) .ds-grid td,
+    .ds-page-2:not(.density-spacing):not(.density-compact-1):not(.density-compact-2):not(.density-compact-3):not(.density-compact-4) .ds-table td {
+        padding: 4px 6px;
+        font-size: 8.7pt;
+        line-height: 1.35;
+    }
+    .ds-page-2:not(.density-spacing):not(.density-compact-1):not(.density-compact-2):not(.density-compact-3):not(.density-compact-4) .ds-table th {
+        padding: 3.5px 6px;
+        font-size: 7.6pt;
+    }
+    .ds-page-2:not(.density-spacing):not(.density-compact-1):not(.density-compact-2):not(.density-compact-3):not(.density-compact-4) .ds-val {
+        font-size: 8.8pt;
+        line-height: 1.32;
+    }
+    .ds-page-2:not(.density-spacing):not(.density-compact-1):not(.density-compact-2):not(.density-compact-3):not(.density-compact-4) .ds-prose {
+        font-size: 8.7pt;
+        line-height: 1.38;
+        padding: 4px 6px;
+        margin-bottom: 5px;
     }
     .ds-page-content > * {
         flex-shrink: 0;
@@ -240,7 +281,7 @@
         text-align: center;
     }
 
-    /* Page 2 minimal continuation header (kept inside printable area below 70mm blank) */
+    /* Page 2 minimal continuation header (top of full-page continuation sheet) */
     .ds-p2-idbar {
         display: table;
         width: 100%;
@@ -284,7 +325,16 @@
         z-index: 0;
     }
 
-    /* Graduated compaction classes applied only if content > 204mm */
+    /* Step 1 overflow optimization: adjust margins & cell padding before reducing font sizes */
+    .density-spacing .ds-title-wrap { margin-bottom: 3px; padding-bottom: 2px; }
+    .density-spacing .ds-section-hdr { margin-top: 2.5px; margin-bottom: 2px; padding: 1.5px 5px; }
+    .density-spacing .ds-grid, .density-spacing .ds-table { margin-bottom: 2px; }
+    .density-spacing .ds-grid td, .density-spacing .ds-table td, .density-spacing .ds-table th { padding: 1.4px 4px; }
+    .density-spacing .ds-prose { padding: 1.5px 4px; margin-bottom: 2px; }
+    .density-spacing .ds-followup-box, .density-spacing .ds-tamil-box, .density-spacing .ds-emergency-box { padding: 3px 6px; margin-bottom: 2.5px; }
+    .density-spacing .ds-sig-space { height: 7mm; }
+
+    /* Graduated compaction classes applied only if spacing + overflow continuation still exceed 204mm */
     .density-compact-1 .ds-section-hdr { margin-top: 2.5px; margin-bottom: 2px; padding: 1.5px 5px; font-size: 7.9pt; }
     .density-compact-1 .ds-grid td, .density-compact-1 .ds-table td { padding: 1.6px 4px; font-size: 8.1pt; }
     .density-compact-1 .ds-prose { font-size: 8.1pt; line-height: 1.22; padding: 1px 3px; margin-bottom: 2px; }

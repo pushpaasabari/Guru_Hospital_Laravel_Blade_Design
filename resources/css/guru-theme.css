@@ -501,6 +501,13 @@ body {
   border-radius: var(--fg-radius-sm, 10px) !important;
 }
 
+.fg-prefix-select {
+  width: 112px !important;
+  min-width: 112px !important;
+  flex: 0 0 112px !important;
+  padding: 9px 30px 9px 12px !important;
+}
+
 .required:after {
   content: " *";
   color: #dc2626;

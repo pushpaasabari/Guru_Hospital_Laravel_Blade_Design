@@ -239,5 +239,41 @@ class DocumentPackPdfTest extends TestCase
             }
         }
     }
+
+    public function test_a4_discharge_summary_renders_strict_two_page_a4_pdf_with_clinical_design(): void
+    {
+        $html = view('pdf.discharge-summary-a4', ['admission' => $this->approvedAdmission])->render();
+
+        $this->assertStringContainsString('#0F5C63', $html);
+        $this->assertStringContainsString('#E6F2F2', $html);
+        $this->assertStringContainsString('#E3A72F', $html);
+        $this->assertStringContainsString('#B3261E', $html);
+        $this->assertStringContainsString('#FDECEA', $html);
+        $this->assertStringContainsString('size: 223mm 304mm', $html);
+        $this->assertStringContainsString('padding: 70mm 13mm 30mm 13mm', $html);
+        $this->assertStringContainsString('padding: 12mm 13mm 12mm 13mm', $html);
+        $this->assertStringContainsString('Page 1', $html);
+        $this->assertStringContainsString('Page 2', $html);
+
+        $response = $this->actingAs($this->doctor)
+            ->get(route('documents.pdf', [$this->approvedAdmission, 'discharge-summary-a4']));
+
+        $response->assertStatus(200);
+        $response->assertHeader('Content-Type', 'application/pdf');
+        $this->assertStringContainsString(
+            'Discharge_Summary_A4.pdf',
+            (string) $response->headers->get('Content-Disposition')
+        );
+
+        $pdfBytes = $response->getContent();
+        $this->assertStringStartsWith('%PDF-', $pdfBytes);
+        $this->assertMatchesRegularExpression('/\/Type\s*\/Pages\b.*?\/Count\s+2\b/s', $pdfBytes);
+
+        preg_match('/\/MediaBox\s*\[\s*0\s+0\s+([0-9.]+)\s+([0-9.]+)\s*\]/', $pdfBytes, $boxMatch);
+        $widthMm = ((float) ($boxMatch[1] ?? 0)) * 25.4 / 72;
+        $heightMm = ((float) ($boxMatch[2] ?? 0)) * 25.4 / 72;
+        $this->assertEqualsWithDelta(223.0, $widthMm, 0.5);
+        $this->assertEqualsWithDelta(304.0, $heightMm, 0.5);
+    }
 }
 

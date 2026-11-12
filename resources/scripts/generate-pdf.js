@@ -47,17 +47,79 @@ async function main() {
     await page.setContent(htmlContent, { waitUntil: 'load' });
 
     const isDischargeSummary = docType === 'discharge_summary' || docType === 'discharge-summary';
+    const isDischargeSummaryA4 = docType === 'discharge_summary_a4' || docType === 'discharge-summary-a4';
 
-    if (isDischargeSummary) {
-      // Balance Page 1 -> Page 2 overflow cleanly so nothing clips into the 30mm bottom blank zone or spills to a 3rd page
+    if (isDischargeSummaryA4) {
+      await page.evaluate(() => {
+        const sheets = document.querySelectorAll('.a4-page-content');
+        if (sheets.length === 2) {
+          const p1 = sheets[0];
+          const p2 = sheets[1];
+          const p1Sheet = p1.closest('.a4-page');
+          const overflowTarget = p2.querySelector('[data-overflow-target="page2"]');
+
+          // Pass 1: Optimize Page 1 spacing before shrinking fonts
+          if (p1.scrollHeight > p1.clientHeight + 1) {
+            p1Sheet?.classList.add('a4-density-spacing');
+          }
+
+          // Pass 2: Move overflow blocks from Page 1 (204mm printable) onto Page 2 (280mm full sheet)
+          if (p1.scrollHeight > p1.clientHeight + 1 && overflowTarget) {
+            const movables = Array.from(p1.querySelectorAll('[data-overflow-movable="page1"]')).reverse();
+            for (const block of movables) {
+              if (p1.scrollHeight <= p1.clientHeight + 1) break;
+              const note = document.createElement('div');
+              note.className = 'a4-continued-note';
+              note.textContent = 'Continued from Page 1';
+              overflowTarget.insertBefore(block, overflowTarget.firstChild);
+              overflowTarget.insertBefore(note, block);
+            }
+          }
+        }
+
+        for (const contentEl of sheets) {
+          const sheetEl = contentEl.closest('.a4-page');
+          for (const cls of ['a4-density-spacing', 'a4-compact-1', 'a4-compact-2']) {
+            if (contentEl.scrollHeight <= contentEl.clientHeight + 1) break;
+            sheetEl?.classList.add(cls);
+          }
+          if (contentEl.scrollHeight > contentEl.clientHeight + 1) {
+            const ratio = Math.max(0.86, contentEl.clientHeight / contentEl.scrollHeight);
+            contentEl.style.transformOrigin = 'top left';
+            contentEl.style.width = `${(100 / ratio).toFixed(3)}%`;
+            contentEl.style.transform = `scale(${ratio.toFixed(3)})`;
+          }
+        }
+      });
+
+      await page.pdf({
+        path: outputFile,
+        printBackground: true,
+        preferCSSPageSize: true,
+        displayHeaderFooter: false,
+        margin: { top: '0px', bottom: '0px', left: '0px', right: '0px' },
+      });
+    } else if (isDischargeSummary) {
+      // Balance Page 1 -> Page 2 overflow per skill rules:
+      // 1) Spacing/padding optimization before font shrinkage,
+      // 2) Move overflow blocks to Page 2 before aggressive shrinking,
+      // 3) Apply graduated compact styles only if content still exceeds the 204mm printable height.
       await page.evaluate(() => {
         const sheets = document.querySelectorAll('.ds-page-content');
         if (sheets.length !== 2) return;
         const p1 = sheets[0];
         const p2 = sheets[1];
+        const p1Sheet = p1.closest('.ds-page');
+        const p2Sheet = p2.closest('.ds-page');
         const overflowTarget = p2.querySelector('[data-overflow-target="page2"]');
 
-        if (overflowTarget) {
+        // Pass 1: Optimize spacing & cell padding first without changing font size
+        if (p1.scrollHeight > p1.clientHeight + 1) {
+          p1Sheet?.classList.add('density-spacing');
+        }
+
+        // Pass 2: If Page 1 still overflows 204mm, continue movable blocks onto Page 2 cleanly
+        if (p1.scrollHeight > p1.clientHeight + 1 && overflowTarget) {
           const movables = Array.from(p1.querySelectorAll('[data-overflow-movable="page1"]')).reverse();
           for (const block of movables) {
             if (p1.scrollHeight <= p1.clientHeight + 1) break;
@@ -69,17 +131,20 @@ async function main() {
           }
         }
 
-        const densityClasses = ['density-compact-1', 'density-compact-2', 'density-compact-3', 'density-compact-4'];
+        // Pass 3: Apply spacing then graduated font compaction only where still exceeding 204mm
+        const densityClasses = ['density-spacing', 'density-compact-1', 'density-compact-2', 'density-compact-3', 'density-compact-4'];
         for (const contentEl of [p1, p2]) {
           const sheetEl = contentEl.closest('.ds-page');
           for (const cls of densityClasses) {
             if (contentEl.scrollHeight <= contentEl.clientHeight + 1) break;
             sheetEl?.classList.add(cls);
           }
-          // Last-resort precision proportional scale if extreme text still exceeds 204mm
+          // Last-resort edge-to-edge proportional vertical fit only if extreme prose still exceeds 204mm
           if (contentEl.scrollHeight > contentEl.clientHeight + 1) {
-            const ratio = Math.max(0.86, contentEl.clientHeight / contentEl.scrollHeight);
-            contentEl.style.zoom = ratio.toFixed(3);
+            const ratio = Math.max(0.88, contentEl.clientHeight / contentEl.scrollHeight);
+            contentEl.style.transformOrigin = 'top left';
+            contentEl.style.width = `${(100 / ratio).toFixed(3)}%`;
+            contentEl.style.transform = `scale(${ratio.toFixed(3)})`;
           }
         }
       });

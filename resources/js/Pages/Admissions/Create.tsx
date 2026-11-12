@@ -4,6 +4,7 @@ import AppLayout from '../../Layouts/AppLayout';
 import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
 import { defaultMrdFromIp, digitsOnlyValue, handleNormalizedInputChange, toUpperCaseValue } from '../../utils/inputNormalizers';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
+import PatientNameInput from '../../Components/PatientNameInput';
 import PaymentInsuranceFields from '../../Components/PaymentInsuranceFields';
 
 interface Props {
@@ -99,21 +100,16 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
             <div className="row g-3">
               <div className="col-md-4">
                 <label className="form-label required">Patient Full Name</label>
-                <input
-                  type="text"
-                  className={`form-control ${errors.patient_name ? 'is-invalid' : ''}`}
-                  style={{ textTransform: 'uppercase' }}
+                <PatientNameInput
                   value={data.patient_name}
-                  onChange={(e) =>
-                    handleNormalizedInputChange(e, toUpperCaseValue, (val) => setData('patient_name', val))
-                  }
-                  placeholder="e.g. MRS. ANITHA"
+                  onChange={(fullName) => setData('patient_name', fullName)}
+                  error={errors.patient_name}
+                  placeholder="e.g. PATIENT NAME"
                   required
                 />
-                {errors.patient_name && <div className="invalid-feedback">{errors.patient_name}</div>}
               </div>
               <div className="col-md-4">
-                <label className="form-label required">UHID / MRN</label>
+                <label className="form-label required">UHID</label>
                 <input
                   type="text"
                   className={`form-control ${errors.uhid ? 'is-invalid' : ''}`}
@@ -159,14 +155,14 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
                 />
               </div>
               <div className="col-md-2">
-                <label className="form-label required">Sex</label>
+                <label className="form-label required">Gender</label>
                 <select
                   className={`form-select ${errors.sex ? 'is-invalid' : ''}`}
                   value={data.sex}
                   onChange={(e) => handleSexChange(e.target.value)}
                   required
                 >
-                  <option value="">Select Sex</option>
+                  <option value="">Select Gender</option>
                   <option value="Female">Female</option>
                   <option value="Male">Male</option>
                   <option value="Other">Other</option>

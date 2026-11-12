@@ -1,0 +1,532 @@
+<style>
+    @font-face {
+        font-family: 'Nirmala';
+        font-style: normal;
+        font-weight: normal;
+        src: url('{{ str_replace('\\', '/', public_path('fonts/Nirmala.ttf')) }}') format('truetype');
+    }
+    @font-face {
+        font-family: 'Nirmala';
+        font-style: normal;
+        font-weight: bold;
+        src: url('{{ str_replace('\\', '/', public_path('fonts/NirmalaB.ttf')) }}') format('truetype');
+    }
+
+    @page {
+        size: 223mm 304mm;
+        margin: 0;
+    }
+
+    * {
+        box-sizing: border-box;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 223mm;
+        background: #ffffff;
+        font-family: 'Helvetica', 'Helvetica Neue', Arial, 'Nirmala UI', 'Nirmala', sans-serif;
+        font-size: 8.8pt;
+        font-weight: 400;
+        line-height: 1.28;
+        color: #1B2A2F;
+    }
+
+    /* Page 1: Pre-printed letterhead geometry:
+       223mm x 304mm sheet, 70mm blank top, 30mm blank bottom => 204mm printable height */
+    .a4-page {
+        width: 223mm;
+        height: 304mm;
+        padding: 70mm 13mm 30mm 13mm;
+        position: relative;
+        background: #ffffff;
+        overflow: hidden;
+    }
+    .a4-page-1 {
+        page-break-after: always;
+        break-after: page;
+    }
+    /* Page 2: Continuation sheet utilizing the full 223mm x 304mm page */
+    .a4-page-2 {
+        padding: 12mm 13mm 12mm 13mm;
+        page-break-after: auto;
+        break-after: auto;
+    }
+
+    .a4-page-content {
+        width: 100%;
+        height: 204mm;
+        max-height: 204mm;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+    }
+    .a4-page-2 .a4-page-content {
+        height: 280mm;
+        max-height: 280mm;
+    }
+    .a4-page-content > * {
+        flex-shrink: 0;
+    }
+
+    /* 1. Compact Teal Header Band (No duplicated hospital branding on pre-printed letterhead) */
+    .a4-header-band {
+        width: 100%;
+        min-height: 16mm;
+        background: #0F5C63;
+        color: #ffffff;
+        padding: 6px 12px 5px 12px;
+        border-bottom: 2.5pt solid #E3A72F;
+        margin-bottom: 5px;
+        display: table;
+        table-layout: fixed;
+    }
+    .a4-header-left {
+        display: table-cell;
+        vertical-align: middle;
+        width: 64%;
+    }
+    .a4-header-right {
+        display: table-cell;
+        vertical-align: middle;
+        text-align: right;
+        width: 36%;
+    }
+    .a4-doc-title {
+        font-size: 22pt;
+        font-weight: 700;
+        color: #ffffff;
+        margin: 0 0 2px 0;
+        line-height: 1.05;
+        letter-spacing: -0.2px;
+    }
+    .a4-doc-subtitle {
+        font-size: 9.5pt;
+        font-weight: 400;
+        color: #E6F2F2;
+        letter-spacing: 0.15px;
+    }
+    .a4-meta-pill {
+        margin-bottom: 1.5px;
+    }
+    .a4-meta-pill:last-child {
+        margin-bottom: 0;
+    }
+    .a4-meta-lbl {
+        display: inline-block;
+        font-size: 8pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: #D5E0E2;
+        margin-right: 4px;
+    }
+    .a4-meta-val {
+        display: inline-block;
+        font-size: 10pt;
+        font-weight: 400;
+        color: #ffffff;
+    }
+
+    /* Section Headings */
+    .a4-section-hdr {
+        font-size: 9.5pt;
+        font-weight: 700;
+        color: #0F5C63;
+        text-transform: uppercase;
+        letter-spacing: 0.35px;
+        border-bottom: 1.1pt solid #0F5C63;
+        padding-bottom: 1.5px;
+        margin-top: 4.5px;
+        margin-bottom: 3.5px;
+        page-break-after: avoid;
+        break-after: avoid;
+    }
+
+    .a4-lbl {
+        display: block;
+        font-size: 6.6pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        color: #6B7B80;
+        line-height: 1.12;
+        margin-bottom: 1px;
+    }
+    .a4-val {
+        display: block;
+        font-size: 8.8pt;
+        font-weight: 400;
+        color: #1B2A2F;
+        line-height: 1.24;
+        word-wrap: break-word;
+    }
+    .a4-val-bold {
+        font-weight: 700;
+    }
+
+    /* 2. Patient Banner */
+    .a4-patient-card {
+        border: 0.75pt solid #D5E0E2;
+        margin-bottom: 4px;
+        background: #ffffff;
+    }
+    .a4-patient-top {
+        display: grid;
+        grid-template-columns: 1.7fr 1fr 1fr 1fr;
+        border-bottom: 0.75pt solid #D5E0E2;
+    }
+    .a4-patient-cell {
+        padding: 3.5px 7px;
+        border-right: 0.75pt solid #D5E0E2;
+    }
+    .a4-patient-cell:last-child {
+        border-right: none;
+    }
+    .a4-patient-name {
+        font-size: 12pt;
+        font-weight: 700;
+        color: #1B2A2F;
+        line-height: 1.15;
+    }
+    .a4-patient-bottom {
+        display: grid;
+        grid-template-columns: 1fr 2.5fr;
+        background: #E6F2F2;
+    }
+    .a4-patient-bottom .a4-patient-cell {
+        padding: 3px 7px;
+    }
+
+    /* 3 & 4 & 8. 3-Column Label/Value Pale Teal Grid with Thin White Gaps */
+    .a4-grid-3 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2px;
+        background: #ffffff;
+        margin-bottom: 4px;
+    }
+    .a4-grid-cell {
+        background: #E6F2F2;
+        padding: 3px 6px;
+    }
+    .a4-status-approved {
+        color: #15803D;
+        font-weight: 700;
+    }
+
+    /* 5. Diagnosis & Clinical Blocks */
+    .a4-diagnosis-card {
+        background: #E6F2F2;
+        border-left: 3pt solid #0F5C63;
+        padding: 3.5px 8px;
+        margin-bottom: 3.5px;
+    }
+    .a4-diagnosis-val {
+        font-size: 11pt;
+        font-weight: 700;
+        color: #0F5C63;
+        line-height: 1.22;
+    }
+    .a4-clinical-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        border-bottom: 0.6pt solid #D5E0E2;
+        padding: 2.5px 2px;
+    }
+    .a4-clinical-block {
+        border-bottom: 0.6pt solid #D5E0E2;
+        padding: 2.5px 2px;
+    }
+    .a4-outlined-card .a4-val,
+    .a4-clinical-row .a4-val,
+    .a4-clinical-block .a4-val {
+        font-size: 9pt;
+        font-weight: 400;
+    }
+    .a4-history-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 4px 8px;
+        padding: 2.5px 2px;
+        border-bottom: 0.6pt solid #D5E0E2;
+    }
+
+    /* 6. Investigations 5-Column Grid */
+    .a4-inv-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 2px;
+        margin-bottom: 4px;
+    }
+    .a4-inv-box {
+        background: #E6F2F2;
+        padding: 3px 5.5px;
+    }
+
+    /* 7 & 10. Teal Header Tables with Zebra Striping */
+    .a4-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+        margin-bottom: 6px;
+    }
+    .a4-table th {
+        background: #0F5C63;
+        color: #ffffff;
+        font-size: 7.4pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        text-align: left;
+        padding: 4px 7px;
+        border: 0.6pt solid #0F5C63;
+    }
+    .a4-table td {
+        padding: 3.5px 7px;
+        font-size: 8.8pt;
+        color: #1B2A2F;
+        border-bottom: 0.6pt solid #D5E0E2;
+        border-left: 0.6pt solid #D5E0E2;
+        border-right: 0.6pt solid #D5E0E2;
+        vertical-align: top;
+        word-wrap: break-word;
+    }
+    .a4-table tbody tr:nth-child(even) td {
+        background: #F4F9F9;
+    }
+
+    /* Outlined Cards */
+    .a4-outlined-card {
+        border: 0.75pt solid #D5E0E2;
+        padding: 5px 8px;
+        margin-bottom: 6px;
+        background: #ffffff;
+    }
+
+    /* 9. Newborn Twin Cards Side by Side */
+    .a4-newborn-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+    .a4-newborn-card {
+        border: 0.75pt solid #D5E0E2;
+        background: #ffffff;
+    }
+    .a4-newborn-title {
+        background: #E6F2F2;
+        color: #0F5C63;
+        font-size: 9pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        padding: 3.5px 8px;
+        border-bottom: 0.75pt solid #D5E0E2;
+    }
+    .a4-newborn-body {
+        padding: 5px 8px;
+        font-size: 9pt;
+        font-weight: 400;
+        line-height: 1.35;
+    }
+    .a4-nb-line {
+        margin-bottom: 1.5px;
+    }
+    .a4-nb-lbl {
+        color: #6B7B80;
+        font-weight: 700;
+        font-size: 7.4pt;
+        text-transform: uppercase;
+        margin-right: 4px;
+    }
+
+    /* 11. Condition at Discharge 4-Column Grid */
+    .a4-grid-4 {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr 0.8fr 2fr;
+        gap: 2.5px;
+        margin-bottom: 6px;
+    }
+
+    /* Bilingual Tamil Notice inside Instructions/Follow-up */
+    .a4-tamil-card {
+        border: 0.75pt solid #D5E0E2;
+        border-left: 2.5pt solid #0F5C63;
+        padding: 5px 8px;
+        margin-bottom: 6px;
+        font-family: 'Nirmala', 'Nirmala UI', 'Helvetica', Arial, sans-serif;
+        font-size: 9pt;
+        font-weight: 400;
+        line-height: 1.38;
+        color: #1B2A2F;
+    }
+
+    /* 12. Warning Box (Red ONLY here) */
+    .a4-warning-box {
+        background: #FDECEA;
+        border-left: 3.5pt solid #B3261E;
+        padding: 6px 10px;
+        margin-top: 4px;
+        margin-bottom: 8px;
+    }
+    .a4-warning-title {
+        font-size: 9pt;
+        font-weight: 700;
+        color: #B3261E;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        margin-bottom: 2px;
+    }
+    .a4-warning-text {
+        font-size: 9pt;
+        font-weight: 400;
+        color: #1B2A2F;
+        line-height: 1.32;
+    }
+
+    /* 13. Signature Block */
+    .a4-signature-row {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+        margin-top: 6px;
+        margin-bottom: 6px;
+    }
+    .a4-sig-left {
+        display: table-cell;
+        width: 50%;
+        vertical-align: bottom;
+        font-size: 8.4pt;
+        color: #6B7B80;
+    }
+    .a4-sig-right {
+        display: table-cell;
+        width: 50%;
+        text-align: right;
+        vertical-align: bottom;
+    }
+    .a4-sig-space {
+        height: 11mm;
+    }
+    .a4-sig-line {
+        display: inline-block;
+        min-width: 62mm;
+        border-top: 0.8pt solid #1B2A2F;
+        padding-top: 3px;
+        text-align: center;
+    }
+    .a4-sig-name {
+        font-size: 9pt;
+        font-weight: 700;
+        color: #1B2A2F;
+    }
+    .a4-sig-desig {
+        font-size: 7.4pt;
+        color: #6B7B80;
+    }
+
+    /* Page Footer Hairline anchored to bottom of printable margin frame */
+    .a4-page-bottom {
+        margin-top: auto;
+    }
+    .a4-footer-hairline {
+        border-top: 0.75pt solid #D5E0E2;
+        padding-top: 3px;
+        margin-top: 4px;
+        display: table;
+        width: 100%;
+        font-size: 7.2pt;
+        font-weight: 400;
+        color: #6B7B80;
+    }
+    .a4-footer-left {
+        display: table-cell;
+        text-align: left;
+    }
+    .a4-footer-right {
+        display: table-cell;
+        text-align: right;
+        font-weight: 400;
+    }
+
+    /* Page 2 utilizes full 223mm x 304mm continuation sheet (280mm printable height) */
+    .a4-page-2:not(.a4-density-spacing):not(.a4-compact-1):not(.a4-compact-2) .a4-section-hdr {
+        margin-top: 8px;
+        margin-bottom: 5px;
+    }
+    .a4-page-2:not(.a4-density-spacing):not(.a4-compact-1):not(.a4-compact-2) .a4-grid-3,
+    .a4-page-2:not(.a4-density-spacing):not(.a4-compact-1):not(.a4-compact-2) .a4-table,
+    .a4-page-2:not(.a4-density-spacing):not(.a4-compact-1):not(.a4-compact-2) .a4-outlined-card,
+    .a4-page-2:not(.a4-density-spacing):not(.a4-compact-1):not(.a4-compact-2) .a4-newborn-grid,
+    .a4-page-2:not(.a4-density-spacing):not(.a4-compact-1):not(.a4-compact-2) .a4-grid-4 {
+        margin-bottom: 7px;
+    }
+    .a4-page-2:not(.a4-density-spacing):not(.a4-compact-1):not(.a4-compact-2) .a4-grid-cell {
+        padding: 4.5px 7px;
+    }
+    .a4-page-2:not(.a4-density-spacing):not(.a4-compact-1):not(.a4-compact-2) .a4-val {
+        line-height: 1.32;
+    }
+
+    .a4-continued-note {
+        font-size: 7.2pt;
+        font-weight: 700;
+        color: #0F5C63;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+        margin-top: 2px;
+        margin-bottom: 1px;
+    }
+
+    /* Draft Watermark */
+    .a4-watermark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-30deg);
+        font-size: 48pt;
+        color: rgba(179, 38, 30, 0.08);
+        font-weight: 700;
+        text-transform: uppercase;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    /* Progressive spacing optimization before font shrinkage (preserves 70mm top & 30mm bottom blank areas) */
+    .a4-density-spacing .a4-header-band { min-height: 13mm; padding: 4.5px 10px 4px 10px; margin-bottom: 3.5px; }
+    .a4-density-spacing .a4-section-hdr { margin-top: 3px; margin-bottom: 2px; padding-bottom: 1px; }
+    .a4-density-spacing .a4-patient-card,
+    .a4-density-spacing .a4-grid-3,
+    .a4-density-spacing .a4-diagnosis-card,
+    .a4-density-spacing .a4-inv-grid,
+    .a4-density-spacing .a4-table,
+    .a4-density-spacing .a4-outlined-card { margin-bottom: 2.5px; }
+    .a4-density-spacing .a4-patient-cell,
+    .a4-density-spacing .a4-grid-cell,
+    .a4-density-spacing .a4-inv-box { padding: 2px 5px; }
+    .a4-density-spacing .a4-clinical-row,
+    .a4-density-spacing .a4-clinical-block,
+    .a4-density-spacing .a4-history-grid { padding: 1.5px 2px; }
+    .a4-density-spacing .a4-table td,
+    .a4-density-spacing .a4-table th { padding: 2px 5px; }
+    .a4-density-spacing .a4-footer-hairline { margin-top: 2px; padding-top: 2px; }
+
+    .a4-compact-1 .a4-header-band { min-height: 12mm; padding: 4px 10px 3.5px 10px; margin-bottom: 3px; }
+    .a4-compact-1 .a4-doc-title { font-size: 18pt; }
+    .a4-compact-1 .a4-section-hdr { margin-top: 2.5px; margin-bottom: 1.5px; font-size: 8.8pt; }
+    .a4-compact-1 .a4-val, .a4-compact-1 .a4-table td { font-size: 8.2pt; line-height: 1.2; }
+    .a4-compact-1 .a4-sig-space { height: 8mm; }
+
+    .a4-compact-2 .a4-header-band { min-height: 11mm; padding: 3px 9px 3px 9px; margin-bottom: 2px; }
+    .a4-compact-2 .a4-doc-title { font-size: 16pt; }
+    .a4-compact-2 .a4-patient-name { font-size: 10pt; }
+    .a4-compact-2 .a4-diagnosis-val { font-size: 9.8pt; }
+    .a4-compact-2 .a4-val, .a4-compact-2 .a4-table td, .a4-compact-2 .a4-warning-text { font-size: 7.8pt; line-height: 1.16; }
+    .a4-compact-2 .a4-sig-space { height: 6mm; }
+</style>
+
