@@ -72,42 +72,52 @@
         flex-shrink: 0;
     }
 
-    /* 1. Compact Teal Header Band (No duplicated hospital branding on pre-printed letterhead) */
+    /* 1. Clean Header (Uppercase Centered Title, No Background Fill) */
     .a4-header-band {
         width: 100%;
-        min-height: 16mm;
-        background: #0F5C63;
-        color: #ffffff;
-        padding: 6px 12px 5px 12px;
-        border-bottom: 2.5pt solid #E3A72F;
+        background: transparent;
+        color: #1B2A2F;
+        padding: 0 0 4px 0;
+        border-bottom: 1.5pt solid #0F5C63;
         margin-bottom: 5px;
-        display: table;
+    }
+    .a4-header-table {
+        width: 100%;
+        border-collapse: collapse;
         table-layout: fixed;
     }
     .a4-header-left {
-        display: table-cell;
+        width: 25%;
         vertical-align: middle;
-        width: 64%;
+        text-align: left;
+    }
+    .a4-header-center {
+        width: 50%;
+        vertical-align: middle;
+        text-align: center;
     }
     .a4-header-right {
-        display: table-cell;
+        width: 25%;
         vertical-align: middle;
         text-align: right;
-        width: 36%;
     }
     .a4-doc-title {
-        font-size: 22pt;
+        font-size: 15pt;
         font-weight: 700;
-        color: #ffffff;
-        margin: 0 0 2px 0;
-        line-height: 1.05;
-        letter-spacing: -0.2px;
+        color: #0F5C63;
+        text-transform: uppercase;
+        text-align: center;
+        letter-spacing: 0.8px;
+        margin: 0 0 1px 0;
+        line-height: 1.1;
     }
     .a4-doc-subtitle {
-        font-size: 9.5pt;
-        font-weight: 400;
-        color: #E6F2F2;
-        letter-spacing: 0.15px;
+        font-size: 8pt;
+        font-weight: 500;
+        color: #556970;
+        text-align: center;
+        letter-spacing: 0.2px;
+        line-height: 1.2;
     }
     .a4-meta-pill {
         margin-bottom: 1.5px;
@@ -116,19 +126,20 @@
         margin-bottom: 0;
     }
     .a4-meta-lbl {
-        display: inline-block;
-        font-size: 8pt;
+        display: block;
+        font-size: 6.8pt;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.3px;
-        color: #D5E0E2;
-        margin-right: 4px;
+        color: #6B7B80;
+        line-height: 1.1;
     }
     .a4-meta-val {
-        display: inline-block;
-        font-size: 10pt;
-        font-weight: 400;
-        color: #ffffff;
+        display: block;
+        font-size: 8.8pt;
+        font-weight: 700;
+        color: #1B2A2F;
+        line-height: 1.2;
     }
 
     /* Section Headings */
@@ -195,32 +206,41 @@
     .a4-patient-bottom {
         display: grid;
         grid-template-columns: 1fr 2.5fr;
-        background: #E6F2F2;
+        background: transparent;
     }
     .a4-patient-bottom .a4-patient-cell {
         padding: 3px 7px;
     }
 
-    /* 3 & 4 & 8. 3-Column Label/Value Pale Teal Grid with Thin White Gaps */
+    /* 3 & 4 & 8. 3-Column Label/Value Clean Grid (No Background Fill) */
     .a4-grid-3 {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 2px;
-        background: #ffffff;
+        border: 0.75pt solid #D5E0E2;
         margin-bottom: 4px;
+        background: transparent;
     }
     .a4-grid-cell {
-        background: #E6F2F2;
+        background: transparent;
         padding: 3px 6px;
+        border-right: 0.75pt solid #D5E0E2;
+        border-bottom: 0.75pt solid #D5E0E2;
+    }
+    .a4-grid-3 > .a4-grid-cell:nth-child(3n) {
+        border-right: none;
+    }
+    .a4-grid-3 > .a4-grid-cell:nth-last-child(-n+3) {
+        border-bottom: none;
     }
     .a4-status-approved {
         color: #15803D;
         font-weight: 700;
     }
 
-    /* 5. Diagnosis & Clinical Blocks */
+    /* 5. Diagnosis & Clinical Blocks (No Background Fill) */
     .a4-diagnosis-card {
-        background: #E6F2F2;
+        background: transparent;
+        border: 0.75pt solid #D5E0E2;
         border-left: 3pt solid #0F5C63;
         padding: 3.5px 8px;
         margin-bottom: 3.5px;
@@ -256,19 +276,22 @@
         border-bottom: 0.6pt solid #D5E0E2;
     }
 
-    /* 6. Investigations 5-Column Grid */
+    /* 6. Investigations Grid (No Background Fill) */
     .a4-inv-grid {
         display: grid;
         grid-template-columns: repeat(5, 1fr);
-        gap: 2px;
+        border: 0.75pt solid #D5E0E2;
         margin-bottom: 4px;
+        background: transparent;
     }
     .a4-inv-box {
-        background: #E6F2F2;
+        background: transparent;
         padding: 3px 5.5px;
+        border-right: 0.75pt solid #D5E0E2;
+        border-bottom: 0.75pt solid #D5E0E2;
     }
 
-    /* 7 & 10. Teal Header Tables with Zebra Striping */
+    /* 7 & 10. Clean Header Tables (No Background Fill, Clean Borders) */
     .a4-table {
         width: 100%;
         border-collapse: collapse;
@@ -276,15 +299,16 @@
         margin-bottom: 6px;
     }
     .a4-table th {
-        background: #0F5C63;
-        color: #ffffff;
+        background: transparent;
+        color: #0F5C63;
         font-size: 7.4pt;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.3px;
         text-align: left;
         padding: 4px 7px;
-        border: 0.6pt solid #0F5C63;
+        border: 0.6pt solid #D5E0E2;
+        border-bottom: 1.2pt solid #0F5C63;
     }
     .a4-table td {
         padding: 3.5px 7px;
@@ -293,11 +317,12 @@
         border-bottom: 0.6pt solid #D5E0E2;
         border-left: 0.6pt solid #D5E0E2;
         border-right: 0.6pt solid #D5E0E2;
+        background: transparent;
         vertical-align: top;
         word-wrap: break-word;
     }
     .a4-table tbody tr:nth-child(even) td {
-        background: #F4F9F9;
+        background: transparent;
     }
 
     /* Outlined Cards */
@@ -305,7 +330,7 @@
         border: 0.75pt solid #D5E0E2;
         padding: 5px 8px;
         margin-bottom: 6px;
-        background: #ffffff;
+        background: transparent;
     }
 
     /* 9. Newborn Twin Cards Side by Side */
@@ -317,10 +342,10 @@
     }
     .a4-newborn-card {
         border: 0.75pt solid #D5E0E2;
-        background: #ffffff;
+        background: transparent;
     }
     .a4-newborn-title {
-        background: #E6F2F2;
+        background: transparent;
         color: #0F5C63;
         font-size: 9pt;
         font-weight: 700;
@@ -345,12 +370,22 @@
         margin-right: 4px;
     }
 
-    /* 11. Condition at Discharge 4-Column Grid */
+    /* 11. Condition at Discharge 4-Column Grid (No Background Fill) */
     .a4-grid-4 {
         display: grid;
         grid-template-columns: 1.2fr 0.8fr 0.8fr 2fr;
-        gap: 2.5px;
+        border: 0.75pt solid #D5E0E2;
         margin-bottom: 6px;
+        background: transparent;
+    }
+    .a4-grid-4 .a4-grid-cell {
+        background: transparent;
+        padding: 3px 6px;
+        border-right: 0.75pt solid #D5E0E2;
+        border-bottom: none;
+    }
+    .a4-grid-4 .a4-grid-cell:last-child {
+        border-right: none;
     }
 
     /* Bilingual Tamil Notice inside Instructions/Follow-up */
@@ -364,11 +399,13 @@
         font-weight: 400;
         line-height: 1.38;
         color: #1B2A2F;
+        background: transparent;
     }
 
-    /* 12. Warning Box (Red ONLY here) */
+    /* 12. Warning Box (No Background Fill) */
     .a4-warning-box {
-        background: #FDECEA;
+        background: transparent;
+        border: 0.75pt solid #FCA5A5;
         border-left: 3.5pt solid #B3261E;
         padding: 6px 10px;
         margin-top: 4px;
@@ -498,7 +535,7 @@
     }
 
     /* Progressive spacing optimization before font shrinkage (preserves 70mm top & 30mm bottom blank areas) */
-    .a4-density-spacing .a4-header-band { min-height: 13mm; padding: 4.5px 10px 4px 10px; margin-bottom: 3.5px; }
+    .a4-density-spacing .a4-header-band { padding-bottom: 2.5px; margin-bottom: 3.5px; }
     .a4-density-spacing .a4-section-hdr { margin-top: 3px; margin-bottom: 2px; padding-bottom: 1px; }
     .a4-density-spacing .a4-patient-card,
     .a4-density-spacing .a4-grid-3,
@@ -516,14 +553,14 @@
     .a4-density-spacing .a4-table th { padding: 2px 5px; }
     .a4-density-spacing .a4-footer-hairline { margin-top: 2px; padding-top: 2px; }
 
-    .a4-compact-1 .a4-header-band { min-height: 12mm; padding: 4px 10px 3.5px 10px; margin-bottom: 3px; }
-    .a4-compact-1 .a4-doc-title { font-size: 18pt; }
+    .a4-compact-1 .a4-header-band { padding-bottom: 2px; margin-bottom: 3px; }
+    .a4-compact-1 .a4-doc-title { font-size: 14pt; }
     .a4-compact-1 .a4-section-hdr { margin-top: 2.5px; margin-bottom: 1.5px; font-size: 8.8pt; }
     .a4-compact-1 .a4-val, .a4-compact-1 .a4-table td { font-size: 8.2pt; line-height: 1.2; }
     .a4-compact-1 .a4-sig-space { height: 8mm; }
 
-    .a4-compact-2 .a4-header-band { min-height: 11mm; padding: 3px 9px 3px 9px; margin-bottom: 2px; }
-    .a4-compact-2 .a4-doc-title { font-size: 16pt; }
+    .a4-compact-2 .a4-header-band { padding-bottom: 1.5px; margin-bottom: 2px; }
+    .a4-compact-2 .a4-doc-title { font-size: 13pt; }
     .a4-compact-2 .a4-patient-name { font-size: 10pt; }
     .a4-compact-2 .a4-diagnosis-val { font-size: 9.8pt; }
     .a4-compact-2 .a4-val, .a4-compact-2 .a4-table td, .a4-compact-2 .a4-warning-text { font-size: 7.8pt; line-height: 1.16; }

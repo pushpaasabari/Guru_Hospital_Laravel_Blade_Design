@@ -19,22 +19,30 @@
             <div class="a4-watermark">DRAFT COPY</div>
         @endif
 
-        {{-- 1. Full-width Teal Header Band (~34mm) with Gold bottom strip --}}
+        {{-- 1. Document Header: Centered Uppercase Title & Clean Hairline Border (No Background) --}}
         <div class="a4-header-band">
-            <div class="a4-header-left">
-                <h1 class="a4-doc-title">Discharge Summary</h1>
-                <div class="a4-doc-subtitle">{{ $deptSubtitle }}</div>
-            </div>
-            <div class="a4-header-right">
-                <div class="a4-meta-pill">
-                    <span class="a4-meta-lbl">MRD File No.</span>
-                    <span class="a4-meta-val">{{ $admission->resolved_mrd_no ?: '—' }}</span>
-                </div>
-                <div class="a4-meta-pill">
-                    <span class="a4-meta-lbl">ICD Code</span>
-                    <span class="a4-meta-val">{{ $admission->icd_code ?: '—' }}</span>
-                </div>
-            </div>
+            <table class="a4-header-table">
+                <tr>
+                    <td class="a4-header-left">
+                        <div class="a4-meta-pill">
+                            <span class="a4-meta-lbl">MRD FILE NO.</span>
+                            <span class="a4-meta-val">{{ $admission->resolved_mrd_no ?: '—' }}</span>
+                        </div>
+                    </td>
+                    <td class="a4-header-center">
+                        <h1 class="a4-doc-title">DISCHARGE SUMMARY</h1>
+                        @if($deptSubtitle)
+                            <div class="a4-doc-subtitle">{{ $deptSubtitle }}</div>
+                        @endif
+                    </td>
+                    <td class="a4-header-right">
+                        <div class="a4-meta-pill">
+                            <span class="a4-meta-lbl">ICD CODE</span>
+                            <span class="a4-meta-val">{{ $admission->icd_code ?: '—' }}</span>
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
 
         {{-- 2. Patient Banner --}}

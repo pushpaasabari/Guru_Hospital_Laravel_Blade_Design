@@ -245,10 +245,8 @@ class DocumentPackPdfTest extends TestCase
         $html = view('pdf.discharge-summary-a4', ['admission' => $this->approvedAdmission])->render();
 
         $this->assertStringContainsString('#0F5C63', $html);
-        $this->assertStringContainsString('#E6F2F2', $html);
-        $this->assertStringContainsString('#E3A72F', $html);
-        $this->assertStringContainsString('#B3261E', $html);
-        $this->assertStringContainsString('#FDECEA', $html);
+        $this->assertStringContainsString('DISCHARGE SUMMARY', $html);
+        $this->assertStringContainsString('a4-header-center', $html);
         $this->assertStringContainsString('size: 223mm 304mm', $html);
         $this->assertStringContainsString('padding: 70mm 13mm 30mm 13mm', $html);
         $this->assertStringContainsString('padding: 12mm 13mm 12mm 13mm', $html);
