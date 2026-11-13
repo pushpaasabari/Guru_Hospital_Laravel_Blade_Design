@@ -6,6 +6,9 @@ export interface FormattedTreatmentRow {
 export interface FormattedInvestigation {
   label: string;
   value: string;
+  unit?: string;
+  normal_range?: string;
+  reference?: string;
 }
 
 export interface FormattedCondition {
@@ -50,6 +53,21 @@ const INVESTIGATION_ORDER: Record<string, number> = {
   CREATININE: 8,
   'URIC ACID': 9,
   RBS: 10,
+  ECG: 11,
+};
+
+export const INVESTIGATION_STANDARDS: Record<string, { unit: string; normal_range: string; reference: string }> = {
+  HB: { unit: 'g/dL', normal_range: '12.0 - 16.0', reference: '12.0 - 16.0 g/dL' },
+  'BLOOD GROUP': { unit: '', normal_range: 'Compatible', reference: 'ABO/Rh Compatible' },
+  HIV: { unit: '', normal_range: 'Non-Reactive', reference: 'Non-Reactive' },
+  HCV: { unit: '', normal_range: 'Non-Reactive', reference: 'Non-Reactive' },
+  VDRL: { unit: '', normal_range: 'Non-Reactive', reference: 'Non-Reactive' },
+  HBSAG: { unit: '', normal_range: 'Non-Reactive', reference: 'Non-Reactive' },
+  UREA: { unit: 'mg/dL', normal_range: '15 - 40', reference: '15 - 40 mg/dL' },
+  CREATININE: { unit: 'mg/dL', normal_range: '0.6 - 1.2', reference: '0.6 - 1.2 mg/dL' },
+  'URIC ACID': { unit: 'mg/dL', normal_range: '3.5 - 7.2', reference: '3.5 - 7.2 mg/dL' },
+  RBS: { unit: 'mg/dL', normal_range: '70 - 140', reference: '70 - 140 mg/dL' },
+  ECG: { unit: '', normal_range: 'Normal Sinus', reference: 'Normal Sinus Rhythm' },
 };
 
 export function formatTreatmentCourse(text?: string | null): FormattedTreatmentRow[] {
@@ -105,10 +123,18 @@ export function formatInvestigations(text?: string | null): FormattedInvestigati
       else if (key === 'creatinine' || key === 'creatine') label = 'CREATININE';
       else if (key === 'uricacid') label = 'URIC ACID';
       else if (key === 'rbs') label = 'RBS';
+      else if (key === 'ecg' || key === 'ekg' || key === 'electrocardiogram') label = 'ECG';
 
-      items.push({ label, value: rawVal });
+      const std = INVESTIGATION_STANDARDS[label] || { unit: '', normal_range: '', reference: '' };
+      items.push({
+        label,
+        value: rawVal,
+        unit: std.unit,
+        normal_range: std.normal_range,
+        reference: std.reference,
+      });
     } else {
-      items.push({ label: 'NOTE', value: line });
+      items.push({ label: 'NOTE', value: line, unit: '', normal_range: '', reference: '' });
     }
   }
 
@@ -411,6 +437,8 @@ export interface FormattedSurgicalInvestigations {
   group1: Record<string, string>;
   group2: Record<string, string>;
   imaging: Record<string, string>;
+  units?: Record<string, string>;
+  ranges?: Record<string, string>;
 }
 
 export function formatSurgicalInvestigations(admission: any): FormattedSurgicalInvestigations {
@@ -430,6 +458,33 @@ export function formatSurgicalInvestigations(admission: any): FormattedSurgicalI
     HIV: '—',
     HCV: '—',
     BG: '—',
+    ECG: '—',
+  };
+
+  const units: Record<string, string> = {
+    Hb: 'g/dL',
+    Urea: 'mg/dL',
+    Creatinine: 'mg/dL',
+    'Uric Acid': 'mg/dL',
+    RBS: 'mg/dL',
+    'HBs Ag': '',
+    HIV: '',
+    HCV: '',
+    BG: '',
+    ECG: '',
+  };
+
+  const ranges: Record<string, string> = {
+    Hb: '12.0-16.0',
+    Urea: '15-40',
+    Creatinine: '0.6-1.2',
+    'Uric Acid': '3.5-7.2',
+    RBS: '70-140',
+    'HBs Ag': 'Non-React',
+    HIV: 'Non-React',
+    HCV: 'Non-React',
+    BG: 'Compatible',
+    ECG: 'Normal Sinus',
   };
 
   const imaging: Record<string, string> = {};
@@ -450,13 +505,14 @@ export function formatSurgicalInvestigations(admission: any): FormattedSurgicalI
       else if (cleanK === 'hiv') group2['HIV'] = v.replace(/negative/i, 'Neg');
       else if (cleanK === 'hcv') group2['HCV'] = v.replace(/negative/i, 'Neg');
       else if (cleanK === 'bg' || cleanK === 'bloodgroup') group2['BG'] = v.replace(/\s+/g, '');
+      else if (cleanK === 'ecg' || cleanK === 'ekg' || cleanK === 'electrocardiogram') group2['ECG'] = v;
       else if (/usg|x-?ray|ct|mri|biopsy|histopath/i.test(rawK)) {
         imaging[rawK.toUpperCase()] = v;
       }
     }
   }
 
-  return { group1, group2, imaging };
+  return { group1, group2, imaging, units, ranges };
 }
 
 export interface FormattedSurgicalAdvice {

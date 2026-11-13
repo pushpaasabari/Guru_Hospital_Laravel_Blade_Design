@@ -539,10 +539,14 @@ class AdmissionWorkflowTest extends TestCase
         $this->assertCount(10, $inv);
         $this->assertEquals('HB', $inv[0]['label']);
         $this->assertEquals('12.9mgs %', $inv[0]['value']);
+        $this->assertEquals('g/dL', $inv[0]['unit']);
+        $this->assertEquals('12.0 - 16.0', $inv[0]['normal_range']);
         $this->assertEquals('BLOOD GROUP', $inv[1]['label']);
         $this->assertEquals('O positive', $inv[1]['value']);
         $this->assertEquals('CREATININE', $inv[7]['label']);
         $this->assertEquals('0.86 mg/dl', $inv[7]['value']);
+        $this->assertEquals('mg/dL', $inv[7]['unit']);
+        $this->assertEquals('0.6 - 1.2', $inv[7]['normal_range']);
 
         // Formatted medications 4-column
         $meds = $admission->formatted_medications;
@@ -587,6 +591,43 @@ class AdmissionWorkflowTest extends TestCase
         $this->assertStringContainsString('வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு', $notice);
         $this->assertStringContainsString('21.08.2026', $notice);
         $this->assertStringContainsString('ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்', $notice);
+    }
+
+    public function test_stage_2_persists_ecg_and_formats_with_units_and_normal_ranges(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'Meenakshi Sundaram',
+            'uhid' => 'GH-ECG-01',
+            'ip_no' => 'IP-ECG-01',
+            'admission_at' => now(),
+            'diagnosis' => 'Cholelithiasis',
+            'format' => 'general',
+            'surgery_type' => 'other',
+            'status' => 'draft',
+            'created_by' => $this->nurse->id,
+        ]);
+
+        $response = $this->actingAs($this->nurse)->put(route('admissions.test-reports.update', $admission), [
+            'investigations' => "Hb : 13.5 g/dL\nBG : B positive\nHIV : Negative\nHCV : Negative\nVDRL : Negative\nHBsAG : Negative\nUREA : 22 mg/dL\nCREATININE : 0.8 mg/dL\nURIC ACID : 4.1 mg/dL\nRBS : 110 mg/dL\nECG : Normal Sinus Rhythm",
+            'next_step' => 'surgery',
+        ]);
+
+        $response->assertRedirect(route('admissions.surgery', $admission));
+
+        $admission->refresh();
+        $this->assertStringContainsString('ECG : Normal Sinus Rhythm', $admission->investigations);
+
+        $inv = $admission->formatted_investigations;
+        $this->assertCount(11, $inv);
+
+        $ecgItem = collect($inv)->firstWhere('label', 'ECG');
+        $this->assertNotNull($ecgItem);
+        $this->assertEquals('Normal Sinus Rhythm', $ecgItem['value']);
+        $this->assertEquals('Normal Sinus', $ecgItem['normal_range']);
+
+        $surgInv = $admission->formatted_surgical_investigations;
+        $this->assertEquals('Normal Sinus Rhythm', $surgInv['group2']['ECG']);
+        $this->assertEquals('Normal Sinus', $surgInv['ranges']['ECG']);
     }
 }
 

@@ -1033,23 +1033,34 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                         }}
                       >
                         <tbody>
-                          {Array.from({ length: Math.ceil(investigationList.length / 5) }).map((_, rIdx) => {
-                            const chunk = investigationList.slice(rIdx * 5, rIdx * 5 + 5);
-                            return (
-                              <tr key={rIdx}>
-                                {chunk.map((inv, cIdx) => (
-                                  <td key={cIdx} style={{ width: '20%', border: '1px solid #cbd5e1', padding: '4px 6px' }}>
-                                    <span style={{ fontSize: '6.8pt', fontWeight: 700, color: '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '1px' }}>{inv.label}</span>
-                                    <span style={{ fontSize: '8.8pt', fontWeight: 700, color: '#000', display: 'block' }}>{inv.value}</span>
-                                  </td>
-                                ))}
-                                {chunk.length < 5 &&
-                                  Array.from({ length: 5 - chunk.length }).map((_, padIdx) => (
-                                    <td key={`pad-${padIdx}`} style={{ width: '20%', border: '1px solid #cbd5e1' }}>&nbsp;</td>
+                          {(() => {
+                            const invCols = investigationList.length > 10 ? 6 : 5;
+                            const colWidth = investigationList.length > 10 ? '16.66%' : '20%';
+                            return Array.from({ length: Math.ceil(investigationList.length / invCols) }).map((_, rIdx) => {
+                              const chunk = investigationList.slice(rIdx * invCols, rIdx * invCols + invCols);
+                              return (
+                                <tr key={rIdx}>
+                                  {chunk.map((inv, cIdx) => (
+                                    <td key={cIdx} style={{ width: colWidth, border: '1px solid #cbd5e1', padding: '3px 5px' }}>
+                                      <span style={{ fontSize: '6.4pt', fontWeight: 700, color: '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '1px' }}>
+                                        {inv.label} {inv.unit ? <span style={{ fontWeight: 400, textTransform: 'none', color: '#64748b', fontSize: '5.6pt' }}>({inv.unit})</span> : null}
+                                      </span>
+                                      <span style={{ fontSize: '8.4pt', fontWeight: 700, color: '#000', display: 'block' }}>{inv.value}</span>
+                                      {inv.normal_range ? (
+                                        <span style={{ fontSize: '5.6pt', color: '#64748b', display: 'block', marginTop: '1px' }}>
+                                          Ref: {inv.normal_range}
+                                        </span>
+                                      ) : null}
+                                    </td>
                                   ))}
-                              </tr>
-                            );
-                          })}
+                                  {chunk.length < invCols &&
+                                    Array.from({ length: invCols - chunk.length }).map((_, padIdx) => (
+                                      <td key={`pad-${padIdx}`} style={{ width: colWidth, border: '1px solid #cbd5e1' }}>&nbsp;</td>
+                                    ))}
+                                </tr>
+                              );
+                            });
+                          })()}
                         </tbody>
                       </table>
                     </>
@@ -1474,12 +1485,14 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                   </thead>
                   <tbody>
                     <tr>
-                      <td style={{ width: '55%', padding: '4px 6px', verticalAlign: 'top' }}>
+                      <td style={{ width: '50%', padding: '4px 6px', verticalAlign: 'top' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}>
                           <tbody>
                             <tr>
                               {Object.keys(inv.group1).map((k) => (
-                                <td key={k} style={{ border: 'none', padding: '1px 2px', fontSize: '7.5pt', fontWeight: 'bold' }}>{k}</td>
+                                <td key={k} style={{ border: 'none', padding: '1px 2px', fontSize: '7.2pt', fontWeight: 'bold' }}>
+                                  {k} {inv.units?.[k] ? <span style={{ fontWeight: 400, color: '#64748b', fontSize: '5.8pt' }}>({inv.units[k]})</span> : null}
+                                </td>
                               ))}
                             </tr>
                             <tr>
@@ -1487,20 +1500,36 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                                 <td key={i} style={{ border: 'none', padding: '1px 2px', fontSize: '8.5pt' }}>{v}</td>
                               ))}
                             </tr>
+                            <tr>
+                              {Object.keys(inv.group1).map((k) => (
+                                <td key={`ref-${k}`} style={{ border: 'none', padding: '0 2px', fontSize: '5.8pt', color: '#64748b' }}>
+                                  {inv.ranges?.[k] ? `Ref: ${inv.ranges[k]}` : ''}
+                                </td>
+                              ))}
+                            </tr>
                           </tbody>
                         </table>
                       </td>
-                      <td style={{ width: '45%', padding: '4px 6px', verticalAlign: 'top' }}>
+                      <td style={{ width: '50%', padding: '4px 6px', verticalAlign: 'top' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', border: 'none' }}>
                           <tbody>
                             <tr>
                               {Object.keys(inv.group2).map((k) => (
-                                <td key={k} style={{ border: 'none', padding: '1px 2px', fontSize: '7.5pt', fontWeight: 'bold' }}>{k}</td>
+                                <td key={k} style={{ border: 'none', padding: '1px 2px', fontSize: '7.2pt', fontWeight: 'bold' }}>
+                                  {k} {inv.units?.[k] ? <span style={{ fontWeight: 400, color: '#64748b', fontSize: '5.8pt' }}>({inv.units[k]})</span> : null}
+                                </td>
                               ))}
                             </tr>
                             <tr>
                               {Object.values(inv.group2).map((v, i) => (
                                 <td key={i} style={{ border: 'none', padding: '1px 2px', fontSize: '8.5pt' }}>{v}</td>
+                              ))}
+                            </tr>
+                            <tr>
+                              {Object.keys(inv.group2).map((k) => (
+                                <td key={`ref-${k}`} style={{ border: 'none', padding: '0 2px', fontSize: '5.8pt', color: '#64748b' }}>
+                                  {inv.ranges?.[k] ? `Ref: ${inv.ranges[k]}` : ''}
+                                </td>
                               ))}
                             </tr>
                           </tbody>

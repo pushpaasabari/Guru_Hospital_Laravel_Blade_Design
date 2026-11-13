@@ -168,14 +168,27 @@
         <div class="a4-block" data-overflow-movable="page1">
             <div class="a4-section-hdr">Investigations</div>
             @if(!empty($investigations))
-                <div class="a4-inv-grid">
+                @php
+                    $invCols = count($investigations) > 10 ? 6 : 5;
+                @endphp
+                <div class="a4-inv-grid" style="grid-template-columns: repeat({{ $invCols }}, 1fr);">
                     @foreach($investigations as $inv)
-                        <div class="a4-inv-box">
-                            <span class="a4-lbl">{{ $inv['label'] }}</span>
-                            <span class="a4-val a4-val-bold">{{ $inv['value'] ?: '—' }}</span>
+                        <div class="a4-inv-box" style="padding: 2.5px 4.5px;">
+                            <span class="a4-lbl" style="font-size: 6.2pt;">
+                                {{ $inv['label'] }}
+                                @if(!empty($inv['unit']))
+                                    <span style="font-weight: 400; text-transform: none; color: #64748b; font-size: 5.6pt;">({{ $inv['unit'] }})</span>
+                                @endif
+                            </span>
+                            <span class="a4-val a4-val-bold" style="font-size: 8.2pt; line-height: 1.15;">{{ $inv['value'] ?: '—' }}</span>
+                            @if(!empty($inv['normal_range']))
+                                <span class="a4-ref" style="display: block; font-size: 5.6pt; color: #64748b; font-weight: 500; line-height: 1; margin-top: 1px;">
+                                    Ref: {{ $inv['normal_range'] }}
+                                </span>
+                            @endif
                         </div>
                     @endforeach
-                    @for($empty = count($investigations) % 5; $empty > 0 && $empty < 5; $empty++)
+                    @for($empty = count($investigations) % $invCols; $empty > 0 && $empty < $invCols; $empty++)
                         <div class="a4-inv-box"><span class="a4-lbl">&nbsp;</span><span class="a4-val">&nbsp;</span></div>
                     @endfor
                 </div>

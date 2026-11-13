@@ -32,6 +32,7 @@ interface LabValues {
   creatinine: string;
   uric_acid: string;
   rbs: string;
+  ecg: string;
 }
 
 interface ExtraTest {
@@ -51,6 +52,7 @@ const parseInvestigations = (raw: string): { core: LabValues; extra: ExtraTest[]
     creatinine: '',
     uric_acid: '',
     rbs: '',
+    ecg: '',
   };
   const extra: ExtraTest[] = [];
 
@@ -78,6 +80,7 @@ const parseInvestigations = (raw: string): { core: LabValues; extra: ExtraTest[]
       else if (k === 'creatine' || k === 'creatinine' || k === 'serumcreatinine') core.creatinine = val;
       else if (k === 'uricacid' || k === 'serumuricacid') core.uric_acid = val;
       else if (k === 'rbs' || k === 'bloodsugar' || k === 'randombloodsugar') core.rbs = val;
+      else if (k === 'ecg' || k === 'ekg' || k === 'electrocardiogram') core.ecg = val;
       else {
         extra.push({ name: rawK, value: val });
       }
@@ -103,6 +106,7 @@ const serializeInvestigations = (core: LabValues, extra: ExtraTest[]): string =>
   if (core.creatinine.trim()) lines.push(`CREATININE : ${core.creatinine.trim()}`);
   if (core.uric_acid.trim()) lines.push(`URIC ACID : ${core.uric_acid.trim()}`);
   if (core.rbs.trim()) lines.push(`RBS : ${core.rbs.trim()}`);
+  if (core.ecg && core.ecg.trim()) lines.push(`ECG : ${core.ecg.trim()}`);
 
   for (const item of extra) {
     if (item.value.trim()) {
@@ -225,7 +229,7 @@ export default function AdmissionsTestReports({ admission }: Props) {
           <div className="card mb-4 border-0 shadow-sm">
             <div className="card-header bg-white py-3 fw-bold text-dark d-flex align-items-center justify-content-between flex-wrap gap-2">
               <div className="d-flex align-items-center gap-2">
-                <span className="badge bg-primary">3.1</span>
+                <span className="badge bg-primary">2.1</span>
                 <span>Hospital Core Lab Investigations (Enter Values Only)</span>
               </div>
               <button
@@ -239,15 +243,25 @@ export default function AdmissionsTestReports({ admission }: Props) {
             <div className="card-body">
               {/* Row 1: Hematology & Blood Group */}
               <div className="p-3 bg-light rounded-3 mb-3 border">
-                <h6 className="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-                  <i className="bi bi-droplet-half text-danger"></i>
-                  <span>Hematology &amp; Blood Grouping</span>
-                </h6>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                    <i className="bi bi-droplet-half text-danger"></i>
+                    <span>Hematology &amp; Blood Grouping</span>
+                  </h6>
+                  <span className="badge bg-white text-secondary border small fw-medium">
+                    Standard Pre-Op Workup
+                  </span>
+                </div>
                 <div className="row g-3">
                   <div className="col-md-6">
-                    <label className="form-label fw-semibold text-secondary small text-uppercase">
-                      Haemoglobin (Hb) <span className="text-muted fw-normal lowercase">(e.g. 12.9 mgs% or 12.4 g/dL)</span>
-                    </label>
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <label className="form-label fw-semibold text-secondary small text-uppercase mb-0">
+                        Haemoglobin (Hb)
+                      </label>
+                      <span className="badge bg-white text-muted border" style={{ fontSize: '0.72rem' }}>
+                        Unit: <strong>g/dL</strong> &bull; Ref: <strong>12.0 – 16.0 g/dL</strong>
+                      </span>
+                    </div>
                     <div className="input-group">
                       <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '90px' }}>
                         Hb :
@@ -257,15 +271,20 @@ export default function AdmissionsTestReports({ admission }: Props) {
                         className="form-control"
                         value={coreValues.hb}
                         onChange={(e) => updateCore('hb', e.target.value)}
-                        placeholder="Enter value only (e.g. 12.9 mgs %)"
+                        placeholder="Enter value (e.g. 12.9 g/dL)"
                       />
                     </div>
                   </div>
 
                   <div className="col-md-6">
-                    <label className="form-label fw-semibold text-secondary small text-uppercase">
-                      Blood Group &amp; Rh (BG) <span className="text-muted fw-normal lowercase">(e.g. O positive)</span>
-                    </label>
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <label className="form-label fw-semibold text-secondary small text-uppercase mb-0">
+                        Blood Group &amp; Rh (BG)
+                      </label>
+                      <span className="badge bg-white text-muted border" style={{ fontSize: '0.72rem' }}>
+                        ABO &amp; Rh Compatibility
+                      </span>
+                    </div>
                     <div className="input-group">
                       <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '90px' }}>
                         BG :
@@ -300,14 +319,19 @@ export default function AdmissionsTestReports({ admission }: Props) {
                     <i className="bi bi-virus text-primary"></i>
                     <span>Viral &amp; Infectious Disease Screening</span>
                   </h6>
-                  <button
-                    type="button"
-                    onClick={setAllViralNegative}
-                    className="btn btn-xs btn-outline-success fw-semibold"
-                    style={{ fontSize: '0.78rem' }}
-                  >
-                    Quick: All Negative
-                  </button>
+                  <div className="d-flex align-items-center gap-2">
+                    <span className="badge bg-white text-muted border small d-none d-md-inline">
+                      Ref: Non-Reactive / Negative
+                    </span>
+                    <button
+                      type="button"
+                      onClick={setAllViralNegative}
+                      className="btn btn-xs btn-outline-success fw-semibold"
+                      style={{ fontSize: '0.78rem' }}
+                    >
+                      <i className="bi bi-check2-all me-1"></i> Quick: All Negative
+                    </button>
+                  </div>
                 </div>
                 <div className="row g-3">
                   <div className="col-md-3">
@@ -388,15 +412,25 @@ export default function AdmissionsTestReports({ admission }: Props) {
 
               {/* Row 3: Biochemistry & Renal Function */}
               <div className="p-3 bg-light rounded-3 mb-3 border">
-                <h6 className="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
-                  <i className="bi bi-activity text-success"></i>
-                  <span>Biochemistry, Renal Function &amp; Blood Sugar</span>
-                </h6>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                    <i className="bi bi-activity text-success"></i>
+                    <span>Biochemistry, Renal Function &amp; Blood Sugar</span>
+                  </h6>
+                  <span className="badge bg-white text-secondary border small fw-medium">
+                    Standard Units: mg/dL
+                  </span>
+                </div>
                 <div className="row g-3">
                   <div className="col-md-3">
-                    <label className="form-label fw-semibold text-secondary small text-uppercase">
-                      Blood Urea <span className="text-muted fw-normal lowercase">(e.g. 9.7 g/dl or 20 mg/dL)</span>
-                    </label>
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <label className="form-label fw-semibold text-secondary small text-uppercase mb-0">
+                        Blood Urea
+                      </label>
+                      <span className="badge bg-white text-muted border" style={{ fontSize: '0.68rem' }}>
+                        Ref: 15–40
+                      </span>
+                    </div>
                     <div className="input-group">
                       <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '75px' }}>
                         Urea :
@@ -406,15 +440,20 @@ export default function AdmissionsTestReports({ admission }: Props) {
                         className="form-control"
                         value={coreValues.urea}
                         onChange={(e) => updateCore('urea', e.target.value)}
-                        placeholder="e.g. 9.7 g/dl"
+                        placeholder="e.g. 20 mg/dL"
                       />
                     </div>
                   </div>
 
                   <div className="col-md-3">
-                    <label className="form-label fw-semibold text-secondary small text-uppercase">
-                      Serum Creatinine <span className="text-muted fw-normal lowercase">(e.g. 0.86 mg/dl)</span>
-                    </label>
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <label className="form-label fw-semibold text-secondary small text-uppercase mb-0">
+                        Serum Creatinine
+                      </label>
+                      <span className="badge bg-white text-muted border" style={{ fontSize: '0.68rem' }}>
+                        Ref: 0.6–1.2
+                      </span>
+                    </div>
                     <div className="input-group">
                       <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '75px' }}>
                         Creat :
@@ -424,15 +463,20 @@ export default function AdmissionsTestReports({ admission }: Props) {
                         className="form-control"
                         value={coreValues.creatinine}
                         onChange={(e) => updateCore('creatinine', e.target.value)}
-                        placeholder="e.g. 0.86 mg/dl"
+                        placeholder="e.g. 0.86 mg/dL"
                       />
                     </div>
                   </div>
 
                   <div className="col-md-3">
-                    <label className="form-label fw-semibold text-secondary small text-uppercase">
-                      Serum Uric Acid <span className="text-muted fw-normal lowercase">(e.g. 4.3 mg/dl)</span>
-                    </label>
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <label className="form-label fw-semibold text-secondary small text-uppercase mb-0">
+                        Serum Uric Acid
+                      </label>
+                      <span className="badge bg-white text-muted border" style={{ fontSize: '0.68rem' }}>
+                        Ref: 3.5–7.2
+                      </span>
+                    </div>
                     <div className="input-group">
                       <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '75px' }}>
                         Uric :
@@ -442,15 +486,20 @@ export default function AdmissionsTestReports({ admission }: Props) {
                         className="form-control"
                         value={coreValues.uric_acid}
                         onChange={(e) => updateCore('uric_acid', e.target.value)}
-                        placeholder="e.g. 4.3 mg/dl"
+                        placeholder="e.g. 4.3 mg/dL"
                       />
                     </div>
                   </div>
 
                   <div className="col-md-3">
-                    <label className="form-label fw-semibold text-secondary small text-uppercase">
-                      RBS (Random Sugar) <span className="text-muted fw-normal lowercase">(e.g. 100.8 mg/dl)</span>
-                    </label>
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <label className="form-label fw-semibold text-secondary small text-uppercase mb-0">
+                        RBS (Random Sugar)
+                      </label>
+                      <span className="badge bg-white text-muted border" style={{ fontSize: '0.68rem' }}>
+                        Ref: 70–140
+                      </span>
+                    </div>
                     <div className="input-group">
                       <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '75px' }}>
                         RBS :
@@ -460,14 +509,91 @@ export default function AdmissionsTestReports({ admission }: Props) {
                         className="form-control"
                         value={coreValues.rbs}
                         onChange={(e) => updateCore('rbs', e.target.value)}
-                        placeholder="e.g. 100.8 mg/dl"
+                        placeholder="e.g. 100.8 mg/dL"
                       />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Row 4: Additional / Custom Tests & Imaging */}
+              {/* Row 4: Cardiac & Pre-Operative Diagnostic Evaluation (ECG) */}
+              <div className="p-3 bg-light rounded-3 mb-3 border">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                    <i className="bi bi-heart-pulse text-danger"></i>
+                    <span>Cardiac &amp; Pre-Operative Diagnostic Evaluation (ECG)</span>
+                  </h6>
+                  <span className="badge bg-white text-secondary border small fw-medium">
+                    Ref: Normal Sinus Rhythm (NSR)
+                  </span>
+                </div>
+                <div className="row g-3">
+                  <div className="col-md-6">
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <label className="form-label fw-semibold text-secondary small text-uppercase mb-0">
+                        12-Lead Electrocardiogram (ECG)
+                      </label>
+                      <span className="badge bg-white text-muted border" style={{ fontSize: '0.68rem' }}>
+                        12-Lead Standard Tracing
+                      </span>
+                    </div>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '90px' }}>
+                        ECG :
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={coreValues.ecg}
+                        onChange={(e) => updateCore('ecg', e.target.value)}
+                        placeholder="e.g. Normal Sinus Rhythm or WNL"
+                        list="ecgOptions"
+                      />
+                      <datalist id="ecgOptions">
+                        <option value="Normal Sinus Rhythm" />
+                        <option value="Within Normal Limits (WNL)" />
+                        <option value="Normal ECG" />
+                        <option value="Sinus Bradycardia" />
+                        <option value="Sinus Tachycardia" />
+                        <option value="Incomplete RBBB" />
+                        <option value="Non-specific ST-T changes" />
+                      </datalist>
+                    </div>
+                  </div>
+
+                  <div className="col-md-6 d-flex flex-column justify-content-end">
+                    <div className="small text-muted mb-1.5 fw-semibold">Quick Select ECG Presets:</div>
+                    <div className="d-flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        onClick={() => updateCore('ecg', 'Normal Sinus Rhythm')}
+                        className={`btn btn-xs ${coreValues.ecg === 'Normal Sinus Rhythm' ? 'btn-success text-white' : 'btn-outline-secondary'}`}
+                        style={{ fontSize: '0.78rem' }}
+                      >
+                        <i className="bi bi-check2 me-1"></i> Normal Sinus Rhythm
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateCore('ecg', 'Within Normal Limits (WNL)')}
+                        className={`btn btn-xs ${coreValues.ecg === 'Within Normal Limits (WNL)' ? 'btn-success text-white' : 'btn-outline-secondary'}`}
+                        style={{ fontSize: '0.78rem' }}
+                      >
+                        WNL
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => updateCore('ecg', 'Normal ECG')}
+                        className={`btn btn-xs ${coreValues.ecg === 'Normal ECG' ? 'btn-success text-white' : 'btn-outline-secondary'}`}
+                        style={{ fontSize: '0.78rem' }}
+                      >
+                        Normal ECG
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 5: Additional / Custom Tests & Imaging */}
               <div className="p-3 bg-light rounded-3 border">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
@@ -485,7 +611,7 @@ export default function AdmissionsTestReports({ admission }: Props) {
 
                 {extraTests.length === 0 ? (
                   <div className="text-muted small py-2">
-                    No additional test reports added. Standard 10 panel above is fully active.
+                    No additional test reports added. Standard pre-op panel (including ECG) above is fully active.
                   </div>
                 ) : (
                   extraTests.map((t, idx) => (

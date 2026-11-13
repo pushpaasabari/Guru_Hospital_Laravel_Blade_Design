@@ -8,9 +8,9 @@ use Carbon\Carbon;
 class DischargeSummaryFormatter
 {
     /**
-     * Standard order for the 10 core lab investigations.
+     * Standard order for core lab investigations.
      */
-    private const INVESTIGATION_ORDER = [
+    public const INVESTIGATION_ORDER = [
         'HB' => 1,
         'BLOOD GROUP' => 2,
         'HIV' => 3,
@@ -21,6 +21,68 @@ class DischargeSummaryFormatter
         'CREATININE' => 8,
         'URIC ACID' => 9,
         'RBS' => 10,
+        'ECG' => 11,
+    ];
+
+    /**
+     * Standard clinical units and normal reference ranges for laboratory investigations.
+     */
+    public const INVESTIGATION_STANDARDS = [
+        'HB' => [
+            'unit' => 'g/dL',
+            'normal_range' => '12.0 - 16.0',
+            'reference' => '12.0 - 16.0 g/dL',
+        ],
+        'BLOOD GROUP' => [
+            'unit' => '',
+            'normal_range' => 'Compatible',
+            'reference' => 'ABO/Rh Compatible',
+        ],
+        'HIV' => [
+            'unit' => '',
+            'normal_range' => 'Non-Reactive',
+            'reference' => 'Non-Reactive',
+        ],
+        'HCV' => [
+            'unit' => '',
+            'normal_range' => 'Non-Reactive',
+            'reference' => 'Non-Reactive',
+        ],
+        'VDRL' => [
+            'unit' => '',
+            'normal_range' => 'Non-Reactive',
+            'reference' => 'Non-Reactive',
+        ],
+        'HBSAG' => [
+            'unit' => '',
+            'normal_range' => 'Non-Reactive',
+            'reference' => 'Non-Reactive',
+        ],
+        'UREA' => [
+            'unit' => 'mg/dL',
+            'normal_range' => '15 - 40',
+            'reference' => '15 - 40 mg/dL',
+        ],
+        'CREATININE' => [
+            'unit' => 'mg/dL',
+            'normal_range' => '0.6 - 1.2',
+            'reference' => '0.6 - 1.2 mg/dL',
+        ],
+        'URIC ACID' => [
+            'unit' => 'mg/dL',
+            'normal_range' => '3.5 - 7.2',
+            'reference' => '3.5 - 7.2 mg/dL',
+        ],
+        'RBS' => [
+            'unit' => 'mg/dL',
+            'normal_range' => '70 - 140',
+            'reference' => '70 - 140 mg/dL',
+        ],
+        'ECG' => [
+            'unit' => '',
+            'normal_range' => 'Normal Sinus',
+            'reference' => 'Normal Sinus Rhythm',
+        ],
     ];
 
     /**
@@ -78,10 +140,11 @@ class DischargeSummaryFormatter
     }
 
     /**
-     * Parse investigations into structured key-value pairs sorted in standard clinical order.
+     * Parse investigations into structured key-value pairs sorted in standard clinical order
+     * with standard clinical units and normal reference ranges.
      *
      * @param mixed $investigations
-     * @return array<int, array{label: string, value: string}>
+     * @return array<int, array{label: string, value: string, unit: string, normal_range: string, reference: string}>
      */
     public static function formatInvestigations($investigations): array
     {
@@ -93,9 +156,31 @@ class DischargeSummaryFormatter
 
         if (is_array($investigations)) {
             foreach ($investigations as $k => $v) {
-                $label = is_string($k) ? strtoupper(trim($k)) : 'TEST';
+                $rawLabel = is_string($k) ? trim($k) : 'TEST';
+                $key = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $rawLabel));
+                $label = match ($key) {
+                    'hb', 'haemoglobin' => 'HB',
+                    'bg', 'bloodgroup' => 'BLOOD GROUP',
+                    'hiv' => 'HIV',
+                    'hcv' => 'HCV',
+                    'vdrl' => 'VDRL',
+                    'hbsag' => 'HBSAG',
+                    'urea' => 'UREA',
+                    'creatinine', 'creatine' => 'CREATININE',
+                    'uricacid' => 'URIC ACID',
+                    'rbs' => 'RBS',
+                    'ecg', 'ekg', 'electrocardiogram' => 'ECG',
+                    default => strtoupper($rawLabel),
+                };
                 $val = is_array($v) ? implode(', ', $v) : (string)$v;
-                $items[] = ['label' => $label, 'value' => $val];
+                $std = self::INVESTIGATION_STANDARDS[$label] ?? ['unit' => '', 'normal_range' => '', 'reference' => ''];
+                $items[] = [
+                    'label' => $label,
+                    'value' => $val,
+                    'unit' => $std['unit'] ?? '',
+                    'normal_range' => $std['normal_range'] ?? '',
+                    'reference' => $std['reference'] ?? '',
+                ];
             }
         } else {
             $lines = preg_split('/\r\n|\r|\n/', trim($investigations));
@@ -121,17 +206,26 @@ class DischargeSummaryFormatter
                         'creatinine', 'creatine' => 'CREATININE',
                         'uricacid' => 'URIC ACID',
                         'rbs' => 'RBS',
+                        'ecg', 'ekg', 'electrocardiogram' => 'ECG',
                         default => strtoupper($rawLabel),
                     };
+
+                    $std = self::INVESTIGATION_STANDARDS[$label] ?? ['unit' => '', 'normal_range' => '', 'reference' => ''];
 
                     $items[] = [
                         'label' => $label,
                         'value' => $rawVal,
+                        'unit' => $std['unit'] ?? '',
+                        'normal_range' => $std['normal_range'] ?? '',
+                        'reference' => $std['reference'] ?? '',
                     ];
                 } else {
                     $items[] = [
                         'label' => 'NOTE',
                         'value' => $line,
+                        'unit' => '',
+                        'normal_range' => '',
+                        'reference' => '',
                     ];
                 }
             }
@@ -554,10 +648,11 @@ class DischargeSummaryFormatter
     }
 
     /**
-     * Parse investigations into split lab groups and imaging (USG / X-Ray / CT).
+     * Parse investigations into split lab groups and imaging (USG / X-Ray / CT)
+     * with standard clinical units and normal reference ranges.
      *
      * @param Admission $admission
-     * @return array{group1: array<string, string>, group2: array<string, string>, imaging: array<string, string>}
+     * @return array{group1: array<string, string>, group2: array<string, string>, imaging: array<string, string>, units: array<string, string>, ranges: array<string, string>}
      */
     public static function formatSurgicalInvestigations(Admission $admission): array
     {
@@ -577,6 +672,33 @@ class DischargeSummaryFormatter
             'HIV' => '—',
             'HCV' => '—',
             'BG' => '—',
+            'ECG' => '—',
+        ];
+
+        $units = [
+            'Hb' => 'g/dL',
+            'Urea' => 'mg/dL',
+            'Creatinine' => 'mg/dL',
+            'Uric Acid' => 'mg/dL',
+            'RBS' => 'mg/dL',
+            'HBs Ag' => '',
+            'HIV' => '',
+            'HCV' => '',
+            'BG' => '',
+            'ECG' => '',
+        ];
+
+        $ranges = [
+            'Hb' => '12.0-16.0',
+            'Urea' => '15-40',
+            'Creatinine' => '0.6-1.2',
+            'Uric Acid' => '3.5-7.2',
+            'RBS' => '70-140',
+            'HBs Ag' => 'Non-React',
+            'HIV' => 'Non-React',
+            'HCV' => 'Non-React',
+            'BG' => 'Compatible',
+            'ECG' => 'Normal Sinus',
         ];
 
         $imaging = [];
@@ -599,6 +721,7 @@ class DischargeSummaryFormatter
                 elseif ($cleanK === 'hiv') $group2['HIV'] = str_ireplace('negative', 'Neg', $v);
                 elseif ($cleanK === 'hcv') $group2['HCV'] = str_ireplace('negative', 'Neg', $v);
                 elseif (in_array($cleanK, ['bg', 'bloodgroup'])) $group2['BG'] = str_replace(' ', '', $v);
+                elseif (in_array($cleanK, ['ecg', 'ekg', 'electrocardiogram'])) $group2['ECG'] = $v;
                 elseif (preg_match('/usg|x-?ray|ct|mri|biopsy|histopath/i', $rawK)) {
                     $imaging[strtoupper($rawK)] = $v;
                 }
@@ -609,6 +732,8 @@ class DischargeSummaryFormatter
             'group1' => $group1,
             'group2' => $group2,
             'imaging' => $imaging,
+            'units' => $units,
+            'ranges' => $ranges,
         ];
     }
 

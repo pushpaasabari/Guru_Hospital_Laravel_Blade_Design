@@ -186,17 +186,31 @@
         <div data-overflow-movable="page1">
             <div class="ds-section-hdr">INVESTIGATIONS</div>
             @if(!empty($investigations))
+                @php
+                    $invCols = count($investigations) > 10 ? 6 : 5;
+                    $colWidth = count($investigations) > 10 ? '16.66%' : '20%';
+                @endphp
                 <table class="ds-grid">
-                    @foreach(array_chunk($investigations, 5) as $chunk)
+                    @foreach(array_chunk($investigations, $invCols) as $chunk)
                         <tr>
                             @foreach($chunk as $inv)
-                                <td style="width: 20%;">
-                                    <span class="ds-lbl">{{ $inv['label'] }}</span>
-                                    <span class="ds-val" style="font-size: 8.2pt;">{{ $inv['value'] }}</span>
+                                <td style="width: {{ $colWidth }}; padding: 1.5px 3.5px;">
+                                    <span class="ds-lbl" style="font-size: 6.2pt;">
+                                        {{ $inv['label'] }}
+                                        @if(!empty($inv['unit']))
+                                            <span style="font-weight: normal; text-transform: none; color: #64748b; font-size: 5.6pt;">({{ $inv['unit'] }})</span>
+                                        @endif
+                                    </span>
+                                    <span class="ds-val" style="font-size: 7.8pt; line-height: 1.15;">{{ $inv['value'] }}</span>
+                                    @if(!empty($inv['normal_range']))
+                                        <span class="ds-ref" style="display: block; font-size: 5.4pt; color: #64748b; font-weight: 500; line-height: 1; margin-top: 0.5px;">
+                                            Ref: {{ $inv['normal_range'] }}
+                                        </span>
+                                    @endif
                                 </td>
                             @endforeach
-                            @for($empty = count($chunk); $empty < 5; $empty++)
-                                <td style="width: 20%;">&nbsp;</td>
+                            @for($empty = count($chunk); $empty < $invCols; $empty++)
+                                <td style="width: {{ $colWidth }};">&nbsp;</td>
                             @endfor
                         </tr>
                     @endforeach
