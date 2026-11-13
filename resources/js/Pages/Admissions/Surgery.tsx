@@ -124,7 +124,7 @@ export default function AdmissionsSurgery({
     drain: admission.drain || '',
     postoperative_orders: admission.postoperative_orders || '',
     newborns: initialNewborns,
-    next_step: 'test-reports',
+    next_step: 'discharge',
   });
 
   // Parse existing postoperative orders into individual rows
@@ -240,7 +240,7 @@ export default function AdmissionsSurgery({
     setData('newborns', updated);
   };
 
-  const submitStage = (step: 'stay' | 'test-reports', e: React.FormEvent) => {
+  const submitStage = (step: 'stay' | 'discharge', e: React.FormEvent) => {
     e.preventDefault();
     transform((current) => ({
       ...current,
@@ -252,11 +252,11 @@ export default function AdmissionsSurgery({
 
   const handleSaveOnly = (e: React.FormEvent) => submitStage('stay', e);
 
-  const handleSaveAndNext = (e: React.FormEvent) => submitStage('test-reports', e);
+  const handleSaveAndNext = (e: React.FormEvent) => submitStage('discharge', e);
 
   return (
     <AppLayout>
-      <Head title={`Stage 2: ${isMedical ? 'Clinical Notes' : 'Labour / Surgery'} — ${admission.patient_name}`} />
+      <Head title={`Stage 3: ${isMedical ? 'Clinical Notes' : 'Labour / Surgery'} — ${admission.patient_name}`} />
 
       {/* 4-Stage Navigation Header */}
       <AdmissionStageNav currentStage="surgery" admission={admission} />
@@ -266,22 +266,43 @@ export default function AdmissionsSurgery({
           <div className="d-flex align-items-center gap-2">
             <i className="bi bi-info-circle-fill fs-5 text-info"></i>
             <div>
-              <strong>Medical Case (Non-Surgical):</strong> This patient is admitted for medical / conservative management. Operation theatre notes and newborn details are optional. You may record bedside notes or proceed directly to Stage 3.
+              <strong>Medical Case (Non-Surgical):</strong> This patient is admitted for medical / conservative management. Operation theatre notes and newborn details are optional. You may record bedside notes or proceed directly to Stage 4.
             </div>
           </div>
           <Link
-            href={`/admissions/${admission.id}/test-reports`}
+            href={`/admissions/${admission.id}/discharge`}
             className="btn btn-sm btn-info text-white text-nowrap fw-semibold mt-2 mt-md-0"
           >
-            Skip to Stage 3: Test Reports <i className="bi bi-arrow-right ms-1"></i>
+            Skip to Stage 4: Discharge Summary <i className="bi bi-arrow-right ms-1"></i>
           </Link>
+        </div>
+      )}
+
+      {admission.investigations && admission.investigations.trim().length > 0 && (
+        <div className="card mb-4 border-0 shadow-sm bg-light">
+          <div className="card-body py-2 px-3 d-flex flex-wrap align-items-center justify-content-between gap-2">
+            <div className="d-flex align-items-center gap-2">
+              <span className="badge bg-success-subtle text-success border border-success-subtle fw-semibold">
+                <i className="bi bi-clipboard2-pulse me-1"></i> Stage 2 Pre-Op Labs
+              </span>
+              <span className="text-secondary small fw-medium text-truncate" style={{ maxWidth: '650px' }}>
+                {admission.investigations.replace(/\r?\n/g, '  |  ')}
+              </span>
+            </div>
+            <Link
+              href={`/admissions/${admission.id}/test-reports`}
+              className="btn btn-sm btn-link text-decoration-none text-primary fw-semibold p-0"
+            >
+              <i className="bi bi-pencil-square me-1"></i> Edit Lab Tests
+            </Link>
+          </div>
         </div>
       )}
 
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
           <h1 className="h3 fw-bold mb-1 text-dark" style={{ letterSpacing: '-0.02em' }}>
-            Stage 2: {isMedical ? 'Clinical & Bedside Notes' : 'Labour / LSCS / Surgery Notes'}
+            Stage 3: {isMedical ? 'Clinical & Bedside Notes' : 'Labour / LSCS / Surgery Notes'}
           </h1>
           <p className="text-muted mb-0">
             {isMedical
@@ -290,8 +311,8 @@ export default function AdmissionsSurgery({
           </p>
         </div>
         <div className="d-flex gap-2">
-          <Link href={`/admissions/${admission.id}/edit`} className="btn btn-outline-secondary">
-            <i className="bi bi-arrow-left me-1"></i> Back to Stage 1: Admission
+          <Link href={`/admissions/${admission.id}/test-reports`} className="btn btn-outline-secondary">
+            <i className="bi bi-arrow-left me-1"></i> Back to Stage 2: Test Reports
           </Link>
           <Link href={`/admissions/${admission.id}/documents/preview`} className="btn btn-outline-secondary">
             <i className="bi bi-file-earmark-text me-1"></i> Preview Documents
@@ -304,9 +325,9 @@ export default function AdmissionsSurgery({
         <div className="card mb-4 border-0 shadow-sm">
           <div className="card-header bg-white py-3 fw-bold text-dark d-flex align-items-center justify-content-between">
             <div>
-              <span className="badge bg-primary me-2">2.1</span> Operation Theatre &amp; Procedure Schedule
+              <span className="badge bg-primary me-2">3.1</span> Operation Theatre &amp; Procedure Schedule
             </div>
-            <span className="text-muted small">Step 2 of 4</span>
+            <span className="text-muted small">Step 3 of 4</span>
           </div>
           <div className="card-body">
             <div className="row g-3">
@@ -402,7 +423,7 @@ export default function AdmissionsSurgery({
         {/* Section 2: Surgical Team */}
         <div className="card mb-4 border-0 shadow-sm">
           <div className="card-header bg-white py-3 fw-bold text-dark">
-            <span className="badge bg-primary me-2">2.2</span> Surgical &amp; Anaesthesia Team
+            <span className="badge bg-primary me-2">3.2</span> Surgical &amp; Anaesthesia Team
           </div>
           <div className="card-body">
             <div className="row g-3">
@@ -521,7 +542,7 @@ export default function AdmissionsSurgery({
         <div className="card mb-4 border-0 shadow-sm">
           <div className="card-header bg-white py-3 fw-bold text-dark d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div>
-              <span className="badge bg-primary me-2">2.3</span> Operative Narrative &amp; Clinical Findings
+              <span className="badge bg-primary me-2">3.3</span> Operative Narrative &amp; Clinical Findings
             </div>
             <div className="d-flex align-items-center gap-2">
               <label className="small text-muted mb-0 fw-semibold d-none d-md-inline" htmlFor="procedure-template-select">
@@ -780,7 +801,7 @@ export default function AdmissionsSurgery({
           <div className="card mb-4 border-0 shadow-sm border-start border-4 border-primary">
             <div className="card-header bg-white py-3 fw-bold text-dark d-flex justify-content-between align-items-center">
               <div>
-                <span className="badge bg-primary me-2">2.4</span> Newborn / Birth Information
+                <span className="badge bg-primary me-2">3.4</span> Newborn / Birth Information
                 <span className="text-muted small ms-2">(Delivery / Obstetric Workflow)</span>
               </div>
               <button type="button" onClick={addBaby} className="btn btn-sm btn-outline-primary">
@@ -909,8 +930,8 @@ export default function AdmissionsSurgery({
 
         {/* Action Bar */}
         <div className="d-flex justify-content-between align-items-center pb-5">
-          <Link href={`/admissions/${admission.id}/edit`} className="btn btn-outline-secondary">
-            <i className="bi bi-arrow-left me-1"></i> Back to Stage 1: Admission
+          <Link href={`/admissions/${admission.id}/test-reports`} className="btn btn-outline-secondary">
+            <i className="bi bi-arrow-left me-1"></i> Back to Stage 2: Test Reports
           </Link>
           <div className="d-flex gap-2">
             <button
@@ -919,7 +940,7 @@ export default function AdmissionsSurgery({
               disabled={processing}
               className="btn btn-outline-primary px-3 py-2 fw-semibold"
             >
-              Save Stage 2 Changes
+              Save Stage 3 Changes
             </button>
             <button
               type="button"
@@ -927,7 +948,7 @@ export default function AdmissionsSurgery({
               disabled={processing}
               className="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2"
             >
-              <span>Save &amp; Next: Stage 3 (Test Reports)</span>
+              <span>Save &amp; Next: Stage 4 (Discharge)</span>
               <i className="bi bi-arrow-right"></i>
             </button>
           </div>

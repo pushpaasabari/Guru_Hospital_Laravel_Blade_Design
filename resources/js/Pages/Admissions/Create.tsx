@@ -43,7 +43,7 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
     policy_holder_name: '',
     policy_holder_relation: '',
     policy_validity: '',
-    next_step: 'surgery',
+    next_step: 'test-reports',
   });
 
   const isFemale = data.sex?.toLowerCase() === 'female';
@@ -429,7 +429,7 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
               disabled={processing}
               className="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2"
             >
-              <span>Save &amp; Proceed to Stage 2: Surgery / Labour</span>
+              <span>Save &amp; Proceed to Stage 2: Test Reports</span>
               <i className="bi bi-arrow-right"></i>
             </button>
           </div>

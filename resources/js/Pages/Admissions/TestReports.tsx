@@ -125,7 +125,7 @@ export default function AdmissionsTestReports({ admission }: Props) {
 
   const { data, setData, put, transform, processing, errors } = useForm({
     investigations: admission.investigations || serializeInvestigations(initial.core, initial.extra),
-    next_step: 'discharge',
+    next_step: 'surgery',
   });
 
   const updateCore = (key: keyof LabValues, val: string) => {
@@ -172,7 +172,7 @@ export default function AdmissionsTestReports({ admission }: Props) {
     setExtraTests(parsed.extra);
   };
 
-  const submitStage = (step: 'stay' | 'discharge', e: React.FormEvent) => {
+  const submitStage = (step: 'stay' | 'surgery', e: React.FormEvent) => {
     e.preventDefault();
     transform((current) => ({
       ...current,
@@ -186,11 +186,11 @@ export default function AdmissionsTestReports({ admission }: Props) {
 
   const handleSaveOnly = (e: React.FormEvent) => submitStage('stay', e);
 
-  const handleSaveAndNext = (e: React.FormEvent) => submitStage('discharge', e);
+  const handleSaveAndNext = (e: React.FormEvent) => submitStage('surgery', e);
 
   return (
     <AppLayout>
-      <Head title={`Stage 3: Lab Results — ${admission.patient_name}`} />
+      <Head title={`Stage 2: Lab Results — ${admission.patient_name}`} />
 
       {/* 4-Stage Navigation Header */}
       <AdmissionStageNav currentStage="test-reports" admission={admission} />
@@ -198,15 +198,15 @@ export default function AdmissionsTestReports({ admission }: Props) {
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
           <h1 className="h3 fw-bold mb-1 text-dark" style={{ letterSpacing: '-0.02em' }}>
-            Stage 3: Laboratory &amp; Diagnostic Test Reports
+            Stage 2: Laboratory &amp; Diagnostic Test Reports
           </h1>
           <p className="text-muted mb-0">
             Standard laboratory investigations are predefined below. Simply enter the patient&rsquo;s test values.
           </p>
         </div>
         <div className="d-flex gap-2">
-          <Link href={`/admissions/${admission.id}/surgery`} className="btn btn-outline-secondary">
-            <i className="bi bi-arrow-left me-1"></i> Back to Stage 2
+          <Link href={`/admissions/${admission.id}/edit`} className="btn btn-outline-secondary">
+            <i className="bi bi-arrow-left me-1"></i> Back to Stage 1: Admission
           </Link>
           <button
             type="button"
@@ -615,8 +615,8 @@ export default function AdmissionsTestReports({ admission }: Props) {
 
         {/* Action Bar */}
         <div className="d-flex justify-content-between align-items-center pb-5">
-          <Link href={`/admissions/${admission.id}/surgery`} className="btn btn-outline-secondary">
-            <i className="bi bi-arrow-left me-1"></i> Back to Stage 2: Labour / Surgery
+          <Link href={`/admissions/${admission.id}/edit`} className="btn btn-outline-secondary">
+            <i className="bi bi-arrow-left me-1"></i> Back to Stage 1: Admission
           </Link>
           <div className="d-flex gap-2">
             <button
@@ -625,7 +625,7 @@ export default function AdmissionsTestReports({ admission }: Props) {
               disabled={processing}
               className="btn btn-outline-primary px-3 py-2 fw-semibold"
             >
-              Save Stage 3 Changes
+              Save Stage 2 Changes
             </button>
             <button
               type="button"
@@ -633,7 +633,7 @@ export default function AdmissionsTestReports({ admission }: Props) {
               disabled={processing}
               className="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2"
             >
-              <span>Save &amp; Next: Stage 4 (Discharge)</span>
+              <span>Save &amp; Next: Stage 3 (Labour / Surgery)</span>
               <i className="bi bi-arrow-right"></i>
             </button>
           </div>

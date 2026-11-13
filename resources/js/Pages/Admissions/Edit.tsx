@@ -149,7 +149,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
     floor_incharge_name: admission.floor_incharge_name || '',
     mrd_incharge_name: admission.mrd_incharge_name || '',
     newborns: admission.newborns || [],
-    next_step: 'surgery',
+    next_step: 'test-reports',
   });
 
   const isFemale = data.sex?.toLowerCase() === 'female';
@@ -173,7 +173,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
     }
   };
 
-  const submitWithStep = (step: 'stay' | 'surgery', e: React.FormEvent) => {
+  const submitWithStep = (step: 'stay' | 'test-reports', e: React.FormEvent) => {
     e.preventDefault();
     transform((current) => ({ ...current, next_step: step }));
     put(`/admissions/${admission.id}`);
@@ -181,7 +181,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
 
   const handleSaveOnly = (e: React.FormEvent) => submitWithStep('stay', e);
 
-  const handleSaveAndNext = (e: React.FormEvent) => submitWithStep('surgery', e);
+  const handleSaveAndNext = (e: React.FormEvent) => submitWithStep('test-reports', e);
 
   return (
     <AppLayout>
@@ -557,7 +557,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
               disabled={processing}
               className="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2"
             >
-              <span>Save &amp; Next: Stage 2 (Labour / Surgery)</span>
+              <span>Save &amp; Next: Stage 2 (Test Reports)</span>
               <i className="bi bi-arrow-right"></i>
             </button>
           </div>

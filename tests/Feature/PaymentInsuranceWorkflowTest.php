@@ -102,7 +102,7 @@ class PaymentInsuranceWorkflowTest extends TestCase
         ]);
 
         $admission = Admission::where('ip_no', 'IP-INS-01')->firstOrFail();
-        $response->assertRedirect(route('admissions.surgery', $admission));
+        $response->assertRedirect(route('admissions.test-reports', $admission));
 
         $this->assertDatabaseHas('admissions', [
             'id' => $admission->id,

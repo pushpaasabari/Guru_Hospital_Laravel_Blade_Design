@@ -74,14 +74,18 @@ class AdmissionController extends Controller
             return $admission;
         });
 
-        $redirectTo = $request->input('redirect_to', $request->input('next_step', 'surgery'));
+        $redirectTo = $request->input('redirect_to', $request->input('next_step', 'test-reports'));
         if ($redirectTo === 'preview') {
             return redirect()->route('documents.preview', $admission)
                 ->with('status', 'Draft admission saved successfully.');
         }
+        if ($redirectTo === 'surgery') {
+            return redirect()->route('admissions.surgery', $admission)
+                ->with('status', 'Admission details saved successfully. Proceed to Labour / LSCS / Surgery.');
+        }
 
-        return redirect()->route('admissions.surgery', $admission)
-            ->with('status', 'Admission details saved successfully. Proceed to Labour / LSCS / Surgery.');
+        return redirect()->route('admissions.test-reports', $admission)
+            ->with('status', 'Admission details saved successfully. Proceed to Laboratory & Diagnostic Test Reports.');
     }
 
     public function show(Admission $admission): Response
@@ -125,7 +129,7 @@ class AdmissionController extends Controller
             );
         });
 
-        $nextStep = $request->input('next_step', 'surgery');
+        $nextStep = $request->input('next_step', 'test-reports');
         if ($nextStep === 'stay') {
             return redirect()->route('admissions.edit', $admission)
                 ->with('status', 'Admission details updated successfully.');
@@ -134,9 +138,13 @@ class AdmissionController extends Controller
             return redirect()->route('documents.preview', $admission)
                 ->with('status', 'Admission details updated successfully.');
         }
+        if ($nextStep === 'surgery') {
+            return redirect()->route('admissions.surgery', $admission)
+                ->with('status', 'Admission details updated. Proceed to Labour / LSCS / Surgery.');
+        }
 
-        return redirect()->route('admissions.surgery', $admission)
-            ->with('status', 'Admission details updated. Proceed to Labour / LSCS / Surgery.');
+        return redirect()->route('admissions.test-reports', $admission)
+            ->with('status', 'Admission details updated. Proceed to Laboratory & Diagnostic Test Reports.');
     }
 
     public function editSurgery(Admission $admission): Response
@@ -172,7 +180,7 @@ class AdmissionController extends Controller
             );
         });
 
-        $nextStep = $request->input('next_step', 'test-reports');
+        $nextStep = $request->input('next_step', 'discharge');
         if ($nextStep === 'stay') {
             return redirect()->route('admissions.surgery', $admission)
                 ->with('status', 'Surgery / Labour details saved successfully.');
@@ -181,9 +189,13 @@ class AdmissionController extends Controller
             return redirect()->route('documents.preview', $admission)
                 ->with('status', 'Surgery / Labour details saved successfully.');
         }
+        if ($nextStep === 'test-reports') {
+            return redirect()->route('admissions.test-reports', $admission)
+                ->with('status', 'Surgery details saved. Proceed to Test Reports.');
+        }
 
-        return redirect()->route('admissions.test-reports', $admission)
-            ->with('status', 'Surgery details saved. Proceed to Test Reports.');
+        return redirect()->route('admissions.discharge', $admission)
+            ->with('status', 'Surgery / Labour details saved. Proceed to Discharge Summary.');
     }
 
     public function editTestReports(Admission $admission): Response
@@ -208,7 +220,7 @@ class AdmissionController extends Controller
             $admission->toArray()
         );
 
-        $nextStep = $request->input('next_step', 'discharge');
+        $nextStep = $request->input('next_step', 'surgery');
         if ($nextStep === 'stay') {
             return redirect()->route('admissions.test-reports', $admission)
                 ->with('status', 'Test reports saved successfully.');
@@ -217,9 +229,13 @@ class AdmissionController extends Controller
             return redirect()->route('documents.preview', $admission)
                 ->with('status', 'Test reports saved successfully.');
         }
+        if ($nextStep === 'discharge') {
+            return redirect()->route('admissions.discharge', $admission)
+                ->with('status', 'Test reports saved. Proceed to Discharge Summary.');
+        }
 
-        return redirect()->route('admissions.discharge', $admission)
-            ->with('status', 'Test reports saved. Proceed to Discharge Summary.');
+        return redirect()->route('admissions.surgery', $admission)
+            ->with('status', 'Test reports saved. Proceed to Labour / LSCS / Surgery Notes.');
     }
 
     public function editDischarge(Admission $admission): Response

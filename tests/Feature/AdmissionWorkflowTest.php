@@ -72,7 +72,7 @@ class AdmissionWorkflowTest extends TestCase
         ]);
 
         $admission = Admission::where('ip_no', 'IP-8891')->first();
-        $response->assertRedirect(route('admissions.surgery', $admission));
+        $response->assertRedirect(route('admissions.test-reports', $admission));
     }
 
     public function test_duplicate_ip_number_is_rejected(): void
@@ -254,10 +254,10 @@ class AdmissionWorkflowTest extends TestCase
                     'apgar_5_min' => 10,
                 ],
             ],
-            'next_step' => 'test-reports',
+            'next_step' => 'discharge',
         ]);
 
-        $updateResponse->assertRedirect(route('admissions.test-reports', $admission));
+        $updateResponse->assertRedirect(route('admissions.discharge', $admission));
         $this->assertDatabaseHas('admissions', [
             'id' => $admission->id,
             'procedure_name' => 'Normal Delivery with Episiotomy',
@@ -286,10 +286,10 @@ class AdmissionWorkflowTest extends TestCase
 
         $updateResponse = $this->actingAs($this->nurse)->put(route('admissions.test-reports.update', $admission), [
             'investigations' => "Hb: 14.2 g/dL\nUrea: 24 mg/dL\nCreatinine: 0.9 mg/dL\nUSG: 5mm right lower ureteric calculus",
-            'next_step' => 'discharge',
+            'next_step' => 'surgery',
         ]);
 
-        $updateResponse->assertRedirect(route('admissions.discharge', $admission));
+        $updateResponse->assertRedirect(route('admissions.surgery', $admission));
         $this->assertDatabaseHas('admissions', [
             'id' => $admission->id,
         ]);

@@ -31,8 +31,16 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
       isCompleted: Boolean(admission?.uhid && admission?.ip_no),
     },
     {
-      id: 'surgery',
+      id: 'test-reports',
       step: 2,
+      name: 'Test Reports',
+      subtitle: 'Lab Tests & Diagnostics',
+      href: admission ? `/admissions/${admission.id}/test-reports` : undefined,
+      isCompleted: Boolean(admission?.investigations && admission.investigations.trim().length > 0),
+    },
+    {
+      id: 'surgery',
+      step: 3,
       name: admission?.surgery_type === 'medical' ? 'Clinical Notes' : 'Labour / Surgery',
       subtitle: admission?.surgery_type === 'medical' ? 'Bedside & Treatment' : 'OT Team & Notes',
       href: admission ? `/admissions/${admission.id}/surgery` : undefined,
@@ -41,14 +49,6 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
         admission?.surgery_type === 'delivery' ||
         admission?.surgery_type === 'medical'
       ),
-    },
-    {
-      id: 'test-reports',
-      step: 3,
-      name: 'Test Reports',
-      subtitle: 'Lab Tests & Diagnostics',
-      href: admission ? `/admissions/${admission.id}/test-reports` : undefined,
-      isCompleted: Boolean(admission?.investigations && admission.investigations.trim().length > 0),
     },
     {
       id: 'discharge',

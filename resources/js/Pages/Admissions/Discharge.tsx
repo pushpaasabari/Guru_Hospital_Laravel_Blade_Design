@@ -362,8 +362,8 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
           </p>
         </div>
         <div className="d-flex gap-2">
-          <Link href={`/admissions/${admission.id}/test-reports`} className="btn btn-outline-secondary">
-            <i className="bi bi-arrow-left me-1"></i> Back to Stage 3: Test Reports
+          <Link href={`/admissions/${admission.id}/surgery`} className="btn btn-outline-secondary">
+            <i className="bi bi-arrow-left me-1"></i> Back to Stage 3: {admission.surgery_type === 'medical' ? 'Clinical Notes' : 'Labour / Surgery'}
           </Link>
           <Link href={`/admissions/${admission.id}/documents/preview`} className="btn btn-outline-secondary">
             <i className="bi bi-file-earmark-text me-1"></i> Preview Documents
@@ -786,8 +786,8 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
 
         {/* Action Bar */}
         <div className="d-flex justify-content-between align-items-center pb-5">
-          <Link href={`/admissions/${admission.id}/test-reports`} className="btn btn-outline-secondary">
-            <i className="bi bi-arrow-left me-1"></i> Back to Stage 3: Test Reports
+          <Link href={`/admissions/${admission.id}/surgery`} className="btn btn-outline-secondary">
+            <i className="bi bi-arrow-left me-1"></i> Back to Stage 3: {admission.surgery_type === 'medical' ? 'Clinical Notes' : 'Labour / Surgery'}
           </Link>
           <div className="d-flex flex-wrap gap-2">
             <button
