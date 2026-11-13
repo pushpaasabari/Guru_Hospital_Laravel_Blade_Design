@@ -1121,9 +1121,111 @@ body {
 .fg-sidebar-link .icon-dashboard { color: #2563eb; }
 .fg-sidebar-link .icon-admissions { color: #7c3aed; }
 .fg-sidebar-link .icon-create { color: #16a34a; }
+.fg-sidebar-link .icon-admin { color: #475569; }
 .fg-sidebar-link .icon-templates { color: #d97706; }
+.fg-sidebar-link .icon-clinical-staff { color: #e11d48; }
+.fg-sidebar-link .icon-anesthesia { color: #8b5cf6; }
 .fg-sidebar-link .icon-users { color: #db2777; }
 .fg-sidebar-link .icon-audit { color: #0891b2; }
+
+/* ─── Sidebar Submenu & Collapsible Dropdown ─── */
+.fg-sidebar-dropdown-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  width: 100%;
+}
+
+.fg-submenu-arrow {
+  font-size: 11px;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  color: var(--fg-text-muted, #94a3b8);
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fg-submenu-arrow.open {
+  transform: rotate(180deg);
+}
+
+.fg-sidebar-menu-item-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.fg-sidebar-submenu {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  margin-left: 18px;
+  padding-left: 10px;
+  border-left: 2px solid var(--fg-border, #e2e8f0);
+}
+
+.fg-sidebar-sublink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fg-text-secondary, #475569);
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.12s ease, color 0.12s ease;
+  white-space: nowrap;
+}
+
+.fg-sidebar-sublink i {
+  font-size: 15px;
+  width: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.fg-sidebar-sublink .icon-templates { color: #d97706; }
+.fg-sidebar-sublink .icon-clinical-staff { color: #e11d48; }
+.fg-sidebar-sublink .icon-anesthesia { color: #8b5cf6; }
+.fg-sidebar-sublink .icon-users { color: #db2777; }
+.fg-sidebar-sublink .icon-audit { color: #0891b2; }
+
+.fg-sidebar-sublink:hover {
+  color: var(--fg-text, #0f172a);
+  background: var(--fg-surface-soft, #f8fafc);
+}
+
+.fg-sidebar-sublink:hover i {
+  transform: translateX(1px);
+}
+
+.fg-sidebar-sublink.active {
+  color: var(--fg-brand-blue, #2563eb) !important;
+  background: var(--fg-brand-blue-soft, #eff6ff) !important;
+  font-weight: 600;
+}
+
+.fg-sidebar-sublink.active i {
+  color: var(--fg-brand-blue, #2563eb) !important;
+}
+
+.fg-sidebar-link.has-active-child {
+  color: var(--fg-text, #0f172a);
+  background: var(--fg-surface-soft, #f1f5f9);
+  font-weight: 600;
+}
+
+.fg-sidebar-link.has-active-child .icon-admin {
+  color: var(--fg-brand-blue, #2563eb) !important;
+}
 
 .fg-sidebar-link .badge {
   margin-left: auto;
@@ -1286,6 +1388,46 @@ body {
   .fg-app-shell.sidebar-collapsed .fg-sidebar-link i {
     font-size: 18px;
     margin: 0;
+  }
+
+  .fg-app-shell.sidebar-collapsed .fg-submenu-arrow {
+    display: none !important;
+  }
+
+  .fg-app-shell.sidebar-collapsed .fg-sidebar-dropdown-btn {
+    width: 44px !important;
+    height: 44px !important;
+    padding: 0 !important;
+    margin: 0 auto !important;
+    justify-content: center !important;
+  }
+
+  .fg-app-shell.sidebar-collapsed .fg-sidebar-menu-item-wrapper {
+    position: relative;
+  }
+
+  .fg-app-shell.sidebar-collapsed .fg-sidebar-submenu {
+    position: absolute;
+    left: 60px;
+    top: 0;
+    width: 215px;
+    background: #ffffff;
+    border: 1px solid var(--fg-border, #e2e8f0);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.06);
+    padding: 8px;
+    margin: 0;
+    z-index: 1060;
+  }
+
+  .fg-app-shell.sidebar-collapsed .fg-sidebar-sublink {
+    padding: 8px 12px;
+    font-size: 13px;
+    width: 100%;
+  }
+
+  .fg-app-shell.sidebar-collapsed .fg-sidebar-sublink span {
+    display: inline !important;
   }
 
   /* Footer adjustments in icon menu mode */

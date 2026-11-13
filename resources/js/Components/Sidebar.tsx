@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 
 interface AuthUser {
@@ -23,14 +23,16 @@ interface SidebarProps {
 export default function Sidebar({ collapsed = false, onToggleCollapse }: SidebarProps) {
   const { auth } = usePage<{ auth: { user: AuthUser | null } }>().props;
   const user = auth.user;
+  const { url } = usePage();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const handleLogout = (e: React.FormEvent) => {
     e.preventDefault();
     router.post('/logout');
   };
 
-  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+  const currentPath = (url || (typeof window !== 'undefined' ? window.location.pathname : '')).split('?')[0];
 
   const isLinkActive = (path: string, exact: boolean = false) => {
     if (exact) return currentPath === path;
@@ -38,6 +40,47 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
       return currentPath.startsWith('/admissions') && currentPath !== '/admissions/create';
     }
     return currentPath.startsWith(path);
+  };
+
+  const adminPaths = ['/templates', '/clinical-staff', '/anesthesia-types', '/users', '/audit-logs'];
+  const isAnyAdminActive = adminPaths.some((p) => isLinkActive(p));
+
+  const [adminMenuOpen, setAdminMenuOpen] = useState<boolean>(() => {
+    if (isAnyAdminActive) return true;
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('guru_admin_menu_open');
+      if (saved !== null) return saved === 'true';
+    }
+    return false;
+  });
+
+  // Keep expanded whenever an admin sub-item route is active
+  useEffect(() => {
+    if (isAnyAdminActive) {
+      setAdminMenuOpen(true);
+    }
+  }, [isAnyAdminActive, currentPath]);
+
+  // Click outside listener to close floating flyout when collapsed
+  useEffect(() => {
+    if (!collapsed) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setAdminMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [collapsed]);
+
+  const toggleAdminMenu = () => {
+    setAdminMenuOpen((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('guru_admin_menu_open', String(next));
+      }
+      return next;
+    });
   };
 
   const closeMobile = () => setMobileOpen(false);
@@ -159,71 +202,97 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
               )}
             </div>
 
-            {/* Group 2: Governance & Administration */}
+            {/* Group 2: Administration (Collapsible Single Menu with Sub-Items) */}
             {(user?.is_admin || user?.can_view_audit) && (
               <div className="fg-sidebar-group">
                 <div className="fg-sidebar-group-title">Administration</div>
 
-                {user.is_admin && (
-                  <>
-                    <Link
-                      href="/templates"
-                      prefetch
-                      className={`fg-sidebar-link ${isLinkActive('/templates') ? 'active' : ''}`}
-                      onClick={closeMobile}
-                      title="Document Templates"
-                    >
-                      <i className="bi bi-file-earmark-code icon-templates"></i>
-                      <span>Templates</span>
-                    </Link>
-
-                    <Link
-                      href="/clinical-staff"
-                      prefetch
-                      className={`fg-sidebar-link ${isLinkActive('/clinical-staff') ? 'active' : ''}`}
-                      onClick={closeMobile}
-                      title="Clinical Staff & Doctors"
-                    >
-                      <i className="bi bi-heart-pulse icon-clinical-staff"></i>
-                      <span>Clinical Staff</span>
-                    </Link>
-
-                    <Link
-                      href="/anesthesia-types"
-                      prefetch
-                      className={`fg-sidebar-link ${isLinkActive('/anesthesia-types') ? 'active' : ''}`}
-                      onClick={closeMobile}
-                      title="Anesthesia Types"
-                    >
-                      <i className="bi bi-capsule icon-anesthesia"></i>
-                      <span>Anesthesia Types</span>
-                    </Link>
-
-                    <Link
-                      href="/users"
-                      prefetch
-                      className={`fg-sidebar-link ${isLinkActive('/users') ? 'active' : ''}`}
-                      onClick={closeMobile}
-                      title="Staff Users Management"
-                    >
-                      <i className="bi bi-people icon-users"></i>
-                      <span>Staff Users</span>
-                    </Link>
-                  </>
-                )}
-
-                {user.can_view_audit && (
-                  <Link
-                    href="/audit-logs"
-                    prefetch
-                    className={`fg-sidebar-link ${isLinkActive('/audit-logs') ? 'active' : ''}`}
-                    onClick={closeMobile}
-                    title="Audit Trail Logs"
+                <div className="fg-sidebar-menu-item-wrapper" ref={menuRef}>
+                  <button
+                    type="button"
+                    className={`fg-sidebar-link fg-sidebar-dropdown-btn w-100 ${
+                      isAnyAdminActive ? 'active has-active-child' : ''
+                    }`}
+                    onClick={toggleAdminMenu}
+                    aria-expanded={adminMenuOpen}
+                    title="Administration"
                   >
-                    <i className="bi bi-shield-check icon-audit"></i>
-                    <span>Audit Trail</span>
-                  </Link>
-                )}
+                    <i className="bi bi-gear-wide-connected icon-admin"></i>
+                    <span className="flex-grow-1 text-start">Administration</span>
+                    <i
+                      className={`bi bi-chevron-down fg-submenu-arrow ${
+                        adminMenuOpen ? 'open' : ''
+                      }`}
+                      aria-hidden="true"
+                    ></i>
+                  </button>
+
+                  {/* Submenu with Sub-Items */}
+                  {adminMenuOpen && (
+                    <div className="fg-sidebar-submenu" role="menu" aria-label="Administration Submenu">
+                      {user.is_admin && (
+                        <>
+                          <Link
+                            href="/templates"
+                            prefetch
+                            className={`fg-sidebar-sublink ${isLinkActive('/templates') ? 'active' : ''}`}
+                            onClick={closeMobile}
+                            title="Document Templates"
+                          >
+                            <i className="bi bi-file-earmark-code icon-templates"></i>
+                            <span>Templates</span>
+                          </Link>
+
+                          <Link
+                            href="/clinical-staff"
+                            prefetch
+                            className={`fg-sidebar-sublink ${isLinkActive('/clinical-staff') ? 'active' : ''}`}
+                            onClick={closeMobile}
+                            title="Clinical Staff & Doctors"
+                          >
+                            <i className="bi bi-heart-pulse icon-clinical-staff"></i>
+                            <span>Clinical Staff</span>
+                          </Link>
+
+                          <Link
+                            href="/anesthesia-types"
+                            prefetch
+                            className={`fg-sidebar-sublink ${isLinkActive('/anesthesia-types') ? 'active' : ''}`}
+                            onClick={closeMobile}
+                            title="Anesthesia Types"
+                          >
+                            <i className="bi bi-capsule icon-anesthesia"></i>
+                            <span>Anesthesia Types</span>
+                          </Link>
+
+                          <Link
+                            href="/users"
+                            prefetch
+                            className={`fg-sidebar-sublink ${isLinkActive('/users') ? 'active' : ''}`}
+                            onClick={closeMobile}
+                            title="Staff Users Management"
+                          >
+                            <i className="bi bi-people icon-users"></i>
+                            <span>Staff Users</span>
+                          </Link>
+                        </>
+                      )}
+
+                      {user.can_view_audit && (
+                        <Link
+                          href="/audit-logs"
+                          prefetch
+                          className={`fg-sidebar-sublink ${isLinkActive('/audit-logs') ? 'active' : ''}`}
+                          onClick={closeMobile}
+                          title="Audit Trail Logs"
+                        >
+                          <i className="bi bi-shield-check icon-audit"></i>
+                          <span>Audit Trail</span>
+                        </Link>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>
