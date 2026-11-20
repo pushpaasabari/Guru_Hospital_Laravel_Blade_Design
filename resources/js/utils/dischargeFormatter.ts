@@ -54,6 +54,71 @@ const INVESTIGATION_ORDER: Record<string, number> = {
   'URIC ACID': 9,
   RBS: 10,
   ECG: 11,
+  CBC: 12,
+  ESR: 13,
+  'BT, CT': 14,
+  'PT - INR': 15,
+  APTT: 16,
+  'PERIPHERAL SMEAR': 17,
+  'URINE ROUTINE': 18,
+  RFT: 19,
+  LFT: 20,
+  'SR. BILIRUBIN': 21,
+  'SERUM ELECTROLYTES': 22,
+  'FASTING (FBS)': 23,
+  PPBS: 24,
+  HBA1C: 25,
+  OGCT: 26,
+  'SERUM CALCIUM': 27,
+  'SERUM AMYLASE': 28,
+  'SERUM LIPASE': 29,
+  'TOTAL IRON': 30,
+  TIBC: 31,
+  'SERUM FERRITIN': 32,
+  CHOLESTEROL: 33,
+  TRIGLYCERIDES: 34,
+  HDL: 35,
+  LDL: 36,
+  VLDL: 37,
+  CRP: 38,
+  WIDAL: 39,
+  'RA FACTOR': 40,
+  'ASO TITER': 41,
+  'DENGUE SEROLOGY': 42,
+  'SCRUB TYPHUS': 43,
+  TSH: 44,
+  TFT: 45,
+  'TROPONIN-T': 46,
+  'CK-MB': 47,
+  'CHEST X-RAY (PA)': 48,
+  'X-RAY KUB': 49,
+  'URINE C/S': 50,
+  'SPUTUM C/S': 51,
+  'PUS C/S': 52,
+  'BLOOD C/S': 53,
+  'SPUTUM AFB': 54,
+  'GEN-XPERT (MTB)': 55,
+  'CA 125': 56,
+  FPSA: 57,
+  'S PSA': 58,
+  TESTOSTERONE: 59,
+  ESTRADIOL: 60,
+  AMH: 61,
+  ANA: 62,
+  PROLACTIN: 63,
+  'LH, FSH': 64,
+  'D-DIMER': 65,
+  'BETA HCG': 66,
+  'SEMEN ANALYSIS': 67,
+  'SEMEN C/S': 68,
+  'SEMEN-XPERT': 69,
+  'SPOT PCR': 70,
+  'SPOT MICROALBUMIN': 71,
+  'SPOT SODIUM': 72,
+  'SMEAR FOR MP/MF': 73,
+  'PACKAGE - 1': 74,
+  'PACKAGE - 2': 75,
+  'PACKAGE - 3': 76,
 };
 
 export const INVESTIGATION_STANDARDS: Record<string, { unit: string; normal_range: string; reference: string }> = {
@@ -68,7 +133,327 @@ export const INVESTIGATION_STANDARDS: Record<string, { unit: string; normal_rang
   'URIC ACID': { unit: 'mg/dL', normal_range: '3.5 - 7.2', reference: '3.5 - 7.2 mg/dL' },
   RBS: { unit: 'mg/dL', normal_range: '70 - 140', reference: '70 - 140 mg/dL' },
   ECG: { unit: '', normal_range: 'Normal Sinus', reference: 'Normal Sinus Rhythm' },
+  CBC: { unit: 'cells/cu.mm', normal_range: 'Normal Hemogram', reference: 'TC: 4000-11000 | Plt: 1.5-4.5L' },
+  ESR: { unit: 'mm/hr', normal_range: '0 - 20', reference: '0 - 20 mm/hr' },
+  'BT, CT': { unit: 'min', normal_range: 'BT: 2-6 | CT: 4-10', reference: 'BT: 2-6 min | CT: 4-10 min' },
+  'SMEAR FOR MP/MF': { unit: '', normal_range: 'Negative', reference: 'Negative for MP & MF' },
+  'PT - INR': { unit: 'INR', normal_range: '0.8 - 1.2', reference: '0.8 - 1.2 INR' },
+  APTT: { unit: 'sec', normal_range: '25 - 35', reference: '25 - 35 sec' },
+  'PERIPHERAL SMEAR': { unit: '', normal_range: 'Normocytic Normochromic', reference: 'Normocytic Normochromic' },
+  'TOTAL IRON': { unit: 'mcg/dL', normal_range: '60 - 170', reference: '60 - 170 mcg/dL' },
+  TIBC: { unit: 'mcg/dL', normal_range: '240 - 450', reference: '240 - 450 mcg/dL' },
+  'SERUM FERRITIN': { unit: 'ng/mL', normal_range: '15 - 200', reference: '15 - 200 ng/mL' },
+  'CHEST X-RAY (PA)': { unit: '', normal_range: 'Normal Chest', reference: 'Clear Bilateral Lung Fields' },
+  'X-RAY KUB': { unit: '', normal_range: 'No Calculus', reference: 'No Radio-opaque Calculi' },
+  'TROPONIN-T': { unit: 'ng/mL', normal_range: '< 0.01', reference: '< 0.01 ng/mL (Negative)' },
+  'CK-MB': { unit: 'U/L', normal_range: '< 25', reference: '0 - 25 U/L' },
+  'SPUTUM AFB': { unit: '', normal_range: 'Negative', reference: 'Negative for AFB' },
+  'GEN-XPERT (MTB)': { unit: '', normal_range: 'Not Detected', reference: 'MTB Not Detected' },
+  'SEMEN ANALYSIS': { unit: 'mil/mL', normal_range: '> 15', reference: 'Count > 15 mil/mL | Motility > 40%' },
+  'SEMEN C/S': { unit: '', normal_range: 'Sterile', reference: 'No Pathogen Grown' },
+  'SEMEN-XPERT': { unit: '', normal_range: 'Not Detected', reference: 'MTB Not Detected' },
+  OGCT: { unit: 'mg/dL', normal_range: '< 140', reference: '< 140 mg/dL' },
+  'FASTING (FBS)': { unit: 'mg/dL', normal_range: '70 - 100', reference: '70 - 100 mg/dL' },
+  PPBS: { unit: 'mg/dL', normal_range: '< 140', reference: '< 140 mg/dL' },
+  HBA1C: { unit: '%', normal_range: '< 5.7', reference: '< 5.7 %' },
+  RFT: { unit: 'mg/dL', normal_range: 'Normal RFT', reference: 'Urea: 15-40 | Creat: 0.6-1.2' },
+  LFT: { unit: '', normal_range: 'Normal LFT', reference: 'Normal Hepatic Profile' },
+  'SR. BILIRUBIN': { unit: 'mg/dL', normal_range: '0.2 - 1.2', reference: '0.2 - 1.2 mg/dL' },
+  'SERUM ELECTROLYTES': { unit: 'mmol/L', normal_range: 'Na: 135-145 | K: 3.5-5.0', reference: 'Na: 135-145 | K: 3.5-5.0 | Cl: 98-107' },
+  'SERUM CALCIUM': { unit: 'mg/dL', normal_range: '8.5 - 10.5', reference: '8.5 - 10.5 mg/dL' },
+  'SERUM AMYLASE': { unit: 'U/L', normal_range: '28 - 100', reference: '28 - 100 U/L' },
+  'SERUM LIPASE': { unit: 'U/L', normal_range: '10 - 140', reference: '10 - 140 U/L' },
+  'URINE ROUTINE': { unit: '', normal_range: 'Alb: Nil | Sug: Nil | Pus: 1-2', reference: 'Albumin: Nil | Sugar: Nil | Pus: 1-2' },
+  'SPOT PCR': { unit: 'mg/g', normal_range: '< 150', reference: '< 150 mg/g' },
+  'SPOT MICROALBUMIN': { unit: 'mg/L', normal_range: '< 20', reference: '< 20 mg/L' },
+  'SPOT SODIUM': { unit: 'mmol/L', normal_range: '40 - 220', reference: '40 - 220 mmol/L' },
+  CHOLESTEROL: { unit: 'mg/dL', normal_range: '< 200', reference: '< 200 mg/dL' },
+  TRIGLYCERIDES: { unit: 'mg/dL', normal_range: '< 150', reference: '< 150 mg/dL' },
+  HDL: { unit: 'mg/dL', normal_range: '> 40', reference: '> 40 mg/dL' },
+  LDL: { unit: 'mg/dL', normal_range: '< 100', reference: '< 100 mg/dL' },
+  VLDL: { unit: 'mg/dL', normal_range: '2 - 30', reference: '2 - 30 mg/dL' },
+  'CA 125': { unit: 'U/mL', normal_range: '< 35', reference: '< 35 U/mL' },
+  FPSA: { unit: 'ng/mL', normal_range: '> 0.25', reference: 'Ratio > 0.25' },
+  'S PSA': { unit: 'ng/mL', normal_range: '< 4.0', reference: '< 4.0 ng/mL' },
+  CRP: { unit: 'mg/L', normal_range: '< 6.0', reference: '< 6.0 mg/L' },
+  WIDAL: { unit: '', normal_range: 'Negative', reference: 'Titers < 1:80' },
+  'RA FACTOR': { unit: 'IU/mL', normal_range: '< 14', reference: '< 14 IU/mL' },
+  'ASO TITER': { unit: 'IU/mL', normal_range: '< 200', reference: '< 200 IU/mL' },
+  'DENGUE SEROLOGY': { unit: '', normal_range: 'Negative', reference: 'NS1, IgM, IgG: Negative' },
+  'SCRUB TYPHUS': { unit: '', normal_range: 'Negative', reference: 'Negative' },
+  'URINE C/S': { unit: '', normal_range: 'Sterile', reference: 'No Growth After 48 hrs' },
+  'SPUTUM C/S': { unit: '', normal_range: 'Normal Flora', reference: 'Normal Commensals Grown' },
+  'PUS C/S': { unit: '', normal_range: 'Sterile', reference: 'No Growth After 48 hrs' },
+  'BLOOD C/S': { unit: '', normal_range: 'Sterile', reference: 'Sterile After 5 Days' },
+  TSH: { unit: 'mIU/L', normal_range: '0.4 - 4.2', reference: '0.4 - 4.2 mIU/L' },
+  TFT: { unit: '', normal_range: 'Euthyroid', reference: 'T3, T4, TSH WNL' },
+  TESTOSTERONE: { unit: 'ng/dL', normal_range: '280 - 1100 (M)', reference: 'Male: 280-1100 | Fem: 15-70' },
+  ESTRADIOL: { unit: 'pg/mL', normal_range: '30 - 400', reference: '30 - 400 pg/mL' },
+  AMH: { unit: 'ng/mL', normal_range: '1.5 - 4.0', reference: '1.5 - 4.0 ng/mL' },
+  ANA: { unit: '', normal_range: 'Negative', reference: 'Negative (< 1:80)' },
+  PROLACTIN: { unit: 'ng/mL', normal_range: '4.8 - 23.3', reference: '4.8 - 23.3 ng/mL' },
+  'LH, FSH': { unit: 'mIU/mL', normal_range: 'LH: 2-15 | FSH: 3-12', reference: 'LH: 2-15 | FSH: 3-12 mIU/mL' },
+  'D-DIMER': { unit: 'mcg/mL FEU', normal_range: '< 0.5', reference: '< 0.5 mcg/mL FEU' },
+  'BETA HCG': { unit: 'mIU/mL', normal_range: '< 5.0 (Non-Preg)', reference: '< 5.0 mIU/mL' },
+  'PACKAGE - 1': { unit: '', normal_range: 'Pre-op Clearance', reference: 'Pre-Operative Profile Normal' },
+  'PACKAGE - 2': { unit: '', normal_range: 'Normal Profile', reference: 'Master Health Profile Normal' },
+  'PACKAGE - 3': { unit: '', normal_range: 'Normal Profile', reference: 'Executive Cardiac Profile Normal' },
 };
+
+export function normalizeInvestigationKey(rawLabel: string): string {
+  const key = rawLabel.toLowerCase().replace(/[^a-z0-9]/g, '');
+  switch (key) {
+    case 'hb':
+    case 'haemoglobin':
+      return 'HB';
+    case 'bg':
+    case 'bloodgroup':
+    case 'bloodgrouping':
+    case 'rh':
+      return 'BLOOD GROUP';
+    case 'hiv':
+      return 'HIV';
+    case 'hcv':
+      return 'HCV';
+    case 'vdrl':
+      return 'VDRL';
+    case 'hbsag':
+    case 'hbs':
+      return 'HBSAG';
+    case 'urea':
+    case 'bloodurea':
+      return 'UREA';
+    case 'creatinine':
+    case 'creatine':
+    case 'serumcreatinine':
+      return 'CREATININE';
+    case 'uricacid':
+    case 'serumuricacid':
+      return 'URIC ACID';
+    case 'rbs':
+    case 'bloodsugar':
+    case 'randombloodsugar':
+      return 'RBS';
+    case 'ecg':
+    case 'ekg':
+    case 'electrocardiogram':
+      return 'ECG';
+    case 'cbc':
+    case 'completebloodcount':
+    case 'hemogram':
+      return 'CBC';
+    case 'esr':
+    case 'erythrocytesedimentationrate':
+      return 'ESR';
+    case 'btct':
+    case 'bt':
+    case 'ct':
+    case 'bleedingtimeclottingtime':
+      return 'BT, CT';
+    case 'smearformpmf':
+    case 'smearformp':
+    case 'mpmf':
+    case 'smearmpmf':
+      return 'SMEAR FOR MP/MF';
+    case 'ptinr':
+    case 'pt':
+    case 'inr':
+    case 'prothrombintime':
+      return 'PT - INR';
+    case 'aptt':
+      return 'APTT';
+    case 'peripheralsmear':
+    case 'ps':
+    case 'peripheralsmearstudy':
+      return 'PERIPHERAL SMEAR';
+    case 'totaliron':
+    case 'serumiron':
+    case 'iron':
+      return 'TOTAL IRON';
+    case 'tibc':
+      return 'TIBC';
+    case 'ferritin':
+    case 'serumferritin':
+      return 'SERUM FERRITIN';
+    case 'xraychest':
+    case 'chestxray':
+    case 'chestpa':
+    case 'xraychestpa':
+    case 'xraychestpaview':
+    case 'chestpaview':
+    case 'chest':
+      return 'CHEST X-RAY (PA)';
+    case 'xraykub':
+    case 'kub':
+      return 'X-RAY KUB';
+    case 'troponint':
+    case 'tropt':
+    case 'trop':
+      return 'TROPONIN-T';
+    case 'ckmb':
+      return 'CK-MB';
+    case 'sputumafb':
+    case 'afb':
+      return 'SPUTUM AFB';
+    case 'genxpert':
+    case 'genxpertmtbrif':
+    case 'genxpertmtb':
+    case 'xpert':
+      return 'GEN-XPERT (MTB)';
+    case 'semenanalysis':
+    case 'semencount':
+      return 'SEMEN ANALYSIS';
+    case 'semencs':
+      return 'SEMEN C/S';
+    case 'semenxpert':
+      return 'SEMEN-XPERT';
+    case 'ogct':
+      return 'OGCT';
+    case 'fasting':
+    case 'fbs':
+    case 'fastingbloodsugar':
+      return 'FASTING (FBS)';
+    case 'postprandial':
+    case 'ppbs':
+    case 'postprandialbloodsugar':
+      return 'PPBS';
+    case 'hba1c':
+    case 'glycatedhemoglobin':
+      return 'HBA1C';
+    case 'rft':
+    case 'renalfunctiontest':
+    case 'renalfunction':
+      return 'RFT';
+    case 'lft':
+    case 'liverfunctiontest':
+    case 'liverfunction':
+      return 'LFT';
+    case 'srbilirubin':
+    case 'bilirubin':
+    case 'totalbilirubin':
+    case 'serumbilirubin':
+      return 'SR. BILIRUBIN';
+    case 'electrolytes':
+    case 'serumelectrolytes':
+    case 'electrolyte':
+      return 'SERUM ELECTROLYTES';
+    case 'calcium':
+    case 'serumcalcium':
+      return 'SERUM CALCIUM';
+    case 'amylase':
+    case 'serumamylase':
+      return 'SERUM AMYLASE';
+    case 'lipase':
+    case 'serumlipase':
+      return 'SERUM LIPASE';
+    case 'urineroutine':
+    case 'urinalysis':
+    case 'urineanalysis':
+    case 'urinecomplete':
+    case 'urine':
+      return 'URINE ROUTINE';
+    case 'spotpcr':
+      return 'SPOT PCR';
+    case 'spotmicroalbumin':
+      return 'SPOT MICROALBUMIN';
+    case 'spotsodium':
+      return 'SPOT SODIUM';
+    case 'cholestrol':
+    case 'cholesterol':
+    case 'totalcholesterol':
+      return 'CHOLESTEROL';
+    case 'triglycerides':
+    case 'tg':
+    case 'tgl':
+      return 'TRIGLYCERIDES';
+    case 'hdl':
+    case 'hdlcholesterol':
+      return 'HDL';
+    case 'ldl':
+    case 'ldlcholesterol':
+      return 'LDL';
+    case 'vldl':
+    case 'vldlcholesterol':
+      return 'VLDL';
+    case 'ca125':
+      return 'CA 125';
+    case 'fpsa':
+    case 'freepsa':
+      return 'FPSA';
+    case 'spsa':
+    case 'psa':
+    case 'serumpsa':
+      return 'S PSA';
+    case 'crp':
+    case 'creactiveprotein':
+      return 'CRP';
+    case 'widal':
+    case 'widaltest':
+      return 'WIDAL';
+    case 'rafactor':
+    case 'rheumatoidfactor':
+      return 'RA FACTOR';
+    case 'asotiter':
+    case 'aso':
+      return 'ASO TITER';
+    case 'dengue':
+    case 'dengueserology':
+    case 'denguens1':
+    case 'denguepanel':
+      return 'DENGUE SEROLOGY';
+    case 'scrubtyphus':
+      return 'SCRUB TYPHUS';
+    case 'urinecs':
+      return 'URINE C/S';
+    case 'sputumcs':
+      return 'SPUTUM C/S';
+    case 'puscs':
+      return 'PUS C/S';
+    case 'bloodcs':
+      return 'BLOOD C/S';
+    case 'tsh':
+    case 'thyroidstimulatinghormone':
+      return 'TSH';
+    case 'tft':
+    case 'thyroidfunctiontest':
+      return 'TFT';
+    case 'testosterone':
+    case 'serumtestosterone':
+      return 'TESTOSTERONE';
+    case 'estradiol':
+    case 'e2':
+    case 'serumestradiol':
+      return 'ESTRADIOL';
+    case 'amh':
+      return 'AMH';
+    case 'ana':
+    case 'antinuclearantibodies':
+      return 'ANA';
+    case 'prolactin':
+    case 'serumprolactin':
+      return 'PROLACTIN';
+    case 'lhfsh':
+    case 'lh':
+    case 'fsh':
+      return 'LH, FSH';
+    case 'ddimer':
+      return 'D-DIMER';
+    case 'betahcg':
+    case 'hcg':
+      return 'BETA HCG';
+    case 'package1':
+    case 'packagei':
+      return 'PACKAGE - 1';
+    case 'package2':
+    case 'packageii':
+      return 'PACKAGE - 2';
+    case 'package3':
+    case 'packageiii':
+      return 'PACKAGE - 3';
+    default:
+      return rawLabel.toUpperCase();
+  }
+}
 
 export function formatTreatmentCourse(text?: string | null): FormattedTreatmentRow[] {
   if (!text) return [];
@@ -110,20 +495,7 @@ export function formatInvestigations(text?: string | null): FormattedInvestigati
     if (match) {
       const rawLabel = match[1].trim();
       const rawVal = match[2].trim();
-      const key = rawLabel.toLowerCase().replace(/[^a-z0-9]/g, '');
-
-      let label = rawLabel.toUpperCase();
-      if (key === 'hb' || key === 'haemoglobin') label = 'HB';
-      else if (key === 'bg' || key === 'bloodgroup') label = 'BLOOD GROUP';
-      else if (key === 'hiv') label = 'HIV';
-      else if (key === 'hcv') label = 'HCV';
-      else if (key === 'vdrl') label = 'VDRL';
-      else if (key === 'hbsag') label = 'HBSAG';
-      else if (key === 'urea') label = 'UREA';
-      else if (key === 'creatinine' || key === 'creatine') label = 'CREATININE';
-      else if (key === 'uricacid') label = 'URIC ACID';
-      else if (key === 'rbs') label = 'RBS';
-      else if (key === 'ecg' || key === 'ekg' || key === 'electrocardiogram') label = 'ECG';
+      const label = normalizeInvestigationKey(rawLabel);
 
       const std = INVESTIGATION_STANDARDS[label] || { unit: '', normal_range: '', reference: '' };
       items.push({

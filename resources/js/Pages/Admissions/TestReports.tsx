@@ -2,6 +2,14 @@ import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
+import {
+  LAB_CATALOG,
+  ALL_LAB_TESTS,
+  findLabTest,
+  FREQUENT_LAB_TESTS,
+  LabCatalogItem,
+} from '../../constants/labCatalog';
+import { formatInvestigations } from '../../utils/dischargeFormatter';
 
 interface AdmissionData {
   id: number;
@@ -126,6 +134,117 @@ export default function AdmissionsTestReports({ admission }: Props) {
   const [coreValues, setCoreValues] = useState<LabValues>(initial.core);
   const [extraTests, setExtraTests] = useState<ExtraTest[]>(initial.extra);
   const [showRawEditor, setShowRawEditor] = useState<boolean>(false);
+  const [showCatalogModal, setShowCatalogModal] = useState<boolean>(false);
+  const [catalogSearch, setCatalogSearch] = useState<string>('');
+  const [selectedCategoryTab, setSelectedCategoryTab] = useState<string>('All');
+
+  const isTestAdded = (item: LabCatalogItem): boolean => {
+    if (item.id === 'bg') return Boolean(coreValues.bg);
+    if (item.id === 'rbs') return Boolean(coreValues.rbs);
+    if (item.id === 'hiv') return Boolean(coreValues.hiv);
+    if (item.id === 'hcv') return Boolean(coreValues.hcv);
+    if (item.id === 'vdrl') return Boolean(coreValues.vdrl);
+    if (item.id === 'hbsag') return Boolean(coreValues.hbsag);
+    if (item.id === 'urea') return Boolean(coreValues.urea);
+    if (item.id === 'creatinine') return Boolean(coreValues.creatinine);
+    if (item.id === 'uric_acid') return Boolean(coreValues.uric_acid);
+    if (item.id === 'ecg') return Boolean(coreValues.ecg);
+    return extraTests.some(
+      (t) =>
+        t.name.trim().toLowerCase() === item.name.trim().toLowerCase() ||
+        t.name.trim().toLowerCase() === item.id.toLowerCase()
+    );
+  };
+
+  const toggleCatalogTest = (item: LabCatalogItem) => {
+    if (item.id === 'bg') {
+      if (!coreValues.bg) updateCore('bg', 'O positive');
+      return;
+    }
+    if (item.id === 'rbs') {
+      if (!coreValues.rbs) updateCore('rbs', '100 mg/dL');
+      return;
+    }
+    if (item.id === 'hiv') {
+      if (!coreValues.hiv) updateCore('hiv', 'Negative');
+      return;
+    }
+    if (item.id === 'hcv') {
+      if (!coreValues.hcv) updateCore('hcv', 'Negative');
+      return;
+    }
+    if (item.id === 'vdrl') {
+      if (!coreValues.vdrl) updateCore('vdrl', 'Negative');
+      return;
+    }
+    if (item.id === 'hbsag') {
+      if (!coreValues.hbsag) updateCore('hbsag', 'Negative');
+      return;
+    }
+    if (item.id === 'urea') {
+      if (!coreValues.urea) updateCore('urea', '20 mg/dL');
+      return;
+    }
+    if (item.id === 'creatinine') {
+      if (!coreValues.creatinine) updateCore('creatinine', '0.8 mg/dL');
+      return;
+    }
+    if (item.id === 'uric_acid') {
+      if (!coreValues.uric_acid) updateCore('uric_acid', '4.2 mg/dL');
+      return;
+    }
+    if (item.id === 'ecg') {
+      if (!coreValues.ecg) updateCore('ecg', 'Normal Sinus Rhythm');
+      return;
+    }
+
+    const idx = extraTests.findIndex(
+      (t) =>
+        t.name.trim().toLowerCase() === item.name.trim().toLowerCase() ||
+        t.name.trim().toLowerCase() === item.id.toLowerCase()
+    );
+
+    if (idx >= 0) {
+      removeExtraTest(idx);
+    } else {
+      const defaultVal = item.quickOptions && item.quickOptions.length > 0 ? item.quickOptions[0] : '';
+      addExtraTest(item.name, defaultVal);
+    }
+  };
+
+  const addFromCatalog = (item: LabCatalogItem) => {
+    if (!isTestAdded(item)) {
+      toggleCatalogTest(item);
+    }
+  };
+
+  const filteredCatalog = LAB_CATALOG.filter((cat) => {
+    if (selectedCategoryTab !== 'All' && cat.name !== selectedCategoryTab) {
+      return false;
+    }
+    if (!catalogSearch.trim()) return true;
+    const q = catalogSearch.toLowerCase().trim();
+    return (
+      cat.name.toLowerCase().includes(q) ||
+      cat.tests.some((t) => t.name.toLowerCase().includes(q) || t.id.toLowerCase().includes(q))
+    );
+  }).map((cat) => {
+    if (!catalogSearch.trim()) return cat;
+    const q = catalogSearch.toLowerCase().trim();
+    return {
+      ...cat,
+      tests: cat.tests.filter(
+        (t) =>
+          t.name.toLowerCase().includes(q) ||
+          t.id.toLowerCase().includes(q) ||
+          cat.name.toLowerCase().includes(q)
+      ),
+    };
+  }).filter((cat) => cat.tests.length > 0);
+
+  const previewInvestigations = formatInvestigations(
+    showRawEditor ? data.investigations : serializeInvestigations(coreValues, extraTests)
+  );
 
   const { data, setData, put, transform, processing, errors } = useForm({
     investigations: admission.investigations || serializeInvestigations(initial.core, initial.extra),
@@ -595,54 +714,151 @@ export default function AdmissionsTestReports({ admission }: Props) {
 
               {/* Row 5: Additional / Custom Tests & Imaging */}
               <div className="p-3 bg-light rounded-3 border">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
-                    <i className="bi bi-file-earmark-medical text-info"></i>
-                    <span>Additional Lab Tests / Imaging / Urine Reports</span>
-                  </h6>
-                  <button
-                    type="button"
-                    onClick={() => addExtraTest()}
-                    className="btn btn-sm btn-outline-primary"
-                  >
-                    <i className="bi bi-plus-circle me-1"></i> Add Other Test
-                  </button>
+                <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                  <div>
+                    <h6 className="fw-bold text-dark mb-0 d-flex align-items-center gap-2">
+                      <i className="bi bi-file-earmark-medical text-danger"></i>
+                      <span>Additional Hospital Laboratory &amp; Diagnostic Investigations</span>
+                    </h6>
+                    <small className="text-muted">
+                      Digitized from Guru Hospital&rsquo;s official printed requisition slip with clinical units and normal reference ranges.
+                    </small>
+                  </div>
+                  <div className="d-flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowCatalogModal(true)}
+                      className="btn btn-sm btn-danger fw-semibold d-inline-flex align-items-center gap-1.5 shadow-xs"
+                    >
+                      <i className="bi bi-card-checklist"></i>
+                      <span>Browse Lab Requisition Slip (60+ Tests)</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => addExtraTest()}
+                      className="btn btn-sm btn-outline-primary"
+                    >
+                      <i className="bi bi-plus-circle me-1"></i> Add Custom Test
+                    </button>
+                  </div>
                 </div>
 
+                {/* Quick Add Popular Hospital Tests */}
+                <div className="mb-3 p-2 bg-white rounded border">
+                  <div className="small fw-bold text-secondary mb-1.5 d-flex align-items-center gap-1">
+                    <i className="bi bi-lightning-charge-fill text-warning"></i>
+                    <span>Quick-Add Common Hospital Tests:</span>
+                  </div>
+                  <div className="d-flex flex-wrap gap-1.5">
+                    {FREQUENT_LAB_TESTS.map((t) => {
+                      const catalogItem = findLabTest(t.name);
+                      const isAdded = catalogItem ? isTestAdded(catalogItem) : extraTests.some((e) => e.name.toLowerCase().includes(t.name.toLowerCase()));
+                      return (
+                        <button
+                          key={t.name}
+                          type="button"
+                          onClick={() => {
+                            if (catalogItem) addFromCatalog(catalogItem);
+                            else addExtraTest(t.name, '');
+                          }}
+                          className={`btn btn-xs ${isAdded ? 'btn-success text-white' : 'btn-outline-secondary bg-white'}`}
+                          style={{ fontSize: '0.78rem' }}
+                          title={`Add ${t.name} (${t.category})`}
+                        >
+                          <i className={`bi bi-${isAdded ? 'check2' : 'plus'} me-0.5`}></i>
+                          {t.name}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Extra tests list */}
                 {extraTests.length === 0 ? (
-                  <div className="text-muted small py-2">
-                    No additional test reports added. Standard pre-op panel (including ECG) above is fully active.
+                  <div className="text-muted small py-3 text-center bg-white rounded border border-dashed">
+                    <i className="bi bi-info-circle me-1 text-primary"></i>
+                    No additional test reports added yet. Standard pre-op panel (including ECG) above is active. Click <strong>Browse Lab Requisition Slip</strong> or any quick-add button above to include Urine Routine, ESR, CBC, Imaging, etc.
                   </div>
                 ) : (
-                  extraTests.map((t, idx) => (
-                    <div key={idx} className="input-group mb-2">
-                      <input
-                        type="text"
-                        className="form-control"
-                        style={{ maxWidth: '280px' }}
-                        value={t.name}
-                        onChange={(e) => updateExtraTest(idx, 'name', e.target.value)}
-                        placeholder="Test Name (e.g. Urine Albumin / USG / ECG)"
-                      />
-                      <span className="input-group-text bg-white">:</span>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={t.value}
-                        onChange={(e) => updateExtraTest(idx, 'value', e.target.value)}
-                        placeholder="Result value only (e.g. Nil / Pus cells 1-2 / Normal Sinus)"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeExtraTest(idx)}
-                        className="btn btn-outline-danger"
-                        title="Remove Test"
-                      >
-                        <i className="bi bi-trash"></i>
-                      </button>
-                    </div>
-                  ))
+                  extraTests.map((t, idx) => {
+                    const catalogItem = findLabTest(t.name);
+                    return (
+                      <div key={idx} className="p-2.5 bg-white rounded border mb-2 shadow-xs">
+                        <div className="row g-2 align-items-center">
+                          <div className="col-md-5">
+                            <div className="input-group input-group-sm">
+                              <span className="input-group-text bg-light text-muted small fw-bold">#{idx + 1}</span>
+                              <input
+                                type="text"
+                                className="form-control fw-semibold"
+                                value={t.name}
+                                onChange={(e) => updateExtraTest(idx, 'name', e.target.value)}
+                                placeholder="Test Name (e.g. Urine Routine, ESR, TSH)"
+                                list="labCatalogDatalist"
+                              />
+                            </div>
+                            {catalogItem && (
+                              <div className="mt-1 d-flex flex-wrap align-items-center gap-1.5" style={{ fontSize: '0.72rem' }}>
+                                <span className="badge bg-secondary-subtle text-secondary border">
+                                  {catalogItem.category}
+                                </span>
+                                {catalogItem.unit && (
+                                  <span className="text-muted">Unit: <strong>{catalogItem.unit}</strong></span>
+                                )}
+                                {catalogItem.normalRange && (
+                                  <span className="text-muted">&bull; Ref: <strong>{catalogItem.normalRange}</strong></span>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                          <div className="col-md-6">
+                            <input
+                              type="text"
+                              className="form-control form-control-sm"
+                              value={t.value}
+                              onChange={(e) => updateExtraTest(idx, 'value', e.target.value)}
+                              placeholder={catalogItem?.placeholder || 'Result value (e.g. Albumin Nil, Sugar Nil, Pus 1-2)'}
+                            />
+                            {catalogItem?.quickOptions && catalogItem.quickOptions.length > 0 && (
+                              <div className="mt-1 d-flex flex-wrap gap-1 align-items-center">
+                                <span className="text-muted" style={{ fontSize: '0.70rem' }}>Presets:</span>
+                                {catalogItem.quickOptions.map((opt, oIdx) => (
+                                  <button
+                                    key={oIdx}
+                                    type="button"
+                                    onClick={() => updateExtraTest(idx, 'value', opt)}
+                                    className={`btn btn-xs py-0 px-1.5 ${t.value === opt ? 'btn-success text-white' : 'btn-outline-secondary'}`}
+                                    style={{ fontSize: '0.70rem' }}
+                                  >
+                                    {opt}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                          <div className="col-md-1 text-end">
+                            <button
+                              type="button"
+                              onClick={() => removeExtraTest(idx)}
+                              className="btn btn-sm btn-outline-danger"
+                              title="Remove Test"
+                            >
+                              <i className="bi bi-trash"></i>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })
                 )}
+
+                <datalist id="labCatalogDatalist">
+                  {ALL_LAB_TESTS.map((test) => (
+                    <option key={test.id} value={test.name}>
+                      {test.category} {test.normalRange ? `(Ref: ${test.normalRange})` : ''}
+                    </option>
+                  ))}
+                </datalist>
               </div>
             </div>
           </div>
@@ -676,66 +892,56 @@ export default function AdmissionsTestReports({ admission }: Props) {
 
         {/* Live Document Print Preview */}
         <div className="card mb-4 border-0 shadow-sm border-start border-4 border-primary">
-          <div className="card-header bg-white py-3 fw-bold text-dark d-flex justify-content-between align-items-center">
+          <div className="card-header bg-white py-3 fw-bold text-dark d-flex justify-content-between align-items-center flex-wrap gap-2">
             <span className="small text-uppercase tracking-wide text-secondary">
               <i className="bi bi-printer me-1"></i> Discharge Summary Print Preview (INVESTIGATIONS Section)
             </span>
-            <span className="badge bg-light text-dark border">Auto-Formatted Grid</span>
+            <span className="badge bg-light text-dark border">
+              Strict 5 or 6 Column Clinical Grid &bull; Units &amp; Normal Reference Ranges
+            </span>
           </div>
           <div className="card-body bg-white p-3">
-            <div className="table-responsive">
-              <table className="table table-bordered table-sm text-center mb-0 align-middle" style={{ fontSize: '0.86rem' }}>
-                <thead className="table-dark">
-                  <tr>
-                    <th>HB</th>
-                    <th>BLOOD GROUP</th>
-                    <th>HCV</th>
-                    <th>HIV</th>
-                    <th>VDRL</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="bg-light fw-bold text-dark">
-                    <td>{coreValues.hb || '—'}</td>
-                    <td>{coreValues.bg || '—'}</td>
-                    <td>{coreValues.hcv || '—'}</td>
-                    <td>{coreValues.hiv || '—'}</td>
-                    <td>{coreValues.vdrl || '—'}</td>
-                  </tr>
-                </tbody>
-                <thead className="table-dark">
-                  <tr>
-                    <th>HBSAG</th>
-                    <th>UREA</th>
-                    <th>CREATININE</th>
-                    <th>URIC ACID</th>
-                    <th>RBS</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="bg-light fw-bold text-dark">
-                    <td>{coreValues.hbsag || '—'}</td>
-                    <td>{coreValues.urea || '—'}</td>
-                    <td>{coreValues.creatinine || '—'}</td>
-                    <td>{coreValues.uric_acid || '—'}</td>
-                    <td>{coreValues.rbs || '—'}</td>
-                  </tr>
-                </tbody>
-              </table>
-
-              {extraTests.length > 0 && (
-                <div className="mt-2 pt-2 border-top">
-                  <div className="small fw-bold text-secondary mb-1">Additional Findings:</div>
-                  <div className="d-flex flex-wrap gap-2">
-                    {extraTests.map((t, idx) => (
-                      <span key={idx} className="badge bg-light text-dark border py-1.5 px-2">
-                        <strong>{t.name}:</strong> {t.value}
-                      </span>
-                    ))}
+            {previewInvestigations.length === 0 ? (
+              <div className="text-muted text-center py-3">No investigations recorded.</div>
+            ) : (
+              <div
+                className="d-grid gap-2"
+                style={{
+                  gridTemplateColumns: `repeat(${previewInvestigations.length > 10 ? 6 : 5}, minmax(0, 1fr))`,
+                }}
+              >
+                {previewInvestigations.map((inv, idx) => (
+                  <div
+                    key={idx}
+                    className="p-2 border rounded bg-white text-center d-flex flex-column justify-content-between shadow-xs"
+                    style={{ minHeight: '62px' }}
+                  >
+                    <div
+                      className="small fw-bold text-secondary text-uppercase text-truncate"
+                      style={{ fontSize: '0.68rem', letterSpacing: '0.02em' }}
+                      title={inv.label}
+                    >
+                      {inv.label}
+                      {inv.unit && (
+                        <span className="fw-normal text-muted ms-1" style={{ fontSize: '0.62rem', textTransform: 'none' }}>
+                          ({inv.unit})
+                        </span>
+                      )}
+                    </div>
+                    <div className="fw-bold text-dark my-0.5 text-truncate" style={{ fontSize: '0.85rem' }} title={inv.value}>
+                      {inv.value || '—'}
+                    </div>
+                    {inv.normal_range ? (
+                      <div className="text-muted text-truncate" style={{ fontSize: '0.62rem', fontWeight: 500 }} title={`Ref: ${inv.normal_range}`}>
+                        Ref: {inv.normal_range}
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '0.62rem' }}>&nbsp;</div>
+                    )}
                   </div>
-                </div>
-              )}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -765,6 +971,183 @@ export default function AdmissionsTestReports({ admission }: Props) {
           </div>
         </div>
       </form>
+
+      {/* Official Lab Requisition Slip Catalog Modal */}
+      {showCatalogModal && (
+        <div
+          className="modal fade show d-block"
+          tabIndex={-1}
+          style={{ backgroundColor: 'rgba(15, 23, 42, 0.65)', backdropFilter: 'blur(2px)', zIndex: 1055 }}
+        >
+          <div className="modal-dialog modal-xl modal-dialog-scrollable">
+            <div className="modal-content border-0 shadow-lg">
+              {/* Slip Header with red accent */}
+              <div className="modal-header-lab-slip d-flex justify-content-between align-items-center">
+                <div>
+                  <div className="d-flex align-items-center gap-2">
+                    <span className="badge bg-danger text-white fw-bold text-uppercase px-2 py-1" style={{ fontSize: '0.72rem' }}>
+                      Guru Hospital
+                    </span>
+                    <h5 className="modal-title fw-bold mb-0 text-dark" style={{ letterSpacing: '-0.01em', fontSize: '1.25rem' }}>
+                      Official Diagnostic &amp; Laboratory Test Requisition Slip
+                    </h5>
+                  </div>
+                  <p className="small mb-0 text-muted mt-1">
+                    Complete catalog from the printed hospital requisition slip with checkboxes, standard clinical units, and normal reference ranges.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="btn-close"
+                  onClick={() => setShowCatalogModal(false)}
+                />
+              </div>
+
+              {/* Search & Filter Toolbar */}
+              <div className="bg-light p-3 border-bottom">
+                <div className="row g-2 align-items-center">
+                  <div className="col-md-5">
+                    <div className="input-group">
+                      <span className="input-group-text bg-white"><i className="bi bi-search"></i></span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search tests (e.g. CBC, ESR, Urine Routine, TSH, Bilirubin, X-Ray)..."
+                        value={catalogSearch}
+                        onChange={(e) => setCatalogSearch(e.target.value)}
+                        autoFocus
+                      />
+                      {catalogSearch && (
+                        <button
+                          type="button"
+                          className="btn btn-outline-secondary"
+                          onClick={() => setCatalogSearch('')}
+                        >
+                          <i className="bi bi-x"></i>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <div className="col-md-7">
+                    <div className="d-flex flex-wrap gap-1 align-items-center justify-content-md-end">
+                      <span className="small text-muted me-1">Category:</span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedCategoryTab('All')}
+                        className={`btn btn-xs ${selectedCategoryTab === 'All' ? 'btn-danger' : 'btn-outline-secondary bg-white'}`}
+                        style={{ fontSize: '0.74rem' }}
+                      >
+                        All (15)
+                      </button>
+                      {LAB_CATALOG.map((cat) => (
+                        <button
+                          key={cat.name}
+                          type="button"
+                          onClick={() => setSelectedCategoryTab(cat.name)}
+                          className={`btn btn-xs ${selectedCategoryTab === cat.name ? 'btn-danger' : 'btn-outline-secondary bg-white'}`}
+                          style={{ fontSize: '0.74rem' }}
+                        >
+                          {cat.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Body: Categorized Grid matching physical slip */}
+              <div className="modal-body p-4 bg-light">
+                <div className="row g-3">
+                  {filteredCatalog.map((cat) => (
+                    <div key={cat.name} className="col-md-6 col-lg-4">
+                      <div className="lab-slip-category-card h-100">
+                        <div
+                          className="lab-slip-category-header"
+                          style={{ backgroundColor: cat.badgeColor || '#b91c1c' }}
+                        >
+                          <span>{cat.name}</span>
+                          <span className="badge">{cat.tests.length}</span>
+                        </div>
+                        <div className="p-2 bg-white">
+                          <div className="d-flex flex-column gap-1.5">
+                            {cat.tests.map((test) => {
+                              const added = isTestAdded(test);
+                              return (
+                                <div
+                                  key={test.id}
+                                  data-testid={`catalog-test-${test.id}`}
+                                  className={`p-2 rounded border transition-all ${
+                                    added
+                                      ? 'border-success bg-success-subtle'
+                                      : 'bg-white hover-bg-light'
+                                  }`}
+                                  style={{ cursor: 'pointer' }}
+                                  onClick={() => toggleCatalogTest(test)}
+                                >
+                                  <div className="d-flex justify-content-between align-items-start">
+                                    <div className="form-check mb-0">
+                                      <input
+                                        type="checkbox"
+                                        className="form-check-input"
+                                        checked={added}
+                                        onChange={() => {}} // handled by parent div click
+                                      />
+                                      <label
+                                        className="form-check-label fw-semibold text-dark small ms-1"
+                                        style={{ cursor: 'pointer' }}
+                                      >
+                                        {test.name}
+                                      </label>
+                                    </div>
+                                    {added && (
+                                      <span className="badge bg-success small text-uppercase" style={{ fontSize: '0.62rem' }}>
+                                        Added
+                                      </span>
+                                    )}
+                                  </div>
+                                  {(test.unit || test.normalRange) && (
+                                    <div className="mt-1 ps-4 text-muted" style={{ fontSize: '0.68rem' }}>
+                                      {test.unit && <span>Unit: <strong>{test.unit}</strong> &bull; </span>}
+                                      {test.normalRange && <span>Ref: <strong>{test.normalRange}</strong></span>}
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Modal Footer */}
+              <div className="modal-footer bg-white px-4 py-3 justify-content-between">
+                <div className="small text-muted">
+                  <span className="fw-bold text-dark">{extraTests.length}</span> additional investigation(s) in patient record.
+                </div>
+                <div className="d-flex gap-2">
+                  <button
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={() => setShowCatalogModal(false)}
+                  >
+                    Close &amp; Review Stage 2
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={() => setShowCatalogModal(false)}
+                  >
+                    <i className="bi bi-check2-circle me-1"></i> Apply &amp; Return to Form
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 }

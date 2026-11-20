@@ -658,6 +658,41 @@ body {
   background: #fafbfc !important;
 }
 
+/* ─── Official Lab Requisition Slip Modal ─────────────────────────────────── */
+.modal-header-lab-slip {
+  background: #ffffff !important;
+  border-bottom: 2px solid #b91c1c !important;
+  padding: 18px 24px !important;
+}
+
+.lab-slip-category-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.lab-slip-category-header {
+  background: #b91c1c !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  padding: 8px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.lab-slip-category-header .badge {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
 /* ─── Orbital Auth System (Staff Login) ───────────────────────────────────── */
 .fg-auth-page {
   min-height: 100vh;

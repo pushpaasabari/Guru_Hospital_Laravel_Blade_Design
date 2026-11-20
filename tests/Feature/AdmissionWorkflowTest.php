@@ -629,5 +629,81 @@ class AdmissionWorkflowTest extends TestCase
         $this->assertEquals('Normal Sinus Rhythm', $surgInv['group2']['ECG']);
         $this->assertEquals('Normal Sinus', $surgInv['ranges']['ECG']);
     }
+
+    public function test_full_hospital_lab_requisition_catalog_formats_with_units_and_ranges(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'Senthil Kumar',
+            'uhid' => 'GH-LAB-01',
+            'ip_no' => 'IP-LAB-01',
+            'admission_at' => now(),
+            'diagnosis' => 'Acute Appendicitis',
+            'format' => 'general',
+            'surgery_type' => 'other',
+            'status' => 'draft',
+            'created_by' => $this->nurse->id,
+        ]);
+
+        $labText = implode("\n", [
+            'Hb : 14.1 g/dL',
+            'BG : B positive',
+            'HIV : Negative',
+            'HCV : Negative',
+            'VDRL : Negative',
+            'HBsAG : Negative',
+            'UREA : 24 mg/dL',
+            'CREATININE : 0.85 mg/dL',
+            'URIC ACID : 4.4 mg/dL',
+            'RBS : 118 mg/dL',
+            'ECG : Normal Sinus Rhythm',
+            'CBC : TC 8400, Platelets 2.8L',
+            'ESR : 14 mm/hr',
+            'Urine Routine : Albumin Nil, Sugar Nil, Pus 1-2',
+            'TSH : 2.4 mIU/L',
+            'X-Ray Chest : Clear lung fields, CTR normal',
+            'Serum Bilirubin : Total 0.8 mg/dL',
+            'Serum Electrolytes : Na 138, K 4.2',
+            'Total Cholesterol : 175 mg/dL',
+            'CRP : Negative (< 6.0 mg/L)',
+        ]);
+
+        $response = $this->actingAs($this->nurse)->put(route('admissions.test-reports.update', $admission), [
+            'investigations' => $labText,
+            'next_step' => 'stay',
+        ]);
+
+        $response->assertRedirect(route('admissions.test-reports', $admission));
+
+        $admission->refresh();
+        $formatted = $admission->formatted_investigations;
+
+        // Check ESR
+        $esr = collect($formatted)->firstWhere('label', 'ESR');
+        $this->assertNotNull($esr);
+        $this->assertEquals('mm/hr', $esr['unit']);
+        $this->assertEquals('0 - 20', $esr['normal_range']);
+
+        // Check Urine Routine
+        $urine = collect($formatted)->firstWhere('label', 'URINE ROUTINE');
+        $this->assertNotNull($urine);
+        $this->assertStringContainsString('Alb: Nil', $urine['normal_range']);
+
+        // Check TSH
+        $tsh = collect($formatted)->firstWhere('label', 'TSH');
+        $this->assertNotNull($tsh);
+        $this->assertEquals('mIU/L', $tsh['unit']);
+        $this->assertEquals('0.4 - 4.2', $tsh['normal_range']);
+
+        // Check Chest X-Ray
+        $xray = collect($formatted)->firstWhere('label', 'CHEST X-RAY (PA)');
+        $this->assertNotNull($xray);
+        $this->assertEquals('Normal Chest', $xray['normal_range']);
+
+        // Check Cholesterol
+        $chol = collect($formatted)->firstWhere('label', 'CHOLESTEROL');
+        $this->assertNotNull($chol);
+        $this->assertEquals('mg/dL', $chol['unit']);
+        $this->assertEquals('< 200', $chol['normal_range']);
+    }
 }
 

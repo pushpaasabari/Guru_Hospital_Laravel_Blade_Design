@@ -8,7 +8,7 @@ use Carbon\Carbon;
 class DischargeSummaryFormatter
 {
     /**
-     * Standard order for core lab investigations.
+     * Standard order for core lab investigations and full hospital catalog.
      */
     public const INVESTIGATION_ORDER = [
         'HB' => 1,
@@ -22,10 +22,76 @@ class DischargeSummaryFormatter
         'URIC ACID' => 9,
         'RBS' => 10,
         'ECG' => 11,
+        'CBC' => 12,
+        'ESR' => 13,
+        'BT, CT' => 14,
+        'PT - INR' => 15,
+        'APTT' => 16,
+        'PERIPHERAL SMEAR' => 17,
+        'URINE ROUTINE' => 18,
+        'RFT' => 19,
+        'LFT' => 20,
+        'SR. BILIRUBIN' => 21,
+        'SERUM ELECTROLYTES' => 22,
+        'FASTING (FBS)' => 23,
+        'PPBS' => 24,
+        'HBA1C' => 25,
+        'OGCT' => 26,
+        'SERUM CALCIUM' => 27,
+        'SERUM AMYLASE' => 28,
+        'SERUM LIPASE' => 29,
+        'TOTAL IRON' => 30,
+        'TIBC' => 31,
+        'SERUM FERRITIN' => 32,
+        'CHOLESTEROL' => 33,
+        'TRIGLYCERIDES' => 34,
+        'HDL' => 35,
+        'LDL' => 36,
+        'VLDL' => 37,
+        'CRP' => 38,
+        'WIDAL' => 39,
+        'RA FACTOR' => 40,
+        'ASO TITER' => 41,
+        'DENGUE SEROLOGY' => 42,
+        'SCRUB TYPHUS' => 43,
+        'TSH' => 44,
+        'TFT' => 45,
+        'TROPONIN-T' => 46,
+        'CK-MB' => 47,
+        'CHEST X-RAY (PA)' => 48,
+        'X-RAY KUB' => 49,
+        'URINE C/S' => 50,
+        'SPUTUM C/S' => 51,
+        'PUS C/S' => 52,
+        'BLOOD C/S' => 53,
+        'SPUTUM AFB' => 54,
+        'GEN-XPERT (MTB)' => 55,
+        'CA 125' => 56,
+        'FPSA' => 57,
+        'S PSA' => 58,
+        'TESTOSTERONE' => 59,
+        'ESTRADIOL' => 60,
+        'AMH' => 61,
+        'ANA' => 62,
+        'PROLACTIN' => 63,
+        'LH, FSH' => 64,
+        'D-DIMER' => 65,
+        'BETA HCG' => 66,
+        'SEMEN ANALYSIS' => 67,
+        'SEMEN C/S' => 68,
+        'SEMEN-XPERT' => 69,
+        'SPOT PCR' => 70,
+        'SPOT MICROALBUMIN' => 71,
+        'SPOT SODIUM' => 72,
+        'SMEAR FOR MP/MF' => 73,
+        'PACKAGE - 1' => 74,
+        'PACKAGE - 2' => 75,
+        'PACKAGE - 3' => 76,
     ];
 
     /**
      * Standard clinical units and normal reference ranges for laboratory investigations.
+     * Comprehensive catalog derived directly from Guru Hospital's official Laboratory Requisition Slip.
      */
     public const INVESTIGATION_STANDARDS = [
         'HB' => [
@@ -82,6 +148,331 @@ class DischargeSummaryFormatter
             'unit' => '',
             'normal_range' => 'Normal Sinus',
             'reference' => 'Normal Sinus Rhythm',
+        ],
+        'CBC' => [
+            'unit' => 'cells/cu.mm',
+            'normal_range' => 'Normal Hemogram',
+            'reference' => 'TC: 4000-11000 | Plt: 1.5-4.5L',
+        ],
+        'ESR' => [
+            'unit' => 'mm/hr',
+            'normal_range' => '0 - 20',
+            'reference' => '0 - 20 mm/hr',
+        ],
+        'BT, CT' => [
+            'unit' => 'min',
+            'normal_range' => 'BT: 2-6 | CT: 4-10',
+            'reference' => 'BT: 2-6 min | CT: 4-10 min',
+        ],
+        'SMEAR FOR MP/MF' => [
+            'unit' => '',
+            'normal_range' => 'Negative',
+            'reference' => 'Negative for MP & MF',
+        ],
+        'PT - INR' => [
+            'unit' => 'INR',
+            'normal_range' => '0.8 - 1.2',
+            'reference' => '0.8 - 1.2 INR',
+        ],
+        'APTT' => [
+            'unit' => 'sec',
+            'normal_range' => '25 - 35',
+            'reference' => '25 - 35 sec',
+        ],
+        'PERIPHERAL SMEAR' => [
+            'unit' => '',
+            'normal_range' => 'Normocytic Normochromic',
+            'reference' => 'Normocytic Normochromic',
+        ],
+        'TOTAL IRON' => [
+            'unit' => 'mcg/dL',
+            'normal_range' => '60 - 170',
+            'reference' => '60 - 170 mcg/dL',
+        ],
+        'TIBC' => [
+            'unit' => 'mcg/dL',
+            'normal_range' => '240 - 450',
+            'reference' => '240 - 450 mcg/dL',
+        ],
+        'SERUM FERRITIN' => [
+            'unit' => 'ng/mL',
+            'normal_range' => '15 - 200',
+            'reference' => '15 - 200 ng/mL',
+        ],
+        'CHEST X-RAY (PA)' => [
+            'unit' => '',
+            'normal_range' => 'Normal Chest',
+            'reference' => 'Clear Bilateral Lung Fields',
+        ],
+        'X-RAY KUB' => [
+            'unit' => '',
+            'normal_range' => 'No Calculus',
+            'reference' => 'No Radio-opaque Calculi',
+        ],
+        'TROPONIN-T' => [
+            'unit' => 'ng/mL',
+            'normal_range' => '< 0.01',
+            'reference' => '< 0.01 ng/mL (Negative)',
+        ],
+        'CK-MB' => [
+            'unit' => 'U/L',
+            'normal_range' => '< 25',
+            'reference' => '0 - 25 U/L',
+        ],
+        'SPUTUM AFB' => [
+            'unit' => '',
+            'normal_range' => 'Negative',
+            'reference' => 'Negative for AFB',
+        ],
+        'GEN-XPERT (MTB)' => [
+            'unit' => '',
+            'normal_range' => 'Not Detected',
+            'reference' => 'MTB Not Detected',
+        ],
+        'SEMEN ANALYSIS' => [
+            'unit' => 'mil/mL',
+            'normal_range' => '> 15',
+            'reference' => 'Count > 15 mil/mL | Motility > 40%',
+        ],
+        'SEMEN C/S' => [
+            'unit' => '',
+            'normal_range' => 'Sterile',
+            'reference' => 'No Pathogen Grown',
+        ],
+        'SEMEN-XPERT' => [
+            'unit' => '',
+            'normal_range' => 'Not Detected',
+            'reference' => 'MTB Not Detected',
+        ],
+        'OGCT' => [
+            'unit' => 'mg/dL',
+            'normal_range' => '< 140',
+            'reference' => '< 140 mg/dL',
+        ],
+        'FASTING (FBS)' => [
+            'unit' => 'mg/dL',
+            'normal_range' => '70 - 100',
+            'reference' => '70 - 100 mg/dL',
+        ],
+        'PPBS' => [
+            'unit' => 'mg/dL',
+            'normal_range' => '< 140',
+            'reference' => '< 140 mg/dL',
+        ],
+        'HBA1C' => [
+            'unit' => '%',
+            'normal_range' => '< 5.7',
+            'reference' => '< 5.7 %',
+        ],
+        'RFT' => [
+            'unit' => 'mg/dL',
+            'normal_range' => 'Normal RFT',
+            'reference' => 'Urea: 15-40 | Creat: 0.6-1.2',
+        ],
+        'LFT' => [
+            'unit' => '',
+            'normal_range' => 'Normal LFT',
+            'reference' => 'Normal Hepatic Profile',
+        ],
+        'SR. BILIRUBIN' => [
+            'unit' => 'mg/dL',
+            'normal_range' => '0.2 - 1.2',
+            'reference' => '0.2 - 1.2 mg/dL',
+        ],
+        'SERUM ELECTROLYTES' => [
+            'unit' => 'mmol/L',
+            'normal_range' => 'Na: 135-145 | K: 3.5-5.0',
+            'reference' => 'Na: 135-145 | K: 3.5-5.0 | Cl: 98-107',
+        ],
+        'SERUM CALCIUM' => [
+            'unit' => 'mg/dL',
+            'normal_range' => '8.5 - 10.5',
+            'reference' => '8.5 - 10.5 mg/dL',
+        ],
+        'SERUM AMYLASE' => [
+            'unit' => 'U/L',
+            'normal_range' => '28 - 100',
+            'reference' => '28 - 100 U/L',
+        ],
+        'SERUM LIPASE' => [
+            'unit' => 'U/L',
+            'normal_range' => '10 - 140',
+            'reference' => '10 - 140 U/L',
+        ],
+        'URINE ROUTINE' => [
+            'unit' => '',
+            'normal_range' => 'Alb: Nil | Sug: Nil | Pus: 1-2',
+            'reference' => 'Albumin: Nil | Sugar: Nil | Pus: 1-2',
+        ],
+        'SPOT PCR' => [
+            'unit' => 'mg/g',
+            'normal_range' => '< 150',
+            'reference' => '< 150 mg/g',
+        ],
+        'SPOT MICROALBUMIN' => [
+            'unit' => 'mg/L',
+            'normal_range' => '< 20',
+            'reference' => '< 20 mg/L',
+        ],
+        'SPOT SODIUM' => [
+            'unit' => 'mmol/L',
+            'normal_range' => '40 - 220',
+            'reference' => '40 - 220 mmol/L',
+        ],
+        'CHOLESTEROL' => [
+            'unit' => 'mg/dL',
+            'normal_range' => '< 200',
+            'reference' => '< 200 mg/dL',
+        ],
+        'TRIGLYCERIDES' => [
+            'unit' => 'mg/dL',
+            'normal_range' => '< 150',
+            'reference' => '< 150 mg/dL',
+        ],
+        'HDL' => [
+            'unit' => 'mg/dL',
+            'normal_range' => '> 40',
+            'reference' => '> 40 mg/dL',
+        ],
+        'LDL' => [
+            'unit' => 'mg/dL',
+            'normal_range' => '< 100',
+            'reference' => '< 100 mg/dL',
+        ],
+        'VLDL' => [
+            'unit' => 'mg/dL',
+            'normal_range' => '2 - 30',
+            'reference' => '2 - 30 mg/dL',
+        ],
+        'CA 125' => [
+            'unit' => 'U/mL',
+            'normal_range' => '< 35',
+            'reference' => '< 35 U/mL',
+        ],
+        'FPSA' => [
+            'unit' => 'ng/mL',
+            'normal_range' => '> 0.25',
+            'reference' => 'Ratio > 0.25',
+        ],
+        'S PSA' => [
+            'unit' => 'ng/mL',
+            'normal_range' => '< 4.0',
+            'reference' => '< 4.0 ng/mL',
+        ],
+        'CRP' => [
+            'unit' => 'mg/L',
+            'normal_range' => '< 6.0',
+            'reference' => '< 6.0 mg/L',
+        ],
+        'WIDAL' => [
+            'unit' => '',
+            'normal_range' => 'Negative',
+            'reference' => 'Titers < 1:80',
+        ],
+        'RA FACTOR' => [
+            'unit' => 'IU/mL',
+            'normal_range' => '< 14',
+            'reference' => '< 14 IU/mL',
+        ],
+        'ASO TITER' => [
+            'unit' => 'IU/mL',
+            'normal_range' => '< 200',
+            'reference' => '< 200 IU/mL',
+        ],
+        'DENGUE SEROLOGY' => [
+            'unit' => '',
+            'normal_range' => 'Negative',
+            'reference' => 'NS1, IgM, IgG: Negative',
+        ],
+        'SCRUB TYPHUS' => [
+            'unit' => '',
+            'normal_range' => 'Negative',
+            'reference' => 'Negative',
+        ],
+        'URINE C/S' => [
+            'unit' => '',
+            'normal_range' => 'Sterile',
+            'reference' => 'No Growth After 48 hrs',
+        ],
+        'SPUTUM C/S' => [
+            'unit' => '',
+            'normal_range' => 'Normal Flora',
+            'reference' => 'Normal Commensals Grown',
+        ],
+        'PUS C/S' => [
+            'unit' => '',
+            'normal_range' => 'Sterile',
+            'reference' => 'No Growth After 48 hrs',
+        ],
+        'BLOOD C/S' => [
+            'unit' => '',
+            'normal_range' => 'Sterile',
+            'reference' => 'Sterile After 5 Days',
+        ],
+        'TSH' => [
+            'unit' => 'mIU/L',
+            'normal_range' => '0.4 - 4.2',
+            'reference' => '0.4 - 4.2 mIU/L',
+        ],
+        'TFT' => [
+            'unit' => '',
+            'normal_range' => 'Euthyroid',
+            'reference' => 'T3, T4, TSH WNL',
+        ],
+        'TESTOSTERONE' => [
+            'unit' => 'ng/dL',
+            'normal_range' => '280 - 1100 (M)',
+            'reference' => 'Male: 280-1100 | Fem: 15-70',
+        ],
+        'ESTRADIOL' => [
+            'unit' => 'pg/mL',
+            'normal_range' => '30 - 400',
+            'reference' => '30 - 400 pg/mL',
+        ],
+        'AMH' => [
+            'unit' => 'ng/mL',
+            'normal_range' => '1.5 - 4.0',
+            'reference' => '1.5 - 4.0 ng/mL',
+        ],
+        'ANA' => [
+            'unit' => '',
+            'normal_range' => 'Negative',
+            'reference' => 'Negative (< 1:80)',
+        ],
+        'PROLACTIN' => [
+            'unit' => 'ng/mL',
+            'normal_range' => '4.8 - 23.3',
+            'reference' => '4.8 - 23.3 ng/mL',
+        ],
+        'LH, FSH' => [
+            'unit' => 'mIU/mL',
+            'normal_range' => 'LH: 2-15 | FSH: 3-12',
+            'reference' => 'LH: 2-15 | FSH: 3-12 mIU/mL',
+        ],
+        'D-DIMER' => [
+            'unit' => 'mcg/mL FEU',
+            'normal_range' => '< 0.5',
+            'reference' => '< 0.5 mcg/mL FEU',
+        ],
+        'BETA HCG' => [
+            'unit' => 'mIU/mL',
+            'normal_range' => '< 5.0 (Non-Preg)',
+            'reference' => '< 5.0 mIU/mL',
+        ],
+        'PACKAGE - 1' => [
+            'unit' => '',
+            'normal_range' => 'Pre-op Clearance',
+            'reference' => 'Pre-Operative Profile Normal',
+        ],
+        'PACKAGE - 2' => [
+            'unit' => '',
+            'normal_range' => 'Normal Profile',
+            'reference' => 'Master Health Profile Normal',
+        ],
+        'PACKAGE - 3' => [
+            'unit' => '',
+            'normal_range' => 'Normal Profile',
+            'reference' => 'Executive Cardiac Profile Normal',
         ],
     ];
 
@@ -140,6 +531,93 @@ class DischargeSummaryFormatter
     }
 
     /**
+     * Normalize an investigation label to match the standard catalog.
+     */
+    public static function normalizeInvestigationKey(string $rawLabel): string
+    {
+        $key = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $rawLabel));
+        return match ($key) {
+            'hb', 'haemoglobin' => 'HB',
+            'bg', 'bloodgroup', 'bloodgrouping', 'rh' => 'BLOOD GROUP',
+            'hiv' => 'HIV',
+            'hcv' => 'HCV',
+            'vdrl' => 'VDRL',
+            'hbsag', 'hbs' => 'HBSAG',
+            'urea', 'bloodurea' => 'UREA',
+            'creatinine', 'creatine', 'serumcreatinine' => 'CREATININE',
+            'uricacid', 'serumuricacid' => 'URIC ACID',
+            'rbs', 'bloodsugar', 'randombloodsugar' => 'RBS',
+            'ecg', 'ekg', 'electrocardiogram' => 'ECG',
+            'cbc', 'completebloodcount', 'hemogram' => 'CBC',
+            'esr', 'erythrocytesedimentationrate' => 'ESR',
+            'btct', 'bt', 'ct', 'bleedingtimeclottingtime' => 'BT, CT',
+            'smearformpmf', 'smearformp', 'mpmf', 'smearmpmf' => 'SMEAR FOR MP/MF',
+            'ptinr', 'pt', 'inr', 'prothrombintime' => 'PT - INR',
+            'aptt' => 'APTT',
+            'peripheralsmear', 'ps', 'peripheralsmearstudy' => 'PERIPHERAL SMEAR',
+            'totaliron', 'serumiron', 'iron' => 'TOTAL IRON',
+            'tibc' => 'TIBC',
+            'ferritin', 'serumferritin' => 'SERUM FERRITIN',
+            'xraychest', 'chestxray', 'chestpa', 'xraychestpa', 'xraychestpaview', 'chestpaview', 'chest' => 'CHEST X-RAY (PA)',
+            'xraykub', 'kub' => 'X-RAY KUB',
+            'troponint', 'tropt', 'trop' => 'TROPONIN-T',
+            'ckmb' => 'CK-MB',
+            'sputumafb', 'afb' => 'SPUTUM AFB',
+            'genxpert', 'genxpertmtbrif', 'genxpertmtb', 'xpert' => 'GEN-XPERT (MTB)',
+            'semenanalysis', 'semencount' => 'SEMEN ANALYSIS',
+            'semencs' => 'SEMEN C/S',
+            'semenxpert' => 'SEMEN-XPERT',
+            'ogct' => 'OGCT',
+            'fasting', 'fbs', 'fastingbloodsugar' => 'FASTING (FBS)',
+            'postprandial', 'ppbs', 'postprandialbloodsugar' => 'PPBS',
+            'hba1c', 'glycatedhemoglobin' => 'HBA1C',
+            'rft', 'renalfunctiontest', 'renalfunction' => 'RFT',
+            'lft', 'liverfunctiontest', 'liverfunction' => 'LFT',
+            'srbilirubin', 'bilirubin', 'totalbilirubin', 'serumbilirubin' => 'SR. BILIRUBIN',
+            'electrolytes', 'serumelectrolytes', 'electrolyte' => 'SERUM ELECTROLYTES',
+            'calcium', 'serumcalcium' => 'SERUM CALCIUM',
+            'amylase', 'serumamylase' => 'SERUM AMYLASE',
+            'lipase', 'serumlipase' => 'SERUM LIPASE',
+            'urineroutine', 'urinalysis', 'urineanalysis', 'urinecomplete', 'urine' => 'URINE ROUTINE',
+            'spotpcr' => 'SPOT PCR',
+            'spotmicroalbumin' => 'SPOT MICROALBUMIN',
+            'spotsodium' => 'SPOT SODIUM',
+            'cholestrol', 'cholesterol', 'totalcholesterol' => 'CHOLESTEROL',
+            'triglycerides', 'tg', 'tgl' => 'TRIGLYCERIDES',
+            'hdl', 'hdlcholesterol' => 'HDL',
+            'ldl', 'ldlcholesterol' => 'LDL',
+            'vldl', 'vldlcholesterol' => 'VLDL',
+            'ca125' => 'CA 125',
+            'fpsa', 'freepsa' => 'FPSA',
+            'spsa', 'psa', 'serumpsa' => 'S PSA',
+            'crp', 'creactiveprotein' => 'CRP',
+            'widal', 'widaltest' => 'WIDAL',
+            'rafactor', 'rheumatoidfactor' => 'RA FACTOR',
+            'asotiter', 'aso' => 'ASO TITER',
+            'dengue', 'dengueserology', 'denguens1', 'denguepanel' => 'DENGUE SEROLOGY',
+            'scrubtyphus' => 'SCRUB TYPHUS',
+            'urinecs' => 'URINE C/S',
+            'sputumcs' => 'SPUTUM C/S',
+            'puscs' => 'PUS C/S',
+            'bloodcs' => 'BLOOD C/S',
+            'tsh', 'thyroidstimulatinghormone' => 'TSH',
+            'tft', 'thyroidfunctiontest' => 'TFT',
+            'testosterone', 'serumtestosterone' => 'TESTOSTERONE',
+            'estradiol', 'e2', 'serumestradiol' => 'ESTRADIOL',
+            'amh' => 'AMH',
+            'ana', 'antinuclearantibodies' => 'ANA',
+            'prolactin', 'serumprolactin' => 'PROLACTIN',
+            'lhfsh', 'lh', 'fsh' => 'LH, FSH',
+            'ddimer' => 'D-DIMER',
+            'betahcg', 'hcg' => 'BETA HCG',
+            'package1', 'packagei' => 'PACKAGE - 1',
+            'package2', 'packageii' => 'PACKAGE - 2',
+            'package3', 'packageiii' => 'PACKAGE - 3',
+            default => strtoupper($rawLabel),
+        };
+    }
+
+    /**
      * Parse investigations into structured key-value pairs sorted in standard clinical order
      * with standard clinical units and normal reference ranges.
      *
@@ -157,21 +635,7 @@ class DischargeSummaryFormatter
         if (is_array($investigations)) {
             foreach ($investigations as $k => $v) {
                 $rawLabel = is_string($k) ? trim($k) : 'TEST';
-                $key = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $rawLabel));
-                $label = match ($key) {
-                    'hb', 'haemoglobin' => 'HB',
-                    'bg', 'bloodgroup' => 'BLOOD GROUP',
-                    'hiv' => 'HIV',
-                    'hcv' => 'HCV',
-                    'vdrl' => 'VDRL',
-                    'hbsag' => 'HBSAG',
-                    'urea' => 'UREA',
-                    'creatinine', 'creatine' => 'CREATININE',
-                    'uricacid' => 'URIC ACID',
-                    'rbs' => 'RBS',
-                    'ecg', 'ekg', 'electrocardiogram' => 'ECG',
-                    default => strtoupper($rawLabel),
-                };
+                $label = self::normalizeInvestigationKey($rawLabel);
                 $val = is_array($v) ? implode(', ', $v) : (string)$v;
                 $std = self::INVESTIGATION_STANDARDS[$label] ?? ['unit' => '', 'normal_range' => '', 'reference' => ''];
                 $items[] = [
@@ -193,22 +657,7 @@ class DischargeSummaryFormatter
                 if (preg_match('/^([^:=]+)[:=](.+)$/', $line, $m)) {
                     $rawLabel = trim($m[1]);
                     $rawVal = trim($m[2]);
-
-                    $key = strtolower(preg_replace('/[^a-zA-Z0-9]/', '', $rawLabel));
-                    $label = match ($key) {
-                        'hb', 'haemoglobin' => 'HB',
-                        'bg', 'bloodgroup' => 'BLOOD GROUP',
-                        'hiv' => 'HIV',
-                        'hcv' => 'HCV',
-                        'vdrl' => 'VDRL',
-                        'hbsag' => 'HBSAG',
-                        'urea' => 'UREA',
-                        'creatinine', 'creatine' => 'CREATININE',
-                        'uricacid' => 'URIC ACID',
-                        'rbs' => 'RBS',
-                        'ecg', 'ekg', 'electrocardiogram' => 'ECG',
-                        default => strtoupper($rawLabel),
-                    };
+                    $label = self::normalizeInvestigationKey($rawLabel);
 
                     $std = self::INVESTIGATION_STANDARDS[$label] ?? ['unit' => '', 'normal_range' => '', 'reference' => ''];
 
