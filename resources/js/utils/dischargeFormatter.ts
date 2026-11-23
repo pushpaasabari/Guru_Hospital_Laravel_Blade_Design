@@ -726,9 +726,6 @@ export function formatNewborns(admission: any): FormattedNewbornCard[] {
       : '—';
 
     let neonatalCare = baby.neonatal_care || '—';
-    if (idx === 0 && /rds/i.test(neonatalCare)) {
-      neonatalCare = 'RDS (+). Handed over to pediatrician; shifted to NICU.';
-    }
 
     cards.push({ title, sex, born: bornTime, mode, weight, apgar, neonatal_care: neonatalCare });
   });

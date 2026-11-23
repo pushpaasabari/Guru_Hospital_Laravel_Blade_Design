@@ -1056,9 +1056,6 @@ class DischargeSummaryFormatter
                 : '—';
 
             $neonatalCare = $baby->neonatal_care ?: '—';
-            if ($idx === 0 && str_contains(strtolower($neonatalCare), 'rds')) {
-                $neonatalCare = 'RDS (+). Handed over to pediatrician; shifted to NICU.';
-            }
 
             $cards[] = [
                 'title' => $title,
