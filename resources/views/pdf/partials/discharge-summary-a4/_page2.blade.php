@@ -252,20 +252,25 @@
 
         <div class="a4-outlined-card">
             <span class="a4-lbl">Follow-up Review</span>
-            @if($followText || $followDate)
-                @php
-                    $formattedFollowText = $followText
-                        ? preg_replace('/(\b\d{1,2}[\/-]\d{1,2}[\/-]\d{2,4}\b)/', '<strong>$1</strong>', e($followText))
-                        : 'Follow-up Review';
-                @endphp
-                <div class="a4-val" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>{!! $formattedFollowText !!}</span>
-                    @if($followDate)
-                        <strong style="font-size: 9.5pt;">{{ $followDate }}</strong>
-                    @endif
-                </div>
+            @php
+                $text = trim((string) $followText);
+                $date = trim((string) $followDate);
+                if ($text !== '' && $date !== '' && !str_contains($text, $date)) {
+                    if (preg_match('/[:\-]\s*$/', $text)) {
+                        $fullReviewText = rtrim($text, " :\-") . ' : ' . $date;
+                    } elseif (preg_match('/\b(?:on|at)\s*$/i', $text)) {
+                        $fullReviewText = $text . ' ' . $date;
+                    } else {
+                        $fullReviewText = $text . ' : ' . $date;
+                    }
+                } else {
+                    $fullReviewText = $text !== '' ? $text : $date;
+                }
+            @endphp
+            @if($fullReviewText !== '')
+                <div class="a4-val a4-val-bold">{{ $fullReviewText }}</div>
             @else
-                <span class="a4-val">—</span>
+                <span class="a4-val a4-val-bold">—</span>
             @endif
         </div>
 

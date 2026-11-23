@@ -206,6 +206,11 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
             $this->assertLessThan($advicePos, $implantPos);
         }
 
+        // Follow-up review is bold and inline
+        $this->assertStringContainsString('Follow-up Review</span>', $htmlAdult);
+        $this->assertMatchesRegularExpression('/Follow-up Review<\/span>\s*<div class="a4-val a4-val-bold">\s*After 7 days/s', $htmlAdult);
+        $this->assertStringNotContainsString('display: flex; justify-content: space-between;', $htmlAdult);
+
         // 2. Delivery case: Pediatrician is displayed
         $deliveryAdmission = Admission::create([
             'patient_name' => 'Mother Patient',
@@ -341,5 +346,38 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
         $this->assertStringContainsString('Reg.No:74950', $htmlJp);
         $this->assertStringContainsString('Consultant Urologist &amp; Surgeon', $htmlJp);
         $this->assertStringContainsString('Dharmapuri-636701', $htmlJp);
+    }
+
+    public function test_page2_follow_up_review_moves_date_adjacent_and_bolds_text(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'MRS. MANJULA',
+            'uhid' => '2026/4388',
+            'ip_no' => '2026/908',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+            'procedure_name' => 'Emergency LSCS',
+            'procedure_done' => 'Emergency LSCS done under SA',
+            'consultant' => 'DR.K.AMBIKA',
+            'diagnosis' => 'Full Term Primigravida in Labour',
+            'discharge_advice' => "Review after one week For Suture Removal (27/11/2026)",
+            'admission_at' => now(),
+            'created_by' => $this->doctor->id,
+            'approved_by' => $this->doctor->id,
+            'status' => 'approved',
+        ]);
+
+        $html = view('pdf.partials.discharge-summary-a4._page2', ['admission' => $admission])->render();
+
+        // Must be in bold
+        $this->assertStringContainsString('class="a4-val a4-val-bold"', $html);
+        $this->assertStringContainsString('Review after one week For Suture Removal', $html);
+        $this->assertStringContainsString('27/11/2026', $html);
+
+        // Date must NOT be pushed across the page with space-between
+        $this->assertStringNotContainsString('display: flex; justify-content: space-between;', $html);
+
+        // Value must be formatted inline together
+        $this->assertMatchesRegularExpression('/<div class="a4-val a4-val-bold">\s*Review after one week For Suture Removal\s*[:(]?\s*27\/11\/2026/s', $html);
     }
 }
