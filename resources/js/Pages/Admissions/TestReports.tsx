@@ -22,6 +22,9 @@ interface AdmissionData {
   surgery_type: string;
   diagnosis: string;
   investigations?: string | null;
+  vital_bp?: string | null;
+  vital_pulse?: string | null;
+  vital_spo2?: string | null;
   status: string;
 }
 
@@ -248,6 +251,9 @@ export default function AdmissionsTestReports({ admission }: Props) {
 
   const { data, setData, put, transform, processing, errors } = useForm({
     investigations: admission.investigations || serializeInvestigations(initial.core, initial.extra),
+    vital_bp: admission.vital_bp || '',
+    vital_pulse: admission.vital_pulse || '',
+    vital_spo2: admission.vital_spo2 || '',
     next_step: 'surgery',
   });
 
@@ -302,6 +308,9 @@ export default function AdmissionsTestReports({ admission }: Props) {
       investigations: showRawEditor
         ? current.investigations
         : serializeInvestigations(coreValues, extraTests),
+      vital_bp: data.vital_bp,
+      vital_pulse: data.vital_pulse,
+      vital_spo2: data.vital_spo2,
       next_step: step,
     }));
     put(`/admissions/${admission.id}/test-reports`);
@@ -313,23 +322,23 @@ export default function AdmissionsTestReports({ admission }: Props) {
 
   return (
     <AppLayout>
-      <Head title={`Stage 2: Lab Results — ${admission.patient_name}`} />
+      <Head title={`Stage 3: Test Reports — ${admission.patient_name}`} />
 
-      {/* 4-Stage Navigation Header */}
+      {/* 5-Stage Navigation Header */}
       <AdmissionStageNav currentStage="test-reports" admission={admission} />
 
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
           <h1 className="h3 fw-bold mb-1 text-dark" style={{ letterSpacing: '-0.02em' }}>
-            Stage 2: Laboratory &amp; Diagnostic Test Reports
+            Stage 3: Laboratory &amp; Diagnostic Test Reports
           </h1>
           <p className="text-muted mb-0">
-            Standard laboratory investigations are predefined below. Simply enter the patient&rsquo;s test values.
+            Standard laboratory investigations and vital signs. Simply enter the patient&rsquo;s test values.
           </p>
         </div>
         <div className="d-flex gap-2">
-          <Link href={`/admissions/${admission.id}/edit`} className="btn btn-outline-secondary">
-            <i className="bi bi-arrow-left me-1"></i> Back to Stage 1: Admission
+          <Link href={`/admissions/${admission.id}/clinical`} className="btn btn-outline-secondary">
+            <i className="bi bi-arrow-left me-1"></i> Back to Stage 2: Clinical Assessment
           </Link>
           <button
             type="button"
@@ -343,12 +352,71 @@ export default function AdmissionsTestReports({ admission }: Props) {
       </div>
 
       <form id="testReportsForm">
+        {/* Section 3.1: Vitals (BP, Pulse, SpO2) */}
+        <div className="card mb-4 border-0 shadow-sm">
+          <div className="card-header bg-white py-3 fw-bold text-dark d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div>
+              <span className="badge bg-primary me-2">3.1</span> Vital Signs (BP, Pulse, SpO2)
+            </div>
+            <span className="text-muted small">Recorded at Diagnostic Evaluation</span>
+          </div>
+          <div className="card-body">
+            <div className="row g-3">
+              <div className="col-md-4">
+                <label className="form-label fw-semibold text-secondary small text-uppercase">
+                  Blood Pressure (BP)
+                </label>
+                <div className="input-group">
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={data.vital_bp}
+                    onChange={(e) => setData('vital_bp', e.target.value)}
+                    placeholder="e.g. 120/80 mmHg"
+                  />
+                  <span className="input-group-text bg-light text-muted small">mmHg</span>
+                </div>
+              </div>
+              <div className="col-md-4">
+                <label className="form-label fw-semibold text-secondary small text-uppercase">
+                  Pulse Rate
+                </label>
+                <div className="input-group">
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={data.vital_pulse}
+                    onChange={(e) => setData('vital_pulse', e.target.value)}
+                    placeholder="e.g. 78"
+                  />
+                  <span className="input-group-text bg-light text-muted small">bpm</span>
+                </div>
+              </div>
+              <div className="col-md-4">
+                <label className="form-label fw-semibold text-secondary small text-uppercase">
+                  SpO2 (Oxygen Saturation)
+                </label>
+                <div className="input-group">
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={data.vital_spo2}
+                    onChange={(e) => setData('vital_spo2', e.target.value)}
+                    placeholder="e.g. 99"
+                  />
+                  <span className="input-group-text bg-light text-muted small">%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Core Hospital Lab Results Form (Values Only) */}
         {!showRawEditor ? (
           <div className="card mb-4 border-0 shadow-sm">
             <div className="card-header bg-white py-3 fw-bold text-dark d-flex align-items-center justify-content-between flex-wrap gap-2">
               <div className="d-flex align-items-center gap-2">
-                <span className="badge bg-primary">2.1</span>
+                <span className="badge bg-primary">3.2</span>
                 <span>Hospital Core Lab Investigations (Enter Values Only)</span>
               </div>
               <button
@@ -398,7 +466,7 @@ export default function AdmissionsTestReports({ admission }: Props) {
                   <div className="col-md-6">
                     <div className="d-flex justify-content-between align-items-center mb-1">
                       <label className="form-label fw-semibold text-secondary small text-uppercase mb-0">
-                        Blood Group &amp; Rh (BG)
+                        BLOOD GROUP &amp; RH (BG)
                       </label>
                       <span className="badge bg-white text-muted border" style={{ fontSize: '0.72rem' }}>
                         ABO &amp; Rh Compatibility
@@ -411,20 +479,21 @@ export default function AdmissionsTestReports({ admission }: Props) {
                       <input
                         type="text"
                         className="form-control"
+                        style={{ textTransform: 'uppercase' }}
                         value={coreValues.bg}
-                        onChange={(e) => updateCore('bg', e.target.value)}
-                        placeholder="Enter value or select (e.g. O positive)"
+                        onChange={(e) => updateCore('bg', e.target.value.toUpperCase())}
+                        placeholder="Enter value or select (e.g. O POSITIVE)"
                         list="bgOptions"
                       />
                       <datalist id="bgOptions">
-                        <option value="O positive" />
-                        <option value="A positive" />
-                        <option value="B positive" />
-                        <option value="AB positive" />
-                        <option value="O negative" />
-                        <option value="A negative" />
-                        <option value="B negative" />
-                        <option value="AB negative" />
+                        <option value="O POSITIVE" />
+                        <option value="A POSITIVE" />
+                        <option value="B POSITIVE" />
+                        <option value="AB POSITIVE" />
+                        <option value="O NEGATIVE" />
+                        <option value="A NEGATIVE" />
+                        <option value="B NEGATIVE" />
+                        <option value="AB NEGATIVE" />
                       </datalist>
                     </div>
                   </div>
@@ -947,8 +1016,8 @@ export default function AdmissionsTestReports({ admission }: Props) {
 
         {/* Action Bar */}
         <div className="d-flex justify-content-between align-items-center pb-5">
-          <Link href={`/admissions/${admission.id}/edit`} className="btn btn-outline-secondary">
-            <i className="bi bi-arrow-left me-1"></i> Back to Stage 1: Admission
+          <Link href={`/admissions/${admission.id}/clinical`} className="btn btn-outline-secondary">
+            <i className="bi bi-arrow-left me-1"></i> Back to Stage 2: Clinical Assessment
           </Link>
           <div className="d-flex gap-2">
             <button
@@ -957,7 +1026,7 @@ export default function AdmissionsTestReports({ admission }: Props) {
               disabled={processing}
               className="btn btn-outline-primary px-3 py-2 fw-semibold"
             >
-              Save Stage 2 Changes
+              Save Stage 3 Changes
             </button>
             <button
               type="button"
@@ -965,7 +1034,7 @@ export default function AdmissionsTestReports({ admission }: Props) {
               disabled={processing}
               className="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2"
             >
-              <span>Save &amp; Next: Stage 3 (Labour / Surgery)</span>
+              <span>Save &amp; Next: Stage 4 (Labour / Surgery)</span>
               <i className="bi bi-arrow-right"></i>
             </button>
           </div>

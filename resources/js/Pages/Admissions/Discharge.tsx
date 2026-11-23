@@ -26,12 +26,18 @@ interface AdmissionData {
   drain?: string | null;
   discharge_at?: string | null;
   discharge_condition?: string | null;
+  discharge_bp?: string | null;
+  discharge_pulse?: string | null;
+  discharge_spo2?: string | null;
   clinical_history?: string | null;
   examination?: string | null;
   treatment_course?: string | null;
   medication_orders?: string | null;
   discharge_advice?: string | null;
+  post_surgery_diet?: string | null;
+  post_surgery_activity?: string | null;
   follow_up?: string | null;
+  suture_removal_date?: string | null;
   mrd_no?: string | null;
   payment_mode?: string | null;
   insurance_type?: string | null;
@@ -225,12 +231,18 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
   const { data, setData, put, transform, processing, errors } = useForm({
     discharge_at: admission.discharge_at ? admission.discharge_at.slice(0, 16) : '',
     discharge_condition: admission.discharge_condition || '',
+    discharge_bp: admission.discharge_bp || '',
+    discharge_pulse: admission.discharge_pulse || '',
+    discharge_spo2: admission.discharge_spo2 || '',
     clinical_history: admission.clinical_history || '',
     examination: admission.examination || '',
-    treatment_course: admission.treatment_course || '',
+    treatment_course: '',
     medication_orders: admission.medication_orders || serializeMedications(initialMedRows),
     discharge_advice: admission.discharge_advice || '',
+    post_surgery_diet: admission.post_surgery_diet || '',
+    post_surgery_activity: admission.post_surgery_activity || '',
     follow_up: admission.follow_up || '',
+    suture_removal_date: admission.suture_removal_date ? String(admission.suture_removal_date).slice(0, 10) : '',
     mrd_no: resolveMrdNo(admission.mrd_no, admission.ip_no),
     payment_mode: normalizePaymentMode(admission.payment_mode),
     insurance_type: admission.insurance_type || '',
@@ -347,23 +359,23 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
 
   return (
     <AppLayout>
-      <Head title={`Stage 4: Discharge Summary — ${admission.patient_name}`} />
+      <Head title={`Stage 5: Discharge Summary — ${admission.patient_name}`} />
 
-      {/* 4-Stage Navigation Header */}
+      {/* 5-Stage Navigation Header */}
       <AdmissionStageNav currentStage="discharge" admission={admission} />
 
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
           <h1 className="h3 fw-bold mb-1 text-dark" style={{ letterSpacing: '-0.02em' }}>
-            Stage 4: Discharge Summary &amp; MRD Records
+            Stage 5: Discharge Summary &amp; MRD Records
           </h1>
           <p className="text-muted mb-0">
-            Finalize discharge timing, condition at discharge, clinical history, medications, advice, and MRD signoffs.
+            Finalize discharge timing, condition at discharge, medications, post-surgery diet &amp; activity, and MRD signoffs.
           </p>
         </div>
         <div className="d-flex gap-2">
           <Link href={`/admissions/${admission.id}/surgery`} className="btn btn-outline-secondary">
-            <i className="bi bi-arrow-left me-1"></i> Back to Stage 3: {admission.surgery_type === 'medical' ? 'Clinical Notes' : 'Labour / Surgery'}
+            <i className="bi bi-arrow-left me-1"></i> Back to Stage 4: {admission.surgery_type === 'medical' ? 'Clinical Notes' : 'Labour / Surgery'}
           </Link>
           <Link href={`/admissions/${admission.id}/documents/preview`} className="btn btn-outline-secondary">
             <i className="bi bi-file-earmark-text me-1"></i> Preview Documents
@@ -376,13 +388,13 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
         <div className="card mb-4 border-0 shadow-sm">
           <div className="card-header bg-white py-3 fw-bold text-dark d-flex align-items-center justify-content-between">
             <div>
-              <span className="badge bg-primary me-2">4.1</span> Discharge Details &amp; Patient Condition
+              <span className="badge bg-primary me-2">5.1</span> Discharge Details &amp; Patient Condition
             </div>
-            <span className="text-muted small">Step 4 of 4</span>
+            <span className="text-muted small">Step 5 of 5</span>
           </div>
           <div className="card-body">
             <div className="row g-3">
-              <div className="col-md-4">
+              <div className="col-md-3">
                 <label className="form-label required">Discharge Date &amp; Time</label>
                 <input
                   type="datetime-local"
@@ -394,68 +406,58 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
                 {errors.discharge_at && <div className="invalid-feedback">{errors.discharge_at}</div>}
               </div>
 
-              <div className="col-md-8">
-                <label className="form-label">Condition at Discharge</label>
+              <div className="col-md-3">
+                <label className="form-label">General Condition</label>
                 <input
                   type="text"
                   className="form-control"
                   value={data.discharge_condition}
                   onChange={(e) => setData('discharge_condition', e.target.value)}
-                  placeholder="e.g. Pt’s general condition good. BP: 110/70mmHg, Pulse: 86 b/mt, P/A: Uterus contracted well."
+                  placeholder="e.g. Good / Stable / Afebrile"
+                />
+              </div>
+
+              <div className="col-md-2">
+                <label className="form-label">BP (Blood Pressure)</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={data.discharge_bp}
+                  onChange={(e) => setData('discharge_bp', e.target.value)}
+                  placeholder="e.g. 110/70 mmHg"
+                />
+              </div>
+
+              <div className="col-md-2">
+                <label className="form-label">Pulse Rate</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={data.discharge_pulse}
+                  onChange={(e) => setData('discharge_pulse', e.target.value)}
+                  placeholder="e.g. 84 bpm"
+                />
+              </div>
+
+              <div className="col-md-2">
+                <label className="form-label">SpO2</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={data.discharge_spo2}
+                  onChange={(e) => setData('discharge_spo2', e.target.value)}
+                  placeholder="e.g. 99%"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Section 2: Clinical Narrative */}
-        <div className="card mb-4 border-0 shadow-sm">
-          <div className="card-header bg-white py-3 fw-bold text-dark">
-            <span className="badge bg-primary me-2">4.2</span> Clinical History &amp; Course in Hospital
-          </div>
-          <div className="card-body">
-            <div className="row g-3">
-              <div className="col-md-6">
-                <label className="form-label">Presenting Complaints / Clinical History</label>
-                <textarea
-                  className="form-control"
-                  rows={4}
-                  value={data.clinical_history}
-                  onChange={(e) => setData('clinical_history', e.target.value)}
-                  placeholder="e.g. G3P1L1A1 / TWINS / EDD 22-9-2026 / admitted for safe confinement. C/O abdominal Pain"
-                />
-              </div>
-
-              <div className="col-md-6">
-                <label className="form-label">Clinical Examination</label>
-                <textarea
-                  className="form-control"
-                  rows={4}
-                  value={data.examination}
-                  onChange={(e) => setData('examination', e.target.value)}
-                  placeholder="e.g. O/E – Afebrile, No Pallor, No Pedal edema. CVS & RS – NAD. P/A: Uterus Overdistended, Both FH good."
-                />
-              </div>
-
-              <div className="col-12">
-                <label className="form-label">Course in Hospital &amp; Treatment Given</label>
-                <textarea
-                  className="form-control"
-                  rows={4}
-                  value={data.treatment_course}
-                  onChange={(e) => setData('treatment_course', e.target.value)}
-                  placeholder="e.g. Treated with IV Fluids&#10;Inj-Pipzo 4.5g BD IV&#10;Inj-Metrogyl 100mg BD&#10;Inj-Pan 40 IV BD"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Section 3: Structured Medication Orders & Stent Advice */}
+        {/* Section 2: Structured Medication Orders */}
         <div className="card mb-4 border-0 shadow-sm">
           <div className="card-header bg-white py-3 fw-bold text-dark d-flex justify-content-between align-items-center flex-wrap gap-2">
             <div>
-              <span className="badge bg-primary me-2">4.3</span> Discharge Medication Orders (Dropdown &amp; Timing)
+              <span className="badge bg-primary me-2">5.2</span> Discharge Medication Orders (Dropdown &amp; Timing)
             </div>
             <div className="d-flex gap-1.5 flex-wrap">
               <span className="small text-muted me-1 align-self-center">Prescription Packs:</span>
@@ -624,7 +626,15 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
                 ))}
               </datalist>
             </div>
+          </div>
+        </div>
 
+        {/* Section 3: Discharge Advice, Post-Surgery Diet/Activity & Review */}
+        <div className="card mb-4 border-0 shadow-sm">
+          <div className="card-header bg-white py-3 fw-bold text-dark">
+            <span className="badge bg-primary me-2">5.3</span> Discharge Advice, Post-Surgery Diet, Activity &amp; Review
+          </div>
+          <div className="card-body">
             {/* Stent Placement Detection & Mandatory Tamil Instruction */}
             <div className="card mb-4 border-warning bg-warning-subtle">
               <div className="card-body p-3">
@@ -687,27 +697,96 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
               </div>
             </div>
 
-            {/* Advice and Follow-Up */}
+            {/* Advice, Post-Surgery Diet & Activity, and Suture Removal */}
             <div className="row g-3">
               <div className="col-md-6">
-                <label className="form-label fw-semibold text-dark">Discharge Advice &amp; Instructions</label>
-                <textarea
+                <label className="form-label fw-semibold text-dark">
+                  <i className="bi bi-cup-hot me-1 text-primary"></i> Post Surgery Diet
+                </label>
+                <input
+                  type="text"
                   className="form-control"
-                  rows={4}
-                  value={data.discharge_advice}
-                  onChange={(e) => setData('discharge_advice', e.target.value)}
-                  placeholder="e.g. Immunisation&#10;Exclusive breast feeding for 6 months&#10;Post Natal Exercise"
+                  value={data.post_surgery_diet}
+                  onChange={(e) => setData('post_surgery_diet', e.target.value)}
+                  placeholder="e.g. Normal diet / Soft diet / Diabetic diet"
+                  list="dietOptions"
                 />
+                <datalist id="dietOptions">
+                  <option value="Normal diet" />
+                  <option value="Soft diet" />
+                  <option value="Diabetic diet" />
+                  <option value="High protein diet" />
+                  <option value="Liquid diet" />
+                  <option value="Low salt diet" />
+                </datalist>
+                <div className="form-text text-muted small">Specify recommended nutritional regimen.</div>
               </div>
 
               <div className="col-md-6">
-                <label className="form-label fw-semibold text-dark">Follow-up Advice &amp; Review Date</label>
-                <textarea
+                <label className="form-label fw-semibold text-dark">
+                  <i className="bi bi-person-walking me-1 text-primary"></i> Post Surgery Activity
+                </label>
+                <input
+                  type="text"
                   className="form-control"
-                  rows={4}
+                  value={data.post_surgery_activity}
+                  onChange={(e) => setData('post_surgery_activity', e.target.value)}
+                  placeholder="e.g. Normal activity / Avoid heavy lifting / Bed rest"
+                  list="activityOptions"
+                />
+                <datalist id="activityOptions">
+                  <option value="Normal activity" />
+                  <option value="Avoid heavy lifting for 3 months" />
+                  <option value="Rest for 1 week" />
+                  <option value="Walking as tolerated" />
+                  <option value="Post Natal Exercise" />
+                </datalist>
+                <div className="form-text text-muted small">Specify physical mobility or restrictions.</div>
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label fw-semibold text-dark">
+                  <i className="bi bi-calendar-check me-1 text-primary"></i> Suture Removal / Review Date
+                </label>
+                <input
+                  type="date"
+                  className="form-control fw-bold"
+                  value={data.suture_removal_date}
+                  onChange={(e) => setData('suture_removal_date', e.target.value)}
+                />
+                <div className="form-text text-muted small">Rendered in bold in the official discharge summary.</div>
+              </div>
+
+              <div className="col-md-6">
+                <label className="form-label fw-semibold text-dark">
+                  <i className="bi bi-chat-left-dots me-1 text-primary"></i> Follow-up Review Instructions
+                </label>
+                <input
+                  type="text"
+                  className="form-control"
                   value={data.follow_up}
                   onChange={(e) => setData('follow_up', e.target.value)}
-                  placeholder="e.g. Review after one week (03/09/2026)"
+                  placeholder="e.g. Review after one week for Suture Removal"
+                  list="reviewPresets"
+                />
+                <datalist id="reviewPresets">
+                  <option value="Review after one week for Suture Removal" />
+                  <option value="Review after 5 days for Suture Removal" />
+                  <option value="Review after 10 days" />
+                  <option value="Review after 2 weeks" />
+                  <option value="Review SOS (as needed)" />
+                </datalist>
+                <div className="form-text text-muted small">Follow-up schedule for clinical review.</div>
+              </div>
+
+              <div className="col-12">
+                <label className="form-label fw-semibold text-dark">General Discharge Advice &amp; Instructions</label>
+                <textarea
+                  className="form-control"
+                  rows={3}
+                  value={data.discharge_advice}
+                  onChange={(e) => setData('discharge_advice', e.target.value)}
+                  placeholder="e.g. Exclusive breast feeding for 6 months&#10;Post Natal Exercise&#10;Keep incision site clean and dry"
                 />
               </div>
             </div>
@@ -717,7 +796,7 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
         {/* Section 4: MRD & Handover */}
         <div className="card mb-4 border-0 shadow-sm">
           <div className="card-header bg-white py-3 fw-bold text-dark">
-            <span className="badge bg-primary me-2">4.4</span> Medical Record Department (MRD) &amp; Ward Handover
+            <span className="badge bg-primary me-2">5.4</span> Medical Record Department (MRD) &amp; Ward Handover
           </div>
           <div className="card-body">
             <div className="row g-3">

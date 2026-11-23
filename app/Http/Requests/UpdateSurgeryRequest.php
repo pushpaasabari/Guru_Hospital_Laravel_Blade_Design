@@ -46,6 +46,7 @@ class UpdateSurgeryRequest extends FormRequest
             'specimen' => ['nullable', 'string', 'max:2000'],
             'drain' => ['nullable', 'string', 'max:2000'],
             'postoperative_orders' => ['nullable', 'string', 'max:10000'],
+            'stent_removal_date' => ['nullable', 'date'],
 
             // Newborns for delivery workflow
             'newborns' => ['nullable', 'array'],

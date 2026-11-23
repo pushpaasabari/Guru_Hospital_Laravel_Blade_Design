@@ -30,7 +30,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index']);
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
-    // Admissions & Clinical Entry (4-Stage Workflow)
+    // Admissions & Clinical Entry (5-Stage Workflow)
     Route::get('/admissions', [AdmissionController::class, 'index'])->name('admissions.index');
     Route::get('/admissions/create', [AdmissionController::class, 'create'])->name('admissions.create');
     Route::post('/admissions', [AdmissionController::class, 'store'])->name('admissions.store');
@@ -40,15 +40,19 @@ Route::middleware('auth')->group(function () {
     Route::put('/admissions/{admission}', [AdmissionController::class, 'update'])->name('admissions.update');
     Route::post('/admissions/{admission}/revision', [AdmissionController::class, 'createRevision'])->name('admissions.revision');
 
-    // Stage 2: Labour / LSCS / Surgery
-    Route::get('/admissions/{admission}/surgery', [AdmissionController::class, 'editSurgery'])->name('admissions.surgery');
-    Route::put('/admissions/{admission}/surgery', [AdmissionController::class, 'updateSurgery'])->name('admissions.surgery.update');
+    // Stage 2: Clinical Assessment (Clinical History & Examination)
+    Route::get('/admissions/{admission}/clinical', [AdmissionController::class, 'editClinical'])->name('admissions.clinical');
+    Route::put('/admissions/{admission}/clinical', [AdmissionController::class, 'updateClinical'])->name('admissions.clinical.update');
 
     // Stage 3: Test Reports
     Route::get('/admissions/{admission}/test-reports', [AdmissionController::class, 'editTestReports'])->name('admissions.test-reports');
     Route::put('/admissions/{admission}/test-reports', [AdmissionController::class, 'updateTestReports'])->name('admissions.test-reports.update');
 
-    // Stage 4: Discharge
+    // Stage 4: Labour / LSCS / Surgery
+    Route::get('/admissions/{admission}/surgery', [AdmissionController::class, 'editSurgery'])->name('admissions.surgery');
+    Route::put('/admissions/{admission}/surgery', [AdmissionController::class, 'updateSurgery'])->name('admissions.surgery.update');
+
+    // Stage 5: Discharge
     Route::get('/admissions/{admission}/discharge', [AdmissionController::class, 'editDischarge'])->name('admissions.discharge');
     Route::put('/admissions/{admission}/discharge', [AdmissionController::class, 'updateDischarge'])->name('admissions.discharge.update');
 

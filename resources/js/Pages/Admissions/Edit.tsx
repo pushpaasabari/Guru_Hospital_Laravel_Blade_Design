@@ -10,6 +10,8 @@ import PaymentInsuranceFields, { normalizePaymentMode } from '../../Components/P
 interface AdmissionData {
   id: number;
   patient_name: string;
+  attender_name?: string | null;
+  attender_relation?: string | null;
   uhid: string;
   ip_no: string;
   picme_no?: string | null;
@@ -85,6 +87,8 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
   const [customConsultant, setCustomConsultant] = useState(false);
   const { data, setData, put, transform, processing, errors } = useForm({
     patient_name: admission.patient_name || '',
+    attender_name: admission.attender_name || '',
+    attender_relation: admission.attender_relation || '',
     uhid: admission.uhid || '',
     ip_no: admission.ip_no || '',
     picme_no: admission.picme_no || '',
@@ -149,7 +153,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
     floor_incharge_name: admission.floor_incharge_name || '',
     mrd_incharge_name: admission.mrd_incharge_name || '',
     newborns: admission.newborns || [],
-    next_step: 'test-reports',
+    next_step: 'clinical',
   });
 
   const isFemale = data.sex?.toLowerCase() === 'female';
@@ -173,7 +177,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
     }
   };
 
-  const submitWithStep = (step: 'stay' | 'test-reports', e: React.FormEvent) => {
+  const submitWithStep = (step: 'stay' | 'clinical' | 'test-reports', e: React.FormEvent) => {
     e.preventDefault();
     transform((current) => ({ ...current, next_step: step }));
     put(`/admissions/${admission.id}`);
@@ -181,7 +185,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
 
   const handleSaveOnly = (e: React.FormEvent) => submitWithStep('stay', e);
 
-  const handleSaveAndNext = (e: React.FormEvent) => submitWithStep('test-reports', e);
+  const handleSaveAndNext = (e: React.FormEvent) => submitWithStep('clinical', e);
 
   return (
     <AppLayout>
@@ -216,7 +220,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
             <div>
               <span className="badge bg-primary me-2">1.1</span> Patient Demographics
             </div>
-            <span className="text-muted small">Step 1 of 4</span>
+            <span className="text-muted small">Step 1 of 5</span>
           </div>
           <div className="card-body">
             <div className="row g-3">
@@ -229,6 +233,42 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                   placeholder="e.g. PATIENT NAME"
                   required
                 />
+              </div>
+              <div className="col-md-4">
+                <label className="form-label">Attender / Care Of Name</label>
+                <input
+                  type="text"
+                  className={`form-control ${errors.attender_name ? 'is-invalid' : ''}`}
+                  style={{ textTransform: 'uppercase' }}
+                  value={data.attender_name}
+                  onChange={(e) =>
+                    handleNormalizedInputChange(e, toUpperCaseValue, (val) => setData('attender_name', val))
+                  }
+                  placeholder="e.g. S. MURUGAN"
+                />
+                {errors.attender_name && <div className="invalid-feedback">{errors.attender_name}</div>}
+              </div>
+              <div className="col-md-4">
+                <label className="form-label">Relationship to Patient</label>
+                <select
+                  className={`form-select ${errors.attender_relation ? 'is-invalid' : ''}`}
+                  value={data.attender_relation}
+                  onChange={(e) => setData('attender_relation', e.target.value)}
+                >
+                  <option value="">Select Relationship</option>
+                  <option value="Husband">Husband</option>
+                  <option value="Father">Father</option>
+                  <option value="Mother">Mother</option>
+                  <option value="Son">Son</option>
+                  <option value="Daughter">Daughter</option>
+                  <option value="Brother">Brother</option>
+                  <option value="Sister">Sister</option>
+                  <option value="Spouse">Spouse</option>
+                  <option value="Guardian">Guardian</option>
+                  <option value="Care of (C/o)">Care of (C/o)</option>
+                  <option value="Other">Other</option>
+                </select>
+                {errors.attender_relation && <div className="invalid-feedback">{errors.attender_relation}</div>}
               </div>
               <div className="col-md-4">
                 <label className="form-label required">UHID</label>
@@ -376,7 +416,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
               {data.surgery_type === 'delivery' && (
                 <div className="col-md-4">
                   <label className="form-label required">
-                    PICME Number (RCH ID)
+                    RCH ID (PICME No)
                     <span className="badge bg-danger-subtle text-danger ms-2" style={{ fontSize: '0.68rem' }}>
                       DELIVERY / OBSTETRIC
                     </span>
@@ -557,7 +597,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
               disabled={processing}
               className="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2"
             >
-              <span>Save &amp; Next: Stage 2 (Test Reports)</span>
+              <span>Save &amp; Next: Stage 2 (Clinical Assessment)</span>
               <i className="bi bi-arrow-right"></i>
             </button>
           </div>

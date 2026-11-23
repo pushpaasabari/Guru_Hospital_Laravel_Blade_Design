@@ -691,6 +691,9 @@ class DischargeSummaryFormatter
                 $rawLabel = is_string($k) ? trim($k) : 'TEST';
                 $label = self::normalizeInvestigationKey($rawLabel);
                 $val = is_array($v) ? implode(', ', $v) : (string)$v;
+                if ($label === 'BLOOD GROUP' || str_contains($label, 'BLOOD')) {
+                    $val = strtoupper($val);
+                }
                 $std = self::INVESTIGATION_STANDARDS[$label] ?? ['unit' => '', 'normal_range' => '', 'reference' => ''];
                 $items[] = [
                     'label' => $label,
@@ -712,6 +715,10 @@ class DischargeSummaryFormatter
                     $rawLabel = trim($m[1]);
                     $rawVal = trim($m[2]);
                     $label = self::normalizeInvestigationKey($rawLabel);
+
+                    if ($label === 'BLOOD GROUP' || str_contains($label, 'BLOOD')) {
+                        $rawVal = strtoupper($rawVal);
+                    }
 
                     $std = self::INVESTIGATION_STANDARDS[$label] ?? ['unit' => '', 'normal_range' => '', 'reference' => ''];
 
@@ -747,16 +754,42 @@ class DischargeSummaryFormatter
      * Parse condition on discharge into structured parameters.
      *
      * @param string|null $text
-     * @return array{general: string, bp: string, pulse: string, pa: string}
+     * @param Admission|null $admission
+     * @return array{general: string, bp: string, pulse: string, spo2: string, pa: string}
      */
-    public static function formatConditionOnDischarge(?string $text): array
+    public static function formatConditionOnDischarge(?string $text, ?Admission $admission = null): array
     {
         $res = [
             'general' => '—',
             'bp' => '—',
             'pulse' => '—',
+            'spo2' => '—',
             'pa' => '—',
         ];
+
+        if ($admission) {
+            if (!empty($admission->discharge_bp)) {
+                $bp = trim((string) $admission->discharge_bp);
+                if (!str_contains(strtolower($bp), 'mmhg')) {
+                    $bp .= ' mmHg';
+                }
+                $res['bp'] = $bp;
+            }
+            if (!empty($admission->discharge_pulse)) {
+                $pulse = trim((string) $admission->discharge_pulse);
+                if (!preg_match('/b\/(?:min|mt)|bpm/i', $pulse)) {
+                    $pulse .= ' b/min';
+                }
+                $res['pulse'] = $pulse;
+            }
+            if (!empty($admission->discharge_spo2)) {
+                $spo2 = trim((string) $admission->discharge_spo2);
+                if (!str_contains($spo2, '%')) {
+                    $spo2 .= '%';
+                }
+                $res['spo2'] = $spo2;
+            }
+        }
 
         if (!$text || !trim($text)) {
             return $res;
@@ -769,7 +802,7 @@ class DischargeSummaryFormatter
             $matchedAny = true;
         }
 
-        if (preg_match('/BP\s*[:\-]?\s*([0-9\/\s]+(?:mmHg)?)/i', $text, $m)) {
+        if ($res['bp'] === '—' && preg_match('/BP\s*[:\-]?\s*([0-9\/\s]+(?:mmHg)?)/i', $text, $m)) {
             $bp = trim($m[1]);
             if (!str_contains(strtolower($bp), 'mmhg')) {
                 $bp .= ' mmHg';
@@ -778,8 +811,17 @@ class DischargeSummaryFormatter
             $matchedAny = true;
         }
 
-        if (preg_match('/Pulse\s*[:\-]?\s*(\d+)\s*(?:b\/mt|b\/min|bpm)?/i', $text, $m)) {
+        if ($res['pulse'] === '—' && preg_match('/Pulse\s*[:\-]?\s*(\d+)\s*(?:b\/mt|b\/min|bpm)?/i', $text, $m)) {
             $res['pulse'] = $m[1] . ' b/min';
+            $matchedAny = true;
+        }
+
+        if ($res['spo2'] === '—' && preg_match('/SpO2\s*[:\-]?\s*(\d+(?:\s*%)?)/i', $text, $m)) {
+            $spo2 = trim($m[1]);
+            if (!str_contains($spo2, '%')) {
+                $spo2 .= '%';
+            }
+            $res['spo2'] = $spo2;
             $matchedAny = true;
         }
 
@@ -793,7 +835,7 @@ class DischargeSummaryFormatter
             $matchedAny = true;
         }
 
-        if (!$matchedAny) {
+        if (!$matchedAny && $res['general'] === '—') {
             $res['general'] = trim(preg_replace('/\s+/', ' ', $text));
         }
 
@@ -896,6 +938,10 @@ class DischargeSummaryFormatter
      */
     public static function hasStent(?Admission $admission = null, ?string $extraText = null): bool
     {
+        if ($admission && !empty($admission->stent_removal_date)) {
+            return true;
+        }
+
         $content = $extraText ?? '';
         if ($admission) {
             $content .= ' ' . ($admission->procedure_name ?? '')
@@ -910,15 +956,50 @@ class DischargeSummaryFormatter
     }
 
     /**
+     * Resolve the stent removal date string from an Admission model or string.
+     */
+    public static function resolveStentRemovalDate(Admission|string|null $dateOrAdmission = null): string
+    {
+        if ($dateOrAdmission instanceof Admission) {
+            if ($dateOrAdmission->stent_removal_date) {
+                return $dateOrAdmission->stent_removal_date->format('d/m/Y');
+            }
+            if ($dateOrAdmission->discharge_at) {
+                return $dateOrAdmission->discharge_at->copy()->addDays(30)->format('d/m/Y');
+            }
+            return date('d/m/Y', strtotime('+30 days'));
+        }
+
+        return $dateOrAdmission ?: '(Date)';
+    }
+
+    /**
+     * Generate the official hospital English stent removal instruction.
+     */
+    public static function getStentRemovalNoticeEn(Admission|string|null $dateOrAdmission = null): string
+    {
+        $d = self::resolveStentRemovalDate($dateOrAdmission);
+        return "The DJ Stent placed inside needs to be removed on <strong>{$d}</strong>. Please contact the hospital one day prior to confirm the time.";
+    }
+
+    /**
+     * Generate the official hospital Tamil stent removal instruction.
+     */
+    public static function getStentRemovalNoticeTa(Admission|string|null $dateOrAdmission = null): string
+    {
+        $d = self::resolveStentRemovalDate($dateOrAdmission);
+        return "வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு <strong>{$d}</strong> அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.";
+    }
+
+    /**
      * Generate the official hospital Tamil stent removal instruction.
      *
-     * @param string|null $date
+     * @param Admission|string|null $dateOrAdmission
      * @return string
      */
-    public static function getStentRemovalNotice(?string $date = null): string
+    public static function getStentRemovalNotice(Admission|string|null $dateOrAdmission = null): string
     {
-        $d = $date ?: '(Date)';
-        return "வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு {$d} அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.";
+        return self::getStentRemovalNoticeTa($dateOrAdmission);
     }
 
     /**
@@ -1259,25 +1340,30 @@ class DischargeSummaryFormatter
 
         $res = [
             'implant' => $hasStent ? 'DJ Stent' : 'Nil',
-            'diet' => '—',
-            'exercise' => '—',
+            'diet' => $admission->post_surgery_diet ?: '—',
+            'exercise' => $admission->post_surgery_activity ?: '—',
             'emergency_contact' => 'Reception: 04342-262266, 7418084266',
             'when_to_contact' => 'Report immediately if bleeding, fever, or severe pain',
-            'review' => '',
+            'review' => $admission->suture_removal_date ? 'Review on ' . $admission->suture_removal_date->format('d/m/Y') . ' for Suture Removal' : '',
             'tamil_note' => '',
         ];
 
         if (preg_match('/Implant\s*[:\-]\s*(.*?)(?=\n|$)/i', $text, $m)) $res['implant'] = trim($m[1]);
-        if (preg_match('/Diet\s*[:\-]\s*(.*?)(?=\n|$)/i', $text, $m)) $res['diet'] = trim($m[1]);
-        if (preg_match('/Exercise\s*[:\-]\s*(.*?)(?=\n|$)/i', $text, $m)) $res['exercise'] = trim($m[1]);
+        if (preg_match('/Diet\s*[:\-]\s*(.*?)(?=\n|$)/i', $text, $m) && empty($admission->post_surgery_diet)) $res['diet'] = trim($m[1]);
+        if (preg_match('/Exercise\s*[:\-]\s*(.*?)(?=\n|$)/i', $text, $m) && empty($admission->post_surgery_activity)) $res['exercise'] = trim($m[1]);
         if (preg_match('/Emergency\s*Contact\s*[:\-]\s*(.*?)(?=\n|$)/i', $text, $m)) $res['emergency_contact'] = trim($m[1]);
         if (preg_match('/When\s*to\s*Contact\s*[:\-]\s*(.*?)(?=\n|$)/i', $text, $m)) $res['when_to_contact'] = trim($m[1]);
         if (preg_match('/Review\s*[:\-]\s*(.*?)(?=\n|$)/i', $text, $m)) $res['review'] = trim($m[1]);
+        if (!empty($admission->follow_up)) {
+            $res['review'] = $admission->follow_up;
+        }
         if (preg_match('/([\x{0B80}-\x{0BFF}].*)/u', $text, $m)) {
             $res['tamil_note'] = trim($m[1]);
         } elseif ($hasStent) {
             $date = null;
-            if (preg_match('/(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/', $res['review'] ?: ($admission->follow_up ?? ''), $dm)) {
+            if ($admission->stent_removal_date) {
+                $date = $admission->stent_removal_date->format('d/m/Y');
+            } elseif (preg_match('/(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/', $res['review'] ?: ($admission->follow_up ?? ''), $dm)) {
                 $date = $dm[1];
             }
             $res['tamil_note'] = self::getStentRemovalNotice($date);

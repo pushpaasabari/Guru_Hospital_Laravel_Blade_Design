@@ -11,14 +11,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Admission extends Model
 {
     protected $fillable = [
-        'patient_name', 'uhid', 'ip_no', 'picme_no', 'age', 'sex', 'address', 'address_line1', 'address_line2', 'address_line3', 'contact',
+        'patient_name', 'attender_name', 'attender_relation', 'uhid', 'ip_no', 'picme_no', 'age', 'sex', 'address', 'address_line1', 'address_line2', 'address_line3', 'contact',
         'admission_at', 'procedure_at', 'discharge_at', 'consultant',
         'department', 'diagnosis', 'format', 'surgery_type', 'clinical_history',
-        'examination', 'investigations', 'treatment_course', 'discharge_condition',
-        'medication_orders', 'discharge_advice', 'follow_up',
+        'examination', 'investigations', 'vital_bp', 'vital_pulse', 'vital_spo2', 'treatment_course', 'discharge_condition',
+        'discharge_bp', 'discharge_pulse', 'discharge_spo2',
+        'medication_orders', 'discharge_advice', 'post_surgery_diet', 'post_surgery_activity', 'follow_up', 'suture_removal_date',
         'procedure_name', 'procedure_done', 'icd_code', 'surgeon', 'assisted_surgeon', 'pediatrician_name', 'anaesthetist', 'assisted_anaesthetist', 'assistant', 'assisted_by', 'staff_nurse', 'ot_technician', 'anaesthesia_type',
         'procedure_note', 'incision', 'findings', 'complications', 'blood_loss_ml',
-        'specimen', 'drain', 'postoperative_orders', 'mrd_no', 'payment_mode',
+        'specimen', 'drain', 'postoperative_orders', 'stent_removal_date', 'mrd_no', 'payment_mode',
         'insurance_type', 'insurance_company', 'policy_number', 'pre_auth_no',
         'pre_auth_status', 'approved_amount', 'policy_holder_name',
         'policy_holder_relation', 'policy_validity',
@@ -33,6 +34,8 @@ class Admission extends Model
         'discharge_at' => 'datetime',
         'approved_at' => 'datetime',
         'policy_validity' => 'date:Y-m-d',
+        'stent_removal_date' => 'date:Y-m-d',
+        'suture_removal_date' => 'date:Y-m-d',
         'birth_details' => 'array',
         'blood_loss_ml' => 'decimal:2',
         'approved_amount' => 'decimal:2',
@@ -227,7 +230,7 @@ class Admission extends Model
 
     public function getFormattedConditionAttribute(): array
     {
-        return \App\Services\DischargeSummaryFormatter::formatConditionOnDischarge($this->discharge_condition);
+        return \App\Services\DischargeSummaryFormatter::formatConditionOnDischarge($this->discharge_condition, $this);
     }
 
     public function getFormattedMedicationsAttribute(): array

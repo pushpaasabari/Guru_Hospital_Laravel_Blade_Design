@@ -16,6 +16,9 @@ class UpdateTestReportsRequest extends FormRequest
     {
         return [
             'investigations' => ['nullable', 'string', 'max:20000'],
+            'vital_bp' => ['nullable', 'string', 'max:50'],
+            'vital_pulse' => ['nullable', 'string', 'max:50'],
+            'vital_spo2' => ['nullable', 'string', 'max:50'],
         ];
     }
 }

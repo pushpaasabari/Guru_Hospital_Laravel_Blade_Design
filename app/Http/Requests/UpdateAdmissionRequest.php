@@ -24,6 +24,8 @@ class UpdateAdmissionRequest extends FormRequest
         return [
             // Patient Demographics
             'patient_name' => ['required', 'string', 'max:160'],
+            'attender_name' => ['nullable', 'string', 'max:160'],
+            'attender_relation' => ['nullable', 'string', 'max:60'],
             'uhid' => ['required', 'string', 'max:60'],
             'ip_no' => ['required', 'string', 'max:60', Rule::unique('admissions', 'ip_no')->ignore($admissionId)],
             'picme_no' => ['nullable', 'string', 'max:30'],

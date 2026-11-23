@@ -34,17 +34,15 @@
         <div data-overflow-target="page2"></div>
 
         {{-- 8. Surgery / Procedures (always starts cleanly at top of Page 2) --}}
-        <div class="a4-section-hdr" style="margin-top: 0;">Surgery / Procedures</div>
         @if($hasSurgerySection)
             @php
-                $showPediatrician = $admission->isDelivery() || !empty($admission->pediatrician_name);
                 $findingsText = trim((string) $admission->findings);
                 $fItems = [];
-                if ($findingsText !== '') {
+                if ($findingsText !== '' && $findingsText !== '—' && strcasecmp($findingsText, 'nil') !== 0) {
                     $rawLines = preg_split('/(?:\r\n|\r|\n|;)+/', $findingsText);
                     foreach ($rawLines as $l) {
                         $l = trim(preg_replace('/^[\s\-\*\•\d+\.\)]+/', '', $l));
-                        if ($l !== '') {
+                        if ($l !== '' && $l !== '—' && strcasecmp($l, 'nil') !== 0) {
                             $fItems[] = $l;
                         }
                     }
@@ -53,85 +51,74 @@
                         $fItems = array_values(array_filter(array_map('trim', $sentences)));
                     }
                 }
-            @endphp
-            <div class="a4-grid-3">
-                <div class="a4-grid-cell">
-                    <span class="a4-lbl">Procedure Performed</span>
-                    <span class="a4-val a4-val-bold">{{ \App\Services\DischargeSummaryFormatter::formatSurgeryPerformed($admission) }}</span>
-                </div>
-                <div class="a4-grid-cell">
-                    <span class="a4-lbl">Surgeon</span>
-                    <span class="a4-val a4-val-bold">{{ $admission->surgeon ?: ($admission->consultant ?: '—') }}</span>
-                </div>
-                <div class="a4-grid-cell">
-                    <span class="a4-lbl">Anaesthetist &amp; Type</span>
-                    <span class="a4-val">
-                        {{ $admission->anaesthetist ? $admission->anaesthetist . ($admission->anaesthesia_type ? ' (' . $admission->anaesthesia_type . ')' : '') : ($admission->anaesthesia_type ?: '—') }}
-                    </span>
-                </div>
-                <div class="a4-grid-cell">
-                    <span class="a4-lbl">Assisted Surgeon / Staff</span>
-                    <span class="a4-val">{{ $admission->assisted_surgeon ?: ($admission->assisted_by ?: ($admission->assistant ?: '—')) }}</span>
-                </div>
-                <div class="a4-grid-cell">
-                    <span class="a4-lbl">Scrub Nurse / OT Tech</span>
-                    <span class="a4-val">{{ collect([$admission->staff_nurse, $admission->ot_technician])->filter()->implode(' / ') ?: '—' }}</span>
-                </div>
-                @if($showPediatrician)
-                    <div class="a4-grid-cell">
-                        <span class="a4-lbl">Pediatrician</span>
-                        <span class="a4-val">{{ $admission->pediatrician_name ?: '—' }}</span>
-                    </div>
-                    <div class="a4-grid-cell">
-                        <span class="a4-lbl">Incision / Specimen</span>
-                        <span class="a4-val">{{ collect([$admission->incision, $admission->specimen ? 'Specimen: ' . $admission->specimen : null])->filter()->implode(' | ') ?: '—' }}</span>
-                    </div>
-                    <div class="a4-grid-cell">
-                        <span class="a4-lbl">Intra-operative Findings</span>
-                        <div class="a4-val">
-                            @if(!empty($fItems))
-                                <ul class="a4-findings-list">
-                                    @foreach($fItems as $item)
-                                        <li>{{ $item }}</li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <span>—</span>
-                            @endif
-                        </div>
-                    </div>
-                @else
-                    <div class="a4-grid-cell">
-                        <span class="a4-lbl">Incision / Specimen</span>
-                        <span class="a4-val">{{ collect([$admission->incision, $admission->specimen ? 'Specimen: ' . $admission->specimen : null])->filter()->implode(' | ') ?: '—' }}</span>
-                    </div>
-                    <div class="a4-grid-cell" style="grid-column: span 2;">
-                        <span class="a4-lbl">Intra-operative Findings</span>
-                        <div class="a4-val">
-                            @if(!empty($fItems))
-                                <ul class="a4-findings-list">
-                                    @foreach($fItems as $item)
-                                        <li>{{ $item }}</li>
-                                    @endforeach
-                                </ul>
-                            @else
-                                <span>—</span>
-                            @endif
-                        </div>
-                    </div>
-                @endif
-                <div class="a4-grid-cell">
-                    <span class="a4-lbl">Drain / Blood Loss / Complications</span>
-                    <span class="a4-val">{{ collect([$admission->drain, $admission->blood_loss_ml ? 'EBL: ' . $admission->blood_loss_ml . ' ml' : null, $admission->complications])->filter()->implode(' | ') ?: '—' }}</span>
-                </div>
-            </div>
 
-            <div class="a4-outlined-card">
-                <span class="a4-lbl">Operative / Procedure Note</span>
-                <div class="a4-val a4-procedure-note">
-                    {!! $admission->procedure_note ? \App\Services\DischargeSummaryFormatter::formatProcedureNoteHtml($admission->procedure_note) : '—' !!}
+                $surgeryCells = [];
+                $procPerf = \App\Services\DischargeSummaryFormatter::formatSurgeryPerformed($admission);
+                if ($procPerf && $procPerf !== '—') {
+                    $surgeryCells[] = ['lbl' => 'Procedure Performed', 'val' => $procPerf, 'bold' => true];
+                }
+                $surgeonVal = $admission->surgeon ?: $admission->consultant;
+                if ($surgeonVal && $surgeonVal !== '—') {
+                    $surgeryCells[] = ['lbl' => 'Surgeon', 'val' => $surgeonVal, 'bold' => true];
+                }
+                $anaesthVal = $admission->anaesthetist ? $admission->anaesthetist . ($admission->anaesthesia_type ? ' (' . $admission->anaesthesia_type . ')' : '') : $admission->anaesthesia_type;
+                if ($anaesthVal && $anaesthVal !== '—') {
+                    $surgeryCells[] = ['lbl' => 'Anaesthetist & Type', 'val' => $anaesthVal, 'bold' => false];
+                }
+                $assistedVal = $admission->assisted_surgeon ?: ($admission->assisted_by ?: $admission->assistant);
+                if ($assistedVal && $assistedVal !== '—') {
+                    $surgeryCells[] = ['lbl' => 'Assisted Surgeon / Staff', 'val' => $assistedVal, 'bold' => false];
+                }
+                $nurseOtVal = collect([$admission->staff_nurse, $admission->ot_technician])->filter()->implode(' / ');
+                if ($nurseOtVal && $nurseOtVal !== '—') {
+                    $surgeryCells[] = ['lbl' => 'Scrub Nurse / OT Tech', 'val' => $nurseOtVal, 'bold' => false];
+                }
+                if (!empty($admission->pediatrician_name) && $admission->pediatrician_name !== '—') {
+                    $surgeryCells[] = ['lbl' => 'Pediatrician', 'val' => $admission->pediatrician_name, 'bold' => false];
+                }
+                $incisionSpecimen = collect([$admission->incision, $admission->specimen ? 'Specimen: ' . $admission->specimen : null])->filter()->implode(' | ');
+                if ($incisionSpecimen && $incisionSpecimen !== '—') {
+                    $surgeryCells[] = ['lbl' => 'Incision / Specimen', 'val' => $incisionSpecimen, 'bold' => false];
+                }
+                $drainBloodComp = collect([$admission->drain, $admission->blood_loss_ml ? 'EBL: ' . $admission->blood_loss_ml . ' ml' : null, $admission->complications])->filter()->implode(' | ');
+                if ($drainBloodComp && $drainBloodComp !== '—') {
+                    $surgeryCells[] = ['lbl' => 'Drain / Blood Loss / Complications', 'val' => $drainBloodComp, 'bold' => false];
+                }
+            @endphp
+
+            <div class="a4-section-hdr" style="margin-top: 0;">Surgery / Procedures</div>
+
+            @if(!empty($surgeryCells) || !empty($fItems))
+                <div class="a4-grid-3">
+                    @foreach($surgeryCells as $cell)
+                        <div class="a4-grid-cell">
+                            <span class="a4-lbl">{{ $cell['lbl'] }}</span>
+                            <span class="a4-val {{ $cell['bold'] ? 'a4-val-bold' : '' }}">{{ $cell['val'] }}</span>
+                        </div>
+                    @endforeach
+                    @if(!empty($fItems))
+                        <div class="a4-grid-cell" style="grid-column: span {{ (count($surgeryCells) % 3 === 2) ? 1 : ((count($surgeryCells) % 3 === 1) ? 2 : 3) }};">
+                            <span class="a4-lbl">Intra-operative Findings</span>
+                            <div class="a4-val">
+                                <ul class="a4-findings-list">
+                                    @foreach($fItems as $item)
+                                        <li>{{ $item }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    @endif
                 </div>
-            </div>
+            @endif
+
+            @if($admission->procedure_note && trim($admission->procedure_note) !== '—')
+                <div class="a4-outlined-card">
+                    <span class="a4-lbl">Operative / Procedure Note</span>
+                    <div class="a4-val a4-procedure-note">
+                        {!! \App\Services\DischargeSummaryFormatter::formatProcedureNoteHtml($admission->procedure_note) !!}
+                    </div>
+                </div>
+            @endif
 
             @php
                 $postOpRows = $admission->formatted_postoperative_orders;
@@ -164,8 +151,24 @@
                     </table>
                 </div>
             @endif
-        @else
-            <div class="a4-outlined-card"><span class="a4-val">—</span></div>
+        @endif
+
+        {{-- Bilingual Stent Removal Notice (Both English & Tamil with Date in BOLD) --}}
+        @if(\App\Services\DischargeSummaryFormatter::hasStent($admission))
+            <div class="a4-stent-card">
+                <div class="a4-stent-hdr">STENT REMOVAL NOTICE / ஸ்டெண்ட் அகற்றும் குறிப்பு</div>
+                <div class="a4-stent-en">
+                    {!! \App\Services\DischargeSummaryFormatter::getStentRemovalNoticeEn($admission) !!}
+                </div>
+                <div class="a4-stent-ta">
+                    {!! \App\Services\DischargeSummaryFormatter::getStentRemovalNoticeTa($admission) !!}
+                </div>
+            </div>
+        @elseif($tamilNote)
+            <div class="a4-tamil-card">
+                <span class="a4-lbl" style="color: #0F5C63;">ஸ்டெண்ட் குறிப்பு (Stent Removal Notice)</span>
+                {{ $tamilNote }}
+            </div>
         @endif
 
         {{-- 9. Newborns --}}
@@ -188,8 +191,8 @@
         @endif
 
         {{-- 10. Discharge Medication --}}
-        <div class="a4-section-hdr">Discharge Medication</div>
         @if(!empty($meds))
+            <div class="a4-section-hdr">Discharge Medication</div>
             <table class="a4-table">
                 <thead>
                     <tr>
@@ -210,74 +213,96 @@
                     @endforeach
                 </tbody>
             </table>
-        @else
-            <div class="a4-outlined-card"><span class="a4-val">—</span></div>
         @endif
 
         {{-- 11. Condition at Discharge, Instructions & Follow-up --}}
-        <div class="a4-section-hdr">Condition at Discharge</div>
-        @if($admission->isDelivery())
-            <div class="a4-grid-4">
-                <div class="a4-grid-cell"><span class="a4-lbl">General Condition</span><span class="a4-val a4-val-bold">{{ $cond['general'] }}</span></div>
-                <div class="a4-grid-cell"><span class="a4-lbl">BP</span><span class="a4-val a4-val-bold">{{ $cond['bp'] }}</span></div>
-                <div class="a4-grid-cell"><span class="a4-lbl">Pulse</span><span class="a4-val a4-val-bold">{{ $cond['pulse'] }}</span></div>
-                <div class="a4-grid-cell"><span class="a4-lbl">Local Exam / P/A</span><span class="a4-val">{{ $cond['pa'] }}</span></div>
+        @php
+            $condItems = [];
+            if (!empty($cond['general']) && $cond['general'] !== '—') $condItems['General Condition'] = $cond['general'];
+            if (!empty($cond['bp']) && $cond['bp'] !== '—') $condItems['BP'] = $cond['bp'];
+            if (!empty($cond['pulse']) && $cond['pulse'] !== '—') $condItems['Pulse'] = $cond['pulse'];
+            if (!empty($cond['spo2']) && $cond['spo2'] !== '—') $condItems['SpO2'] = $cond['spo2'];
+            if (!empty($cond['pa']) && $cond['pa'] !== '—') $condItems['Local Exam / P/A'] = $cond['pa'];
+            $condCols = count($condItems);
+        @endphp
+
+        @if(!empty($condItems))
+            <div class="a4-section-hdr">Condition at Discharge</div>
+            <div class="a4-grid-{{ min(max($condCols, 1), 5) }}" style="display: grid; grid-template-columns: repeat({{ $condCols }}, 1fr); border: 0.75pt solid #D5E0E2; margin-bottom: 4px;">
+                @foreach($condItems as $lbl => $val)
+                    <div class="a4-grid-cell" style="padding: 3px 6px; border-right: 0.75pt solid #D5E0E2; border-bottom: none;">
+                        <span class="a4-lbl">{{ $lbl }}</span>
+                        <span class="a4-val a4-val-bold">{{ $val }}</span>
+                    </div>
+                @endforeach
             </div>
-        @else
+        @elseif($admission->discharge_condition && trim($admission->discharge_condition) !== '—')
+            <div class="a4-section-hdr">Condition at Discharge</div>
             <div class="a4-outlined-card">
-                <span class="a4-val">{!! $admission->discharge_condition ? nl2br(e($admission->discharge_condition)) : '—' !!}</span>
+                <span class="a4-val">{!! nl2br(e($admission->discharge_condition)) !!}</span>
             </div>
         @endif
 
-        <div class="a4-outlined-card">
-            <span class="a4-lbl">Discharge Instructions</span>
-            @php
-                $implantVal = $surgAdvice['implant'] ?? 'Nil';
-                $dietVal = $surgAdvice['diet'] ?? '—';
-                $activityVal = $surgAdvice['exercise'] ?? '—';
-            @endphp
-            <div class="a4-val" style="margin-bottom: {{ !empty($displayAdviceItems) ? '3px' : '0' }};">
-                <strong>Implant:</strong> {{ $implantVal }} &nbsp;|&nbsp;
-                <strong>Diet:</strong> {{ $dietVal }} &nbsp;|&nbsp;
-                <strong>Activity:</strong> {{ $activityVal }}
+        {{-- Discharge Instructions --}}
+        @php
+            $implantVal = $surgAdvice['implant'] ?? null;
+            $dietVal = $admission->post_surgery_diet ?: ($surgAdvice['diet'] ?? null);
+            $activityVal = $admission->post_surgery_activity ?: ($surgAdvice['exercise'] ?? null);
+
+            $instructionParts = [];
+            if (!empty($implantVal) && $implantVal !== '—') {
+                $instructionParts[] = '<strong>Implant:</strong> ' . e($implantVal);
+            }
+            if (!empty($dietVal) && $dietVal !== '—' && strcasecmp($dietVal, 'nil') !== 0) {
+                $instructionParts[] = '<strong>Diet:</strong> ' . e($dietVal);
+            }
+            if (!empty($activityVal) && $activityVal !== '—' && strcasecmp($activityVal, 'nil') !== 0) {
+                $instructionParts[] = '<strong>Activity:</strong> ' . e($activityVal);
+            }
+        @endphp
+
+        @if(!empty($instructionParts) || !empty($displayAdviceItems))
+            <div class="a4-outlined-card">
+                <span class="a4-lbl">Discharge Instructions</span>
+                @if(!empty($instructionParts))
+                    <div class="a4-val" style="margin-bottom: {{ !empty($displayAdviceItems) ? '3px' : '0' }};">
+                        {!! implode(' &nbsp;|&nbsp; ', $instructionParts) !!}
+                    </div>
+                @endif
+                @if(!empty($displayAdviceItems))
+                    <div class="a4-val">
+                        @foreach($displayAdviceItems as $item)
+                            <span style="display: inline-block; margin-right: 12px;">&bull; {{ $item }}</span>
+                        @endforeach
+                    </div>
+                @endif
             </div>
-            @if(!empty($displayAdviceItems))
-                <div class="a4-val">
-                    @foreach($displayAdviceItems as $item)
-                        <span style="display: inline-block; margin-right: 12px;">&bull; {{ $item }}</span>
-                    @endforeach
-                </div>
-            @endif
-        </div>
+        @endif
 
-        <div class="a4-outlined-card">
-            <span class="a4-lbl">Follow-up Review</span>
-            @php
-                $text = trim((string) $followText);
-                $date = trim((string) $followDate);
-                if ($text !== '' && $date !== '' && !str_contains($text, $date)) {
-                    if (preg_match('/[:\-]\s*$/', $text)) {
-                        $fullReviewText = rtrim($text, " :\-") . ' : ' . $date;
-                    } elseif (preg_match('/\b(?:on|at)\s*$/i', $text)) {
-                        $fullReviewText = $text . ' ' . $date;
-                    } else {
-                        $fullReviewText = $text . ' : ' . $date;
-                    }
+        {{-- Follow-up Review / Suture Removal --}}
+        @php
+            $text = trim((string) $followText);
+            $date = trim((string) $followDate);
+            $sutureDate = $admission->suture_removal_date?->format('d/m/Y');
+            if ($sutureDate && !str_contains($text, $sutureDate)) {
+                $date = $sutureDate;
+            }
+            if ($text !== '' && $date !== '' && !str_contains($text, $date)) {
+                if (preg_match('/[:\-]\s*$/', $text)) {
+                    $fullReviewText = rtrim($text, " :\-") . ' : ' . $date;
+                } elseif (preg_match('/\b(?:on|at)\s*$/i', $text)) {
+                    $fullReviewText = $text . ' ' . $date;
                 } else {
-                    $fullReviewText = $text !== '' ? $text : $date;
+                    $fullReviewText = $text . ' (' . $date . ')';
                 }
-            @endphp
-            @if($fullReviewText !== '')
-                <div class="a4-val a4-val-bold">{{ $fullReviewText }}</div>
-            @else
-                <span class="a4-val a4-val-bold">—</span>
-            @endif
-        </div>
-
-        @if($tamilNote)
-            <div class="a4-tamil-card">
-                <span class="a4-lbl" style="color: #0F5C63;">ஸ்டெண்ட் குறிப்பு (Stent Removal Notice)</span>
-                {{ $tamilNote }}
+            } else {
+                $fullReviewText = $text !== '' ? $text : $date;
+            }
+        @endphp
+        @if($fullReviewText !== '')
+            <div class="a4-outlined-card">
+                <span class="a4-lbl">Follow-up Review</span>
+                <div class="a4-val a4-val-bold">{!! nl2br(e($fullReviewText)) !!}</div>
             </div>
         @endif
 

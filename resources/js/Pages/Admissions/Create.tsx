@@ -15,6 +15,8 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
   const [customConsultant, setCustomConsultant] = useState(false);
   const { data, setData, post, processing, errors } = useForm({
     patient_name: '',
+    attender_name: '',
+    attender_relation: '',
     uhid: '',
     ip_no: '',
     picme_no: '',
@@ -43,7 +45,7 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
     policy_holder_name: '',
     policy_holder_relation: '',
     policy_validity: '',
-    next_step: 'test-reports',
+    next_step: 'clinical',
   });
 
   const isFemale = data.sex?.toLowerCase() === 'female';
@@ -94,7 +96,7 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
             <div>
               <span className="badge bg-primary me-2">1.1</span> Patient Demographics
             </div>
-            <span className="text-muted small">Step 1 of 4</span>
+            <span className="text-muted small">Step 1 of 5</span>
           </div>
           <div className="card-body">
             <div className="row g-3">
@@ -107,6 +109,42 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
                   placeholder="e.g. PATIENT NAME"
                   required
                 />
+              </div>
+              <div className="col-md-4">
+                <label className="form-label">Attender / Care Of Name</label>
+                <input
+                  type="text"
+                  className={`form-control ${errors.attender_name ? 'is-invalid' : ''}`}
+                  style={{ textTransform: 'uppercase' }}
+                  value={data.attender_name}
+                  onChange={(e) =>
+                    handleNormalizedInputChange(e, toUpperCaseValue, (val) => setData('attender_name', val))
+                  }
+                  placeholder="e.g. S. MURUGAN"
+                />
+                {errors.attender_name && <div className="invalid-feedback">{errors.attender_name}</div>}
+              </div>
+              <div className="col-md-4">
+                <label className="form-label">Relationship to Patient</label>
+                <select
+                  className={`form-select ${errors.attender_relation ? 'is-invalid' : ''}`}
+                  value={data.attender_relation}
+                  onChange={(e) => setData('attender_relation', e.target.value)}
+                >
+                  <option value="">Select Relationship</option>
+                  <option value="Husband">Husband</option>
+                  <option value="Father">Father</option>
+                  <option value="Mother">Mother</option>
+                  <option value="Son">Son</option>
+                  <option value="Daughter">Daughter</option>
+                  <option value="Brother">Brother</option>
+                  <option value="Sister">Sister</option>
+                  <option value="Spouse">Spouse</option>
+                  <option value="Guardian">Guardian</option>
+                  <option value="Care of (C/o)">Care of (C/o)</option>
+                  <option value="Other">Other</option>
+                </select>
+                {errors.attender_relation && <div className="invalid-feedback">{errors.attender_relation}</div>}
               </div>
               <div className="col-md-4">
                 <label className="form-label required">UHID</label>
@@ -256,7 +294,7 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
               {data.surgery_type === 'delivery' && (
                 <div className="col-md-4">
                   <label className="form-label required">
-                    PICME Number (RCH ID)
+                    RCH ID (PICME No)
                     <span className="badge bg-danger-subtle text-danger ms-2" style={{ fontSize: '0.68rem' }}>
                       DELIVERY / OBSTETRIC
                     </span>
@@ -429,7 +467,7 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
               disabled={processing}
               className="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2"
             >
-              <span>Save &amp; Proceed to Stage 2: Test Reports</span>
+              <span>Save &amp; Proceed to Stage 2: Clinical Assessment</span>
               <i className="bi bi-arrow-right"></i>
             </button>
           </div>

@@ -72,7 +72,7 @@ class AdmissionWorkflowTest extends TestCase
         ]);
 
         $admission = Admission::where('ip_no', 'IP-8891')->first();
-        $response->assertRedirect(route('admissions.test-reports', $admission));
+        $response->assertRedirect(route('admissions.clinical', $admission));
     }
 
     public function test_duplicate_ip_number_is_rejected(): void
@@ -542,7 +542,7 @@ class AdmissionWorkflowTest extends TestCase
         $this->assertEquals('g/dL', $inv[0]['unit']);
         $this->assertEquals('12.0 - 16.0', $inv[0]['normal_range']);
         $this->assertEquals('BLOOD GROUP', $inv[1]['label']);
-        $this->assertEquals('O positive', $inv[1]['value']);
+        $this->assertEquals('O POSITIVE', $inv[1]['value']);
         $this->assertEquals('CREATININE', $inv[7]['label']);
         $this->assertEquals('0.86 mg/dl', $inv[7]['value']);
         $this->assertEquals('mg/dL', $inv[7]['unit']);

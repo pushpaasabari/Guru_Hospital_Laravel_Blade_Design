@@ -2,10 +2,12 @@ import React from 'react';
 import { Link } from '@inertiajs/react';
 
 export interface AdmissionStageNavProps {
-  currentStage: 'admission' | 'surgery' | 'test-reports' | 'discharge';
+  currentStage: 'admission' | 'clinical' | 'surgery' | 'test-reports' | 'discharge';
   admission?: {
     id: number;
     patient_name: string;
+    attender_name?: string | null;
+    attender_relation?: string | null;
     uhid: string;
     ip_no: string;
     picme_no?: string | null;
@@ -14,6 +16,8 @@ export interface AdmissionStageNavProps {
     format?: string;
     surgery_type?: string;
     status?: string;
+    clinical_history?: string | null;
+    examination?: string | null;
     procedure_name?: string | null;
     investigations?: string | null;
     discharge_at?: string | null;
@@ -31,16 +35,24 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
       isCompleted: Boolean(admission?.uhid && admission?.ip_no),
     },
     {
-      id: 'test-reports',
+      id: 'clinical',
       step: 2,
+      name: 'Clinical Assessment',
+      subtitle: 'History & Examination',
+      href: admission ? `/admissions/${admission.id}/clinical` : undefined,
+      isCompleted: Boolean(admission?.clinical_history || admission?.examination),
+    },
+    {
+      id: 'test-reports',
+      step: 3,
       name: 'Test Reports',
-      subtitle: 'Lab Tests & Diagnostics',
+      subtitle: 'Vitals & Lab Tests',
       href: admission ? `/admissions/${admission.id}/test-reports` : undefined,
       isCompleted: Boolean(admission?.investigations && admission.investigations.trim().length > 0),
     },
     {
       id: 'surgery',
-      step: 3,
+      step: 4,
       name: admission?.surgery_type === 'medical' ? 'Clinical Notes' : 'Labour / Surgery',
       subtitle: admission?.surgery_type === 'medical' ? 'Bedside & Treatment' : 'OT Team & Notes',
       href: admission ? `/admissions/${admission.id}/surgery` : undefined,
@@ -52,7 +64,7 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
     },
     {
       id: 'discharge',
-      step: 4,
+      step: 5,
       name: 'Discharge',
       subtitle: 'Summary, Advice & MRD',
       href: admission ? `/admissions/${admission.id}/discharge` : undefined,
@@ -97,8 +109,20 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
                     <>
                       <span>&bull;</span>
                       <span>
-                        <strong className="text-secondary">PICME:</strong>{' '}
+                        <strong className="text-secondary">RCH ID:</strong>{' '}
                         <span className="font-monospace text-dark fw-bold">{admission.picme_no}</span>
+                      </span>
+                    </>
+                  )}
+                  {admission.attender_name && (
+                    <>
+                      <span>&bull;</span>
+                      <span>
+                        <strong className="text-secondary">Attender:</strong>{' '}
+                        <span className="text-dark fw-medium">
+                          {admission.attender_name}
+                          {admission.attender_relation ? ` (${admission.attender_relation})` : ''}
+                        </span>
                       </span>
                     </>
                   )}

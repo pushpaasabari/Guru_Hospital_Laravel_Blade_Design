@@ -11,6 +11,7 @@ class AdmissionInputNormalizer
      */
     public const UPPERCASE_FIELDS = [
         'patient_name',
+        'attender_name',
         'address',
         'address_line1',
         'address_line2',

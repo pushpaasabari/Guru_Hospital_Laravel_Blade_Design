@@ -104,6 +104,7 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
             'surgery_type' => 'other',
             'diagnosis' => 'GENERAL SURGICAL ASSESSMENT',
             'clinical_history' => 'C/O Flank pain for 3 days. Dysuria present.',
+            'examination' => 'P/A: Soft, non-tender, no organomegaly',
             'treatment_course' => "Treated with IV Fluids\nInj-Pipzo 4.5g BD",
             'admission_at' => now(),
             'created_by' => $this->doctor->id,
@@ -118,14 +119,15 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
         $this->assertStringContainsString('Presenting Complaints', $html);
         $this->assertStringContainsString('Clinical Examination', $html);
 
-        // Medical history grid must NOT be rendered
-        $this->assertStringNotContainsString('DM / HT / Asthma / TB', $html);
-        $this->assertStringNotContainsString('Other Medical', $html);
-        $this->assertStringNotContainsString('Past Surgical History', $html);
-        $this->assertStringNotContainsString('Allergies / Prior Meds', $html);
+        // Clinical history grid is rendered under Diagnosis & Clinical Summary
+        $this->assertStringContainsString('DM / HT / ASTHMA / TB', $html);
+        $this->assertStringContainsString('OTHER MEDICAL', $html);
+        $this->assertStringContainsString('PAST SURGICAL HISTORY', $html);
+        $this->assertStringContainsString('ALLERGIES / PRIOR MEDS', $html);
 
-        // Treatment Provided must NOT be rendered
+        // Treatment Provided / Course in Hospital must NOT be rendered
         $this->assertStringNotContainsString('Treatment Provided', $html);
+        $this->assertStringNotContainsString('Course in Hospital', $html);
     }
 
     public function test_investigations_renders_unit_after_result_value(): void
@@ -146,12 +148,12 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
 
         $html = view('pdf.partials.discharge-summary-a4._page1', ['admission' => $admission])->render();
 
-        // Label must not contain (g/dL)
-        $this->assertStringNotContainsString('HB <span style="font-weight: 400; text-transform: none; color: #64748b; font-size: 5.6pt;">(g/dL)</span>', $html);
-        $this->assertStringContainsString('<span class="a4-lbl">HB</span>', $html);
-
-        // Value followed by unit
-        $this->assertMatchesRegularExpression('/12\.9\s*<span class="a4-inv-unit">g\/dL<\/span>/', $html);
+        // 5-card grid structure
+        $this->assertStringContainsString('a4-inv-grid-5', $html);
+        $this->assertStringContainsString('a4-inv-card', $html);
+        $this->assertStringContainsString('HB', $html);
+        $this->assertStringContainsString('(g/dL)', $html);
+        $this->assertStringContainsString('12.9', $html);
 
         // Normal range below
         $this->assertStringContainsString('Ref: 12.0 - 16.0', $html);

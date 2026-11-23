@@ -277,6 +277,61 @@
     }
 
     /* 6. Investigations Grid (No Background Fill) */
+    /* 6. Investigations 5-Card Grid */
+    .a4-inv-grid-5 {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 3.5px;
+        margin-bottom: 4px;
+        background: transparent;
+    }
+    .a4-inv-card {
+        border: 0.75pt solid #D5E0E2;
+        border-radius: 5px;
+        padding: 3.5px 4.5px;
+        text-align: center;
+        background: #ffffff;
+        min-height: 48px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-sizing: border-box;
+    }
+    .a4-inv-card-hdr {
+        font-size: 7.6pt;
+        font-weight: 700;
+        color: #1B2A2F;
+        text-transform: uppercase;
+        line-height: 1.15;
+        margin-bottom: 1.5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .a4-inv-card-name {
+        font-weight: 700;
+        color: #1B2A2F;
+    }
+    .a4-inv-card-unit {
+        font-size: 7pt;
+        font-weight: 500;
+        color: #64748B;
+        text-transform: none;
+    }
+    .a4-inv-card-val {
+        font-size: 11pt;
+        font-weight: 700;
+        color: #0F5C63;
+        line-height: 1.15;
+        margin: 1.5px 0;
+    }
+    .a4-inv-card-ref {
+        font-size: 6.8pt;
+        font-weight: 500;
+        color: #64748B;
+        line-height: 1.1;
+    }
+
     .a4-inv-grid {
         display: grid;
         grid-template-columns: repeat(5, 1fr);

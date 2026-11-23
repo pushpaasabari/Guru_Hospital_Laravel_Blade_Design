@@ -65,17 +65,25 @@
                     <span class="a4-val a4-val-bold">{{ $admission->ip_no ?: '—' }}</span>
                 </div>
             </div>
-            <div class="a4-patient-bottom">
+            <div class="a4-patient-bottom" style="display: grid; grid-template-columns: {{ $admission->attender_name ? '1fr 1.2fr 1.8fr' : '1fr 2.5fr' }};">
                 <div class="a4-patient-cell">
                     <span class="a4-lbl">Phone / Contact</span>
                     <span class="a4-val">{{ $admission->contact ?: '—' }}</span>
                 </div>
+                @if($admission->attender_name)
+                    <div class="a4-patient-cell">
+                        <span class="a4-lbl">Attender / Relation</span>
+                        <span class="a4-val a4-val-bold">
+                            {{ $admission->attender_name }}@if($admission->attender_relation) <span style="font-weight: 500; color: #475569;">({{ $admission->attender_relation }})</span>@endif
+                        </span>
+                    </div>
+                @endif
                 <div class="a4-patient-cell">
                     <span class="a4-lbl">Address</span>
                     <span class="a4-val">
                         {{ str_replace(["\r\n", "\r", "\n"], ', ', $admission->address ?: '—') }}
                         @if($admission->picme_no)
-                            <span style="color: #6B7B80;"> (PICME: {{ $admission->picme_no }})</span>
+                            <span style="color: #6B7B80;"> (RCH ID: {{ $admission->picme_no }})</span>
                         @endif
                     </span>
                 </div>
@@ -107,10 +115,12 @@
                     {{ match ($admission->surgery_type) { 'delivery' => 'Obstetric / Delivery', 'other' => 'Surgical', 'medical' => 'Medical', default => '—' } }}@if($admission->ward_room_no) &bull; {{ $admission->ward_room_no }}@endif
                 </span>
             </div>
-            <div class="a4-grid-cell">
-                <span class="a4-lbl">Payment Mode</span>
-                <span class="a4-val">{{ $admission->payment_mode ?: '—' }}</span>
-            </div>
+            @if(!empty(trim((string)$admission->payment_mode)) && trim((string)$admission->payment_mode) !== '—')
+                <div class="a4-grid-cell">
+                    <span class="a4-lbl">Payment Mode</span>
+                    <span class="a4-val">{{ $admission->payment_mode }}</span>
+                </div>
+            @endif
         </div>
 
         {{-- 4. Insurance / TPA (3-column pale teal grid; green bold strictly for Approved pre-auth status) --}}
@@ -137,60 +147,92 @@
 
         {{-- 5. Diagnosis & Clinical Information --}}
         <div class="a4-section-hdr">Diagnosis &amp; Clinical Summary</div>
-        <div class="a4-diagnosis-card">
-            <span class="a4-lbl">Final Diagnosis</span>
-            <div class="a4-diagnosis-val">{{ $admission->diagnosis ?: '—' }}</div>
-        </div>
-
-        <div class="a4-clinical-row">
-            <div>
-                <span class="a4-lbl">Presenting Complaints</span>
-                <span class="a4-val">{!! nl2br(e($sections['complaints'])) !!}</span>
+        @if(!empty(trim((string)$admission->diagnosis)) && trim((string)$admission->diagnosis) !== '—')
+            <div class="a4-diagnosis-card">
+                <span class="a4-lbl">Final Diagnosis</span>
+                <div class="a4-diagnosis-val">{{ $admission->diagnosis }}</div>
             </div>
-            <div>
-                <span class="a4-lbl">History of Present Illness</span>
-                <span class="a4-val">{!! nl2br(e($sections['hpi'])) !!}</span>
+        @endif
+
+        {{-- Clinical History Grid: DM / HT / ASTHMA / TB | OTHER MEDICAL | PAST SURGICAL HISTORY | ALLERGIES / PRIOR MEDS --}}
+        <div class="a4-history-grid">
+            <div class="a4-grid-cell" style="border: none; padding: 2px 4px;">
+                <span class="a4-lbl">DM / HT / ASTHMA / TB</span>
+                <span class="a4-val">DM: {{ $pastHist['dm'] }} | HT: {{ $pastHist['ht'] }} | Asthma: {{ $pastHist['asthma'] }} | TB: {{ $pastHist['tb'] }}</span>
+            </div>
+            <div class="a4-grid-cell" style="border: none; padding: 2px 4px;">
+                <span class="a4-lbl">OTHER MEDICAL</span>
+                <span class="a4-val">{{ $pastHist['other'] }}</span>
+            </div>
+            <div class="a4-grid-cell" style="border: none; padding: 2px 4px;">
+                <span class="a4-lbl">PAST SURGICAL HISTORY</span>
+                <span class="a4-val">{{ $pastHist['past_surgical'] }}</span>
+            </div>
+            <div class="a4-grid-cell" style="border: none; padding: 2px 4px;">
+                <span class="a4-lbl">ALLERGIES / PRIOR MEDS</span>
+                <span class="a4-val">{{ $pastHist['allergies'] }} | {{ $pastHist['medications'] }}</span>
             </div>
         </div>
 
-        <div class="a4-clinical-block" style="margin-bottom: 4px;">
-            <span class="a4-lbl">Clinical Examination</span>
-            <span class="a4-val">{!! $admission->examination ? nl2br(e($admission->examination)) : '—' !!}</span>
-        </div>
+        @php
+            $hasComplaints = !empty(trim((string)($sections['complaints'] ?? ''))) && trim((string)$sections['complaints']) !== '—';
+            $hasHpi = !empty(trim((string)($sections['hpi'] ?? ''))) && trim((string)$sections['hpi']) !== '—';
+            $hasExam = !empty(trim((string)($admission->examination ?? ''))) && trim((string)$admission->examination) !== '—';
+        @endphp
 
-        {{-- 6. Investigations --}}
-        <div class="a4-block" data-overflow-movable="page1">
-            <div class="a4-section-hdr">Investigations</div>
-            @if(!empty($investigations))
-                @php
-                    $invCols = count($investigations) > 10 ? 6 : 5;
-                @endphp
-                <div class="a4-inv-grid" style="grid-template-columns: repeat({{ $invCols }}, 1fr);">
-                    @foreach($investigations as $inv)
-                        <div class="a4-inv-box" style="padding: 2.5px 4.5px;">
-                            <span class="a4-lbl">{{ $inv['label'] }}</span>
-                            <span class="a4-val a4-val-bold">
-                                @if(($inv['value'] ?? '—') !== '—' && !empty($inv['value']))
-                                    {{ $inv['value'] }}@if(!empty($inv['unit']) && !str_contains((string)$inv['value'], $inv['unit'])) <span class="a4-inv-unit">{{ $inv['unit'] }}</span>@endif
-                                @else
-                                    —
-                                @endif
-                            </span>
+        @if($hasComplaints || $hasHpi)
+            <div class="a4-clinical-row">
+                @if($hasComplaints)
+                    <div>
+                        <span class="a4-lbl">Presenting Complaints</span>
+                        <span class="a4-val">{!! nl2br(e($sections['complaints'])) !!}</span>
+                    </div>
+                @endif
+                @if($hasHpi)
+                    <div>
+                        <span class="a4-lbl">History of Present Illness</span>
+                        <span class="a4-val">{!! nl2br(e($sections['hpi'])) !!}</span>
+                    </div>
+                @endif
+            </div>
+        @endif
+
+        @if($hasExam)
+            <div class="a4-clinical-block" style="margin-bottom: 4px;">
+                <span class="a4-lbl">Clinical Examination</span>
+                <span class="a4-val">{!! nl2br(e($admission->examination)) !!}</span>
+            </div>
+        @endif
+
+        {{-- 6. Investigations (Card View: 5 cards per row) --}}
+        @php
+            $validInvs = collect($investigations)->reject(function ($inv) {
+                $val = trim((string)($inv['value'] ?? ''));
+                return $val === '' || $val === '—' || $val === '-' || strcasecmp($val, 'nil') === 0 || strcasecmp($val, 'none') === 0;
+            })->values()->all();
+        @endphp
+        @if(!empty($validInvs))
+            <div class="a4-block" data-overflow-movable="page1">
+                <div class="a4-section-hdr">Investigations</div>
+                <div class="a4-inv-grid-5">
+                    @foreach($validInvs as $inv)
+                        <div class="a4-inv-card">
+                            <div class="a4-inv-card-hdr">
+                                <span class="a4-inv-card-name">{{ $inv['label'] }}</span>@if(!empty($inv['unit']) && !str_contains((string)$inv['value'], $inv['unit'])) <span class="a4-inv-card-unit">({{ $inv['unit'] }})</span>@endif
+                            </div>
+                            <div class="a4-inv-card-val">
+                                {{ $inv['value'] }}
+                            </div>
                             @if(!empty($inv['normal_range']))
-                                <span class="a4-ref">
+                                <div class="a4-inv-card-ref">
                                     Ref: {{ $inv['normal_range'] }}
-                                </span>
+                                </div>
                             @endif
                         </div>
                     @endforeach
-                    @for($empty = count($investigations) % $invCols; $empty > 0 && $empty < $invCols; $empty++)
-                        <div class="a4-inv-box"><span class="a4-lbl">&nbsp;</span><span class="a4-val">&nbsp;</span></div>
-                    @endfor
                 </div>
-            @else
-                <div class="a4-outlined-card"><span class="a4-val">—</span></div>
-            @endif
-        </div>
+            </div>
+        @endif
 
         {{-- Page 1 Footer --}}
         <div class="a4-page-bottom">

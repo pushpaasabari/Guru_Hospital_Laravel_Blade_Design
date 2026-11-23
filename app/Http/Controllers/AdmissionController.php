@@ -74,18 +74,22 @@ class AdmissionController extends Controller
             return $admission;
         });
 
-        $redirectTo = $request->input('redirect_to', $request->input('next_step', 'test-reports'));
+        $redirectTo = $request->input('redirect_to', $request->input('next_step', 'clinical'));
         if ($redirectTo === 'preview') {
             return redirect()->route('documents.preview', $admission)
                 ->with('status', 'Draft admission saved successfully.');
+        }
+        if ($redirectTo === 'test-reports') {
+            return redirect()->route('admissions.test-reports', $admission)
+                ->with('status', 'Admission details saved successfully. Proceed to Laboratory & Diagnostic Test Reports.');
         }
         if ($redirectTo === 'surgery') {
             return redirect()->route('admissions.surgery', $admission)
                 ->with('status', 'Admission details saved successfully. Proceed to Labour / LSCS / Surgery.');
         }
 
-        return redirect()->route('admissions.test-reports', $admission)
-            ->with('status', 'Admission details saved successfully. Proceed to Laboratory & Diagnostic Test Reports.');
+        return redirect()->route('admissions.clinical', $admission)
+            ->with('status', 'Admission details saved successfully. Proceed to Clinical Assessment.');
     }
 
     public function show(Admission $admission): Response
@@ -129,7 +133,7 @@ class AdmissionController extends Controller
             );
         });
 
-        $nextStep = $request->input('next_step', 'test-reports');
+        $nextStep = $request->input('next_step', 'clinical');
         if ($nextStep === 'stay') {
             return redirect()->route('admissions.edit', $admission)
                 ->with('status', 'Admission details updated successfully.');
@@ -138,13 +142,61 @@ class AdmissionController extends Controller
             return redirect()->route('documents.preview', $admission)
                 ->with('status', 'Admission details updated successfully.');
         }
+        if ($nextStep === 'test-reports') {
+            return redirect()->route('admissions.test-reports', $admission)
+                ->with('status', 'Admission details updated. Proceed to Laboratory & Diagnostic Test Reports.');
+        }
         if ($nextStep === 'surgery') {
             return redirect()->route('admissions.surgery', $admission)
                 ->with('status', 'Admission details updated. Proceed to Labour / LSCS / Surgery.');
         }
 
+        return redirect()->route('admissions.clinical', $admission)
+            ->with('status', 'Admission details updated. Proceed to Clinical Assessment.');
+    }
+
+    public function editClinical(Admission $admission): Response
+    {
+        $this->authorize('update', $admission);
+        return Inertia::render('Admissions/Clinical', compact('admission'));
+    }
+
+    public function updateClinical(Request $request, Admission $admission): RedirectResponse
+    {
+        $this->authorize('update', $admission);
+        $validated = $request->validate([
+            'clinical_history' => ['nullable', 'string', 'max:10000'],
+            'examination' => ['nullable', 'string', 'max:10000'],
+        ]);
+
+        $oldData = $admission->toArray();
+        $admission->update($validated);
+
+        AuditService::log(
+            'admission.clinical_updated',
+            'Admission',
+            $admission->id,
+            "Clinical assessment updated for {$admission->patient_name}",
+            $oldData,
+            $admission->toArray()
+        );
+
+        $nextStep = $request->input('next_step', 'test-reports');
+        if ($nextStep === 'stay') {
+            return redirect()->route('admissions.clinical', $admission)
+                ->with('status', 'Clinical assessment saved successfully.');
+        }
+        if ($nextStep === 'admission') {
+            return redirect()->route('admissions.edit', $admission)
+                ->with('status', 'Clinical assessment saved. Proceed to Admission Details.');
+        }
+        if ($nextStep === 'preview') {
+            return redirect()->route('documents.preview', $admission)
+                ->with('status', 'Clinical assessment saved successfully.');
+        }
+
         return redirect()->route('admissions.test-reports', $admission)
-            ->with('status', 'Admission details updated. Proceed to Laboratory & Diagnostic Test Reports.');
+            ->with('status', 'Clinical assessment saved. Proceed to Laboratory & Diagnostic Test Reports.');
     }
 
     public function editSurgery(Admission $admission): Response

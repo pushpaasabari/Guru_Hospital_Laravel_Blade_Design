@@ -61,6 +61,7 @@ interface AdmissionData {
   specimen?: string | null;
   drain?: string | null;
   postoperative_orders?: string | null;
+  stent_removal_date?: string | null;
   status: string;
   newborns?: Newborn[];
 }
@@ -123,6 +124,7 @@ export default function AdmissionsSurgery({
     specimen: admission.specimen || '',
     drain: admission.drain || '',
     postoperative_orders: admission.postoperative_orders || '',
+    stent_removal_date: admission.stent_removal_date ? String(admission.stent_removal_date).slice(0, 10) : '',
     newborns: initialNewborns,
     next_step: 'discharge',
   });
@@ -257,9 +259,9 @@ export default function AdmissionsSurgery({
 
   return (
     <AppLayout>
-      <Head title={`Stage 3: ${isMedical ? 'Clinical Notes' : 'Labour / Surgery'} — ${admission.patient_name}`} />
+      <Head title={`Stage 4: ${isMedical ? 'Clinical Notes' : 'Labour / Surgery'} — ${admission.patient_name}`} />
 
-      {/* 4-Stage Navigation Header */}
+      {/* 5-Stage Navigation Header */}
       <AdmissionStageNav currentStage="surgery" admission={admission} />
 
       {isMedical && (
@@ -303,7 +305,7 @@ export default function AdmissionsSurgery({
       <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
           <h1 className="h3 fw-bold mb-1 text-dark" style={{ letterSpacing: '-0.02em' }}>
-            Stage 3: {isMedical ? 'Clinical & Bedside Notes' : 'Labour / LSCS / Surgery Notes'}
+            Stage 4: {isMedical ? 'Clinical & Bedside Notes' : 'Labour / LSCS / Surgery Notes'}
           </h1>
           <p className="text-muted mb-0">
             {isMedical
@@ -313,7 +315,7 @@ export default function AdmissionsSurgery({
         </div>
         <div className="d-flex gap-2">
           <Link href={`/admissions/${admission.id}/test-reports`} className="btn btn-outline-secondary">
-            <i className="bi bi-arrow-left me-1"></i> Back to Stage 2: Test Reports
+            <i className="bi bi-arrow-left me-1"></i> Back to Stage 3: Test Reports
           </Link>
           <Link href={`/admissions/${admission.id}/documents/preview`} className="btn btn-outline-secondary">
             <i className="bi bi-file-earmark-text me-1"></i> Preview Documents
@@ -326,9 +328,9 @@ export default function AdmissionsSurgery({
         <div className="card mb-4 border-0 shadow-sm">
           <div className="card-header bg-white py-3 fw-bold text-dark d-flex align-items-center justify-content-between">
             <div>
-              <span className="badge bg-primary me-2">3.1</span> Operation Theatre &amp; Procedure Schedule
+              <span className="badge bg-primary me-2">4.1</span> Operation Theatre &amp; Procedure Schedule
             </div>
-            <span className="text-muted small">Step 3 of 4</span>
+            <span className="text-muted small">Step 4 of 5</span>
           </div>
           <div className="card-body">
             <div className="row g-3">
@@ -346,7 +348,7 @@ export default function AdmissionsSurgery({
               {isDelivery && (
                 <div className="col-md-4">
                   <label className="form-label required">
-                    PICME Number (RCH ID)
+                    RCH ID (PICME No)
                     <span className="badge bg-danger-subtle text-danger ms-2" style={{ fontSize: '0.68rem' }}>
                       DELIVERY / OBSTETRIC
                     </span>
@@ -431,7 +433,7 @@ export default function AdmissionsSurgery({
         {/* Section 2: Surgical Team */}
         <div className="card mb-4 border-0 shadow-sm">
           <div className="card-header bg-white py-3 fw-bold text-dark">
-            <span className="badge bg-primary me-2">3.2</span> Surgical &amp; Anaesthesia Team
+            <span className="badge bg-primary me-2">4.2</span> Surgical &amp; Anaesthesia Team
           </div>
           <div className="card-body">
             <div className="row g-3">
@@ -551,7 +553,7 @@ export default function AdmissionsSurgery({
         <div className="card mb-4 border-0 shadow-sm">
           <div className="card-header bg-white py-3 fw-bold text-dark d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div>
-              <span className="badge bg-primary me-2">3.3</span> Operative Narrative &amp; Clinical Findings
+              <span className="badge bg-primary me-2">4.3</span> Operative Narrative &amp; Clinical Findings
             </div>
             <div className="d-flex align-items-center gap-2">
               <label className="small text-muted mb-0 fw-semibold d-none d-md-inline" htmlFor="procedure-template-select">
@@ -689,15 +691,35 @@ export default function AdmissionsSurgery({
                     </div>
 
                     {hasStent && (
-                      <div className="alert alert-warning py-2 px-3 mb-0 border-0 rounded-2 mt-2">
-                        <div className="d-flex align-items-center gap-2">
-                          <i className="bi bi-info-circle-fill text-warning fs-5"></i>
-                          <div className="small">
-                            <strong>Stent Placement Notice:</strong> When a patient has a stent, the mandatory Tamil stent removal instruction:
-                            <div className="font-monospace fw-bold text-dark mt-1" style={{ fontSize: '0.85rem' }}>
-                              &ldquo;வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு (Date) அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.&rdquo;
+                      <div className="alert alert-warning py-3 px-3 mb-0 border-0 rounded-2 mt-2">
+                        <div className="row g-3 align-items-center">
+                          <div className="col-md-5">
+                            <label className="form-label fw-bold text-dark required mb-1">
+                              <i className="bi bi-calendar-event me-1 text-danger"></i> Stent Removal Date
+                            </label>
+                            <input
+                              type="date"
+                              className="form-control fw-bold border-warning"
+                              value={data.stent_removal_date || ''}
+                              onChange={(e) => setData('stent_removal_date', e.target.value)}
+                              required={hasStent}
+                            />
+                            <div className="form-text text-muted small">
+                              Target date when DJ Stent must be removed at hospital.
                             </div>
-                            will automatically appear on the patient&rsquo;s Discharge Summary and discharge review advice.
+                          </div>
+                          <div className="col-md-7">
+                            <div className="small text-secondary">
+                              <div className="fw-bold text-dark mb-1">Stent Removal Bilingual Notice (English &amp; Tamil):</div>
+                              <div className="p-2 bg-white rounded border">
+                                <div className="mb-1 text-dark">
+                                  &bull; <strong>En:</strong> The DJ Stent placed inside needs to be removed on <strong>{data.stent_removal_date || '(Date)'}</strong>. Please contact the hospital one day prior to confirm the time.
+                                </div>
+                                <div className="text-dark">
+                                  &bull; <strong>Ta:</strong> வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு <strong>{data.stent_removal_date || '(Date)'}</strong> அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.
+                                </div>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -706,44 +728,57 @@ export default function AdmissionsSurgery({
                 </div>
               </div>
 
-              {/* Immediate Postoperative Orders (Separate Rows) */}
+              {/* Immediate Postoperative Orders (Dropdown & Row by Row) */}
               <div className="col-12 mt-3">
-                <div className="d-flex justify-content-between align-items-center mb-2">
+                <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
                   <label className="form-label fw-bold text-dark mb-0">
                     <i className="bi bi-list-check text-primary me-1"></i> Immediate Postoperative Orders (Row by Row)
                   </label>
-                  <button
-                    type="button"
-                    onClick={() => addOrderRow()}
-                    className="btn btn-sm btn-outline-primary fw-semibold"
-                  >
-                    <i className="bi bi-plus-circle me-1"></i> Add Order Row
-                  </button>
-                </div>
-
-                {/* Quick Presets */}
-                <div className="mb-2 d-flex flex-wrap gap-1.5 align-items-center">
-                  <span className="small text-muted me-1">Quick add:</span>
-                  {[
-                    'NPO for 6 hours',
-                    'IV Fluids: RL @ 100 ml/hr',
-                    'Monitor vitals q1h x 4h, then q4h',
-                    'Inj. Tramadol 50mg IV SOS (severe pain)',
-                    'Inj. Ondansetron 4mg IV SOS (vomiting)',
-                    'Catheter care & monitor hourly urine output',
-                    'Check dressing site for soakage / bleeding',
-                    'Sips of water after 6 hours if bowel sounds present',
-                  ].map((preset, pIdx) => (
-                    <button
-                      key={pIdx}
-                      type="button"
-                      onClick={() => addOrderRow(preset)}
-                      className="btn btn-xs btn-light border text-secondary"
-                      style={{ fontSize: '0.76rem', padding: '2px 8px' }}
+                  <div className="d-flex align-items-center gap-2">
+                    <select
+                      className="form-select form-select-sm"
+                      style={{ minWidth: '280px' }}
+                      defaultValue=""
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          addOrderRow(e.target.value);
+                          e.target.value = '';
+                        }
+                      }}
+                      aria-label="Select Common Postoperative Order to Add"
                     >
-                      + {preset}
+                      <option value="">-- Add Order from Common Orders Dropdown --</option>
+                      <optgroup label="Post-Op Medications &amp; Injections">
+                        <option value="Inj - Cefbact 1.5g BD IV">Inj - Cefbact 1.5g BD IV</option>
+                        <option value="Inj - Diclo IM (sos)">Inj - Diclo IM (sos)</option>
+                        <option value="Inj - Metrogyl 100mg TDS IV">Inj - Metrogyl 100mg TDS IV</option>
+                        <option value="Inj - Pan 40mg IV BD">Inj - Pan 40mg IV BD</option>
+                        <option value="Inj. Tramadol 50mg IV SOS (severe pain)">Inj. Tramadol 50mg IV SOS (severe pain)</option>
+                        <option value="Inj. Ondansetron 4mg IV SOS (vomiting)">Inj. Ondansetron 4mg IV SOS (vomiting)</option>
+                        <option value="Inj - Oxytocin 10 IU in 500ml RL (post-LSCS)">Inj - Oxytocin 10 IU in 500ml RL (post-LSCS)</option>
+                      </optgroup>
+                      <optgroup label="IV Fluids">
+                        <option value="IV Fluids: RL @ 100 ml/hr">IV Fluids: RL @ 100 ml/hr</option>
+                        <option value="IV Fluids: DNS @ 100 ml/hr">IV Fluids: DNS @ 100 ml/hr</option>
+                        <option value="IV Fluids: NS 500ml @ 75 ml/hr">IV Fluids: NS 500ml @ 75 ml/hr</option>
+                      </optgroup>
+                      <optgroup label="Nursing &amp; Patient Care Orders">
+                        <option value="NPO for 6 hours">NPO for 6 hours</option>
+                        <option value="Sips of water after 6 hours if bowel sounds present">Sips of water after 6 hours if bowel sounds present</option>
+                        <option value="Monitor vitals q1h x 4h, then q4h (BP, Pulse, SpO2, Temp)">Monitor vitals q1h x 4h, then q4h</option>
+                        <option value="Catheter care &amp; monitor hourly urine output">Catheter care &amp; monitor hourly urine output</option>
+                        <option value="Check dressing site for soakage / bleeding">Check dressing site for soakage / bleeding</option>
+                        <option value="Semi-fowler position">Semi-fowler position</option>
+                      </optgroup>
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => addOrderRow()}
+                      className="btn btn-sm btn-outline-primary fw-semibold"
+                    >
+                      <i className="bi bi-plus-circle me-1"></i> Add Row
                     </button>
-                  ))}
+                  </div>
                 </div>
 
                 {/* Order Rows Repeater */}
@@ -940,7 +975,7 @@ export default function AdmissionsSurgery({
         {/* Action Bar */}
         <div className="d-flex justify-content-between align-items-center pb-5">
           <Link href={`/admissions/${admission.id}/test-reports`} className="btn btn-outline-secondary">
-            <i className="bi bi-arrow-left me-1"></i> Back to Stage 2: Test Reports
+            <i className="bi bi-arrow-left me-1"></i> Back to Stage 3: Test Reports
           </Link>
           <div className="d-flex gap-2">
             <button
@@ -949,7 +984,7 @@ export default function AdmissionsSurgery({
               disabled={processing}
               className="btn btn-outline-primary px-3 py-2 fw-semibold"
             >
-              Save Stage 3 Changes
+              Save Stage 4 Changes
             </button>
             <button
               type="button"
@@ -957,7 +992,7 @@ export default function AdmissionsSurgery({
               disabled={processing}
               className="btn btn-primary px-4 py-2 fw-semibold d-inline-flex align-items-center gap-2"
             >
-              <span>Save &amp; Next: Stage 4 (Discharge)</span>
+              <span>Save &amp; Next: Stage 5 (Discharge Summary)</span>
               <i className="bi bi-arrow-right"></i>
             </button>
           </div>
