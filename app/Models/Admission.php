@@ -65,6 +65,13 @@ class Admission extends Model
             if (empty($admission->mrd_no) && !empty($admission->ip_no)) {
                 $admission->mrd_no = self::defaultMrdNo($admission->ip_no);
             }
+
+            // Keep procedure_done and procedure_name synchronized if one is empty
+            if (empty($admission->procedure_done) && !empty($admission->procedure_name)) {
+                $admission->procedure_done = $admission->procedure_name;
+            } elseif (empty($admission->procedure_name) && !empty($admission->procedure_done)) {
+                $admission->procedure_name = $admission->procedure_done;
+            }
         });
     }
 

@@ -1047,7 +1047,7 @@ class DischargeSummaryFormatter
             } elseif (preg_match('/normal|natural/i', $babyNotes)) {
                 $mode = 'Labour natural with episiotomy';
             } else {
-                $mode = $admission->procedure_name ?: ($admission->procedure_done ?: '—');
+                $mode = $admission->procedure_done ?: ($admission->procedure_name ?: '—');
             }
 
             $weight = $baby->birth_weight_kg ? number_format($baby->birth_weight_kg, 2) . ' kg' : '—';
@@ -1076,14 +1076,23 @@ class DischargeSummaryFormatter
 
     /**
      * Formats surgery performed summary string.
+     * Prioritizes procedure_done as the exact operative procedure performed,
+     * falling back to procedure_name.
      */
     public static function formatSurgeryPerformed(Admission $admission): string
     {
-        if ($admission->newborns->count() > 1) {
-            return 'Twin A: Labour natural with episiotomy | Twin B: Emergency LSCS';
+        $done = trim((string) ($admission->procedure_done ?? ''));
+        $name = trim((string) ($admission->procedure_name ?? ''));
+
+        if ($done !== '') {
+            return $done;
         }
 
-        return $admission->procedure_name ?: ($admission->procedure_done ?: '—');
+        if ($name !== '') {
+            return $name;
+        }
+
+        return '—';
     }
 
     /**

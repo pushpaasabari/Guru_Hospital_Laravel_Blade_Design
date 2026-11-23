@@ -715,7 +715,7 @@ export function formatNewborns(admission: any): FormattedNewbornCard[] {
     }
 
     const babyNotes = `${baby.notes || ''} ${baby.neonatal_care || ''}`;
-    let mode = admission.procedure_name || admission.procedure_done || '—';
+    let mode = admission.procedure_done || admission.procedure_name || '—';
     if (/breech/i.test(babyNotes)) mode = 'Breech delivery with episiotomy';
     else if (/lscs|c-section/i.test(babyNotes)) mode = 'Emergency LSCS under SA';
     else if (/normal|natural/i.test(babyNotes)) mode = 'Labour natural with episiotomy';
@@ -737,10 +737,16 @@ export function formatNewborns(admission: any): FormattedNewbornCard[] {
 }
 
 export function formatSurgeryPerformed(admission: any): string {
-  if (admission.newborns && admission.newborns.length > 1) {
-    return 'Twin A: Labour natural with episiotomy | Twin B: Emergency LSCS';
+  const done = (admission.procedure_done || '').trim();
+  const name = (admission.procedure_name || '').trim();
+
+  if (done) {
+    return done;
   }
-  return admission.procedure_name || admission.procedure_done || '—';
+  if (name) {
+    return name;
+  }
+  return '—';
 }
 
 /* =========================================================================

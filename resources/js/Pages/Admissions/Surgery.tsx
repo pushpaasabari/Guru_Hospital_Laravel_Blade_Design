@@ -170,12 +170,13 @@ export default function AdmissionsSurgery({
     setData((prev) => ({
       ...prev,
       procedure_note: tpl.procedureNote,
-      procedure_name: prev.procedure_name ? prev.procedure_name : tpl.procedureName,
-      procedure_done: prev.procedure_done ? prev.procedure_done : tpl.procedureDone,
-      incision: prev.incision ? prev.incision : tpl.incision,
-      findings: prev.findings ? prev.findings : tpl.findings,
-      blood_loss_ml: prev.blood_loss_ml ? prev.blood_loss_ml : (tpl.bloodLossMl !== undefined ? String(tpl.bloodLossMl) : prev.blood_loss_ml),
-      icd_code: prev.icd_code ? prev.icd_code : (tpl.icdCode || prev.icd_code),
+      procedure_name: tpl.procedureName || prev.procedure_name,
+      procedure_done: tpl.procedureDone || prev.procedure_done,
+      incision: tpl.incision || prev.incision,
+      findings: tpl.findings || prev.findings,
+      blood_loss_ml: tpl.bloodLossMl !== undefined ? String(tpl.bloodLossMl) : prev.blood_loss_ml,
+      icd_code: tpl.icdCode || prev.icd_code,
+      anaesthesia_type: tpl.anesthesiaType || prev.anaesthesia_type,
     }));
 
     if (tpl.hasStent) {
@@ -368,7 +369,14 @@ export default function AdmissionsSurgery({
                   type="text"
                   className="form-control"
                   value={data.procedure_name}
-                  onChange={(e) => setData('procedure_name', e.target.value)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setData((prev) => ({
+                      ...prev,
+                      procedure_name: val,
+                      procedure_done: !prev.procedure_done || prev.procedure_done === prev.procedure_name ? val : prev.procedure_done,
+                    }));
+                  }}
                   placeholder="e.g. Emergency Lower Segment Caesarean Section (LSCS)"
                 />
               </div>

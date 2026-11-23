@@ -233,4 +233,54 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
         $this->assertStringContainsString('<span class="a4-lbl">Pediatrician</span>', $htmlDelivery);
         $this->assertStringContainsStringIgnoringCase('Dr. S. Ramesh', $htmlDelivery);
     }
+
+    public function test_procedure_performed_in_digital_discharge_summary_matches_procedure_done(): void
+    {
+        // 1. Procedure Done takes priority over procedure_name when both exist
+        $admission = Admission::create([
+            'patient_name' => 'MR.BALAMURUGAN',
+            'uhid' => '2023/4975',
+            'ip_no' => '2026/862',
+            'format' => 'general',
+            'surgery_type' => 'other',
+            'diagnosis' => 'Left lower ureteric calculus.',
+            'procedure_name' => 'Left lower ureteric calculus',
+            'procedure_done' => 'LEFT URSL & DJ STENTING',
+            'admission_at' => now(),
+            'created_by' => $this->doctor->id,
+            'approved_by' => $this->doctor->id,
+            'status' => 'approved',
+        ]);
+
+        $this->assertEquals('LEFT URSL & DJ STENTING', \App\Services\DischargeSummaryFormatter::formatSurgeryPerformed($admission));
+
+        $html = view('pdf.partials.discharge-summary-a4._page2', ['admission' => $admission])->render();
+        $this->assertStringContainsString('Procedure Performed</span>', $html);
+        $this->assertStringContainsString('LEFT URSL &amp; DJ STENTING', $html);
+        $this->assertStringNotContainsString('Left lower ureteric calculus</span>', $html);
+
+        // 2. Twin delivery renders actual procedure rather than hardcoded stub
+        $twinAdmission = Admission::create([
+            'patient_name' => 'Twin Mother',
+            'uhid' => 'TM001',
+            'ip_no' => 'IP-TM001',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+            'procedure_name' => 'Bilateral Twin LSCS',
+            'procedure_done' => 'Emergency LSCS for Twin Gestation',
+            'diagnosis' => 'Twin Pregnancy at 37 Weeks',
+            'admission_at' => now(),
+            'created_by' => $this->doctor->id,
+            'approved_by' => $this->doctor->id,
+            'status' => 'approved',
+        ]);
+        $twinAdmission->newborns()->create(['sex' => 'Male', 'birth_weight_kg' => 2.5]);
+        $twinAdmission->newborns()->create(['sex' => 'Female', 'birth_weight_kg' => 2.4]);
+        $twinAdmission->load('newborns');
+
+        $this->assertEquals('Emergency LSCS for Twin Gestation', \App\Services\DischargeSummaryFormatter::formatSurgeryPerformed($twinAdmission));
+        $htmlTwin = view('pdf.partials.discharge-summary-a4._page2', ['admission' => $twinAdmission])->render();
+        $this->assertStringContainsString('Emergency LSCS for Twin Gestation', $htmlTwin);
+        $this->assertStringNotContainsString('Twin A: Labour natural with episiotomy | Twin B: Emergency LSCS', $htmlTwin);
+    }
 }
