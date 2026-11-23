@@ -88,7 +88,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
   const { data, setData, put, transform, processing, errors } = useForm({
     patient_name: admission.patient_name || '',
     attender_name: admission.attender_name || '',
-    attender_relation: admission.attender_relation || '',
+    attender_relation: admission.attender_relation || 'Husband',
     uhid: admission.uhid || '',
     ip_no: admission.ip_no || '',
     picme_no: admission.picme_no || '',
@@ -224,7 +224,7 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
           </div>
           <div className="card-body">
             <div className="row g-3">
-              <div className="col-md-4">
+              <div className="col-md-6">
                 <label className="form-label required">Patient Full Name</label>
                 <PatientNameInput
                   value={data.patient_name}
@@ -234,41 +234,41 @@ export default function AdmissionsEdit({ admission, clinicalStaff = [] }: Props)
                   required
                 />
               </div>
-              <div className="col-md-4">
+              <div className="col-md-6">
                 <label className="form-label">Attender / Care Of Name</label>
-                <input
-                  type="text"
-                  className={`form-control ${errors.attender_name ? 'is-invalid' : ''}`}
-                  style={{ textTransform: 'uppercase' }}
-                  value={data.attender_name}
-                  onChange={(e) =>
-                    handleNormalizedInputChange(e, toUpperCaseValue, (val) => setData('attender_name', val))
-                  }
-                  placeholder="e.g. S. MURUGAN"
-                />
-                {errors.attender_name && <div className="invalid-feedback">{errors.attender_name}</div>}
-              </div>
-              <div className="col-md-4">
-                <label className="form-label">Relationship to Patient</label>
-                <select
-                  className={`form-select ${errors.attender_relation ? 'is-invalid' : ''}`}
-                  value={data.attender_relation}
-                  onChange={(e) => setData('attender_relation', e.target.value)}
-                >
-                  <option value="">Select Relationship</option>
-                  <option value="Husband">Husband</option>
-                  <option value="Father">Father</option>
-                  <option value="Mother">Mother</option>
-                  <option value="Son">Son</option>
-                  <option value="Daughter">Daughter</option>
-                  <option value="Brother">Brother</option>
-                  <option value="Sister">Sister</option>
-                  <option value="Spouse">Spouse</option>
-                  <option value="Guardian">Guardian</option>
-                  <option value="Care of (C/o)">Care of (C/o)</option>
-                  <option value="Other">Other</option>
-                </select>
-                {errors.attender_relation && <div className="invalid-feedback">{errors.attender_relation}</div>}
+                <div className={`fg-merged-name-group ${errors.attender_name || errors.attender_relation ? 'is-invalid' : ''}`}>
+                  <select
+                    className="form-select fg-relation-select"
+                    aria-label="Relationship to Patient"
+                    value={data.attender_relation || 'Husband'}
+                    onChange={(e) => setData('attender_relation', e.target.value)}
+                  >
+                    <option value="Husband">Husband</option>
+                    <option value="Father">Father</option>
+                    <option value="Mother">Mother</option>
+                    <option value="Son">Son</option>
+                    <option value="Daughter">Daughter</option>
+                    <option value="Brother">Brother</option>
+                    <option value="Sister">Sister</option>
+                    <option value="Spouse">Spouse</option>
+                    <option value="Guardian">Guardian</option>
+                    <option value="Care of (C/o)">Care of (C/o)</option>
+                    <option value="Other">Other</option>
+                  </select>
+                  <input
+                    type="text"
+                    className={`form-control fg-name-text-input ${errors.attender_name ? 'is-invalid' : ''}`}
+                    style={{ textTransform: 'uppercase', minWidth: 0 }}
+                    aria-label="Attender / Care Of Name"
+                    value={data.attender_name}
+                    onChange={(e) =>
+                      handleNormalizedInputChange(e, toUpperCaseValue, (val) => setData('attender_name', val))
+                    }
+                    placeholder="e.g. S. MURUGAN"
+                  />
+                </div>
+                {errors.attender_name && <div className="invalid-feedback d-block">{errors.attender_name}</div>}
+                {errors.attender_relation && <div className="invalid-feedback d-block">{errors.attender_relation}</div>}
               </div>
               <div className="col-md-4">
                 <label className="form-label required">UHID</label>

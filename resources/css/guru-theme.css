@@ -574,6 +574,27 @@ body {
   background-color: #ffffff !important;
 }
 
+.fg-merged-name-group .fg-relation-select {
+  width: 125px !important;
+  min-width: 125px !important;
+  flex: 0 0 125px !important;
+  border: none !important;
+  border-right: 1px solid var(--fg-border, #e9e9e9) !important;
+  border-radius: 0 !important;
+  background-color: var(--fg-surface-soft, #fafbfc) !important;
+  padding: 9px 24px 9px 10px !important;
+  font-size: 13.5px !important;
+  color: var(--fg-text, #111111) !important;
+  box-shadow: none !important;
+  cursor: pointer;
+}
+
+.fg-merged-name-group .fg-relation-select:focus {
+  outline: none !important;
+  box-shadow: none !important;
+  background-color: #ffffff !important;
+}
+
 .fg-merged-name-group .fg-name-text-input {
   flex: 1 1 auto;
   border: none !important;
