@@ -155,9 +155,9 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
         </div>
       )}
 
-      {/* 4-Stage Horizontal Stepper */}
+      {/* 5-Stage Horizontal Stepper (All 5 Cards in a Single Row) */}
       <div className="fg-stage-stepper">
-        <div className="row g-2">
+        <div className="fg-stage-row-5">
           {stages.map((stage) => {
             const isActive = currentStage === stage.id;
             const isClickable = Boolean(stage.href);
@@ -172,10 +172,18 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
               .join(' ');
 
             const content = (
-              <div className={cardClasses}>
-                <div className="fg-stage-number">
+              <div className={cardClasses} style={{ padding: '8px 10px', gap: '8px' }}>
+                <div
+                  className="fg-stage-number"
+                  style={{
+                    width: '30px',
+                    height: '30px',
+                    fontSize: '0.82rem',
+                    flexShrink: 0,
+                  }}
+                >
                   {stage.isCompleted && !isActive ? (
-                    <i className="bi bi-check-lg" style={{ fontSize: '1.1rem' }}></i>
+                    <i className="bi bi-check-lg" style={{ fontSize: '1rem' }}></i>
                   ) : (
                     stage.step
                   )}
@@ -187,20 +195,25 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
                       className={`fw-bold text-truncate ${
                         isActive ? 'text-primary' : isClickable ? 'text-dark' : 'text-secondary'
                       }`}
-                      style={{ fontSize: '0.86rem' }}
+                      style={{ fontSize: '0.82rem', lineHeight: 1.2 }}
+                      title={stage.name}
                     >
                       {stage.name}
                     </span>
                     {isActive && (
                       <span
-                        className="badge bg-primary text-white"
-                        style={{ fontSize: '0.62rem', letterSpacing: '0.04em' }}
+                        className="badge bg-primary text-white flex-shrink-0"
+                        style={{ fontSize: '0.58rem', padding: '2px 5px', letterSpacing: '0.04em' }}
                       >
                         ACTIVE
                       </span>
                     )}
                   </div>
-                  <div className="text-muted text-truncate" style={{ fontSize: '0.74rem' }}>
+                  <div
+                    className="text-muted text-truncate"
+                    style={{ fontSize: '0.70rem', marginTop: '1px' }}
+                    title={stage.subtitle}
+                  >
                     {stage.subtitle}
                   </div>
                 </div>
@@ -208,7 +221,7 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
             );
 
             return (
-              <div key={stage.id} className="col-12 col-sm-6 col-lg-3">
+              <div key={stage.id} style={{ minWidth: 0, height: '100%' }}>
                 {isClickable ? (
                   <Link href={stage.href!} prefetch className="text-decoration-none d-block h-100">
                     {content}
