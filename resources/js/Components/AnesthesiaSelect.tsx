@@ -12,6 +12,7 @@ interface AnesthesiaSelectProps {
   value: string;
   onChange: (value: string) => void;
   types?: AnesthesiaTypeItem[];
+  anesthesiaList?: AnesthesiaTypeItem[];
   placeholder?: string;
   required?: boolean;
 }
@@ -20,14 +21,16 @@ export default function AnesthesiaSelect({
   label = 'Anaesthesia Type',
   value,
   onChange,
-  types = [],
+  types,
+  anesthesiaList,
   placeholder = '-- Select Anaesthesia Type --',
   required = false,
 }: AnesthesiaSelectProps) {
   const [customMode, setCustomMode] = useState(false);
+  const typeList = types ?? anesthesiaList ?? [];
 
   // Match if current value matches either the name or code
-  const hasMatch = types.some((t) => t.name === value || (t.code && t.code === value));
+  const hasMatch = typeList.some((t) => t.name === value || (t.code && t.code === value));
 
   return (
     <div>
@@ -71,7 +74,7 @@ export default function AnesthesiaSelect({
           {value && !hasMatch && (
             <option value={value}>{value} (Current)</option>
           )}
-          {types.map((t) => (
+          {typeList.map((t) => (
             <option key={t.id} value={t.name}>
               {t.name}
             </option>

@@ -488,6 +488,7 @@ export default function AdmissionsSurgery({
                   label="Anaesthesia Type"
                   value={data.anaesthesia_type}
                   onChange={(val) => setData('anaesthesia_type', val)}
+                  types={anesthesiaTypes}
                   anesthesiaList={anesthesiaTypes}
                   placeholder="-- Select Anaesthesia Type --"
                 />

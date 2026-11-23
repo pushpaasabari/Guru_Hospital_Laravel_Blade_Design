@@ -25,21 +25,54 @@ interface StaffSelectProps {
 }
 
 const ROLE_ALIASES: Record<string, string[]> = {
-  surgeon: ['surgeon', 'consultant_doctor'],
-  assisted_surgeon: ['assisted_surgeon', 'surgeon', 'consultant_doctor', 'staff_nurse'],
+  surgeon: ['surgeon'],
+  assisted_surgeon: ['assisted_surgeon', 'surgeon'],
   doctor: ['consultant_doctor', 'surgeon', 'assisted_surgeon', 'anaesthetist', 'consultant_pediatrician'],
-  consultant_doctor: ['consultant_doctor', 'surgeon'],
+  consultant_doctor: ['consultant_doctor', 'surgeon', 'consultant_pediatrician'],
   anaesthetist: ['anaesthetist'],
-  assisted_anaesthetist: ['assisted_anaesthetist', 'anaesthetist', 'staff_nurse'],
-  staff_nurse: ['staff_nurse'],
+  assisted_anaesthetist: ['assisted_anaesthetist', 'anaesthetist'],
+  staff_nurse: ['staff_nurse', 'nurse'],
   nurse: ['staff_nurse'],
-  ot_technician: ['ot_technician'],
-  ot_tech: ['ot_technician'],
-  consultant_pediatrician: ['consultant_pediatrician', 'consultant_doctor'],
-  pediatrician: ['consultant_pediatrician', 'consultant_doctor'],
+  ot_technician: ['ot_technician', 'ot_tech'],
+  ot_tech: ['ot_technician', 'ot_tech'],
+  consultant_pediatrician: ['consultant_pediatrician', 'pediatrician'],
+  pediatrician: ['consultant_pediatrician', 'pediatrician'],
   all: [],
   other: [],
 };
+
+function getBaseStaffName(name: string): string {
+  if (!name) return '';
+  return name
+    .replace(/(?:,\s*|\s+)(?:M\.?S\.?|M\.?D\.?|M\.?B\.?B\.?S|M\.?Ch\.?|D\.?G\.?O|D\.?N\.?B|D\.?A|FRCS|MRCOG|DM|FCPS|DCH|B\.?Sc|GNM)(?:\s*\([^)]*\))?/gi, '')
+    .trim();
+}
+
+function formatStaffOptionLabel(staff: ClinicalStaffMember): string {
+  const name = staff.name ? staff.name.trim() : '';
+  const qual = staff.qualification ? staff.qualification.trim() : '';
+  const dept = staff.department ? staff.department.trim() : '';
+
+  if (qual) {
+    const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const cleanQual = qual.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (cleanQual && cleanName.includes(cleanQual)) {
+      return name;
+    }
+    return `${name} (${qual})`;
+  }
+
+  if (dept) {
+    const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const cleanDept = dept.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (cleanDept && cleanName.includes(cleanDept)) {
+      return name;
+    }
+    return `${name} (${dept})`;
+  }
+
+  return name;
+}
 
 export default function StaffSelect({
   label,
@@ -83,16 +116,34 @@ export default function StaffSelect({
     return false;
   });
 
-  // Fallback to all staff if role filter returned empty so dropdown is never broken
-  const displayList = filtered.length > 0 ? filtered : staffList;
+  // Display only filtered staff; do NOT fall back to unrelated staff members
+  const displayList = filtered;
 
-  // Deduplicate by normalized name
-  const uniqueList = Array.from(
-    new Map(displayList.map((item) => [normalize(item.name), item])).values()
-  );
+  // Deduplicate by base normalized name so entries with/without degree suffixes merge cleanly
+  const deduplicatedMap = new Map<string, ClinicalStaffMember>();
+  displayList.forEach((item) => {
+    const baseKey = normalize(getBaseStaffName(item.name));
+    const existing = deduplicatedMap.get(baseKey);
+    if (!existing) {
+      deduplicatedMap.set(baseKey, item);
+    } else {
+      const existingHasDegree = /(?:M\.?S|M\.?D|M\.?Ch|MBBS)/i.test(existing.name);
+      const currentHasDegree = /(?:M\.?S|M\.?D|M\.?Ch|MBBS)/i.test(item.name);
+      if (existingHasDegree && !currentHasDegree) {
+        deduplicatedMap.set(baseKey, item);
+      } else if (!existing.qualification && item.qualification) {
+        deduplicatedMap.set(baseKey, item);
+      }
+    }
+  });
+  const uniqueList = Array.from(deduplicatedMap.values());
 
   // Check if current value matches one in the list
-  const hasMatch = uniqueList.some((s) => normalize(s.name) === currentValue);
+  const hasMatch = uniqueList.some(
+    (s) =>
+      normalize(s.name) === currentValue ||
+      normalize(getBaseStaffName(s.name)) === normalize(getBaseStaffName(currentValue))
+  );
 
   return (
     <div>
@@ -159,7 +210,7 @@ export default function StaffSelect({
             const optionValue = normalize(s.name);
             return (
               <option key={s.id} value={optionValue}>
-                {optionValue} {s.qualification ? `(${s.qualification})` : s.department ? `(${s.department})` : ''}
+                {formatStaffOptionLabel(s)}
               </option>
             );
           })}
