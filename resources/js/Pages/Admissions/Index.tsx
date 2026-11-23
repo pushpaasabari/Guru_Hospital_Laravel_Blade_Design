@@ -7,6 +7,7 @@ import ActionDropdown, {
   buildEditStageMenuItems,
   buildPdfDownloadMenuItems,
 } from '../../Components/ActionDropdown';
+import { formatDate } from '../../utils/dateFormatter';
 
 interface AdmissionItem {
   id: number;
@@ -166,8 +167,8 @@ export default function AdmissionsIndex({ admissions, filters = {}, auth }: Prop
                       </div>
                     </td>
                     <td>
-                      <div className="small">Adm: {adm.admission_at?.substring(0, 10)}</div>
-                      <div className="small text-muted">Dis: {adm.discharge_at?.substring(0, 10)}</div>
+                      <div className="small">Adm: {formatDate(adm.admission_at)}</div>
+                      <div className="small text-muted">Dis: {formatDate(adm.discharge_at)}</div>
                     </td>
                     <td>
                       <span className={`badge ${getStatusBadge(adm.status)} text-uppercase`}>

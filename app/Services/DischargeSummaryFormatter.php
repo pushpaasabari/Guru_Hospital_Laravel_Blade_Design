@@ -956,21 +956,44 @@ class DischargeSummaryFormatter
     }
 
     /**
+     * Normalize any date string (YYYY-MM-DD, DD/MM/YYYY, DD-MM-YYYY) to standard dd.mm.yyyy.
+     */
+    public static function normalizeToDotDate(?string $dateStr): string
+    {
+        if (empty($dateStr)) {
+            return '';
+        }
+        $trimmed = trim($dateStr);
+        // Normalize YYYY-MM-DD
+        if (preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})/', $trimmed, $m)) {
+            return str_pad($m[3], 2, '0', STR_PAD_LEFT) . '.' . str_pad($m[2], 2, '0', STR_PAD_LEFT) . '.' . $m[1];
+        }
+        // Normalize DD/MM/YYYY or DD-MM-YYYY
+        if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/', $trimmed, $m)) {
+            $year = strlen($m[3]) === 2 ? '20' . $m[3] : $m[3];
+            return str_pad($m[1], 2, '0', STR_PAD_LEFT) . '.' . str_pad($m[2], 2, '0', STR_PAD_LEFT) . '.' . $year;
+        }
+        return preg_replace('/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/', '$1.$2.$3', $trimmed);
+    }
+
+    /**
      * Resolve the stent removal date string from an Admission model or string.
      */
     public static function resolveStentRemovalDate(Admission|string|null $dateOrAdmission = null): string
     {
         if ($dateOrAdmission instanceof Admission) {
             if ($dateOrAdmission->stent_removal_date) {
-                return $dateOrAdmission->stent_removal_date->format('d/m/Y');
+                return $dateOrAdmission->stent_removal_date->format('d.m.Y');
             }
             if ($dateOrAdmission->discharge_at) {
-                return $dateOrAdmission->discharge_at->copy()->addDays(30)->format('d/m/Y');
+                return $dateOrAdmission->discharge_at->copy()->addDays(30)->format('d.m.Y');
             }
-            return date('d/m/Y', strtotime('+30 days'));
+            return date('d.m.Y', strtotime('+30 days'));
         }
 
-        return $dateOrAdmission ?: '(Date)';
+        return is_string($dateOrAdmission) && !empty($dateOrAdmission)
+            ? (self::normalizeToDotDate($dateOrAdmission) ?: '(Date)')
+            : '(Date)';
     }
 
     /**
@@ -1035,9 +1058,9 @@ class DischargeSummaryFormatter
             }
 
             if (preg_match('/(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/', $line, $dm)) {
-                $reviewDate = $dm[1];
+                $reviewDate = self::normalizeToDotDate($dm[1]);
                 if (!$reviewText && str_contains(strtolower($line), 'review')) {
-                    $reviewText = $line;
+                    $reviewText = self::normalizeToDotDate($line);
                     continue;
                 }
             }
@@ -1344,7 +1367,7 @@ class DischargeSummaryFormatter
             'exercise' => $admission->post_surgery_activity ?: '—',
             'emergency_contact' => 'Reception: 04342-262266, 7418084266',
             'when_to_contact' => 'Report immediately if bleeding, fever, or severe pain',
-            'review' => $admission->suture_removal_date ? 'Review on ' . $admission->suture_removal_date->format('d/m/Y') . ' for Suture Removal' : '',
+            'review' => $admission->suture_removal_date ? 'Review on ' . $admission->suture_removal_date->format('d.m.Y') . ' for Suture Removal' : '',
             'tamil_note' => '',
         ];
 
@@ -1362,9 +1385,9 @@ class DischargeSummaryFormatter
         } elseif ($hasStent) {
             $date = null;
             if ($admission->stent_removal_date) {
-                $date = $admission->stent_removal_date->format('d/m/Y');
+                $date = $admission->stent_removal_date->format('d.m.Y');
             } elseif (preg_match('/(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/', $res['review'] ?: ($admission->follow_up ?? ''), $dm)) {
-                $date = $dm[1];
+                $date = self::normalizeToDotDate($dm[1]);
             }
             $res['tamil_note'] = self::getStentRemovalNotice($date);
         }

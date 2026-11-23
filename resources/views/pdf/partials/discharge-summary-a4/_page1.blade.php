@@ -95,15 +95,15 @@
         <div class="a4-grid-3">
             <div class="a4-grid-cell">
                 <span class="a4-lbl">Date of Admission</span>
-                <span class="a4-val a4-val-bold">{{ $admission->admission_at?->format('d/m/Y, h:i A') ?? '—' }}</span>
+                <span class="a4-val a4-val-bold">{{ $admission->admission_at?->format('d.m.Y, h:i A') ?? '—' }}</span>
             </div>
             <div class="a4-grid-cell">
                 <span class="a4-lbl">Date of Procedure / Surgery</span>
-                <span class="a4-val a4-val-bold">{{ $admission->procedure_at?->format('d/m/Y, h:i A') ?? '—' }}</span>
+                <span class="a4-val a4-val-bold">{{ $admission->procedure_at?->format('d.m.Y, h:i A') ?? '—' }}</span>
             </div>
             <div class="a4-grid-cell">
                 <span class="a4-lbl">Date of Discharge</span>
-                <span class="a4-val a4-val-bold">{{ $admission->discharge_at?->format('d/m/Y, h:i A') ?? '—' }}</span>
+                <span class="a4-val a4-val-bold">{{ $admission->discharge_at?->format('d.m.Y, h:i A') ?? '—' }}</span>
             </div>
             <div class="a4-grid-cell">
                 <span class="a4-lbl">Consultant / Treating Doctor</span>

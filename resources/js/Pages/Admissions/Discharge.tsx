@@ -196,37 +196,9 @@ const serializeMedications = (rows: MedicationRow[]): string => {
     .join('\n');
 };
 
-const getStentNoticeText = (date: string) => {
-  const d = date || '(Date)';
-  return `வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு ${d} அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.`;
-};
-
 export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: Props) {
-  // Stent detection
-  const hasStentInSurgery = Boolean(
-    (admission.procedure_name || '').match(/stent/i) ||
-    (admission.procedure_done || '').match(/stent/i) ||
-    (admission.procedure_note || '').match(/stent/i) ||
-    (admission.findings || '').match(/stent/i) ||
-    (admission.drain || '').match(/stent/i) ||
-    (admission.discharge_advice || '').match(/stent/i) ||
-    (admission.follow_up || '').match(/stent/i)
-  );
-
   const initialMedRows = parseMedications(admission.medication_orders);
   const [medRows, setMedRows] = useState<MedicationRow[]>(initialMedRows);
-  const [hasStent, setHasStent] = useState<boolean>(hasStentInSurgery);
-
-  // Extract stent date
-  const extractDate = (text?: string | null): string => {
-    if (!text) return '';
-    const m = text.match(/(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/);
-    return m ? m[1] : '';
-  };
-
-  const [stentRemovalDate, setStentRemovalDate] = useState<string>(
-    extractDate(admission.follow_up || admission.discharge_advice)
-  );
 
   const { data, setData, put, transform, processing, errors } = useForm({
     discharge_at: admission.discharge_at ? admission.discharge_at.slice(0, 16) : '',
@@ -315,20 +287,6 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
       ];
     }
     setMedRows(rows);
-  };
-
-  const insertTamilStentNotice = () => {
-    const notice = getStentNoticeText(stentRemovalDate);
-    if (!data.discharge_advice.includes('வயிற்றுக்குள்')) {
-      const updated = data.discharge_advice ? `${data.discharge_advice.trim()}\n${notice}` : notice;
-      setData('discharge_advice', updated);
-    }
-    if (!data.follow_up.includes('stent removal')) {
-      const followUpUpdated = data.follow_up
-        ? `${data.follow_up.trim()}\n${stentRemovalDate} for stent removal`
-        : `${stentRemovalDate} for stent removal`;
-      setData('follow_up', followUpUpdated);
-    }
   };
 
   const submitWithStep = (step: 'download_ds' | 'download_pack' | 'preview' | 'stay', e?: React.FormEvent) => {
@@ -635,68 +593,6 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
             <span className="badge bg-primary me-2">5.3</span> Discharge Advice, Post-Surgery Diet, Activity &amp; Review
           </div>
           <div className="card-body">
-            {/* Stent Placement Detection & Mandatory Tamil Instruction */}
-            <div className="card mb-4 border-warning bg-warning-subtle">
-              <div className="card-body p-3">
-                <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
-                  <div className="form-check form-switch mb-0">
-                    <input
-                      className="form-check-input"
-                      type="checkbox"
-                      role="switch"
-                      id="stentDischargeSwitch"
-                      checked={hasStent}
-                      onChange={(e) => setHasStent(e.target.checked)}
-                    />
-                    <label className="form-check-label fw-bold text-dark" htmlFor="stentDischargeSwitch">
-                      <i className="bi bi-shield-plus text-primary me-1"></i> Patient has STENT (Internal Stent in situ)
-                    </label>
-                  </div>
-                  {hasStent && (
-                    <button
-                      type="button"
-                      onClick={insertTamilStentNotice}
-                      className="btn btn-sm btn-warning text-dark fw-bold shadow-xs"
-                    >
-                      <i className="bi bi-pencil-square me-1"></i> Insert Tamil Stent Instruction into Advice
-                    </button>
-                  )}
-                </div>
-
-                {hasStent && (
-                  <div className="p-3 bg-white rounded-3 border mt-2">
-                    <div className="row g-2 align-items-center mb-2">
-                      <div className="col-auto">
-                        <label className="form-label fw-bold small text-dark mb-0">Stent Removal Due Date:</label>
-                      </div>
-                      <div className="col-auto">
-                        <input
-                          type="text"
-                          className="form-control form-control-sm"
-                          value={stentRemovalDate}
-                          onChange={(e) => setStentRemovalDate(e.target.value)}
-                          placeholder="e.g. 21.08.2026"
-                          style={{ width: '140px' }}
-                        />
-                      </div>
-                      <div className="col-auto">
-                        <span className="text-muted small">(Date to appear in Tamil Stent Notice)</span>
-                      </div>
-                    </div>
-
-                    <div className="p-2.5 bg-light rounded border" style={{ fontFamily: "'Nirmala', 'Arial Unicode MS', sans-serif", fontSize: '0.92rem', lineHeight: '1.5' }}>
-                      <strong className="text-primary d-block mb-1">
-                        <i className="bi bi-info-circle-fill me-1"></i> அதிகாரப்பூர்வ ஸ்டெண்ட் அகற்றல் குறிப்பு (Official Stent Notice):
-                      </strong>
-                      <span className="text-dark fw-semibold">
-                        &ldquo;{getStentNoticeText(stentRemovalDate)}&rdquo;
-                      </span>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
             {/* Advice, Post-Surgery Diet & Activity, and Suture Removal */}
             <div className="row g-3">
               <div className="col-md-6">

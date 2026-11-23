@@ -278,11 +278,10 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
     if (!dateStr) return '—';
     try {
       const d = new Date(dateStr);
-      return d.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      });
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${day}.${month}.${year}`;
     } catch {
       return dateStr;
     }
@@ -292,19 +291,15 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
     if (!dateStr) return '—';
     try {
       const d = new Date(dateStr);
-      return (
-        d.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-        }) +
-        ' at ' +
-        d.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: true,
-        })
-      );
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const time = d.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+      return `${day}.${month}.${year}, ${time}`;
     } catch {
       return dateStr;
     }

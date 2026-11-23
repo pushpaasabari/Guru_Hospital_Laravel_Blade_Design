@@ -8,6 +8,7 @@ import AdmissionStageNav from '../../Components/AdmissionStageNav';
 import { PROCEDURE_TEMPLATES } from '../../constants/procedureTemplates';
 import Icd10SelectorModal from '../../Components/Icd10SelectorModal';
 import { ICD10_CATALOG } from '../../constants/icd10Catalog';
+import { formatDate } from '../../utils/dateFormatter';
 
 interface Newborn {
   id?: number;
@@ -713,10 +714,10 @@ export default function AdmissionsSurgery({
                               <div className="fw-bold text-dark mb-1">Stent Removal Bilingual Notice (English &amp; Tamil):</div>
                               <div className="p-2 bg-white rounded border">
                                 <div className="mb-1 text-dark">
-                                  &bull; <strong>En:</strong> The DJ Stent placed inside needs to be removed on <strong>{data.stent_removal_date || '(Date)'}</strong>. Please contact the hospital one day prior to confirm the time.
+                                  &bull; <strong>En:</strong> The DJ Stent placed inside needs to be removed on <strong>{data.stent_removal_date ? formatDate(data.stent_removal_date) : '(Date)'}</strong>. Please contact the hospital one day prior to confirm the time.
                                 </div>
                                 <div className="text-dark">
-                                  &bull; <strong>Ta:</strong> வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு <strong>{data.stent_removal_date || '(Date)'}</strong> அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.
+                                  &bull; <strong>Ta:</strong> வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு <strong>{data.stent_removal_date ? formatDate(data.stent_removal_date) : '(Date)'}</strong> அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.
                                 </div>
                               </div>
                             </div>

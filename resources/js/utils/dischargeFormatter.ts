@@ -653,9 +653,9 @@ export function formatAdviceAndReview(adviceText?: string | null, followUpText?:
 
     const dm = line.match(/(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/);
     if (dm) {
-      reviewDate = dm[1];
+      reviewDate = dm[1].replace(/[\/\-]/g, '.');
       if (!reviewText && /review/i.test(line)) {
-        reviewText = line;
+        reviewText = line.replace(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/g, '$1.$2.$3');
         continue;
       }
     }
@@ -933,7 +933,7 @@ export function formatSurgicalAdvice(admission: any): FormattedSurgicalAdvice {
     res.tamil_note = tamilM[1].trim();
   } else if (hasStent) {
     const dm = (res.review || admission.follow_up || '').match(/(\d{1,2}[\/\.\-]\d{1,2}[\/\.\-]\d{2,4})/);
-    const d = dm ? dm[1] : '(Date)';
+    const d = dm ? dm[1].replace(/[\/\-]/g, '.') : '(Date)';
     res.tamil_note = `வயிற்றுக்குள் வைக்கப்பட்டிருக்கும் ஸ்டெண்ட் என்ற டியூபை எடுப்பதற்கு ${d} அன்று வர வேண்டும். ஒரு நாள் முன்னர் மருத்துவமனையை தொடர்பு கொண்டு நேரம் அறிந்து கொள்ள வேண்டும்.`;
   }
 
@@ -1038,7 +1038,7 @@ export function getInsuranceDetailsList(admission: any): InsuranceDetailItem[] {
     const dt = new Date(admission.policy_validity);
     const val = Number.isNaN(dt.getTime())
       ? String(admission.policy_validity)
-      : `${String(dt.getDate()).padStart(2, '0')}/${String(dt.getMonth() + 1).padStart(2, '0')}/${dt.getFullYear()}`;
+      : `${String(dt.getDate()).padStart(2, '0')}.${String(dt.getMonth() + 1).padStart(2, '0')}.${dt.getFullYear()}`;
     items.push({ label: 'Valid Till', value: val });
   }
 

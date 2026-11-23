@@ -463,7 +463,7 @@ class Admission extends Model
             $items[] = ['label' => 'Policy Holder', 'value' => $holder];
         }
         if ($this->policy_validity) {
-            $items[] = ['label' => 'Valid Till', 'value' => $this->policy_validity->format('d/m/Y')];
+            $items[] = ['label' => 'Valid Till', 'value' => $this->policy_validity->format('d.m.Y')];
         }
 
         return $items;

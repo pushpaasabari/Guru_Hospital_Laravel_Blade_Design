@@ -88,7 +88,7 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
         $html = view('pdf.partials.discharge-summary-a4._page1', ['admission' => $admission])->render();
 
         // Date of Procedure in bold
-        $this->assertMatchesRegularExpression('/Date of Procedure \/ Surgery<\/span>\s*<span class="a4-val a4-val-bold">\s*10\/11\/2026, 12:56 PM/s', $html);
+        $this->assertMatchesRegularExpression('/Date of Procedure \/ Surgery<\/span>\s*<span class="a4-val a4-val-bold">\s*10\.11\.2026, 12:56 PM/s', $html);
 
         // Consultant with degrees
         $this->assertStringContainsString('N.JAYAPRAKASH, M.S (Gen Surg), M.Ch (Uro)', $html);
@@ -374,12 +374,12 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
         // Must be in bold
         $this->assertStringContainsString('class="a4-val a4-val-bold"', $html);
         $this->assertStringContainsString('Review after one week For Suture Removal', $html);
-        $this->assertStringContainsString('27/11/2026', $html);
+        $this->assertStringContainsString('27.11.2026', $html);
 
         // Date must NOT be pushed across the page with space-between
         $this->assertStringNotContainsString('display: flex; justify-content: space-between;', $html);
 
         // Value must be formatted inline together
-        $this->assertMatchesRegularExpression('/<div class="a4-val a4-val-bold">\s*Review after one week For Suture Removal\s*[:(]?\s*27\/11\/2026/s', $html);
+        $this->assertMatchesRegularExpression('/<div class="a4-val a4-val-bold">\s*Review after one week For Suture Removal\s*[:(]?\s*27\.11\.2026/s', $html);
     }
 }

@@ -79,15 +79,15 @@
             <tr>
                 <td>
                     <span class="ds-lbl">Date of Admission</span>
-                    <span class="ds-val">{{ $admission->admission_at?->format('d/m/Y, h:i A') ?? '—' }}</span>
+                    <span class="ds-val">{{ $admission->admission_at?->format('d.m.Y, h:i A') ?? '—' }}</span>
                 </td>
                 <td>
                     <span class="ds-lbl">Date of Procedure / Surgery</span>
-                    <span class="ds-val">{{ $admission->procedure_at?->format('d/m/Y, h:i A') ?? '—' }}</span>
+                    <span class="ds-val">{{ $admission->procedure_at?->format('d.m.Y, h:i A') ?? '—' }}</span>
                 </td>
                 <td>
                     <span class="ds-lbl">Date of Discharge</span>
-                    <span class="ds-val">{{ $admission->discharge_at?->format('d/m/Y, h:i A') ?? '—' }}</span>
+                    <span class="ds-val">{{ $admission->discharge_at?->format('d.m.Y, h:i A') ?? '—' }}</span>
                 </td>
             </tr>
             <tr>

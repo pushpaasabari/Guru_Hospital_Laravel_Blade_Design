@@ -6,6 +6,7 @@ import ActionDropdown, {
   buildDocumentPreviewMenuItems,
   buildPdfDownloadMenuItems,
 } from '../Components/ActionDropdown';
+import { formatDate } from '../utils/dateFormatter';
 
 interface AdmissionItem {
   id: number;
@@ -291,9 +292,9 @@ export default function Dashboard({ counts, admissions, filters = {}, auth }: Pr
                       </div>
                     </td>
                     <td>
-                      <div>{item.admission_at ? new Date(item.admission_at).toLocaleDateString('en-GB') : '—'}</div>
+                      <div>{item.admission_at ? formatDate(item.admission_at) : '—'}</div>
                       <div className="text-muted small">
-                        to {item.discharge_at ? new Date(item.discharge_at).toLocaleDateString('en-GB') : '—'}
+                        to {item.discharge_at ? formatDate(item.discharge_at) : '—'}
                       </div>
                     </td>
                     <td>

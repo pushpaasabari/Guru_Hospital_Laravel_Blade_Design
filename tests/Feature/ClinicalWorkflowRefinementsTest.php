@@ -163,7 +163,7 @@ class ClinicalWorkflowRefinementsTest extends TestCase
 
         $this->assertStringContainsString('a4-stent-card', $pdfHtml);
         $this->assertStringContainsString('STENT REMOVAL NOTICE', $pdfHtml);
-        $this->assertStringContainsString('<strong>15/12/2026</strong>', $pdfHtml);
+        $this->assertStringContainsString('<strong>15.12.2026</strong>', $pdfHtml);
         $this->assertStringContainsString('ஸ்டெண்ட்', $pdfHtml);
     }
 
@@ -198,7 +198,7 @@ class ClinicalWorkflowRefinementsTest extends TestCase
 
         // Suture removal review date bold
         $this->assertStringContainsString('Review after one week For Suture Removal', $pdfHtml);
-        $this->assertStringContainsString('27/11/2026', $pdfHtml);
+        $this->assertStringContainsString('27.11.2026', $pdfHtml);
         $this->assertStringContainsString('a4-val-bold', $pdfHtml);
 
         // Doctor qualification and stamp impression present

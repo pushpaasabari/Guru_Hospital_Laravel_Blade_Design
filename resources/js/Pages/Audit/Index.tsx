@@ -91,20 +91,16 @@ export default function Index({ auditLogs, filters = {} }: Props) {
   const formatDateTime = (dateStr: string) => {
     try {
       const d = new Date(dateStr);
-      return (
-        d.toLocaleDateString('en-GB', {
-          day: '2-digit',
-          month: '2-digit',
-          year: 'numeric',
-        }) +
-        ' ' +
-        d.toLocaleTimeString('en-US', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false,
-        })
-      );
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const time = d.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
+      });
+      return `${day}.${month}.${year} ${time}`;
     } catch {
       return dateStr;
     }

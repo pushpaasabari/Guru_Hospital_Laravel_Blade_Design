@@ -283,9 +283,15 @@
         @php
             $text = trim((string) $followText);
             $date = trim((string) $followDate);
-            $sutureDate = $admission->suture_removal_date?->format('d/m/Y');
+            $sutureDate = $admission->suture_removal_date?->format('d.m.Y');
             if ($sutureDate && !str_contains($text, $sutureDate)) {
                 $date = $sutureDate;
+            }
+            if ($date !== '') {
+                $date = preg_replace('/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/', '$1.$2.$3', $date);
+            }
+            if ($text !== '') {
+                $text = preg_replace('/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/', '$1.$2.$3', $text);
             }
             if ($text !== '' && $date !== '' && !str_contains($text, $date)) {
                 if (preg_match('/[:\-]\s*$/', $text)) {

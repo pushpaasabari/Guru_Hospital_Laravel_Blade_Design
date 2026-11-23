@@ -75,11 +75,10 @@ export default function Index({ templates }: Props) {
     if (!dateStr) return 'Pending';
     try {
       const d = new Date(dateStr);
-      return d.toLocaleDateString('en-GB', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric',
-      });
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      return `${day}.${month}.${year}`;
     } catch {
       return dateStr;
     }

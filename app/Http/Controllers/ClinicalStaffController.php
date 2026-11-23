@@ -39,7 +39,7 @@ class ClinicalStaffController extends Controller
                 'department' => $member->department,
                 'phone' => $member->phone,
                 'is_active' => $member->is_active,
-                'created_at' => $member->created_at?->format('d/m/Y'),
+                'created_at' => $member->created_at?->format('d.m.Y'),
             ];
         });
 

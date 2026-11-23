@@ -31,7 +31,7 @@ class AnesthesiaTypeController extends Controller
                     'description' => $type->description,
                     'is_active' => $type->is_active,
                     'sort_order' => $type->sort_order,
-                    'created_at' => $type->created_at?->format('d/m/Y'),
+                    'created_at' => $type->created_at?->format('d.m.Y'),
                 ];
             });
 

@@ -342,11 +342,11 @@
             </td>
             <td colspan="4">
                 <span class="cell-lbl">ADMISSION</span>
-                <span class="cell-val">{{ $admission->admission_at?->format('d/m/Y, h:i A') ?? '—' }}</span>
+                <span class="cell-val">{{ $admission->admission_at?->format('d.m.Y, h:i A') ?? '—' }}</span>
             </td>
             <td colspan="4">
                 <span class="cell-lbl">DISCHARGE</span>
-                <span class="cell-val">{{ $admission->discharge_at?->format('d/m/Y, h:i A') ?? '—' }}</span>
+                <span class="cell-val">{{ $admission->discharge_at?->format('d.m.Y, h:i A') ?? '—' }}</span>
             </td>
         </tr>
         <tr>
@@ -372,7 +372,7 @@
             </td>
             <td style="width: 33.4%;">
                 <span class="cell-lbl">DATE OF SURGERY</span>
-                <span class="cell-val">{{ $admission->procedure_at?->format('d/m/Y, h:i A') ?? '—' }}</span>
+                <span class="cell-val">{{ $admission->procedure_at?->format('d.m.Y, h:i A') ?? '—' }}</span>
             </td>
         </tr>
         <tr>
@@ -1053,7 +1053,7 @@
         <td>{{ $admission->icd_code ?? '' }}</td>
         <td style="font-weight: bold;">DATE</td>
         <td style="font-weight: bold; text-align: center;">:</td>
-        <td>{{ $admission->procedure_at?->format('d/m/Y') ?? ($admission->admission_at?->format('d/m/Y') ?? now()->format('d/m/Y')) }}</td>
+        <td>{{ $admission->procedure_at?->format('d.m.Y') ?? ($admission->admission_at?->format('d.m.Y') ?? now()->format('d.m.Y')) }}</td>
     </tr>
 </table>
 
@@ -1066,7 +1066,7 @@
     <tr>
         <td style="font-weight: bold;">DATE OF SURGERY</td>
         <td style="font-weight: bold; text-align: center;">:</td>
-        <td>{{ $admission->procedure_at?->format('d/m/Y h:i a') ?? '' }}</td>
+        <td>{{ $admission->procedure_at?->format('d.m.Y h:i a') ?? '' }}</td>
     </tr>
 </table>
 
@@ -1173,7 +1173,7 @@
             @if($admission->newborns->isNotEmpty())
                 @foreach($admission->newborns as $i => $baby)
                     <div style="margin-bottom: 4px;">
-                        Alive {{ $baby->sex ?? 'Female' }} baby on {{ $baby->birth_at?->format('d/m/Y @ h.iA') ?? ($admission->procedure_at?->format('d/m/Y @ h.iA') ?? '') }}<br>
+                        Alive {{ $baby->sex ?? 'Female' }} baby on {{ $baby->birth_at?->format('d.m.Y @ h.iA') ?? ($admission->procedure_at?->format('d.m.Y @ h.iA') ?? '') }}<br>
                         Baby Weight {{ $baby->birth_weight_kg ? number_format($baby->birth_weight_kg, 3) . 'Kg' : '2.650Kg' }}
                         @if($baby->neonatal_care)
                             <span style="color: #555;">({{ $baby->neonatal_care }})</span>
@@ -1182,7 +1182,7 @@
                 @endforeach
             @else
                 <div>
-                    Alive Female baby on {{ $admission->procedure_at?->format('d/m/Y @ h.iA') ?? now()->format('d/m/Y @ h.iA') }}<br>
+                    Alive Female baby on {{ $admission->procedure_at?->format('d.m.Y @ h.iA') ?? now()->format('d.m.Y @ h.iA') }}<br>
                     Baby Weight 2.650Kg
                 </div>
             @endif
