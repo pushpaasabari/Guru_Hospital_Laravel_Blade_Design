@@ -751,7 +751,7 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
               <div className="col-md-4">
                 <StaffSelect
                   label="Handed Over By (Ward Nurse)"
-                  role="nurse"
+                  role="staff_nurse"
                   value={data.handover_name}
                   onChange={(val) => setData('handover_name', val)}
                   staffList={clinicalStaff}
@@ -762,7 +762,7 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
               <div className="col-md-6">
                 <StaffSelect
                   label="Floor In-Charge Sister"
-                  role="nurse"
+                  role="staff_nurse"
                   value={data.floor_incharge_name}
                   onChange={(val) => setData('floor_incharge_name', val)}
                   staffList={clinicalStaff}
@@ -773,7 +773,7 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
               <div className="col-md-6">
                 <StaffSelect
                   label="MRD In-Charge"
-                  role="other"
+                  role="all"
                   value={data.mrd_incharge_name}
                   onChange={(val) => setData('mrd_incharge_name', val)}
                   staffList={clinicalStaff}

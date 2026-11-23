@@ -430,7 +430,7 @@ export default function AdmissionsSurgery({
               <div className="col-md-4">
                 <StaffSelect
                   label="Surgeon"
-                  role="doctor"
+                  role="surgeon"
                   value={data.surgeon}
                   onChange={(val) => setData('surgeon', val)}
                   staffList={clinicalStaff}
@@ -442,7 +442,7 @@ export default function AdmissionsSurgery({
               <div className="col-md-4">
                 <StaffSelect
                   label="Assisted Surgeon"
-                  role="doctor"
+                  role="assisted_surgeon"
                   value={data.assisted_surgeon}
                   onChange={(val) => setData('assisted_surgeon', val)}
                   staffList={clinicalStaff}
@@ -466,7 +466,7 @@ export default function AdmissionsSurgery({
               <div className="col-md-4">
                 <StaffSelect
                   label="Assisted Anaesthetist"
-                  role="anaesthetist"
+                  role="assisted_anaesthetist"
                   value={data.assisted_anaesthetist}
                   onChange={(val) => setData('assisted_anaesthetist', val)}
                   staffList={clinicalStaff}
@@ -488,7 +488,7 @@ export default function AdmissionsSurgery({
               <div className="col-md-4">
                 <StaffSelect
                   label="Scrub / Staff Nurse"
-                  role="nurse"
+                  role="staff_nurse"
                   value={data.staff_nurse}
                   onChange={(val) => setData('staff_nurse', val)}
                   staffList={clinicalStaff}
@@ -500,7 +500,7 @@ export default function AdmissionsSurgery({
               <div className="col-md-4">
                 <StaffSelect
                   label="OT Technician"
-                  role="ot_tech"
+                  role="ot_technician"
                   value={data.ot_technician}
                   onChange={(val) => setData('ot_technician', val)}
                   staffList={clinicalStaff}
@@ -512,7 +512,7 @@ export default function AdmissionsSurgery({
               <div className="col-md-4">
                 <StaffSelect
                   label="Pediatrician / Neonatologist"
-                  role="doctor"
+                  role="consultant_pediatrician"
                   value={data.pediatrician_name}
                   onChange={(val) => setData('pediatrician_name', val)}
                   staffList={clinicalStaff}

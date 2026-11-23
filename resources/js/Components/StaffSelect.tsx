@@ -24,6 +24,23 @@ interface StaffSelectProps {
   uppercase?: boolean;
 }
 
+const ROLE_ALIASES: Record<string, string[]> = {
+  surgeon: ['surgeon', 'consultant_doctor'],
+  assisted_surgeon: ['assisted_surgeon', 'surgeon', 'consultant_doctor', 'staff_nurse'],
+  doctor: ['consultant_doctor', 'surgeon', 'assisted_surgeon', 'anaesthetist', 'consultant_pediatrician'],
+  consultant_doctor: ['consultant_doctor', 'surgeon'],
+  anaesthetist: ['anaesthetist'],
+  assisted_anaesthetist: ['assisted_anaesthetist', 'anaesthetist', 'staff_nurse'],
+  staff_nurse: ['staff_nurse'],
+  nurse: ['staff_nurse'],
+  ot_technician: ['ot_technician'],
+  ot_tech: ['ot_technician'],
+  consultant_pediatrician: ['consultant_pediatrician', 'consultant_doctor'],
+  pediatrician: ['consultant_pediatrician', 'consultant_doctor'],
+  all: [],
+  other: [],
+};
+
 export default function StaffSelect({
   label,
   role,
@@ -52,13 +69,30 @@ export default function StaffSelect({
   const normalize = (val: string) => (uppercase ? toUpperCaseValue(val) : val);
   const currentValue = normalize(value || '');
 
-  // Filter staff by the requested role
-  const filtered = staffList.filter(
-    (s) => s.category === role || (s.roles && s.roles.includes(role))
+  const targetRoles = ROLE_ALIASES[role] ?? (role ? [role] : []);
+
+  // Filter staff by the requested role or aliases
+  const filtered = staffList.filter((s) => {
+    if (!role || role === 'all' || role === 'other') return true;
+    if (s.category === role) return true;
+    if (s.roles && s.roles.includes(role)) return true;
+    if (targetRoles.length > 0) {
+      if (targetRoles.includes(s.category)) return true;
+      if (s.roles && s.roles.some((r) => targetRoles.includes(r))) return true;
+    }
+    return false;
+  });
+
+  // Fallback to all staff if role filter returned empty so dropdown is never broken
+  const displayList = filtered.length > 0 ? filtered : staffList;
+
+  // Deduplicate by normalized name
+  const uniqueList = Array.from(
+    new Map(displayList.map((item) => [normalize(item.name), item])).values()
   );
 
-  // Check if current value matches one in the filtered list
-  const hasMatch = filtered.some((s) => normalize(s.name) === currentValue);
+  // Check if current value matches one in the list
+  const hasMatch = uniqueList.some((s) => normalize(s.name) === currentValue);
 
   return (
     <div>
@@ -121,7 +155,7 @@ export default function StaffSelect({
           {currentValue && !hasMatch && (
             <option value={currentValue}>{currentValue} (Current)</option>
           )}
-          {filtered.map((s) => {
+          {uniqueList.map((s) => {
             const optionValue = normalize(s.name);
             return (
               <option key={s.id} value={optionValue}>
