@@ -142,26 +142,6 @@
             <div class="a4-diagnosis-val">{{ $admission->diagnosis ?: '—' }}</div>
         </div>
 
-        {{-- Medical History Block first under Diagnosis --}}
-        <div class="a4-history-grid">
-            <div>
-                <span class="a4-lbl">DM / HT / Asthma / TB</span>
-                <span class="a4-val">DM: {{ $pastHist['dm'] ?: 'Nil' }} | HT: {{ $pastHist['ht'] ?: 'Nil' }} | Asthma: {{ $pastHist['asthma'] ?: 'Nil' }} | TB: {{ $pastHist['tb'] ?: 'Nil' }}</span>
-            </div>
-            <div>
-                <span class="a4-lbl">Other Medical</span>
-                <span class="a4-val">{{ $pastHist['other'] ?: 'Nil' }}</span>
-            </div>
-            <div>
-                <span class="a4-lbl">Past Surgical History</span>
-                <span class="a4-val">{{ $pastHist['past_surgical'] ?: 'Nil' }}</span>
-            </div>
-            <div>
-                <span class="a4-lbl">Allergies / Prior Meds</span>
-                <span class="a4-val">{{ $pastHist['allergies'] ?: 'Nil' }} | {{ $pastHist['medications'] ?: 'Nil' }}</span>
-            </div>
-        </div>
-
         <div class="a4-clinical-row">
             <div>
                 <span class="a4-lbl">Presenting Complaints</span>
@@ -206,38 +186,6 @@
                     @for($empty = count($investigations) % $invCols; $empty > 0 && $empty < $invCols; $empty++)
                         <div class="a4-inv-box"><span class="a4-lbl">&nbsp;</span><span class="a4-val">&nbsp;</span></div>
                     @endfor
-                </div>
-            @else
-                <div class="a4-outlined-card"><span class="a4-val">—</span></div>
-            @endif
-        </div>
-
-        {{-- 7. Treatment Provided --}}
-        <div class="a4-block" data-overflow-movable="page1">
-            <div class="a4-section-hdr">Treatment Provided</div>
-            @php
-                $hasStructuredTreatment = !empty($treatmentRows) && collect($treatmentRows)->contains(fn ($r) => ($r['dose'] ?? '—') !== '—' || strlen((string) ($r['medicine'] ?? '')) <= 70);
-            @endphp
-            @if($hasStructuredTreatment)
-                <table class="a4-table">
-                    <thead>
-                        <tr>
-                            <th style="width: 60%;">Medication / Fluid / Therapy</th>
-                            <th style="width: 40%;">Dose &amp; Route</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($treatmentRows as $row)
-                            <tr>
-                                <td class="a4-val-bold">{{ $row['medicine'] ?: '—' }}</td>
-                                <td>{{ $row['dose'] ?: '—' }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            @elseif($admission->treatment_course)
-                <div class="a4-outlined-card">
-                    <span class="a4-val">{!! nl2br(e($sections['hospital_course'])) !!}</span>
                 </div>
             @else
                 <div class="a4-outlined-card"><span class="a4-val">—</span></div>

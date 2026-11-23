@@ -94,7 +94,7 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
         $this->assertStringContainsString('N.JAYAPRAKASH, M.S (Gen Surg), M.Ch (Uro)', $html);
     }
 
-    public function test_diagnosis_and_clinical_summary_orders_medical_history_first_with_default_nil(): void
+    public function test_digital_discharge_summary_removes_medical_history_grid_and_treatment_provided(): void
     {
         $admission = Admission::create([
             'patient_name' => 'SABARINATHAN',
@@ -104,6 +104,7 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
             'surgery_type' => 'other',
             'diagnosis' => 'GENERAL SURGICAL ASSESSMENT',
             'clinical_history' => 'C/O Flank pain for 3 days. Dysuria present.',
+            'treatment_course' => "Treated with IV Fluids\nInj-Pipzo 4.5g BD",
             'admission_at' => now(),
             'created_by' => $this->doctor->id,
             'approved_by' => $this->doctor->id,
@@ -112,26 +113,19 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
 
         $html = view('pdf.partials.discharge-summary-a4._page1', ['admission' => $admission])->render();
 
-        $diagPos = strpos($html, 'Final Diagnosis');
-        $histPos = strpos($html, 'DM / HT / Asthma / TB');
-        $complaintsPos = strpos($html, 'Presenting Complaints');
-        $examPos = strpos($html, 'Clinical Examination');
+        // Final diagnosis and clinical symptoms remain
+        $this->assertStringContainsString('Final Diagnosis', $html);
+        $this->assertStringContainsString('Presenting Complaints', $html);
+        $this->assertStringContainsString('Clinical Examination', $html);
 
-        $this->assertNotFalse($diagPos);
-        $this->assertNotFalse($histPos);
-        $this->assertNotFalse($complaintsPos);
-        $this->assertNotFalse($examPos);
+        // Medical history grid must NOT be rendered
+        $this->assertStringNotContainsString('DM / HT / Asthma / TB', $html);
+        $this->assertStringNotContainsString('Other Medical', $html);
+        $this->assertStringNotContainsString('Past Surgical History', $html);
+        $this->assertStringNotContainsString('Allergies / Prior Meds', $html);
 
-        // History grid comes FIRST directly after Final Diagnosis
-        $this->assertLessThan($histPos, $diagPos);
-        $this->assertLessThan($complaintsPos, $histPos);
-        $this->assertLessThan($examPos, $complaintsPos);
-
-        // Default Nil values
-        $this->assertStringContainsString('DM: Nil | HT: Nil | Asthma: Nil | TB: Nil', $html);
-        $this->assertStringContainsString('Other Medical</span>', $html);
-        $this->assertStringContainsString('Past Surgical History</span>', $html);
-        $this->assertStringContainsString('Allergies / Prior Meds</span>', $html);
+        // Treatment Provided must NOT be rendered
+        $this->assertStringNotContainsString('Treatment Provided', $html);
     }
 
     public function test_investigations_renders_unit_after_result_value(): void
