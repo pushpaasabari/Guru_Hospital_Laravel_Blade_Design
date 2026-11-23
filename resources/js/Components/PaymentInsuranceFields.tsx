@@ -21,9 +21,9 @@ export const HOLDER_RELATIONS = [
   'Other',
 ] as const;
 
-export function normalizePaymentMode(mode?: string | null): 'Cash' | 'Insurance' {
+export function normalizePaymentMode(mode?: string | null): 'Cash' | 'Insurance' | '' {
   const val = (mode || '').trim().toLowerCase();
-  if (!val) return 'Cash';
+  if (!val) return '';
   if (
     val === 'insurance' ||
     val.includes('insurance') ||
@@ -34,7 +34,10 @@ export function normalizePaymentMode(mode?: string | null): 'Cash' | 'Insurance'
   ) {
     return 'Insurance';
   }
-  return 'Cash';
+  if (val === 'cash') {
+    return 'Cash';
+  }
+  return '';
 }
 
 export function mapInsuranceTypeToFormat(insuranceType?: string | null): 'cmchistn' | 'private' | 'employee' {
@@ -75,7 +78,27 @@ export default function PaymentInsuranceFields({
   const mode = normalizePaymentMode(data.payment_mode);
   const isInsurance = mode === 'Insurance';
 
-  const handleModeChange = (nextMode: 'Cash' | 'Insurance') => {
+  const handleModeChange = (nextMode: 'Cash' | 'Insurance' | '') => {
+    if (!nextMode) {
+      const patch: Partial<PaymentInsuranceData> = {
+        payment_mode: '',
+        insurance_type: '',
+        insurance_company: '',
+        policy_number: '',
+        pre_auth_no: '',
+        pre_auth_status: '',
+        approved_amount: '',
+        policy_holder_name: '',
+        policy_holder_relation: '',
+        policy_validity: '',
+      };
+      if (syncFormat) {
+        patch.format = 'general';
+      }
+      onPatch(patch);
+      return;
+    }
+
     if (nextMode === 'Cash') {
       const patch: Partial<PaymentInsuranceData> = {
         payment_mode: 'Cash',
@@ -132,8 +155,9 @@ export default function PaymentInsuranceFields({
         <select
           className={`form-select ${errors.payment_mode ? 'is-invalid' : ''}`}
           value={mode}
-          onChange={(e) => handleModeChange(e.target.value as 'Cash' | 'Insurance')}
+          onChange={(e) => handleModeChange(e.target.value as 'Cash' | 'Insurance' | '')}
         >
+          <option value="">-- Select Payment Mode --</option>
           <option value="Cash">Cash</option>
           <option value="Insurance">Insurance</option>
         </select>

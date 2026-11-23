@@ -33,7 +33,7 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
     surgery_type: '',
     diagnosis: '',
     mrd_no: '',
-    payment_mode: 'Cash',
+    payment_mode: '',
     insurance_type: '',
     insurance_company: '',
     policy_number: '',

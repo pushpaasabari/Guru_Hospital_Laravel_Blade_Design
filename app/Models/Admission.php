@@ -249,6 +249,72 @@ class Admission extends Model
         return \App\Services\DischargeSummaryFormatter::formatNewborns($this);
     }
 
+    public function getFormattedPostoperativeOrdersAttribute(): array
+    {
+        return \App\Services\DischargeSummaryFormatter::formatPostoperativeOrders($this->postoperative_orders);
+    }
+
+    /**
+     * Resolves consultant / treating doctor name accompanied by their academic qualification / degrees.
+     */
+    public function getConsultantWithDegreeAttribute(): string
+    {
+        $consultant = trim((string) ($this->consultant ?: $this->surgeon));
+        if ($consultant === '') {
+            return '—';
+        }
+
+        // Return immediately if doctor string already contains common degree abbreviations
+        if (preg_match('/(,\s*|\s*\()?(MBBS|M\.B\.B\.S|MS|M\.S|MD|M\.D|MCh|M\.Ch|DGO|D\.G\.O|DNB|D\.N\.B|DA|D\.A|MRCOG|FRCS|DM|D\.M|FCPS|DCH|B\.Sc|GNM)/i', $consultant)) {
+            return $consultant;
+        }
+
+        // Strip honorifics to search ClinicalStaff directory
+        $clean = preg_replace('/^(?:Dr\.?|Prof\.?|Staff\s+Nurse|Nurse|Sister|Miss|Mr\.?|Mrs\.?)\s+/i', '', $consultant);
+        $clean = trim($clean);
+
+        // First attempt: exact or partial name match in active clinical staff
+        $staff = ClinicalStaff::active()
+            ->where(function ($q) use ($consultant, $clean) {
+                $q->where('name', 'like', "%{$clean}%")
+                    ->orWhere('name', 'like', "%{$consultant}%");
+            })
+            ->whereNotNull('qualification')
+            ->where('qualification', '!=', '')
+            ->first();
+
+        // Second attempt: match by first or last word of name (e.g. "Jayaprakash", "Ambika")
+        if (!$staff && $clean !== '') {
+            $words = array_values(array_filter(preg_split('/[\s\.\-]+/', $clean), fn ($w) => strlen($w) >= 3));
+            foreach ($words as $word) {
+                $staff = ClinicalStaff::active()
+                    ->where('name', 'like', "%{$word}%")
+                    ->whereNotNull('qualification')
+                    ->where('qualification', '!=', '')
+                    ->first();
+                if ($staff) {
+                    break;
+                }
+            }
+        }
+
+        if ($staff && !empty($staff->qualification)) {
+            if (!str_contains(strtolower($consultant), strtolower($staff->qualification))) {
+                return $consultant . ', ' . $staff->qualification;
+            }
+        }
+
+        // Well-known hospital defaults fallback if clinical staff table was empty/unseeded
+        if (preg_match('/Jayaprakash/i', $consultant)) {
+            return $consultant . ', M.S (Gen Surg), M.Ch (Uro)';
+        }
+        if (preg_match('/Ambika/i', $consultant)) {
+            return $consultant . ', M.S (O&G)';
+        }
+
+        return $consultant;
+    }
+
     public function getFormattedSurgicalPastHistoryAttribute(): array
     {
         return \App\Services\DischargeSummaryFormatter::formatSurgicalPastHistory($this);

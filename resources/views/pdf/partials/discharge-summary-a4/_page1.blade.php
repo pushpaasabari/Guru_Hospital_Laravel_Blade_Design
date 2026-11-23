@@ -91,7 +91,7 @@
             </div>
             <div class="a4-grid-cell">
                 <span class="a4-lbl">Date of Procedure / Surgery</span>
-                <span class="a4-val">{{ $admission->procedure_at?->format('d/m/Y, h:i A') ?? '—' }}</span>
+                <span class="a4-val a4-val-bold">{{ $admission->procedure_at?->format('d/m/Y, h:i A') ?? '—' }}</span>
             </div>
             <div class="a4-grid-cell">
                 <span class="a4-lbl">Date of Discharge</span>
@@ -99,7 +99,7 @@
             </div>
             <div class="a4-grid-cell">
                 <span class="a4-lbl">Consultant / Treating Doctor</span>
-                <span class="a4-val a4-val-bold">{{ $admission->consultant ?: ($admission->surgeon ?: '—') }}</span>
+                <span class="a4-val a4-val-bold">{{ $admission->consultant_with_degree }}</span>
             </div>
             <div class="a4-grid-cell">
                 <span class="a4-lbl">Ward / Room &amp; Case Type</span>
@@ -142,6 +142,26 @@
             <div class="a4-diagnosis-val">{{ $admission->diagnosis ?: '—' }}</div>
         </div>
 
+        {{-- Medical History Block first under Diagnosis --}}
+        <div class="a4-history-grid">
+            <div>
+                <span class="a4-lbl">DM / HT / Asthma / TB</span>
+                <span class="a4-val">DM: {{ $pastHist['dm'] ?: 'Nil' }} | HT: {{ $pastHist['ht'] ?: 'Nil' }} | Asthma: {{ $pastHist['asthma'] ?: 'Nil' }} | TB: {{ $pastHist['tb'] ?: 'Nil' }}</span>
+            </div>
+            <div>
+                <span class="a4-lbl">Other Medical</span>
+                <span class="a4-val">{{ $pastHist['other'] ?: 'Nil' }}</span>
+            </div>
+            <div>
+                <span class="a4-lbl">Past Surgical History</span>
+                <span class="a4-val">{{ $pastHist['past_surgical'] ?: 'Nil' }}</span>
+            </div>
+            <div>
+                <span class="a4-lbl">Allergies / Prior Meds</span>
+                <span class="a4-val">{{ $pastHist['allergies'] ?: 'Nil' }} | {{ $pastHist['medications'] ?: 'Nil' }}</span>
+            </div>
+        </div>
+
         <div class="a4-clinical-row">
             <div>
                 <span class="a4-lbl">Presenting Complaints</span>
@@ -152,20 +172,6 @@
                 <span class="a4-val">{!! nl2br(e($sections['hpi'])) !!}</span>
             </div>
         </div>
-
-        @if($sections['has_past_history'] || $admission->isSurgical())
-            <div class="a4-history-grid">
-                <div><span class="a4-lbl">DM / HT / Asthma / TB</span><span class="a4-val">DM: {{ $pastHist['dm'] }} | HT: {{ $pastHist['ht'] }} | Asthma: {{ $pastHist['asthma'] }} | TB: {{ $pastHist['tb'] }}</span></div>
-                <div><span class="a4-lbl">Other Medical</span><span class="a4-val">{{ $pastHist['other'] }}</span></div>
-                <div><span class="a4-lbl">Past Surgical History</span><span class="a4-val">{{ $pastHist['past_surgical'] }}</span></div>
-                <div><span class="a4-lbl">Allergies / Prior Meds</span><span class="a4-val">{{ $pastHist['allergies'] }} | {{ $pastHist['medications'] }}</span></div>
-            </div>
-        @else
-            <div class="a4-clinical-block">
-                <span class="a4-lbl">Past Medical / Surgical History &amp; Allergies</span>
-                <span class="a4-val">—</span>
-            </div>
-        @endif
 
         <div class="a4-clinical-block" style="margin-bottom: 4px;">
             <span class="a4-lbl">Clinical Examination</span>
@@ -182,15 +188,16 @@
                 <div class="a4-inv-grid" style="grid-template-columns: repeat({{ $invCols }}, 1fr);">
                     @foreach($investigations as $inv)
                         <div class="a4-inv-box" style="padding: 2.5px 4.5px;">
-                            <span class="a4-lbl" style="font-size: 6.2pt;">
-                                {{ $inv['label'] }}
-                                @if(!empty($inv['unit']))
-                                    <span style="font-weight: 400; text-transform: none; color: #64748b; font-size: 5.6pt;">({{ $inv['unit'] }})</span>
+                            <span class="a4-lbl">{{ $inv['label'] }}</span>
+                            <span class="a4-val a4-val-bold">
+                                @if(($inv['value'] ?? '—') !== '—' && !empty($inv['value']))
+                                    {{ $inv['value'] }}@if(!empty($inv['unit']) && !str_contains((string)$inv['value'], $inv['unit'])) <span class="a4-inv-unit">{{ $inv['unit'] }}</span>@endif
+                                @else
+                                    —
                                 @endif
                             </span>
-                            <span class="a4-val a4-val-bold" style="font-size: 8.2pt; line-height: 1.15;">{{ $inv['value'] ?: '—' }}</span>
                             @if(!empty($inv['normal_range']))
-                                <span class="a4-ref" style="display: block; font-size: 5.6pt; color: #64748b; font-weight: 500; line-height: 1; margin-top: 1px;">
+                                <span class="a4-ref">
                                     Ref: {{ $inv['normal_range'] }}
                                 </span>
                             @endif

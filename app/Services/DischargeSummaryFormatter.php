@@ -531,6 +531,60 @@ class DischargeSummaryFormatter
     }
 
     /**
+     * Format immediate postoperative orders into structured rows (Order #, Item/Instruction, Route/Timing).
+     *
+     * @param string|null $text
+     * @return array<int, array{sno: int, order: string, instruction: string}>
+     */
+    public static function formatPostoperativeOrders(?string $text): array
+    {
+        if (!$text) {
+            return [];
+        }
+
+        $lines = preg_split('/\r\n|\r|\n/', trim($text));
+        $rows = [];
+        $index = 1;
+
+        foreach ($lines as $line) {
+            $line = trim($line, " \t\n\r\0\x0B*•-");
+            if (!$line) {
+                continue;
+            }
+
+            // Remove leading numbering like "1. ", "1) ", "1 - ", "#1 "
+            $cleaned = trim((string) preg_replace('/^(?:#?\d+[\.\)\-:]|\([0-9]+\))\s*/', '', $line));
+            if ($cleaned === '') {
+                continue;
+            }
+
+            // Check if pipe or tab separated: "Order / Medicine | Route / Timing"
+            if (str_contains($cleaned, '|')) {
+                $parts = array_map('trim', explode('|', $cleaned, 2));
+                $rows[] = [
+                    'sno' => $index++,
+                    'order' => $parts[0] ?: '—',
+                    'instruction' => $parts[1] ?? '',
+                ];
+            } elseif (preg_match('/^(Inj\.\s+[A-Za-z0-9_\-+]+|Tab\.\s+[A-Za-z0-9_\-+\s]+|Cap\.\s+[A-Za-z0-9_\-+\s]+|Syp\.\s+[A-Za-z0-9_\-+\s]+|IV\s+Fluids?|RL|DNS|NS)\s+(.+)$/i', $cleaned, $m)) {
+                $rows[] = [
+                    'sno' => $index++,
+                    'order' => trim($m[1]),
+                    'instruction' => trim($m[2]),
+                ];
+            } else {
+                $rows[] = [
+                    'sno' => $index++,
+                    'order' => $cleaned,
+                    'instruction' => '',
+                ];
+            }
+        }
+
+        return $rows;
+    }
+
+    /**
      * Normalize an investigation label to match the standard catalog.
      */
     public static function normalizeInvestigationKey(string $rawLabel): string

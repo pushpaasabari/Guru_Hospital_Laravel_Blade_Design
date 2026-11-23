@@ -29,9 +29,9 @@
         width: 223mm;
         background: #ffffff;
         font-family: 'Helvetica', 'Helvetica Neue', Arial, 'Nirmala UI', 'Nirmala', sans-serif;
-        font-size: 8.8pt;
+        font-size: 10.3pt;
         font-weight: 400;
-        line-height: 1.28;
+        line-height: 1.25;
         color: #1B2A2F;
     }
 
@@ -102,7 +102,7 @@
         text-align: right;
     }
     .a4-doc-title {
-        font-size: 15pt;
+        font-size: 16pt;
         font-weight: 700;
         color: #0F5C63;
         text-transform: uppercase;
@@ -112,7 +112,7 @@
         line-height: 1.1;
     }
     .a4-doc-subtitle {
-        font-size: 8pt;
+        font-size: 9.5pt;
         font-weight: 500;
         color: #556970;
         text-align: center;
@@ -127,7 +127,7 @@
     }
     .a4-meta-lbl {
         display: block;
-        font-size: 6.8pt;
+        font-size: 8.2pt;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.3px;
@@ -136,7 +136,7 @@
     }
     .a4-meta-val {
         display: block;
-        font-size: 8.8pt;
+        font-size: 10.3pt;
         font-weight: 700;
         color: #1B2A2F;
         line-height: 1.2;
@@ -144,22 +144,22 @@
 
     /* Section Headings */
     .a4-section-hdr {
-        font-size: 9.5pt;
+        font-size: 11pt;
         font-weight: 700;
         color: #0F5C63;
         text-transform: uppercase;
         letter-spacing: 0.35px;
         border-bottom: 1.1pt solid #0F5C63;
         padding-bottom: 1.5px;
-        margin-top: 4.5px;
-        margin-bottom: 3.5px;
+        margin-top: 4px;
+        margin-bottom: 3px;
         page-break-after: avoid;
         break-after: avoid;
     }
 
     .a4-lbl {
         display: block;
-        font-size: 6.6pt;
+        font-size: 8pt;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.3px;
@@ -169,7 +169,7 @@
     }
     .a4-val {
         display: block;
-        font-size: 8.8pt;
+        font-size: 10.3pt;
         font-weight: 400;
         color: #1B2A2F;
         line-height: 1.24;
@@ -246,7 +246,7 @@
         margin-bottom: 3.5px;
     }
     .a4-diagnosis-val {
-        font-size: 11pt;
+        font-size: 12.5pt;
         font-weight: 700;
         color: #0F5C63;
         line-height: 1.22;
@@ -265,7 +265,7 @@
     .a4-outlined-card .a4-val,
     .a4-clinical-row .a4-val,
     .a4-clinical-block .a4-val {
-        font-size: 9pt;
+        font-size: 10.5pt;
         font-weight: 400;
     }
     .a4-history-grid {
@@ -286,9 +286,29 @@
     }
     .a4-inv-box {
         background: transparent;
-        padding: 3px 5.5px;
+        padding: 3px 5px;
         border-right: 0.75pt solid #D5E0E2;
         border-bottom: 0.75pt solid #D5E0E2;
+    }
+    .a4-inv-box .a4-lbl {
+        font-size: 7.8pt;
+    }
+    .a4-inv-box .a4-val {
+        font-size: 9.8pt;
+        line-height: 1.16;
+    }
+    .a4-inv-unit {
+        font-size: 8.2pt;
+        font-weight: 500;
+        color: #475569;
+    }
+    .a4-ref {
+        display: block;
+        font-size: 6.8pt;
+        color: #64748b;
+        font-weight: 500;
+        line-height: 1.1;
+        margin-top: 1px;
     }
 
     /* 7 & 10. Clean Header Tables (No Background Fill, Clean Borders) */
@@ -301,18 +321,18 @@
     .a4-table th {
         background: transparent;
         color: #0F5C63;
-        font-size: 7.4pt;
+        font-size: 8.8pt;
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.3px;
         text-align: left;
-        padding: 4px 7px;
+        padding: 3.5px 6px;
         border: 0.6pt solid #D5E0E2;
         border-bottom: 1.2pt solid #0F5C63;
     }
     .a4-table td {
-        padding: 3.5px 7px;
-        font-size: 8.8pt;
+        padding: 3px 6px;
+        font-size: 10.3pt;
         color: #1B2A2F;
         border-bottom: 0.6pt solid #D5E0E2;
         border-left: 0.6pt solid #D5E0E2;
@@ -323,6 +343,47 @@
     }
     .a4-table tbody tr:nth-child(even) td {
         background: transparent;
+    }
+
+    /* Operative / Procedure Note Justified */
+    .a4-procedure-note {
+        text-align: justify;
+        text-justify: inter-word;
+    }
+    .a4-procedure-note p {
+        text-align: justify;
+        margin: 0 0 2.5px 0;
+    }
+    .a4-procedure-note p:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Intra-operative Findings Bulleted List */
+    .a4-findings-list {
+        margin: 1px 0 0 0;
+        padding-left: 14px;
+        list-style-type: disc;
+    }
+    .a4-findings-list li {
+        margin-bottom: 1.5px;
+        line-height: 1.22;
+    }
+    .a4-findings-list li:last-child {
+        margin-bottom: 0;
+    }
+
+    /* Immediate Postoperative Orders Table */
+    .a4-postop-table {
+        margin-bottom: 4px;
+    }
+    .a4-postop-table th {
+        font-size: 8.4pt;
+        padding: 3px 6px;
+    }
+    .a4-postop-table td {
+        font-size: 10pt;
+        padding: 2.5px 6px;
+        line-height: 1.22;
     }
 
     /* Outlined Cards */
@@ -347,17 +408,17 @@
     .a4-newborn-title {
         background: transparent;
         color: #0F5C63;
-        font-size: 9pt;
+        font-size: 10.5pt;
         font-weight: 700;
         text-transform: uppercase;
         padding: 3.5px 8px;
         border-bottom: 0.75pt solid #D5E0E2;
     }
     .a4-newborn-body {
-        padding: 5px 8px;
-        font-size: 9pt;
+        padding: 4px 8px;
+        font-size: 10.3pt;
         font-weight: 400;
-        line-height: 1.35;
+        line-height: 1.3;
     }
     .a4-nb-line {
         margin-bottom: 1.5px;
@@ -365,7 +426,7 @@
     .a4-nb-lbl {
         color: #6B7B80;
         font-weight: 700;
-        font-size: 7.4pt;
+        font-size: 8.6pt;
         text-transform: uppercase;
         margin-right: 4px;
     }
@@ -375,7 +436,7 @@
         display: grid;
         grid-template-columns: 1.2fr 0.8fr 0.8fr 2fr;
         border: 0.75pt solid #D5E0E2;
-        margin-bottom: 6px;
+        margin-bottom: 5px;
         background: transparent;
     }
     .a4-grid-4 .a4-grid-cell {
@@ -392,12 +453,12 @@
     .a4-tamil-card {
         border: 0.75pt solid #D5E0E2;
         border-left: 2.5pt solid #0F5C63;
-        padding: 5px 8px;
-        margin-bottom: 6px;
+        padding: 4px 8px;
+        margin-bottom: 5px;
         font-family: 'Nirmala', 'Nirmala UI', 'Helvetica', Arial, sans-serif;
-        font-size: 9pt;
+        font-size: 10.3pt;
         font-weight: 400;
-        line-height: 1.38;
+        line-height: 1.34;
         color: #1B2A2F;
         background: transparent;
     }
@@ -407,12 +468,12 @@
         background: transparent;
         border: 0.75pt solid #FCA5A5;
         border-left: 3.5pt solid #B3261E;
-        padding: 6px 10px;
+        padding: 5px 9px;
         margin-top: 4px;
-        margin-bottom: 8px;
+        margin-bottom: 6px;
     }
     .a4-warning-title {
-        font-size: 9pt;
+        font-size: 10.3pt;
         font-weight: 700;
         color: #B3261E;
         text-transform: uppercase;
@@ -420,10 +481,10 @@
         margin-bottom: 2px;
     }
     .a4-warning-text {
-        font-size: 9pt;
+        font-size: 10.3pt;
         font-weight: 400;
         color: #1B2A2F;
-        line-height: 1.32;
+        line-height: 1.28;
     }
 
     /* 13. Signature Block */
@@ -431,14 +492,14 @@
         display: table;
         width: 100%;
         table-layout: fixed;
-        margin-top: 6px;
-        margin-bottom: 6px;
+        margin-top: 5px;
+        margin-bottom: 5px;
     }
     .a4-sig-left {
         display: table-cell;
         width: 50%;
         vertical-align: bottom;
-        font-size: 8.4pt;
+        font-size: 9.8pt;
         color: #6B7B80;
     }
     .a4-sig-right {
@@ -448,7 +509,7 @@
         vertical-align: bottom;
     }
     .a4-sig-space {
-        height: 11mm;
+        height: 10mm;
     }
     .a4-sig-line {
         display: inline-block;
@@ -458,12 +519,12 @@
         text-align: center;
     }
     .a4-sig-name {
-        font-size: 9pt;
+        font-size: 10.5pt;
         font-weight: 700;
         color: #1B2A2F;
     }
     .a4-sig-desig {
-        font-size: 7.4pt;
+        font-size: 8.6pt;
         color: #6B7B80;
     }
 
@@ -474,10 +535,10 @@
     .a4-footer-hairline {
         border-top: 0.75pt solid #D5E0E2;
         padding-top: 3px;
-        margin-top: 4px;
+        margin-top: 3px;
         display: table;
         width: 100%;
-        font-size: 7.2pt;
+        font-size: 8.4pt;
         font-weight: 400;
         color: #6B7B80;
     }

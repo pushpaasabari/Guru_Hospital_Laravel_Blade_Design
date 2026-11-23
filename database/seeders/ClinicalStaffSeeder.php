@@ -11,6 +11,16 @@ class ClinicalStaffSeeder extends Seeder
     {
         $staffMembers = [
             [
+                'name' => 'Dr. N. Jayaprakash',
+                'category' => 'consultant_doctor',
+                'roles' => ['consultant_doctor', 'surgeon'],
+                'qualification' => 'M.S (Gen Surg), M.Ch (Uro)',
+                'doctor_reg_no' => 'TNMC-38912',
+                'department' => 'General Surgery & Urology',
+                'phone' => '9443224466',
+                'is_active' => true,
+            ],
+            [
                 'name' => 'Dr. Ambika M.S (O&G)',
                 'category' => 'consultant_doctor',
                 'roles' => ['consultant_doctor', 'surgeon'],
