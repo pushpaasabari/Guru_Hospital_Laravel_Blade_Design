@@ -293,14 +293,25 @@
             </div>
 
             <div class="a4-signature-row">
-                <div class="a4-sig-left">Verified clinically</div>
+                <div class="a4-sig-left"></div>
                 <div class="a4-sig-right">
                     <div class="a4-sig-space"></div>
                     <div class="a4-sig-line">
-                        <div class="a4-sig-name">{{ $admission->consultant ?: ($admission->surgeon ?: '—') }}</div>
+                        <div class="a4-sig-name">{{ $admission->consultant_with_degree }}</div>
                         <div class="a4-sig-desig">
                             {{ $doctorDesignation ?: 'Consultant / Treating Doctor' }}
                         </div>
+                        @if($stamp = $admission->doctor_stamp_details)
+                            <div class="a4-stamp-box">
+                                <div class="a4-stamp-line a4-stamp-name">{{ $stamp['name'] }}</div>
+                                <div class="a4-stamp-line a4-stamp-reg">{{ $stamp['reg_no'] }}</div>
+                                <div class="a4-stamp-line a4-stamp-desig">{{ $stamp['line1'] }}</div>
+                                @if(!empty($stamp['line2']))
+                                    <div class="a4-stamp-line a4-stamp-sub">{{ $stamp['line2'] }}</div>
+                                @endif
+                                <div class="a4-stamp-line a4-stamp-loc">{{ $stamp['location'] }}</div>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>

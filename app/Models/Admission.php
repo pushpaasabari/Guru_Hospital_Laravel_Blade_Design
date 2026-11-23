@@ -262,6 +262,89 @@ class Admission extends Model
     }
 
     /**
+     * Resolves official doctor rubber stamp pad impression details for discharge summary footer.
+     */
+    public function getDoctorStampDetailsAttribute(): ?array
+    {
+        $doctor = trim((string) ($this->consultant ?: $this->surgeon));
+        if ($doctor === '') {
+            return null;
+        }
+
+        // Clean honorifics for staff directory lookup
+        $clean = preg_replace('/^(?:Dr\.?|Prof\.?|Staff\s+Nurse|Nurse|Sister|Miss|Mr\.?|Mrs\.?)\s+/i', '', $doctor);
+        $clean = trim($clean);
+
+        // Attempt lookup from active ClinicalStaff
+        $staff = ClinicalStaff::active()
+            ->where(function ($q) use ($doctor, $clean) {
+                $q->where('name', 'like', "%{$clean}%")
+                    ->orWhere('name', 'like', "%{$doctor}%");
+            })
+            ->first();
+
+        if (!$staff && $clean !== '') {
+            $words = array_values(array_filter(preg_split('/[\s\.\-]+/', $clean), fn ($w) => strlen($w) >= 3));
+            foreach ($words as $word) {
+                $staff = ClinicalStaff::active()
+                    ->where('name', 'like', "%{$word}%")
+                    ->first();
+                if ($staff) {
+                    break;
+                }
+            }
+        }
+
+        // Stamp impression for Dr. Ambika matching physical seal
+        if (preg_match('/Ambika/i', $doctor)) {
+            $regNo = $staff?->doctor_reg_no ?: '80822';
+            $regDisplay = str_starts_with($regNo, 'Reg') ? $regNo : 'Reg.No:' . $regNo;
+            return [
+                'name' => 'DR.K.AMBIKA, MS.,(O&G)',
+                'reg_no' => $regDisplay,
+                'line1' => 'Consultant Gynaecologist',
+                'line2' => 'Infertility Specialist',
+                'location' => 'Dharmapuri-636701',
+            ];
+        }
+
+        // Stamp impression for Dr. Jayaprakash matching hospital seal
+        if (preg_match('/Jayaprakash/i', $doctor)) {
+            $regNo = $staff?->doctor_reg_no ?: '74950';
+            $regDisplay = str_starts_with($regNo, 'Reg') ? $regNo : 'Reg.No:' . $regNo;
+            return [
+                'name' => 'DR.N.JAYAPRAKASH, MS.,MCh (URO)',
+                'reg_no' => $regDisplay,
+                'line1' => 'Consultant Urologist & Surgeon',
+                'line2' => 'Guru Hospital',
+                'location' => 'Dharmapuri-636701',
+            ];
+        }
+
+        // Generic fallback for any other doctor / medical staff
+        $docName = $doctor;
+        if (!preg_match('/^Dr\.?\s+/i', $docName)) {
+            $docName = 'DR.' . $docName;
+        }
+        $docName = strtoupper($docName);
+        if ($staff && !empty($staff->qualification) && !str_contains(strtolower($docName), strtolower($staff->qualification))) {
+            $docName .= ', ' . $staff->qualification;
+        }
+
+        $regNo = $staff?->doctor_reg_no ? 'Reg.No:' . $staff->doctor_reg_no : 'Reg.No: —';
+        $desig = $staff?->category ? (ClinicalStaff::ROLES[$staff->category] ?? 'Consultant Doctor') : 'Consultant Doctor';
+        $dept = $staff?->department ?: ($this->department ?: 'Guru Hospital');
+
+        return [
+            'name' => $docName,
+            'reg_no' => $regNo,
+            'line1' => $desig,
+            'line2' => $dept !== $desig ? $dept : null,
+            'location' => 'Dharmapuri-636701',
+        ];
+    }
+
+    /**
      * Resolves consultant / treating doctor name accompanied by their academic qualification / degrees.
      */
     public function getConsultantWithDegreeAttribute(): string

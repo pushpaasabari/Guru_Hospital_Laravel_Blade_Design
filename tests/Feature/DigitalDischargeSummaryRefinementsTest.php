@@ -277,4 +277,69 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
         $this->assertStringContainsString('Emergency LSCS for Twin Gestation', $htmlTwin);
         $this->assertStringNotContainsString('Twin A: Labour natural with episiotomy | Twin B: Emergency LSCS', $htmlTwin);
     }
+
+    public function test_page2_signature_removes_verified_clinically_and_includes_doctor_degrees_and_stamp(): void
+    {
+        // 1. Dr. Ambika delivery admission
+        $ambikaAdmission = Admission::create([
+            'patient_name' => 'MRS. MANJULA',
+            'uhid' => '2026/4388',
+            'ip_no' => '2026/908',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+            'procedure_name' => 'Emergency LSCS',
+            'procedure_done' => 'Emergency LSCS with Pfannenstiel Incision',
+            'consultant' => 'DR.K.AMBIKA',
+            'department' => 'OBSTETRICS & GYNAECOLOGIST',
+            'diagnosis' => 'Full Term Primigravida in Labour',
+            'admission_at' => now(),
+            'created_by' => $this->doctor->id,
+            'approved_by' => $this->doctor->id,
+            'status' => 'approved',
+        ]);
+
+        $htmlAmbika = view('pdf.partials.discharge-summary-a4._page2', ['admission' => $ambikaAdmission])->render();
+
+        // "Verified clinically" MUST NOT be present
+        $this->assertStringNotContainsString('Verified clinically', $htmlAmbika);
+
+        // Doctor Name MUST include qualification / degrees in signature line
+        $this->assertStringContainsString('DR.K.AMBIKA, M.S (O&amp;G)', $htmlAmbika);
+
+        // Stamp Pad Impression Box MUST be present with authentic seal lines
+        $this->assertStringContainsString('a4-stamp-box', $htmlAmbika);
+        $this->assertStringContainsString('DR.K.AMBIKA, MS.,(O&amp;G)', $htmlAmbika);
+        $this->assertStringContainsString('Reg.No:80822', $htmlAmbika);
+        $this->assertStringContainsString('Consultant Gynaecologist', $htmlAmbika);
+        $this->assertStringContainsString('Infertility Specialist', $htmlAmbika);
+        $this->assertStringContainsString('Dharmapuri-636701', $htmlAmbika);
+
+        // 2. Dr. Jayaprakash urology surgery admission
+        $jayaprakashAdmission = Admission::create([
+            'patient_name' => 'MR. BALAMURUGAN',
+            'uhid' => '2023/4975',
+            'ip_no' => '2026/862',
+            'format' => 'general',
+            'surgery_type' => 'other',
+            'procedure_name' => 'Left URSL & DJ Stenting',
+            'procedure_done' => 'LEFT URSL & DJ STENTING',
+            'consultant' => 'DR.N.JAYAPRAKASH',
+            'department' => 'UROLOGY',
+            'diagnosis' => 'Left lower ureteric calculus',
+            'admission_at' => now(),
+            'created_by' => $this->doctor->id,
+            'approved_by' => $this->doctor->id,
+            'status' => 'approved',
+        ]);
+
+        $htmlJp = view('pdf.partials.discharge-summary-a4._page2', ['admission' => $jayaprakashAdmission])->render();
+
+        $this->assertStringNotContainsString('Verified clinically', $htmlJp);
+        $this->assertStringContainsString('DR.N.JAYAPRAKASH, M.S (Gen Surg), M.Ch (Uro)', $htmlJp);
+        $this->assertStringContainsString('a4-stamp-box', $htmlJp);
+        $this->assertStringContainsString('DR.N.JAYAPRAKASH, MS.,MCh (URO)', $htmlJp);
+        $this->assertStringContainsString('Reg.No:74950', $htmlJp);
+        $this->assertStringContainsString('Consultant Urologist &amp; Surgeon', $htmlJp);
+        $this->assertStringContainsString('Dharmapuri-636701', $htmlJp);
+    }
 }

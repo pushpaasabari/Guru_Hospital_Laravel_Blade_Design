@@ -468,9 +468,9 @@
         background: transparent;
         border: 0.75pt solid #FCA5A5;
         border-left: 3.5pt solid #B3261E;
-        padding: 5px 9px;
-        margin-top: 4px;
-        margin-bottom: 6px;
+        padding: 4px 8px;
+        margin-top: 3px;
+        margin-bottom: 4px;
     }
     .a4-warning-title {
         font-size: 10.3pt;
@@ -492,28 +492,28 @@
         display: table;
         width: 100%;
         table-layout: fixed;
-        margin-top: 5px;
-        margin-bottom: 5px;
+        margin-top: 3px;
+        margin-bottom: 3px;
     }
     .a4-sig-left {
         display: table-cell;
-        width: 50%;
+        width: 45%;
         vertical-align: bottom;
         font-size: 9.8pt;
         color: #6B7B80;
     }
     .a4-sig-right {
         display: table-cell;
-        width: 50%;
+        width: 55%;
         text-align: right;
         vertical-align: bottom;
     }
     .a4-sig-space {
-        height: 10mm;
+        height: 3mm;
     }
     .a4-sig-line {
         display: inline-block;
-        min-width: 62mm;
+        min-width: 65mm;
         border-top: 0.8pt solid #1B2A2F;
         padding-top: 3px;
         text-align: center;
@@ -526,6 +526,43 @@
     .a4-sig-desig {
         font-size: 8.6pt;
         color: #6B7B80;
+    }
+
+    /* Doctor Stamp Pad Impression (Authentic Rubber Stamp Box) */
+    .a4-stamp-box {
+        display: block;
+        margin: 4px auto 0 auto;
+        padding: 3px 6px;
+        border: 1.2pt solid #1e3a8a;
+        border-radius: 2px;
+        text-align: center;
+        background: transparent;
+        color: #1e3a8a;
+    }
+    .a4-stamp-line {
+        line-height: 1.18;
+    }
+    .a4-stamp-name {
+        font-size: 7.6pt;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        text-transform: uppercase;
+    }
+    .a4-stamp-reg {
+        font-size: 7pt;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+    }
+    .a4-stamp-desig,
+    .a4-stamp-sub {
+        font-size: 7pt;
+        font-weight: 600;
+        letter-spacing: 0.1px;
+    }
+    .a4-stamp-loc {
+        font-size: 7pt;
+        font-weight: 600;
+        letter-spacing: 0.2px;
     }
 
     /* Page Footer Hairline anchored to bottom of printable margin frame */
