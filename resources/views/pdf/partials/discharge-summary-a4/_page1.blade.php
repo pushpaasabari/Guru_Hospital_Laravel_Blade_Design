@@ -268,26 +268,28 @@
         @endphp
 
         @if($hasSurgeryDetails)
-            <div class="a4-section-hdr">Surgery / Procedures</div>
-            <div class="a4-grid-3">
-                @foreach($surgeryCells as $cell)
-                    <div class="a4-grid-cell">
-                        <span class="a4-lbl">{{ $cell['lbl'] }}</span>
-                        <span class="a4-val {{ $cell['bold'] ? 'a4-val-bold' : '' }}">{{ $cell['val'] }}</span>
-                    </div>
-                @endforeach
-                @if(!empty($fItems))
-                    <div class="a4-grid-cell" style="grid-column: span {{ (count($surgeryCells) % 3 === 2) ? 1 : ((count($surgeryCells) % 3 === 1) ? 2 : 3) }};">
-                        <span class="a4-lbl">Intra-operative Findings</span>
-                        <div class="a4-val">
-                            <ul class="a4-findings-list">
-                                @foreach($fItems as $item)
-                                    <li>{{ $item }}</li>
-                                @endforeach
-                            </ul>
+            <div class="a4-block" data-overflow-movable="page1">
+                <div class="a4-section-hdr">Surgery / Procedures</div>
+                <div class="a4-grid-3">
+                    @foreach($surgeryCells as $cell)
+                        <div class="a4-grid-cell">
+                            <span class="a4-lbl">{{ $cell['lbl'] }}</span>
+                            <span class="a4-val {{ $cell['bold'] ? 'a4-val-bold' : '' }}">{{ $cell['val'] }}</span>
                         </div>
-                    </div>
-                @endif
+                    @endforeach
+                    @if(!empty($fItems))
+                        <div class="a4-grid-cell" style="grid-column: span {{ (count($surgeryCells) % 3 === 2) ? 1 : ((count($surgeryCells) % 3 === 1) ? 2 : 3) }};">
+                            <span class="a4-lbl">Intra-operative Findings</span>
+                            <div class="a4-val">
+                                <ul class="a4-findings-list">
+                                    @foreach($fItems as $item)
+                                        <li>{{ $item }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        </div>
+                    @endif
+                </div>
             </div>
         @endif
 

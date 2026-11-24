@@ -840,6 +840,66 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                     </>
                   )}
 
+                  {/* Investigations (Always before Procedure / Surgery) */}
+                  {investigationList.length > 0 && (
+                    <>
+                      <div
+                        style={{
+                          fontSize: '10pt',
+                          fontWeight: 'bold',
+                          color: '#111',
+                          textTransform: 'uppercase',
+                          borderBottom: '1.5px solid #222',
+                          paddingBottom: '2px',
+                          marginTop: '12px',
+                          marginBottom: '4px',
+                        }}
+                      >
+                        INVESTIGATIONS
+                      </div>
+                      <table
+                        className="w-100 mb-2"
+                        style={{
+                          borderCollapse: 'collapse',
+                          tableLayout: 'fixed',
+                          border: '1px solid #94a3b8',
+                          backgroundColor: '#ffffff',
+                        }}
+                      >
+                        <tbody>
+                          {(() => {
+                            const invCols = investigationList.length > 10 ? 6 : 5;
+                            const colWidth = investigationList.length > 10 ? '16.66%' : '20%';
+                            return Array.from({ length: Math.ceil(investigationList.length / invCols) }).map((_, rIdx) => {
+                              const chunk = investigationList.slice(rIdx * invCols, rIdx * invCols + invCols);
+                              return (
+                                <tr key={rIdx}>
+                                  {chunk.map((inv, cIdx) => (
+                                    <td key={cIdx} style={{ width: colWidth, border: '1px solid #cbd5e1', padding: '3px 5px' }}>
+                                      <span style={{ fontSize: '6.4pt', fontWeight: 700, color: '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '1px' }}>
+                                        {inv.label} {inv.unit ? <span style={{ fontWeight: 400, textTransform: 'none', color: '#64748b', fontSize: '5.6pt' }}>({inv.unit})</span> : null}
+                                      </span>
+                                      <span style={{ fontSize: '8.4pt', fontWeight: 700, color: '#000', display: 'block' }}>{inv.value}</span>
+                                      {inv.normal_range ? (
+                                        <span style={{ fontSize: '5.6pt', color: '#64748b', display: 'block', marginTop: '1px' }}>
+                                          Ref: {inv.normal_range}
+                                        </span>
+                                      ) : null}
+                                    </td>
+                                  ))}
+                                  {chunk.length < invCols &&
+                                    Array.from({ length: invCols - chunk.length }).map((_, padIdx) => (
+                                      <td key={`pad-${padIdx}`} style={{ width: colWidth, border: '1px solid #cbd5e1' }}>&nbsp;</td>
+                                    ))}
+                                </tr>
+                              );
+                            });
+                          })()}
+                        </tbody>
+                      </table>
+                    </>
+                  )}
+
                   {/* Section: Procedure Note */}
                   {admission.procedure_note && (
                     <>
@@ -996,66 +1056,6 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                               <td style={{ border: '1px solid #94a3b8', padding: '4px 6px', fontSize: '9pt' }}>{row.dose}</td>
                             </tr>
                           ))}
-                        </tbody>
-                      </table>
-                    </>
-                  )}
-
-                  {/* Investigations */}
-                  {investigationList.length > 0 && (
-                    <>
-                      <div
-                        style={{
-                          fontSize: '10pt',
-                          fontWeight: 'bold',
-                          color: '#111',
-                          textTransform: 'uppercase',
-                          borderBottom: '1.5px solid #222',
-                          paddingBottom: '2px',
-                          marginTop: '12px',
-                          marginBottom: '4px',
-                        }}
-                      >
-                        INVESTIGATIONS
-                      </div>
-                      <table
-                        className="w-100 mb-2"
-                        style={{
-                          borderCollapse: 'collapse',
-                          tableLayout: 'fixed',
-                          border: '1px solid #94a3b8',
-                          backgroundColor: '#ffffff',
-                        }}
-                      >
-                        <tbody>
-                          {(() => {
-                            const invCols = investigationList.length > 10 ? 6 : 5;
-                            const colWidth = investigationList.length > 10 ? '16.66%' : '20%';
-                            return Array.from({ length: Math.ceil(investigationList.length / invCols) }).map((_, rIdx) => {
-                              const chunk = investigationList.slice(rIdx * invCols, rIdx * invCols + invCols);
-                              return (
-                                <tr key={rIdx}>
-                                  {chunk.map((inv, cIdx) => (
-                                    <td key={cIdx} style={{ width: colWidth, border: '1px solid #cbd5e1', padding: '3px 5px' }}>
-                                      <span style={{ fontSize: '6.4pt', fontWeight: 700, color: '#475569', textTransform: 'uppercase', display: 'block', marginBottom: '1px' }}>
-                                        {inv.label} {inv.unit ? <span style={{ fontWeight: 400, textTransform: 'none', color: '#64748b', fontSize: '5.6pt' }}>({inv.unit})</span> : null}
-                                      </span>
-                                      <span style={{ fontSize: '8.4pt', fontWeight: 700, color: '#000', display: 'block' }}>{inv.value}</span>
-                                      {inv.normal_range ? (
-                                        <span style={{ fontSize: '5.6pt', color: '#64748b', display: 'block', marginTop: '1px' }}>
-                                          Ref: {inv.normal_range}
-                                        </span>
-                                      ) : null}
-                                    </td>
-                                  ))}
-                                  {chunk.length < invCols &&
-                                    Array.from({ length: invCols - chunk.length }).map((_, padIdx) => (
-                                      <td key={`pad-${padIdx}`} style={{ width: colWidth, border: '1px solid #cbd5e1' }}>&nbsp;</td>
-                                    ))}
-                                </tr>
-                              );
-                            });
-                          })()}
                         </tbody>
                       </table>
                     </>

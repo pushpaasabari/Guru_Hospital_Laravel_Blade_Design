@@ -68,6 +68,17 @@ async function main() {
             const movables = Array.from(p1.querySelectorAll('[data-overflow-movable="page1"]')).reverse();
             for (const block of movables) {
               if (p1.scrollHeight <= p1.clientHeight + 1) break;
+
+              // Enforce clinical rule: INVESTIGATIONS must always appear before SURGERY / PROCEDURES.
+              // Never move Investigations to Page 2 if Surgery / Procedures is still remaining on Page 1.
+              const isInv = block.textContent.includes('Investigations');
+              const surgeryStillOnP1 = Array.from(p1.querySelectorAll('[data-overflow-movable="page1"]')).some(
+                el => el !== block && el.textContent.includes('Surgery / Procedures')
+              );
+              if (isInv && surgeryStillOnP1) {
+                continue;
+              }
+
               const note = document.createElement('div');
               note.className = 'a4-continued-note';
               note.textContent = 'Continued from Page 1';

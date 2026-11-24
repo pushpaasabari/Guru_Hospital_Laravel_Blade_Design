@@ -423,6 +423,43 @@
         <div class="prose-text">{!! nl2br(e($admission->examination)) !!}</div>
     @endif
 
+    {{-- Section: Investigations (Grid) --}}
+    @php
+        $investigations = $admission->formatted_investigations;
+        $invCols = count($investigations) > 10 ? 6 : 5;
+        $colWidth = count($investigations) > 10 ? '16.66%' : '20%';
+    @endphp
+    @if(!empty($investigations))
+        <div class="section-header">INVESTIGATIONS</div>
+        <table class="info-table bg-white">
+            @foreach(array_chunk($investigations, $invCols) as $chunk)
+                <tr>
+                    @foreach($chunk as $inv)
+                        <td style="width: {{ $colWidth }}; padding: 2px 4px;">
+                            <span class="cell-lbl" style="font-size: 6.4pt;">
+                                {{ $inv['label'] }}
+                                @if(!empty($inv['unit']))
+                                    <span style="font-weight: normal; text-transform: none; color: #64748b; font-size: 5.6pt;">({{ $inv['unit'] }})</span>
+                                @endif
+                            </span>
+                            <span class="cell-val" style="font-size: 8.2pt;">{{ $inv['value'] }}</span>
+                            @if(!empty($inv['normal_range']))
+                                <span style="display: block; font-size: 5.6pt; color: #64748b; font-weight: normal; line-height: 1; margin-top: 0.5px;">
+                                    Ref: {{ $inv['normal_range'] }}
+                                </span>
+                            @endif
+                        </td>
+                    @endforeach
+                    @if(count($chunk) < $invCols)
+                        @for($i = 0; $i < ($invCols - count($chunk)); $i++)
+                            <td style="width: {{ $colWidth }}; border: 0.6pt solid #cbd5e1;">&nbsp;</td>
+                        @endfor
+                    @endif
+                </tr>
+            @endforeach
+        </table>
+    @endif
+
     {{-- Section: Procedure Note --}}
     @if($admission->procedure_note)
         <div class="section-header">PROCEDURE NOTE</div>
@@ -510,43 +547,6 @@
                     </tr>
                 @endforeach
             </tbody>
-        </table>
-    @endif
-
-    {{-- Investigations (Grid) --}}
-    @php
-        $investigations = $admission->formatted_investigations;
-        $invCols = count($investigations) > 10 ? 6 : 5;
-        $colWidth = count($investigations) > 10 ? '16.66%' : '20%';
-    @endphp
-    @if(!empty($investigations))
-        <div class="section-header">INVESTIGATIONS</div>
-        <table class="info-table bg-white">
-            @foreach(array_chunk($investigations, $invCols) as $chunk)
-                <tr>
-                    @foreach($chunk as $inv)
-                        <td style="width: {{ $colWidth }}; padding: 2px 4px;">
-                            <span class="cell-lbl" style="font-size: 6.4pt;">
-                                {{ $inv['label'] }}
-                                @if(!empty($inv['unit']))
-                                    <span style="font-weight: normal; text-transform: none; color: #64748b; font-size: 5.6pt;">({{ $inv['unit'] }})</span>
-                                @endif
-                            </span>
-                            <span class="cell-val" style="font-size: 8.2pt;">{{ $inv['value'] }}</span>
-                            @if(!empty($inv['normal_range']))
-                                <span style="display: block; font-size: 5.6pt; color: #64748b; font-weight: normal; line-height: 1; margin-top: 0.5px;">
-                                    Ref: {{ $inv['normal_range'] }}
-                                </span>
-                            @endif
-                        </td>
-                    @endforeach
-                    @if(count($chunk) < $invCols)
-                        @for($i = 0; $i < ($invCols - count($chunk)); $i++)
-                            <td style="width: {{ $colWidth }}; border: 0.6pt solid #cbd5e1;">&nbsp;</td>
-                        @endfor
-                    @endif
-                </tr>
-            @endforeach
         </table>
     @endif
 

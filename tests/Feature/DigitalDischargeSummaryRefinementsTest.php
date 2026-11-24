@@ -436,4 +436,45 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
         $this->assertStringContainsString('(%)', $html);
         $this->assertStringContainsString('99', $html);
     }
+
+    public function test_investigations_is_strictly_rendered_before_surgery_and_procedures(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'Order Sequence Patient',
+            'uhid' => 'ORD001',
+            'ip_no' => 'IP-ORD001',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+            'procedure_name' => 'Emergency LSCS',
+            'procedure_done' => 'Emergency LSCS under Spinal Anaesthesia',
+            'surgeon' => 'Dr. Ambika',
+            'diagnosis' => 'Full Term Primigravida',
+            'investigations' => "HB: 12.5\nBlood Group: B positive",
+            'vital_bp' => '110/70',
+            'vital_pulse' => '76',
+            'admission_at' => now(),
+            'created_by' => $this->doctor->id,
+            'approved_by' => $this->doctor->id,
+            'status' => 'approved',
+        ]);
+
+        $htmlA4 = view('pdf.partials.discharge-summary-a4._page1', ['admission' => $admission])->render();
+        $invPos = strpos($htmlA4, 'Investigations');
+        $surgPos = strpos($htmlA4, 'Surgery / Procedures');
+
+        $this->assertNotFalse($invPos, 'Investigations section must be present on Page 1');
+        $this->assertNotFalse($surgPos, 'Surgery / Procedures section must be present on Page 1');
+        $this->assertLessThan($surgPos, $invPos, 'INVESTIGATIONS must strictly appear before SURGERY / PROCEDURES');
+
+        // Verify Surgery / Procedures has data-overflow-movable="page1" so it moves first before investigations
+        $this->assertMatchesRegularExpression('/<div class="a4-block" data-overflow-movable="page1">\s*<div class="a4-section-hdr">Surgery \/ Procedures<\/div>/', $htmlA4);
+
+        // Also verify pack.blade.php renders investigations before procedure note
+        $htmlPack = view('pdf.pack', ['admission' => $admission])->render();
+        $invPackPos = strpos($htmlPack, 'INVESTIGATIONS');
+        $procPackPos = strpos($htmlPack, 'PROCEDURE NOTE');
+        if ($invPackPos !== false && $procPackPos !== false) {
+            $this->assertLessThan($procPackPos, $invPackPos, 'In document pack, INVESTIGATIONS must strictly appear before PROCEDURE NOTE');
+        }
+    }
 }
