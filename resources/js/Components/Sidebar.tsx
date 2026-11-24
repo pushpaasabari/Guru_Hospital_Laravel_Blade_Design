@@ -45,6 +45,9 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
   const adminPaths = ['/templates', '/clinical-staff', '/anesthesia-types', '/users', '/audit-logs'];
   const isAnyAdminActive = adminPaths.some((p) => isLinkActive(p));
 
+  const reportPaths = ['/reports/birth', '/reports/surgery', '/reports/medical', '/reports/month-wise', '/reports'];
+  const isAnyReportActive = reportPaths.some((p) => isLinkActive(p));
+
   const [adminMenuOpen, setAdminMenuOpen] = useState<boolean>(() => {
     if (isAnyAdminActive) return true;
     if (typeof window !== 'undefined') {
@@ -54,6 +57,17 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
     return false;
   });
 
+  const [reportMenuOpen, setReportMenuOpen] = useState<boolean>(() => {
+    if (isAnyReportActive) return true;
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('guru_report_menu_open');
+      if (saved !== null) return saved === 'true';
+    }
+    return false;
+  });
+
+  const reportMenuRef = useRef<HTMLDivElement>(null);
+
   // Keep expanded whenever an admin sub-item route is active
   useEffect(() => {
     if (isAnyAdminActive) {
@@ -61,12 +75,22 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
     }
   }, [isAnyAdminActive, currentPath]);
 
-  // Click outside listener to close floating flyout when collapsed
+  // Keep expanded whenever a report sub-item route is active
+  useEffect(() => {
+    if (isAnyReportActive) {
+      setReportMenuOpen(true);
+    }
+  }, [isAnyReportActive, currentPath]);
+
+  // Click outside listener to close floating flyouts when collapsed
   useEffect(() => {
     if (!collapsed) return;
     const handleClickOutside = (e: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setAdminMenuOpen(false);
+      }
+      if (reportMenuRef.current && !reportMenuRef.current.contains(e.target as Node)) {
+        setReportMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -78,6 +102,16 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
       const next = !prev;
       if (typeof window !== 'undefined') {
         localStorage.setItem('guru_admin_menu_open', String(next));
+      }
+      return next;
+    });
+  };
+
+  const toggleReportMenu = () => {
+    setReportMenuOpen((prev) => {
+      const next = !prev;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('guru_report_menu_open', String(next));
       }
       return next;
     });
@@ -200,6 +234,77 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                   <span>New Admission</span>
                 </Link>
               )}
+
+              {/* Report Menu with Sub-Items */}
+              <div className="fg-sidebar-menu-item-wrapper" ref={reportMenuRef}>
+                <button
+                  type="button"
+                  className={`fg-sidebar-link fg-sidebar-dropdown-btn w-100 ${
+                    isAnyReportActive ? 'active has-active-child' : ''
+                  }`}
+                  onClick={toggleReportMenu}
+                  aria-expanded={reportMenuOpen}
+                  title="Report"
+                >
+                  <i className="bi bi-file-earmark-bar-graph icon-reports"></i>
+                  <span className="flex-grow-1 text-start">Report</span>
+                  <i
+                    className={`bi bi-chevron-down fg-submenu-arrow ${
+                      reportMenuOpen ? 'open' : ''
+                    }`}
+                    aria-hidden="true"
+                  ></i>
+                </button>
+
+                {/* Submenu with 4 Sub-Items */}
+                {reportMenuOpen && (
+                  <div className="fg-sidebar-submenu" role="menu" aria-label="Report Submenu">
+                    <Link
+                      href="/reports/birth"
+                      prefetch
+                      className={`fg-sidebar-sublink ${isLinkActive('/reports/birth') ? 'active' : ''}`}
+                      onClick={closeMobile}
+                      title="Birth report"
+                    >
+                      <i className="bi bi-gender-ambiguous icon-report-birth"></i>
+                      <span>Birth report</span>
+                    </Link>
+
+                    <Link
+                      href="/reports/surgery"
+                      prefetch
+                      className={`fg-sidebar-sublink ${isLinkActive('/reports/surgery') ? 'active' : ''}`}
+                      onClick={closeMobile}
+                      title="Surgery Report"
+                    >
+                      <i className="bi bi-bandaid icon-report-surgery"></i>
+                      <span>Surgery Report</span>
+                    </Link>
+
+                    <Link
+                      href="/reports/medical"
+                      prefetch
+                      className={`fg-sidebar-sublink ${isLinkActive('/reports/medical') ? 'active' : ''}`}
+                      onClick={closeMobile}
+                      title="Medical Case Report"
+                    >
+                      <i className="bi bi-heart-pulse icon-report-medical"></i>
+                      <span>Medical Case Report</span>
+                    </Link>
+
+                    <Link
+                      href="/reports/month-wise"
+                      prefetch
+                      className={`fg-sidebar-sublink ${isLinkActive('/reports/month-wise') ? 'active' : ''}`}
+                      onClick={closeMobile}
+                      title="Month Wise report"
+                    >
+                      <i className="bi bi-calendar3-range icon-report-month"></i>
+                      <span>Month Wise report</span>
+                    </Link>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Group 2: Administration (Collapsible Single Menu with Sub-Items) */}

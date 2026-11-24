@@ -8,6 +8,7 @@ use App\Http\Controllers\ClinicalStaffController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DocumentApprovalController;
 use App\Http\Controllers\DocumentPackController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -66,6 +67,13 @@ Route::middleware('auth')->group(function () {
     Route::match(['get', 'post'], '/documents/{admission}/pdf/{type?}', [DocumentPackController::class, 'pdf']);
     Route::get('/admissions/{admission}/history', [DocumentPackController::class, 'history'])->name('documents.history');
     Route::get('/documents/{admission}/history', [DocumentPackController::class, 'history']);
+
+    // Clinical Reports
+    Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/birth', [ReportController::class, 'birth'])->name('reports.birth');
+    Route::get('/reports/surgery', [ReportController::class, 'surgery'])->name('reports.surgery');
+    Route::get('/reports/medical', [ReportController::class, 'medical'])->name('reports.medical');
+    Route::get('/reports/month-wise', [ReportController::class, 'monthWise'])->name('reports.month-wise');
 
     // Audit Logs (Admins & Auditors)
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('audit.index');
