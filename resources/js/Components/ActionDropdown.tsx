@@ -288,7 +288,11 @@ export function buildEditStageMenuItems(admissionId: number): ActionDropdownItem
   ];
 }
 
-export function buildPdfDownloadMenuItems(admissionId: number, headerLabel?: string): ActionDropdownItem[] {
+export function buildPdfDownloadMenuItems(
+  admissionId: number,
+  headerLabel?: string,
+  onCopyIntimation?: () => void
+): ActionDropdownItem[] {
   const items: ActionDropdownItem[] = [];
   if (headerLabel) {
     items.push({ type: 'header', label: headerLabel });
@@ -327,6 +331,20 @@ export function buildPdfDownloadMenuItems(admissionId: number, headerLabel?: str
       className: 'fw-semibold',
     }
   );
+
+  if (onCopyIntimation) {
+    items.push(
+      { type: 'divider' },
+      {
+        type: 'button',
+        label: 'Copy Discharge Intimation',
+        onClick: onCopyIntimation,
+        iconClass: 'bi bi-whatsapp text-success',
+        className: 'fw-semibold text-success',
+      }
+    );
+  }
+
   return items;
 }
 

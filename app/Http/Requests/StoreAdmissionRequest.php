@@ -26,6 +26,8 @@ class StoreAdmissionRequest extends FormRequest
             'uhid' => ['required', 'string', 'max:60'],
             'ip_no' => ['required', 'string', 'max:60', Rule::unique('admissions', 'ip_no')],
             'picme_no' => ['nullable', 'string', 'max:30'],
+            'vhn_name' => ['nullable', 'string', 'max:160'],
+            'phc' => ['nullable', 'string', 'max:160'],
             'age' => ['nullable', 'string', 'max:30'],
             'sex' => ['nullable', Rule::in(['Female', 'Male', 'Other', 'Not recorded'])],
             'address' => ['nullable', 'string', 'max:1000'],

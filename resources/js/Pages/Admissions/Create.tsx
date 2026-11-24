@@ -20,6 +20,8 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
     uhid: '',
     ip_no: '',
     picme_no: '',
+    vhn_name: '',
+    phc: '',
     age: '',
     sex: '',
     address: '',
@@ -292,26 +294,56 @@ export default function AdmissionsCreate({ clinicalStaff = [] }: Props) {
               </div>
 
               {data.surgery_type === 'delivery' && (
-                <div className="col-md-4">
-                  <label className="form-label required">
-                    RCH ID (PICME No)
-                    <span className="badge bg-danger-subtle text-danger ms-2" style={{ fontSize: '0.68rem' }}>
-                      DELIVERY / OBSTETRIC
-                    </span>
-                  </label>
-                  <input
-                    type="text"
-                    className={`form-control ${errors.picme_no ? 'is-invalid' : ''}`}
-                    value={data.picme_no}
-                    onChange={(e) => setData('picme_no', e.target.value)}
-                    placeholder="e.g. 331024567890 (12-digit PICME / RCH ID)"
-                    maxLength={25}
-                  />
-                  {errors.picme_no && <div className="invalid-feedback">{errors.picme_no}</div>}
-                  <div className="form-text text-muted small">
-                    Mandatory for all delivery/obstetric patients in Tamil Nadu.
+                <>
+                  <div className="col-md-4">
+                    <label className="form-label required">
+                      RCH ID (PICME No)
+                      <span className="badge bg-danger-subtle text-danger ms-2" style={{ fontSize: '0.68rem' }}>
+                        DELIVERY / OBSTETRIC
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-control ${errors.picme_no ? 'is-invalid' : ''}`}
+                      value={data.picme_no}
+                      onChange={(e) => setData('picme_no', e.target.value)}
+                      placeholder="e.g. 331024567890 (12-digit PICME / RCH ID)"
+                      maxLength={25}
+                    />
+                    {errors.picme_no && <div className="invalid-feedback">{errors.picme_no}</div>}
+                    <div className="form-text text-muted small">
+                      Mandatory for all delivery/obstetric patients in Tamil Nadu.
+                    </div>
                   </div>
-                </div>
+
+                  <div className="col-md-4">
+                    <label className="form-label">VHN Name (Village Health Nurse)</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      style={{ textTransform: 'uppercase' }}
+                      value={data.vhn_name}
+                      onChange={(e) =>
+                        handleNormalizedInputChange(e, toUpperCaseValue, (val) => setData('vhn_name', val))
+                      }
+                      placeholder="e.g. S. LAKSHMI"
+                    />
+                  </div>
+
+                  <div className="col-md-4">
+                    <label className="form-label">PHC (Primary Health Centre)</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      style={{ textTransform: 'uppercase' }}
+                      value={data.phc}
+                      onChange={(e) =>
+                        handleNormalizedInputChange(e, toUpperCaseValue, (val) => setData('phc', val))
+                      }
+                      placeholder="e.g. PENNAGARAM PHC"
+                    />
+                  </div>
+                </>
               )}
             </div>
           </div>

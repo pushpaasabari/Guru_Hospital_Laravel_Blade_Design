@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class Admission extends Model
 {
     protected $fillable = [
-        'patient_name', 'attender_name', 'attender_relation', 'uhid', 'ip_no', 'picme_no', 'age', 'sex', 'address', 'address_line1', 'address_line2', 'address_line3', 'contact',
+        'patient_name', 'attender_name', 'attender_relation', 'uhid', 'ip_no', 'picme_no', 'vhn_name', 'phc', 'age', 'sex', 'address', 'address_line1', 'address_line2', 'address_line3', 'contact',
         'admission_at', 'procedure_at', 'discharge_at', 'consultant',
         'department', 'diagnosis', 'format', 'surgery_type', 'clinical_history',
         'examination', 'investigations', 'vital_bp', 'vital_pulse', 'vital_spo2', 'treatment_course', 'discharge_condition',

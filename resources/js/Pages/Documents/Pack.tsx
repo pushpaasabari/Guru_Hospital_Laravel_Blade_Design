@@ -5,6 +5,7 @@ import ActionDropdown, {
   buildEditStageMenuItems,
   buildPdfDownloadMenuItems,
 } from '../../Components/ActionDropdown';
+import DischargeIntimationModal from '../../Components/DischargeIntimationModal';
 import { resolveMrdNo } from '../../utils/inputNormalizers';
 import {
   formatTreatmentCourse,
@@ -184,6 +185,7 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
   const [viewMode, setViewMode] = useState<'sheet' | 'pdf'>(initialMode);
   const [returnModalOpen, setReturnModalOpen] = useState(false);
   const [revisionModalOpen, setRevisionModalOpen] = useState(false);
+  const [intimationModalOpen, setIntimationModalOpen] = useState(false);
 
   const deliveryFormatted = useMemo(() => {
     if (admission.surgery_type !== 'delivery') return null;
@@ -410,7 +412,11 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                 toggleClassName="btn btn-primary dropdown-toggle dropdown-toggle-split"
                 toggleTitle="Toggle PDF Options"
                 fontSize="13px"
-                items={buildPdfDownloadMenuItems(admission.id, 'Separate PDF Documents')}
+                items={buildPdfDownloadMenuItems(
+                  admission.id,
+                  'Separate PDF Documents',
+                  () => setIntimationModalOpen(true)
+                )}
                 primaryAction={
                   <a
                     href={`/admissions/${admission.id}/documents/pdf/discharge-summary`}
@@ -423,6 +429,15 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                   </a>
                 }
               />
+
+              <button
+                type="button"
+                className="btn btn-outline-success d-inline-flex align-items-center gap-1 shadow-sm"
+                onClick={() => setIntimationModalOpen(true)}
+                title="Copy formatted WhatsApp discharge intimation message for VHN/PHC"
+              >
+                <i className="bi bi-whatsapp"></i> Copy Intimation
+              </button>
 
               {(user?.is_admin || user?.role === 'doctor') && (
                 <button
@@ -461,10 +476,18 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
               <i className="bi bi-check-circle-fill me-1 text-success"></i>{' '}
               <strong>Documents Ready for Download:</strong> Complete discharge documentation is finalized. You can directly download official PDFs below without needing approval.
             </div>
-            <div className="d-flex gap-2">
+            <div className="d-flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setIntimationModalOpen(true)}
+                className="btn btn-sm btn-success fw-semibold d-inline-flex align-items-center gap-1 shadow-sm"
+                title="Copy formatted WhatsApp discharge intimation message for VHN/PHC"
+              >
+                <i className="bi bi-whatsapp me-1"></i> Copy Discharge Intimation
+              </button>
               <a
                 href={`/admissions/${admission.id}/documents/pdf/discharge-summary`}
-                className="btn btn-sm btn-success fw-semibold"
+                className="btn btn-sm btn-outline-success fw-semibold"
                 target="_blank"
                 rel="noreferrer"
               >
@@ -2140,6 +2163,13 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
           }}
         />
       )}
+
+      {/* Discharge Intimation WhatsApp / VHN Copy Modal */}
+      <DischargeIntimationModal
+        show={intimationModalOpen}
+        onClose={() => setIntimationModalOpen(false)}
+        admission={admission}
+      />
     </AppLayout>
   );
 }

@@ -16,6 +16,8 @@ class AdmissionInputNormalizer
         'address_line1',
         'address_line2',
         'address_line3',
+        'vhn_name',
+        'phc',
         'consultant',
         'surgeon',
         'assisted_surgeon',

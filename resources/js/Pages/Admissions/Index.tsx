@@ -7,6 +7,7 @@ import ActionDropdown, {
   buildEditStageMenuItems,
   buildPdfDownloadMenuItems,
 } from '../../Components/ActionDropdown';
+import DischargeIntimationModal from '../../Components/DischargeIntimationModal';
 import { formatDate } from '../../utils/dateFormatter';
 
 interface AdmissionItem {
@@ -46,6 +47,7 @@ interface Props {
 export default function AdmissionsIndex({ admissions, filters = {}, auth }: Props) {
   const [search, setSearch] = useState(filters.search || '');
   const [status, setStatus] = useState(filters.status || '');
+  const [intimationAdmission, setIntimationAdmission] = useState<any>(null);
 
   const handleFilter = (e: React.FormEvent) => {
     e.preventDefault();
@@ -203,23 +205,33 @@ export default function AdmissionsIndex({ admissions, filters = {}, auth }: Prop
                           History
                         </Link>
                         {['approved', 'generated'].includes(adm.status) && (
-                          <ActionDropdown
-                            toggleClassName="btn btn-primary dropdown-toggle dropdown-toggle-split"
-                            toggleTitle="Download Separate PDFs"
-                            fontSize="12px"
-                            items={buildPdfDownloadMenuItems(adm.id)}
-                            primaryAction={
-                              <a
-                                href={`/admissions/${adm.id}/documents/pdf/discharge-summary`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn btn-primary"
-                                title="Download Discharge Summary PDF"
-                              >
-                                PDF
-                              </a>
-                            }
-                          />
+                          <>
+                            <button
+                              type="button"
+                              className="btn btn-outline-success"
+                              onClick={() => setIntimationAdmission(adm)}
+                              title="Copy Discharge Intimation WhatsApp Message"
+                            >
+                              <i className="bi bi-whatsapp"></i>
+                            </button>
+                            <ActionDropdown
+                              toggleClassName="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                              toggleTitle="Download Separate PDFs"
+                              fontSize="12px"
+                              items={buildPdfDownloadMenuItems(adm.id, undefined, () => setIntimationAdmission(adm))}
+                              primaryAction={
+                                <a
+                                  href={`/admissions/${adm.id}/documents/pdf/discharge-summary`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="btn btn-primary"
+                                  title="Download Discharge Summary PDF"
+                                >
+                                  PDF
+                                </a>
+                              }
+                            />
+                          </>
                         )}
                       </div>
                     </td>
@@ -238,6 +250,15 @@ export default function AdmissionsIndex({ admissions, filters = {}, auth }: Prop
         </div>
         <Pagination links={admissions.links} />
       </div>
+
+      {/* Discharge Intimation WhatsApp Copy Modal */}
+      {intimationAdmission && (
+        <DischargeIntimationModal
+          show={true}
+          onClose={() => setIntimationAdmission(null)}
+          admission={intimationAdmission}
+        />
+      )}
     </AppLayout>
   );
 }
