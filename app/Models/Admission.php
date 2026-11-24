@@ -96,6 +96,9 @@ class Admission extends Model
             'admission_at',
             'discharge_at',
             'rejection_reason',
+            'consultant',
+            'department',
+            'ward_room_no',
         ]);
     }
 

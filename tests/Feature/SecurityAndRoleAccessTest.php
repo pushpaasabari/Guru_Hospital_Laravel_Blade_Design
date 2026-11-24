@@ -136,12 +136,14 @@ class SecurityAndRoleAccessTest extends TestCase
 
     public function test_authenticated_user_can_view_dashboard(): void
     {
-        $response = $this->actingAs($this->nurse)->get(route('dashboard'));
+        $response = $this->actingAs($this->nurse)->get(route('dashboard', ['per_page' => 25]));
         $response->assertStatus(200);
         $response->assertInertia(fn (Assert $page) => $page
             ->component('Dashboard')
             ->has('counts')
             ->has('admissions')
+            ->has('filters')
+            ->where('filters.per_page', 25)
         );
     }
 

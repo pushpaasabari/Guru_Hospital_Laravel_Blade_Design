@@ -51,8 +51,14 @@ class DashboardController extends Controller
             $query->whereDate('admission_at', '<=', $dateTo);
         }
 
-        $admissions = $query->paginate(15)->withQueryString();
+        $perPage = (int) $request->input('per_page', 50);
+        if ($perPage < 5 || $perPage > 250) {
+            $perPage = 50;
+        }
+
+        $admissions = $query->paginate($perPage)->withQueryString();
         $filters = $request->only(['search', 'status', 'format', 'surgery_type', 'date_from', 'date_to']);
+        $filters['per_page'] = $perPage;
 
         return Inertia::render('Dashboard', compact('counts', 'admissions', 'filters'));
     }
