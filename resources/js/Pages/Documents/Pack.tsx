@@ -432,11 +432,11 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
 
               <button
                 type="button"
-                className="btn btn-outline-success d-inline-flex align-items-center gap-1 shadow-sm"
+                className="btn btn-outline-secondary d-inline-flex align-items-center gap-1 shadow-sm"
                 onClick={() => setIntimationModalOpen(true)}
-                title="Copy formatted WhatsApp discharge intimation message for VHN/PHC"
+                title="Copy formatted discharge message"
               >
-                <i className="bi bi-whatsapp"></i> Copy Intimation
+                <i className="bi bi-clipboard-check"></i> Copy Message
               </button>
 
               {(user?.is_admin || user?.role === 'doctor') && (
@@ -480,10 +480,10 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
               <button
                 type="button"
                 onClick={() => setIntimationModalOpen(true)}
-                className="btn btn-sm btn-success fw-semibold d-inline-flex align-items-center gap-1 shadow-sm"
-                title="Copy formatted WhatsApp discharge intimation message for VHN/PHC"
+                className="btn btn-sm btn-primary fw-semibold d-inline-flex align-items-center gap-1 shadow-sm"
+                title="Copy formatted discharge message"
               >
-                <i className="bi bi-whatsapp me-1"></i> Copy Discharge Intimation
+                <i className="bi bi-clipboard-check me-1"></i> Copy Discharge Message
               </button>
               <a
                 href={`/admissions/${admission.id}/documents/pdf/discharge-summary`}

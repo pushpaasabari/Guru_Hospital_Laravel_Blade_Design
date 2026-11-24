@@ -91,7 +91,10 @@ export function formatPatientHeader(
 
   const parts: string[] = [];
   if (age && String(age).trim()) {
-    parts.push(`${String(age).trim()} Yrs`);
+    const rawAge = String(age).replace(/\s*yrs?\s*/i, '').trim();
+    if (rawAge) {
+      parts.push(rawAge);
+    }
   }
   if (sex && sex.trim()) {
     parts.push(sex.trim());
@@ -142,20 +145,16 @@ export function formatDiagnosisAndIndications(
 export function buildDischargeIntimationMessage(data: IntimationData): string {
   const lines: string[] = [];
 
-  // 1. Header
-  lines.push('*DISCHARGE INTIMATION*');
-  lines.push('');
-
-  // 2. Patient Name, Age | Gender
+  // 1. Patient Name, Age | Gender (starts directly without extra header)
   lines.push(formatPatientHeader(data.patient_name, data.age, data.sex));
 
-  // 3. W/O Attender Name
+  // 2. W/O Attender Name
   const attenderLine = formatAttenderRelationLine(data.attender_name, data.attender_relation, data.sex);
   if (attenderLine) {
     lines.push(attenderLine);
   }
 
-  // 4. Address Lines (omit any empty lines)
+  // 3. Address Lines (omit any empty lines)
   if (data.address_line1 && data.address_line1.trim()) {
     lines.push(data.address_line1.trim());
   } else if (data.address && data.address.trim()) {
@@ -170,29 +169,29 @@ export function buildDischargeIntimationMessage(data: IntimationData): string {
     lines.push(data.address_line3.trim());
   }
 
-  // 5. Phone Number
+  // 4. Phone Number
   if (data.contact && data.contact.trim()) {
     lines.push(`*Ph.no:* ${data.contact.trim()}`);
   }
 
-  // 6. RCH ID
+  // 5. RCH ID
   if (data.picme_no && data.picme_no.trim()) {
     lines.push(`*RCH ID:* ${data.picme_no.trim()}`);
   }
 
-  // 7. VHN Name
+  // 6. VHN Name
   if (data.vhn_name && data.vhn_name.trim()) {
     lines.push(`*VHN Name:* ${data.vhn_name.trim()}`);
   }
 
-  // 8. PHC
+  // 7. PHC
   if (data.phc && data.phc.trim()) {
     lines.push(`*PHC:* ${data.phc.trim()}`);
   }
 
   lines.push('');
 
-  // 9. Diagnosis / Indication
+  // 8. Diagnosis / Indication
   lines.push('*Diagnosis / Indication:*');
   const diagItems = formatDiagnosisAndIndications(data.diagnosis, data.procedure_done || data.procedure_name, data.findings);
   if (diagItems.length > 0) {
@@ -203,23 +202,17 @@ export function buildDischargeIntimationMessage(data: IntimationData): string {
 
   lines.push('');
 
-  // 10. Discharge condition
+  // 9. Discharge condition
   lines.push('*Patient discharged with vitals stable.*');
   lines.push('');
 
-  // 11. Follow up instruction
+  // 10. Follow up instruction
   const pronoun = (data.sex || '').toLowerCase().startsWith('m') ? 'him' : 'her';
   lines.push(`Kindly *VHN follow up* with ${pronoun}.`);
   lines.push('');
 
-  // 12. Thank you
+  // 11. Thank you
   lines.push('Thank you.');
-
-  // 13. Optional Digital Link
-  if (data.include_link && data.link_url) {
-    lines.push('');
-    lines.push(`*Discharge Document:* ${data.link_url}`);
-  }
 
   return lines.join('\n');
 }

@@ -205,33 +205,23 @@ export default function AdmissionsIndex({ admissions, filters = {}, auth }: Prop
                           History
                         </Link>
                         {['approved', 'generated'].includes(adm.status) && (
-                          <>
-                            <button
-                              type="button"
-                              className="btn btn-outline-success"
-                              onClick={() => setIntimationAdmission(adm)}
-                              title="Copy Discharge Intimation WhatsApp Message"
-                            >
-                              <i className="bi bi-whatsapp"></i>
-                            </button>
-                            <ActionDropdown
-                              toggleClassName="btn btn-primary dropdown-toggle dropdown-toggle-split"
-                              toggleTitle="Download Separate PDFs"
-                              fontSize="12px"
-                              items={buildPdfDownloadMenuItems(adm.id, undefined, () => setIntimationAdmission(adm))}
-                              primaryAction={
-                                <a
-                                  href={`/admissions/${adm.id}/documents/pdf/discharge-summary`}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="btn btn-primary"
-                                  title="Download Discharge Summary PDF"
-                                >
-                                  PDF
-                                </a>
-                              }
-                            />
-                          </>
+                          <ActionDropdown
+                            toggleClassName="btn btn-primary dropdown-toggle dropdown-toggle-split"
+                            toggleTitle="Download Separate PDFs"
+                            fontSize="12px"
+                            items={buildPdfDownloadMenuItems(adm.id, undefined, () => setIntimationAdmission(adm))}
+                            primaryAction={
+                              <a
+                                href={`/admissions/${adm.id}/documents/pdf/discharge-summary`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="btn btn-primary"
+                                title="Download Discharge Summary PDF"
+                              >
+                                PDF
+                              </a>
+                            }
+                          />
                         )}
                       </div>
                     </td>

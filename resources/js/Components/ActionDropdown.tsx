@@ -337,10 +337,10 @@ export function buildPdfDownloadMenuItems(
       { type: 'divider' },
       {
         type: 'button',
-        label: 'Copy Discharge Intimation',
+        label: 'Copy Discharge Message',
         onClick: onCopyIntimation,
-        iconClass: 'bi bi-whatsapp text-success',
-        className: 'fw-semibold text-success',
+        iconClass: 'bi bi-clipboard-check text-dark',
+        className: 'fw-semibold',
       }
     );
   }

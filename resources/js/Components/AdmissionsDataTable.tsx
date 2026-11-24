@@ -691,33 +691,23 @@ export default function AdmissionsDataTable({
                           </Link>
                         )}
                         {(item.status === 'approved' || item.status === 'generated') && (
-                          <>
-                            <button
-                              type="button"
-                              className="btn btn-outline-success"
-                              onClick={() => setIntimationAdmission(item)}
-                              title="Copy Discharge Intimation WhatsApp Message"
-                            >
-                              <i className="bi bi-whatsapp"></i>
-                            </button>
-                            <ActionDropdown
-                              toggleClassName="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
-                              toggleTitle="Download Separate PDFs"
-                              fontSize="12px"
-                              items={buildPdfDownloadMenuItems(item.id, undefined, () => setIntimationAdmission(item))}
-                              primaryAction={
-                                <a
-                                  href={`/admissions/${item.id}/documents/pdf/discharge-summary-a4`}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="btn btn-outline-primary"
-                                  title="Download Digital Discharge Summary PDF"
-                                >
-                                  <i className="bi bi-file-earmark-pdf"></i>
-                                </a>
-                              }
-                            />
-                          </>
+                          <ActionDropdown
+                            toggleClassName="btn btn-outline-primary dropdown-toggle dropdown-toggle-split"
+                            toggleTitle="Download Separate PDFs"
+                            fontSize="12px"
+                            items={buildPdfDownloadMenuItems(item.id, undefined, () => setIntimationAdmission(item))}
+                            primaryAction={
+                              <a
+                                href={`/admissions/${item.id}/documents/pdf/discharge-summary-a4`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="btn btn-outline-primary"
+                                title="Download Digital Discharge Summary PDF"
+                              >
+                                <i className="bi bi-file-earmark-pdf"></i>
+                              </a>
+                            }
+                          />
                         )}
                       </div>
                     </td>
