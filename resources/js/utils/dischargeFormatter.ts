@@ -45,85 +45,91 @@ export interface FormattedNewbornCard {
 const INVESTIGATION_ORDER: Record<string, number> = {
   HB: 1,
   'BLOOD GROUP': 2,
-  HIV: 3,
-  HCV: 4,
-  VDRL: 5,
-  HBSAG: 6,
-  UREA: 7,
-  CREATININE: 8,
-  'URIC ACID': 9,
-  RBS: 10,
-  ECG: 11,
-  CBC: 12,
-  ESR: 13,
-  'BT, CT': 14,
-  'PT - INR': 15,
-  APTT: 16,
-  'PERIPHERAL SMEAR': 17,
-  'URINE ROUTINE': 18,
-  RFT: 19,
-  LFT: 20,
-  'SR. BILIRUBIN': 21,
-  'SERUM ELECTROLYTES': 22,
-  'FASTING (FBS)': 23,
-  PPBS: 24,
-  HBA1C: 25,
-  OGCT: 26,
-  'SERUM CALCIUM': 27,
-  'SERUM AMYLASE': 28,
-  'SERUM LIPASE': 29,
-  'TOTAL IRON': 30,
-  TIBC: 31,
-  'SERUM FERRITIN': 32,
-  CHOLESTEROL: 33,
-  TRIGLYCERIDES: 34,
-  HDL: 35,
-  LDL: 36,
-  VLDL: 37,
-  CRP: 38,
-  WIDAL: 39,
-  'RA FACTOR': 40,
-  'ASO TITER': 41,
-  'DENGUE SEROLOGY': 42,
-  'SCRUB TYPHUS': 43,
-  TSH: 44,
-  TFT: 45,
-  'TROPONIN-T': 46,
-  'CK-MB': 47,
-  'CHEST X-RAY (PA)': 48,
-  'X-RAY KUB': 49,
-  'URINE C/S': 50,
-  'SPUTUM C/S': 51,
-  'PUS C/S': 52,
-  'BLOOD C/S': 53,
-  'SPUTUM AFB': 54,
-  'GEN-XPERT (MTB)': 55,
-  'CA 125': 56,
-  FPSA: 57,
-  'S PSA': 58,
-  TESTOSTERONE: 59,
-  ESTRADIOL: 60,
-  AMH: 61,
-  ANA: 62,
-  PROLACTIN: 63,
-  'LH, FSH': 64,
-  'D-DIMER': 65,
-  'BETA HCG': 66,
-  'SEMEN ANALYSIS': 67,
-  'SEMEN C/S': 68,
-  'SEMEN-XPERT': 69,
-  'SPOT PCR': 70,
-  'SPOT MICROALBUMIN': 71,
-  'SPOT SODIUM': 72,
-  'SMEAR FOR MP/MF': 73,
-  'PACKAGE - 1': 74,
-  'PACKAGE - 2': 75,
-  'PACKAGE - 3': 76,
+  BP: 3,
+  PULSE: 4,
+  SPO2: 5,
+  HIV: 6,
+  HCV: 7,
+  VDRL: 8,
+  HBSAG: 9,
+  UREA: 10,
+  CREATININE: 11,
+  'URIC ACID': 12,
+  RBS: 13,
+  ECG: 14,
+  CBC: 15,
+  ESR: 16,
+  'BT, CT': 17,
+  'PT - INR': 18,
+  APTT: 19,
+  'PERIPHERAL SMEAR': 20,
+  'URINE ROUTINE': 21,
+  RFT: 22,
+  LFT: 23,
+  'SR. BILIRUBIN': 24,
+  'SERUM ELECTROLYTES': 25,
+  'FASTING (FBS)': 26,
+  PPBS: 27,
+  HBA1C: 28,
+  OGCT: 29,
+  'SERUM CALCIUM': 30,
+  'SERUM AMYLASE': 31,
+  'SERUM LIPASE': 32,
+  'TOTAL IRON': 33,
+  TIBC: 34,
+  'SERUM FERRITIN': 35,
+  CHOLESTEROL: 36,
+  TRIGLYCERIDES: 37,
+  HDL: 38,
+  LDL: 39,
+  VLDL: 40,
+  CRP: 41,
+  WIDAL: 42,
+  'RA FACTOR': 43,
+  'ASO TITER': 44,
+  'DENGUE SEROLOGY': 45,
+  'SCRUB TYPHUS': 46,
+  TSH: 47,
+  TFT: 48,
+  'TROPONIN-T': 49,
+  'CK-MB': 50,
+  'CHEST X-RAY (PA)': 51,
+  'X-RAY KUB': 52,
+  'URINE C/S': 53,
+  'SPUTUM C/S': 54,
+  'PUS C/S': 55,
+  'BLOOD C/S': 56,
+  'SPUTUM AFB': 57,
+  'GEN-XPERT (MTB)': 58,
+  'CA 125': 59,
+  FPSA: 60,
+  'S PSA': 61,
+  TESTOSTERONE: 62,
+  ESTRADIOL: 63,
+  AMH: 64,
+  ANA: 65,
+  PROLACTIN: 66,
+  'LH, FSH': 67,
+  'D-DIMER': 68,
+  'BETA HCG': 69,
+  'SEMEN ANALYSIS': 70,
+  'SEMEN C/S': 71,
+  'SEMEN-XPERT': 72,
+  'SPOT PCR': 73,
+  'SPOT MICROALBUMIN': 74,
+  'SPOT SODIUM': 75,
+  'SMEAR FOR MP/MF': 76,
+  'PACKAGE - 1': 77,
+  'PACKAGE - 2': 78,
+  'PACKAGE - 3': 79,
 };
 
 export const INVESTIGATION_STANDARDS: Record<string, { unit: string; normal_range: string; reference: string }> = {
   HB: { unit: 'g/dL', normal_range: '12.0 - 16.0', reference: '12.0 - 16.0 g/dL' },
   'BLOOD GROUP': { unit: '', normal_range: 'Compatible', reference: 'ABO/Rh Compatible' },
+  BP: { unit: 'mmHg', normal_range: '120/80', reference: '120/80 mmHg' },
+  PULSE: { unit: 'bpm', normal_range: '60 - 100', reference: '60 - 100 bpm' },
+  SPO2: { unit: '%', normal_range: '95 - 100', reference: '95 - 100 %' },
   HIV: { unit: '', normal_range: 'Non-Reactive', reference: 'Non-Reactive' },
   HCV: { unit: '', normal_range: 'Non-Reactive', reference: 'Non-Reactive' },
   VDRL: { unit: '', normal_range: 'Non-Reactive', reference: 'Non-Reactive' },
@@ -211,6 +217,19 @@ export function normalizeInvestigationKey(rawLabel: string): string {
     case 'bloodgrouping':
     case 'rh':
       return 'BLOOD GROUP';
+    case 'bp':
+    case 'bloodpressure':
+      return 'BP';
+    case 'pulse':
+    case 'pulserate':
+    case 'heartrate':
+    case 'hr':
+      return 'PULSE';
+    case 'spo2':
+    case 'oxygen':
+    case 'oxygensaturation':
+    case 'sats':
+      return 'SPO2';
     case 'hiv':
       return 'HIV';
     case 'hcv':
@@ -485,28 +504,76 @@ export function formatTreatmentCourse(text?: string | null): FormattedTreatmentR
   return rows;
 }
 
-export function formatInvestigations(text?: string | null): FormattedInvestigation[] {
-  if (!text) return [];
-  const lines = text.split(/\r?\n/).map((l) => l.trim().replace(/^[*•-]\s*/, '')).filter(Boolean);
+export function formatInvestigations(
+  text?: string | null,
+  admission?: {
+    vital_bp?: string | null;
+    vital_pulse?: string | null;
+    vital_spo2?: string | null;
+    discharge_bp?: string | null;
+    discharge_pulse?: string | null;
+    discharge_spo2?: string | null;
+  } | null
+): FormattedInvestigation[] {
   const items: FormattedInvestigation[] = [];
+  if (text) {
+    const lines = text.split(/\r?\n/).map((l) => l.trim().replace(/^[*•-]\s*/, '')).filter(Boolean);
 
-  for (const line of lines) {
-    const match = line.match(/^([^:=]+)[:=](.+)$/);
-    if (match) {
-      const rawLabel = match[1].trim();
-      const rawVal = match[2].trim();
-      const label = normalizeInvestigationKey(rawLabel);
+    for (const line of lines) {
+      const match = line.match(/^([^:=]+)[:=](.+)$/);
+      if (match) {
+        const rawLabel = match[1].trim();
+        const rawVal = match[2].trim();
+        const label = normalizeInvestigationKey(rawLabel);
 
-      const std = INVESTIGATION_STANDARDS[label] || { unit: '', normal_range: '', reference: '' };
+        const std = INVESTIGATION_STANDARDS[label] || { unit: '', normal_range: '', reference: '' };
+        items.push({
+          label,
+          value: rawVal,
+          unit: std.unit,
+          normal_range: std.normal_range,
+          reference: std.reference,
+        });
+      } else {
+        items.push({ label: 'NOTE', value: line, unit: '', normal_range: '', reference: '' });
+      }
+    }
+  }
+
+  if (admission) {
+    const existingLabels = new Set(items.map((i) => i.label));
+
+    const bpVal = (admission.vital_bp || admission.discharge_bp || '').trim();
+    if (bpVal && bpVal !== '—' && !existingLabels.has('BP')) {
       items.push({
-        label,
-        value: rawVal,
-        unit: std.unit,
-        normal_range: std.normal_range,
-        reference: std.reference,
+        label: 'BP',
+        value: bpVal,
+        unit: 'mmHg',
+        normal_range: '120/80',
+        reference: '120/80 mmHg',
       });
-    } else {
-      items.push({ label: 'NOTE', value: line, unit: '', normal_range: '', reference: '' });
+    }
+
+    const pulseVal = (admission.vital_pulse || admission.discharge_pulse || '').trim();
+    if (pulseVal && pulseVal !== '—' && !existingLabels.has('PULSE')) {
+      items.push({
+        label: 'PULSE',
+        value: pulseVal,
+        unit: 'bpm',
+        normal_range: '60 - 100',
+        reference: '60 - 100 bpm',
+      });
+    }
+
+    const spo2Val = (admission.vital_spo2 || admission.discharge_spo2 || '').trim();
+    if (spo2Val && spo2Val !== '—' && !existingLabels.has('SPO2')) {
+      items.push({
+        label: 'SPO2',
+        value: spo2Val,
+        unit: '%',
+        normal_range: '95 - 100',
+        reference: '95 - 100 %',
+      });
     }
   }
 

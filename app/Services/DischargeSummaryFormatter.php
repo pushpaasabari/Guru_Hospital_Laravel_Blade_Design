@@ -13,15 +13,18 @@ class DischargeSummaryFormatter
     public const INVESTIGATION_ORDER = [
         'HB' => 1,
         'BLOOD GROUP' => 2,
-        'HIV' => 3,
-        'HCV' => 4,
-        'VDRL' => 5,
-        'HBSAG' => 6,
-        'UREA' => 7,
-        'CREATININE' => 8,
-        'URIC ACID' => 9,
-        'RBS' => 10,
-        'ECG' => 11,
+        'BP' => 3,
+        'PULSE' => 4,
+        'SPO2' => 5,
+        'HIV' => 6,
+        'HCV' => 7,
+        'VDRL' => 8,
+        'HBSAG' => 9,
+        'UREA' => 10,
+        'CREATININE' => 11,
+        'URIC ACID' => 12,
+        'RBS' => 13,
+        'ECG' => 14,
         'CBC' => 12,
         'ESR' => 13,
         'BT, CT' => 14,
@@ -103,6 +106,21 @@ class DischargeSummaryFormatter
             'unit' => '',
             'normal_range' => 'Compatible',
             'reference' => 'ABO/Rh Compatible',
+        ],
+        'BP' => [
+            'unit' => 'mmHg',
+            'normal_range' => '120/80',
+            'reference' => '120/80 mmHg',
+        ],
+        'PULSE' => [
+            'unit' => 'bpm',
+            'normal_range' => '60 - 100',
+            'reference' => '60 - 100 bpm',
+        ],
+        'SPO2' => [
+            'unit' => '%',
+            'normal_range' => '95 - 100',
+            'reference' => '95 - 100 %',
         ],
         'HIV' => [
             'unit' => '',
@@ -593,6 +611,9 @@ class DischargeSummaryFormatter
         return match ($key) {
             'hb', 'haemoglobin' => 'HB',
             'bg', 'bloodgroup', 'bloodgrouping', 'rh' => 'BLOOD GROUP',
+            'bp', 'bloodpressure' => 'BP',
+            'pulse', 'pulserate', 'hr', 'heartrate' => 'PULSE',
+            'spo2', 'oxygen', 'sao2', 'oxygensaturation' => 'SPO2',
             'hiv' => 'HIV',
             'hcv' => 'HCV',
             'vdrl' => 'VDRL',
@@ -676,68 +697,105 @@ class DischargeSummaryFormatter
      * with standard clinical units and normal reference ranges.
      *
      * @param mixed $investigations
+     * @param Admission|null $admission
      * @return array<int, array{label: string, value: string, unit: string, normal_range: string, reference: string}>
      */
-    public static function formatInvestigations($investigations): array
+    public static function formatInvestigations($investigations, ?Admission $admission = null): array
     {
-        if (!$investigations) {
-            return [];
-        }
-
         $items = [];
 
-        if (is_array($investigations)) {
-            foreach ($investigations as $k => $v) {
-                $rawLabel = is_string($k) ? trim($k) : 'TEST';
-                $label = self::normalizeInvestigationKey($rawLabel);
-                $val = is_array($v) ? implode(', ', $v) : (string)$v;
-                if ($label === 'BLOOD GROUP' || str_contains($label, 'BLOOD')) {
-                    $val = strtoupper($val);
-                }
-                $std = self::INVESTIGATION_STANDARDS[$label] ?? ['unit' => '', 'normal_range' => '', 'reference' => ''];
-                $items[] = [
-                    'label' => $label,
-                    'value' => $val,
-                    'unit' => $std['unit'] ?? '',
-                    'normal_range' => $std['normal_range'] ?? '',
-                    'reference' => $std['reference'] ?? '',
-                ];
-            }
-        } else {
-            $lines = preg_split('/\r\n|\r|\n/', trim($investigations));
-            foreach ($lines as $line) {
-                $line = trim($line, " \t\n\r\0\x0B*•-");
-                if (!$line) {
-                    continue;
-                }
-
-                if (preg_match('/^([^:=]+)[:=](.+)$/', $line, $m)) {
-                    $rawLabel = trim($m[1]);
-                    $rawVal = trim($m[2]);
+        if ($investigations) {
+            if (is_array($investigations)) {
+                foreach ($investigations as $k => $v) {
+                    $rawLabel = is_string($k) ? trim($k) : 'TEST';
                     $label = self::normalizeInvestigationKey($rawLabel);
-
+                    $val = is_array($v) ? implode(', ', $v) : (string)$v;
                     if ($label === 'BLOOD GROUP' || str_contains($label, 'BLOOD')) {
-                        $rawVal = strtoupper($rawVal);
+                        $val = strtoupper($val);
                     }
-
                     $std = self::INVESTIGATION_STANDARDS[$label] ?? ['unit' => '', 'normal_range' => '', 'reference' => ''];
-
                     $items[] = [
                         'label' => $label,
-                        'value' => $rawVal,
+                        'value' => $val,
                         'unit' => $std['unit'] ?? '',
                         'normal_range' => $std['normal_range'] ?? '',
                         'reference' => $std['reference'] ?? '',
                     ];
-                } else {
-                    $items[] = [
-                        'label' => 'NOTE',
-                        'value' => $line,
-                        'unit' => '',
-                        'normal_range' => '',
-                        'reference' => '',
-                    ];
                 }
+            } else {
+                $lines = preg_split('/\r\n|\r|\n/', trim($investigations));
+                foreach ($lines as $line) {
+                    $line = trim($line, " \t\n\r\0\x0B*•-");
+                    if (!$line) {
+                        continue;
+                    }
+
+                    if (preg_match('/^([^:=]+)[:=](.+)$/', $line, $m)) {
+                        $rawLabel = trim($m[1]);
+                        $rawVal = trim($m[2]);
+                        $label = self::normalizeInvestigationKey($rawLabel);
+
+                        if ($label === 'BLOOD GROUP' || str_contains($label, 'BLOOD')) {
+                            $rawVal = strtoupper($rawVal);
+                        }
+
+                        $std = self::INVESTIGATION_STANDARDS[$label] ?? ['unit' => '', 'normal_range' => '', 'reference' => ''];
+
+                        $items[] = [
+                            'label' => $label,
+                            'value' => $rawVal,
+                            'unit' => $std['unit'] ?? '',
+                            'normal_range' => $std['normal_range'] ?? '',
+                            'reference' => $std['reference'] ?? '',
+                        ];
+                    } else {
+                        $items[] = [
+                            'label' => 'NOTE',
+                            'value' => $line,
+                            'unit' => '',
+                            'normal_range' => '',
+                            'reference' => '',
+                        ];
+                    }
+                }
+            }
+        }
+
+        if ($admission) {
+            $existingLabels = array_column($items, 'label');
+            $existingSet = array_flip($existingLabels);
+
+            $bpVal = trim((string)($admission->vital_bp ?: $admission->discharge_bp));
+            if ($bpVal !== '' && $bpVal !== '—' && !isset($existingSet['BP'])) {
+                $items[] = [
+                    'label' => 'BP',
+                    'value' => $bpVal,
+                    'unit' => 'mmHg',
+                    'normal_range' => '120/80',
+                    'reference' => '120/80 mmHg',
+                ];
+            }
+
+            $pulseVal = trim((string)($admission->vital_pulse ?: $admission->discharge_pulse));
+            if ($pulseVal !== '' && $pulseVal !== '—' && !isset($existingSet['PULSE'])) {
+                $items[] = [
+                    'label' => 'PULSE',
+                    'value' => $pulseVal,
+                    'unit' => 'bpm',
+                    'normal_range' => '60 - 100',
+                    'reference' => '60 - 100 bpm',
+                ];
+            }
+
+            $spo2Val = trim((string)($admission->vital_spo2 ?: $admission->discharge_spo2));
+            if ($spo2Val !== '' && $spo2Val !== '—' && !isset($existingSet['SPO2'])) {
+                $items[] = [
+                    'label' => 'SPO2',
+                    'value' => $spo2Val,
+                    'unit' => '%',
+                    'normal_range' => '95 - 100',
+                    'reference' => '95 - 100 %',
+                ];
             }
         }
 

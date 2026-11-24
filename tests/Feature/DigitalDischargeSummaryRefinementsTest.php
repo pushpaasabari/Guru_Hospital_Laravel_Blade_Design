@@ -119,11 +119,11 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
         $this->assertStringContainsString('Presenting Complaints', $html);
         $this->assertStringContainsString('Clinical Examination', $html);
 
-        // Clinical history grid is rendered under Diagnosis & Clinical Summary
-        $this->assertStringContainsString('DM / HT / ASTHMA / TB', $html);
-        $this->assertStringContainsString('OTHER MEDICAL', $html);
-        $this->assertStringContainsString('PAST SURGICAL HISTORY', $html);
-        $this->assertStringContainsString('ALLERGIES / PRIOR MEDS', $html);
+        // Clinical history grid is permanently removed as requested
+        $this->assertStringNotContainsString('DM / HT / ASTHMA / TB', $html);
+        $this->assertStringNotContainsString('OTHER MEDICAL', $html);
+        $this->assertStringNotContainsString('PAST SURGICAL HISTORY', $html);
+        $this->assertStringNotContainsString('ALLERGIES / PRIOR MEDS', $html);
 
         // Treatment Provided / Course in Hospital must NOT be rendered
         $this->assertStringNotContainsString('Treatment Provided', $html);
@@ -183,37 +183,38 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
             'status' => 'approved',
         ]);
 
-        $htmlAdult = view('pdf.partials.discharge-summary-a4._page2', ['admission' => $adultAdmission])->render();
+        $htmlAdultP1 = view('pdf.partials.discharge-summary-a4._page1', ['admission' => $adultAdmission])->render();
+        $htmlAdultP2 = view('pdf.partials.discharge-summary-a4._page2', ['admission' => $adultAdmission])->render();
 
         // Pediatrician is NOT rendered for adult non-pediatric surgery
-        $this->assertStringNotContainsString('<span class="a4-lbl">Pediatrician</span>', $htmlAdult);
+        $this->assertStringNotContainsString('<span class="a4-lbl">Pediatrician</span>', $htmlAdultP1);
 
-        // Findings as bulleted list
-        $this->assertStringContainsString('class="a4-findings-list"', $htmlAdult);
-        $this->assertStringContainsString('<li>Right ureteric calculus 8mm</li>', $htmlAdult);
+        // Findings as bulleted list (moved to Page 1)
+        $this->assertStringContainsString('class="a4-findings-list"', $htmlAdultP1);
+        $this->assertStringContainsString('<li>Right ureteric calculus 8mm</li>', $htmlAdultP1);
 
-        // Procedure note justified
-        $this->assertStringContainsString('a4-procedure-note', $htmlAdult);
+        // Procedure note justified (on Page 2)
+        $this->assertStringContainsString('a4-procedure-note', $htmlAdultP2);
 
-        // Immediate Postoperative Orders in structured table and rows
-        $this->assertStringContainsString('a4-postop-table', $htmlAdult);
-        $this->assertStringContainsString('IV RL 1 pint @ 75ml/hr', $htmlAdult);
-        $this->assertStringContainsString('IV Infusion', $htmlAdult);
+        // Immediate Postoperative Orders in structured table and rows (on Page 2)
+        $this->assertStringContainsString('a4-postop-table', $htmlAdultP2);
+        $this->assertStringContainsString('IV RL 1 pint @ 75ml/hr', $htmlAdultP2);
+        $this->assertStringContainsString('IV Infusion', $htmlAdultP2);
 
         // Discharge instructions: Implant/Diet/Activity is first
-        $implantPos = strpos($htmlAdult, '<strong>Implant:</strong>');
-        $advicePos = strpos($htmlAdult, '&bull;');
+        $implantPos = strpos($htmlAdultP2, '<strong>Implant:</strong>');
+        $advicePos = strpos($htmlAdultP2, '&bull;');
         $this->assertNotFalse($implantPos);
         if ($advicePos !== false) {
             $this->assertLessThan($advicePos, $implantPos);
         }
 
         // Follow-up review is bold and inline
-        $this->assertStringContainsString('Follow-up Review</span>', $htmlAdult);
-        $this->assertMatchesRegularExpression('/Follow-up Review<\/span>\s*<div class="a4-val a4-val-bold">\s*After 7 days/s', $htmlAdult);
-        $this->assertStringNotContainsString('display: flex; justify-content: space-between;', $htmlAdult);
+        $this->assertStringContainsString('Follow-up Review</span>', $htmlAdultP2);
+        $this->assertMatchesRegularExpression('/Follow-up Review<\/span>\s*<div class="a4-val a4-val-bold">\s*After 7 days/s', $htmlAdultP2);
+        $this->assertStringNotContainsString('display: flex; justify-content: space-between;', $htmlAdultP2);
 
-        // 2. Delivery case: Pediatrician is displayed
+        // 2. Delivery case: Pediatrician is displayed (on Page 1)
         $deliveryAdmission = Admission::create([
             'patient_name' => 'Mother Patient',
             'uhid' => 'DEL001',
@@ -230,7 +231,7 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
             'status' => 'approved',
         ]);
 
-        $htmlDelivery = view('pdf.partials.discharge-summary-a4._page2', ['admission' => $deliveryAdmission])->render();
+        $htmlDelivery = view('pdf.partials.discharge-summary-a4._page1', ['admission' => $deliveryAdmission])->render();
         $this->assertStringContainsString('<span class="a4-lbl">Pediatrician</span>', $htmlDelivery);
         $this->assertStringContainsStringIgnoringCase('Dr. S. Ramesh', $htmlDelivery);
     }
@@ -255,7 +256,7 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
 
         $this->assertEquals('LEFT URSL & DJ STENTING', \App\Services\DischargeSummaryFormatter::formatSurgeryPerformed($admission));
 
-        $html = view('pdf.partials.discharge-summary-a4._page2', ['admission' => $admission])->render();
+        $html = view('pdf.partials.discharge-summary-a4._page1', ['admission' => $admission])->render();
         $this->assertStringContainsString('Procedure Performed</span>', $html);
         $this->assertStringContainsString('LEFT URSL &amp; DJ STENTING', $html);
         $this->assertStringNotContainsString('Left lower ureteric calculus</span>', $html);
@@ -280,7 +281,7 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
         $twinAdmission->load('newborns');
 
         $this->assertEquals('Emergency LSCS for Twin Gestation', \App\Services\DischargeSummaryFormatter::formatSurgeryPerformed($twinAdmission));
-        $htmlTwin = view('pdf.partials.discharge-summary-a4._page2', ['admission' => $twinAdmission])->render();
+        $htmlTwin = view('pdf.partials.discharge-summary-a4._page1', ['admission' => $twinAdmission])->render();
         $this->assertStringContainsString('Emergency LSCS for Twin Gestation', $htmlTwin);
         $this->assertStringNotContainsString('Twin A: Labour natural with episiotomy | Twin B: Emergency LSCS', $htmlTwin);
     }
@@ -381,5 +382,58 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
 
         // Value must be formatted inline together
         $this->assertMatchesRegularExpression('/<div class="a4-val a4-val-bold">\s*Review after one week For Suture Removal\s*[:(]?\s*27\.11\.2026/s', $html);
+    }
+
+    public function test_digital_a4_uses_open_sans_font_and_expanded_signature_space(): void
+    {
+        $html = view('pdf.partials.discharge-summary-a4._styles')->render();
+
+        // Must declare and use Open Sans
+        $this->assertStringContainsString("font-family: 'Open Sans'", $html);
+        $this->assertStringContainsString('OpenSans-Regular.ttf', $html);
+        $this->assertStringContainsString('OpenSans-Bold.ttf', $html);
+
+        // Signature space expanded to at least 16mm
+        $this->assertMatchesRegularExpression('/\.a4-sig-space\s*\{\s*height:\s*16mm;/s', $html);
+    }
+
+    public function test_investigations_includes_vital_bp_pulse_spo2_cards(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'Vitals Test Patient',
+            'uhid' => 'VIT001',
+            'ip_no' => 'IP-VIT001',
+            'format' => 'general',
+            'surgery_type' => 'other',
+            'diagnosis' => 'Clinical Observation',
+            'investigations' => "HB: 13.0\nBlood Group: O positive",
+            'vital_bp' => '120/80',
+            'vital_pulse' => '78',
+            'vital_spo2' => '99',
+            'admission_at' => now(),
+            'created_by' => $this->doctor->id,
+            'approved_by' => $this->doctor->id,
+            'status' => 'approved',
+        ]);
+
+        $formatted = $admission->formatted_investigations;
+        $labels = array_column($formatted, 'label');
+
+        $this->assertContains('HB', $labels);
+        $this->assertContains('BLOOD GROUP', $labels);
+        $this->assertContains('BP', $labels);
+        $this->assertContains('PULSE', $labels);
+        $this->assertContains('SPO2', $labels);
+
+        $html = view('pdf.partials.discharge-summary-a4._page1', ['admission' => $admission])->render();
+        $this->assertStringContainsString('BP', $html);
+        $this->assertStringContainsString('(mmHg)', $html);
+        $this->assertStringContainsString('120/80', $html);
+        $this->assertStringContainsString('PULSE', $html);
+        $this->assertStringContainsString('(bpm)', $html);
+        $this->assertStringContainsString('78', $html);
+        $this->assertStringContainsString('SPO2', $html);
+        $this->assertStringContainsString('(%)', $html);
+        $this->assertStringContainsString('99', $html);
     }
 }

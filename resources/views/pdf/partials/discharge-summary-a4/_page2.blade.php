@@ -33,85 +33,17 @@
 
         <div data-overflow-target="page2"></div>
 
-        {{-- 8. Surgery / Procedures (always starts cleanly at top of Page 2) --}}
-        @if($hasSurgerySection)
-            @php
-                $findingsText = trim((string) $admission->findings);
-                $fItems = [];
-                if ($findingsText !== '' && $findingsText !== '—' && strcasecmp($findingsText, 'nil') !== 0) {
-                    $rawLines = preg_split('/(?:\r\n|\r|\n|;)+/', $findingsText);
-                    foreach ($rawLines as $l) {
-                        $l = trim(preg_replace('/^[\s\-\*\•\d+\.\)]+/', '', $l));
-                        if ($l !== '' && $l !== '—' && strcasecmp($l, 'nil') !== 0) {
-                            $fItems[] = $l;
-                        }
-                    }
-                    if (count($fItems) <= 1 && preg_match('/[.!?]\s+[A-Z0-9]/', $findingsText)) {
-                        $sentences = preg_split('/(?<=[.!?])\s+(?=[A-Z0-9])/', $findingsText);
-                        $fItems = array_values(array_filter(array_map('trim', $sentences)));
-                    }
-                }
+        {{-- 8. Operative & Postoperative Notes (Part 2 of Surgery / Procedures) --}}
+        @php
+            $hasProcNote = $admission->procedure_note && trim($admission->procedure_note) !== '—';
+            $postOpRows = $admission->formatted_postoperative_orders;
+            $hasInstructionsCol = collect($postOpRows)->contains(fn ($r) => !empty($r['instruction']));
+            $hasPostOp = !empty($postOpRows);
+        @endphp
+        @if($hasProcNote || $hasPostOp)
+            <div class="a4-section-hdr" style="margin-top: 0;">Operative &amp; Postoperative Notes</div>
 
-                $surgeryCells = [];
-                $procPerf = \App\Services\DischargeSummaryFormatter::formatSurgeryPerformed($admission);
-                if ($procPerf && $procPerf !== '—') {
-                    $surgeryCells[] = ['lbl' => 'Procedure Performed', 'val' => $procPerf, 'bold' => true];
-                }
-                $surgeonVal = $admission->surgeon ?: $admission->consultant;
-                if ($surgeonVal && $surgeonVal !== '—') {
-                    $surgeryCells[] = ['lbl' => 'Surgeon', 'val' => $surgeonVal, 'bold' => true];
-                }
-                $anaesthVal = $admission->anaesthetist ? $admission->anaesthetist . ($admission->anaesthesia_type ? ' (' . $admission->anaesthesia_type . ')' : '') : $admission->anaesthesia_type;
-                if ($anaesthVal && $anaesthVal !== '—') {
-                    $surgeryCells[] = ['lbl' => 'Anaesthetist & Type', 'val' => $anaesthVal, 'bold' => false];
-                }
-                $assistedVal = $admission->assisted_surgeon ?: ($admission->assisted_by ?: $admission->assistant);
-                if ($assistedVal && $assistedVal !== '—') {
-                    $surgeryCells[] = ['lbl' => 'Assisted Surgeon / Staff', 'val' => $assistedVal, 'bold' => false];
-                }
-                $nurseOtVal = collect([$admission->staff_nurse, $admission->ot_technician])->filter()->implode(' / ');
-                if ($nurseOtVal && $nurseOtVal !== '—') {
-                    $surgeryCells[] = ['lbl' => 'Scrub Nurse / OT Tech', 'val' => $nurseOtVal, 'bold' => false];
-                }
-                if (!empty($admission->pediatrician_name) && $admission->pediatrician_name !== '—') {
-                    $surgeryCells[] = ['lbl' => 'Pediatrician', 'val' => $admission->pediatrician_name, 'bold' => false];
-                }
-                $incisionSpecimen = collect([$admission->incision, $admission->specimen ? 'Specimen: ' . $admission->specimen : null])->filter()->implode(' | ');
-                if ($incisionSpecimen && $incisionSpecimen !== '—') {
-                    $surgeryCells[] = ['lbl' => 'Incision / Specimen', 'val' => $incisionSpecimen, 'bold' => false];
-                }
-                $drainBloodComp = collect([$admission->drain, $admission->blood_loss_ml ? 'EBL: ' . $admission->blood_loss_ml . ' ml' : null, $admission->complications])->filter()->implode(' | ');
-                if ($drainBloodComp && $drainBloodComp !== '—') {
-                    $surgeryCells[] = ['lbl' => 'Drain / Blood Loss / Complications', 'val' => $drainBloodComp, 'bold' => false];
-                }
-            @endphp
-
-            <div class="a4-section-hdr" style="margin-top: 0;">Surgery / Procedures</div>
-
-            @if(!empty($surgeryCells) || !empty($fItems))
-                <div class="a4-grid-3">
-                    @foreach($surgeryCells as $cell)
-                        <div class="a4-grid-cell">
-                            <span class="a4-lbl">{{ $cell['lbl'] }}</span>
-                            <span class="a4-val {{ $cell['bold'] ? 'a4-val-bold' : '' }}">{{ $cell['val'] }}</span>
-                        </div>
-                    @endforeach
-                    @if(!empty($fItems))
-                        <div class="a4-grid-cell" style="grid-column: span {{ (count($surgeryCells) % 3 === 2) ? 1 : ((count($surgeryCells) % 3 === 1) ? 2 : 3) }};">
-                            <span class="a4-lbl">Intra-operative Findings</span>
-                            <div class="a4-val">
-                                <ul class="a4-findings-list">
-                                    @foreach($fItems as $item)
-                                        <li>{{ $item }}</li>
-                                    @endforeach
-                                </ul>
-                            </div>
-                        </div>
-                    @endif
-                </div>
-            @endif
-
-            @if($admission->procedure_note && trim($admission->procedure_note) !== '—')
+            @if($hasProcNote)
                 <div class="a4-outlined-card">
                     <span class="a4-lbl">Operative / Procedure Note</span>
                     <div class="a4-val a4-procedure-note">
@@ -120,11 +52,7 @@
                 </div>
             @endif
 
-            @php
-                $postOpRows = $admission->formatted_postoperative_orders;
-                $hasInstructionsCol = collect($postOpRows)->contains(fn ($r) => !empty($r['instruction']));
-            @endphp
-            @if(!empty($postOpRows))
+            @if($hasPostOp)
                 <div class="a4-outlined-card" style="padding: 3.5px 6px;">
                     <span class="a4-lbl" style="margin-bottom: 2px;">Immediate Postoperative Orders</span>
                     <table class="a4-table a4-postop-table">

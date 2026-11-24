@@ -154,26 +154,6 @@
             </div>
         @endif
 
-        {{-- Clinical History Grid: DM / HT / ASTHMA / TB | OTHER MEDICAL | PAST SURGICAL HISTORY | ALLERGIES / PRIOR MEDS --}}
-        <div class="a4-history-grid">
-            <div class="a4-grid-cell" style="border: none; padding: 2px 4px;">
-                <span class="a4-lbl">DM / HT / ASTHMA / TB</span>
-                <span class="a4-val">DM: {{ $pastHist['dm'] }} | HT: {{ $pastHist['ht'] }} | Asthma: {{ $pastHist['asthma'] }} | TB: {{ $pastHist['tb'] }}</span>
-            </div>
-            <div class="a4-grid-cell" style="border: none; padding: 2px 4px;">
-                <span class="a4-lbl">OTHER MEDICAL</span>
-                <span class="a4-val">{{ $pastHist['other'] }}</span>
-            </div>
-            <div class="a4-grid-cell" style="border: none; padding: 2px 4px;">
-                <span class="a4-lbl">PAST SURGICAL HISTORY</span>
-                <span class="a4-val">{{ $pastHist['past_surgical'] }}</span>
-            </div>
-            <div class="a4-grid-cell" style="border: none; padding: 2px 4px;">
-                <span class="a4-lbl">ALLERGIES / PRIOR MEDS</span>
-                <span class="a4-val">{{ $pastHist['allergies'] }} | {{ $pastHist['medications'] }}</span>
-            </div>
-        </div>
-
         @php
             $hasComplaints = !empty(trim((string)($sections['complaints'] ?? ''))) && trim((string)$sections['complaints']) !== '—';
             $hasHpi = !empty(trim((string)($sections['hpi'] ?? ''))) && trim((string)$sections['hpi']) !== '—';
@@ -231,6 +211,83 @@
                         </div>
                     @endforeach
                 </div>
+            </div>
+        @endif
+
+        {{-- 7. Surgery / Procedures (Part 1: Team, Procedure Performed & Findings) --}}
+        @php
+            $findingsText = trim((string) $admission->findings);
+            $fItems = [];
+            if ($findingsText !== '' && $findingsText !== '—' && strcasecmp($findingsText, 'nil') !== 0) {
+                $rawLines = preg_split('/(?:\r\n|\r|\n|;)+/', $findingsText);
+                foreach ($rawLines as $l) {
+                    $l = trim(preg_replace('/^[\s\-\*\•\d+\.\)]+/', '', $l));
+                    if ($l !== '' && $l !== '—' && strcasecmp($l, 'nil') !== 0) {
+                        $fItems[] = $l;
+                    }
+                }
+                if (count($fItems) <= 1 && preg_match('/[.!?]\s+[A-Z0-9]/', $findingsText)) {
+                    $sentences = preg_split('/(?<=[.!?])\s+(?=[A-Z0-9])/', $findingsText);
+                    $fItems = array_values(array_filter(array_map('trim', $sentences)));
+                }
+            }
+
+            $surgeryCells = [];
+            $procPerf = \App\Services\DischargeSummaryFormatter::formatSurgeryPerformed($admission);
+            if ($procPerf && $procPerf !== '—') {
+                $surgeryCells[] = ['lbl' => 'Procedure Performed', 'val' => $procPerf, 'bold' => true];
+            }
+            $surgeonVal = $admission->surgeon ?: $admission->consultant;
+            if ($surgeonVal && $surgeonVal !== '—') {
+                $surgeryCells[] = ['lbl' => 'Surgeon', 'val' => $surgeonVal, 'bold' => true];
+            }
+            $anaesthVal = $admission->anaesthetist ? $admission->anaesthetist . ($admission->anaesthesia_type ? ' (' . $admission->anaesthesia_type . ')' : '') : $admission->anaesthesia_type;
+            if ($anaesthVal && $anaesthVal !== '—') {
+                $surgeryCells[] = ['lbl' => 'Anaesthetist & Type', 'val' => $anaesthVal, 'bold' => false];
+            }
+            $assistedVal = $admission->assisted_surgeon ?: ($admission->assisted_by ?: $admission->assistant);
+            if ($assistedVal && $assistedVal !== '—') {
+                $surgeryCells[] = ['lbl' => 'Assisted Surgeon / Staff', 'val' => $assistedVal, 'bold' => false];
+            }
+            $nurseOtVal = collect([$admission->staff_nurse, $admission->ot_technician])->filter()->implode(' / ');
+            if ($nurseOtVal && $nurseOtVal !== '—') {
+                $surgeryCells[] = ['lbl' => 'Scrub Nurse / OT Tech', 'val' => $nurseOtVal, 'bold' => false];
+            }
+            if (!empty($admission->pediatrician_name) && $admission->pediatrician_name !== '—') {
+                $surgeryCells[] = ['lbl' => 'Pediatrician', 'val' => $admission->pediatrician_name, 'bold' => false];
+            }
+            $incisionSpecimen = collect([$admission->incision, $admission->specimen ? 'Specimen: ' . $admission->specimen : null])->filter()->implode(' | ');
+            if ($incisionSpecimen && $incisionSpecimen !== '—') {
+                $surgeryCells[] = ['lbl' => 'Incision / Specimen', 'val' => $incisionSpecimen, 'bold' => false];
+            }
+            $drainBloodComp = collect([$admission->drain, $admission->blood_loss_ml ? 'EBL: ' . $admission->blood_loss_ml . ' ml' : null, $admission->complications])->filter()->implode(' | ');
+            if ($drainBloodComp && $drainBloodComp !== '—') {
+                $surgeryCells[] = ['lbl' => 'Drain / Blood Loss / Complications', 'val' => $drainBloodComp, 'bold' => false];
+            }
+            $hasSurgeryDetails = !empty($surgeryCells) || !empty($fItems);
+        @endphp
+
+        @if($hasSurgeryDetails)
+            <div class="a4-section-hdr">Surgery / Procedures</div>
+            <div class="a4-grid-3">
+                @foreach($surgeryCells as $cell)
+                    <div class="a4-grid-cell">
+                        <span class="a4-lbl">{{ $cell['lbl'] }}</span>
+                        <span class="a4-val {{ $cell['bold'] ? 'a4-val-bold' : '' }}">{{ $cell['val'] }}</span>
+                    </div>
+                @endforeach
+                @if(!empty($fItems))
+                    <div class="a4-grid-cell" style="grid-column: span {{ (count($surgeryCells) % 3 === 2) ? 1 : ((count($surgeryCells) % 3 === 1) ? 2 : 3) }};">
+                        <span class="a4-lbl">Intra-operative Findings</span>
+                        <div class="a4-val">
+                            <ul class="a4-findings-list">
+                                @foreach($fItems as $item)
+                                    <li>{{ $item }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                @endif
             </div>
         @endif
 

@@ -225,7 +225,7 @@ class Admission extends Model
 
     public function getFormattedInvestigationsAttribute(): array
     {
-        return \App\Services\DischargeSummaryFormatter::formatInvestigations($this->investigations);
+        return \App\Services\DischargeSummaryFormatter::formatInvestigations($this->investigations, $this);
     }
 
     public function getFormattedConditionAttribute(): array

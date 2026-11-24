@@ -1,5 +1,23 @@
 <style>
     @font-face {
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: normal;
+        src: url('{{ str_replace('\\', '/', public_path('fonts/OpenSans-Regular.ttf')) }}') format('truetype');
+    }
+    @font-face {
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: 600;
+        src: url('{{ str_replace('\\', '/', public_path('fonts/OpenSans-Bold.ttf')) }}') format('truetype');
+    }
+    @font-face {
+        font-family: 'Open Sans';
+        font-style: normal;
+        font-weight: bold;
+        src: url('{{ str_replace('\\', '/', public_path('fonts/OpenSans-Bold.ttf')) }}') format('truetype');
+    }
+    @font-face {
         font-family: 'Nirmala';
         font-style: normal;
         font-weight: normal;
@@ -28,7 +46,7 @@
         padding: 0;
         width: 223mm;
         background: #ffffff;
-        font-family: 'Helvetica', 'Helvetica Neue', Arial, 'Nirmala UI', 'Nirmala', sans-serif;
+        font-family: 'Open Sans', 'Helvetica Neue', Arial, 'Nirmala UI', 'Nirmala', sans-serif;
         font-size: 10.3pt;
         font-weight: 400;
         line-height: 1.25;
@@ -564,7 +582,7 @@
         vertical-align: bottom;
     }
     .a4-sig-space {
-        height: 3mm;
+        height: 16mm;
     }
     .a4-sig-line {
         display: inline-block;
@@ -710,13 +728,13 @@
     .a4-compact-1 .a4-doc-title { font-size: 14pt; }
     .a4-compact-1 .a4-section-hdr { margin-top: 2.5px; margin-bottom: 1.5px; font-size: 8.8pt; }
     .a4-compact-1 .a4-val, .a4-compact-1 .a4-table td { font-size: 8.2pt; line-height: 1.2; }
-    .a4-compact-1 .a4-sig-space { height: 8mm; }
+    .a4-compact-1 .a4-sig-space { height: 13mm; }
 
     .a4-compact-2 .a4-header-band { padding-bottom: 1.5px; margin-bottom: 2px; }
     .a4-compact-2 .a4-doc-title { font-size: 13pt; }
     .a4-compact-2 .a4-patient-name { font-size: 10pt; }
     .a4-compact-2 .a4-diagnosis-val { font-size: 9.8pt; }
     .a4-compact-2 .a4-val, .a4-compact-2 .a4-table td, .a4-compact-2 .a4-warning-text { font-size: 7.8pt; line-height: 1.16; }
-    .a4-compact-2 .a4-sig-space { height: 6mm; }
+    .a4-compact-2 .a4-sig-space { height: 10mm; }
 </style>
 
