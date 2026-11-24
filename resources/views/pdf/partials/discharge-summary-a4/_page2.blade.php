@@ -102,7 +102,7 @@
         {{-- 9. Newborns --}}
         @if(!empty($newbornCards))
             <div class="a4-section-hdr">Newborn Details</div>
-            <div class="a4-newborn-grid">
+            <div class="a4-newborn-grid" style="grid-template-columns: {{ count($newbornCards) === 1 ? 'minmax(0, 1fr)' : 'repeat(2, minmax(0, 1fr))' }};">
                 @foreach($newbornCards as $card)
                     <div class="a4-newborn-card">
                         <div class="a4-newborn-title">{{ $card['title'] }}</div>
@@ -156,9 +156,9 @@
 
         @if(!empty($condItems))
             <div class="a4-section-hdr">Condition at Discharge</div>
-            <div class="a4-grid-{{ min(max($condCols, 1), 5) }}" style="display: grid; grid-template-columns: repeat({{ $condCols }}, 1fr); border: 0.75pt solid #D5E0E2; margin-bottom: 4px;">
+            <div class="a4-grid-{{ min(max($condCols, 1), 5) }}" style="display: grid; grid-template-columns: repeat({{ $condCols }}, minmax(0, 1fr)); border: 0.75pt solid #D5E0E2; margin-bottom: 4px;">
                 @foreach($condItems as $lbl => $val)
-                    <div class="a4-grid-cell" style="padding: 3px 6px; border-right: 0.75pt solid #D5E0E2; border-bottom: none;">
+                    <div class="a4-grid-cell" style="padding: 3px 6px; border-right: {{ $loop->last ? 'none' : '0.75pt solid #D5E0E2' }}; border-bottom: none;">
                         <span class="a4-lbl">{{ $lbl }}</span>
                         <span class="a4-val a4-val-bold">{{ $val }}</span>
                     </div>

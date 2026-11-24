@@ -471,10 +471,90 @@ class DigitalDischargeSummaryRefinementsTest extends TestCase
 
         // Also verify pack.blade.php renders investigations before procedure note
         $htmlPack = view('pdf.pack', ['admission' => $admission])->render();
-        $invPackPos = strpos($htmlPack, 'INVESTIGATIONS');
-        $procPackPos = strpos($htmlPack, 'PROCEDURE NOTE');
-        if ($invPackPos !== false && $procPackPos !== false) {
-            $this->assertLessThan($procPackPos, $invPackPos, 'In document pack, INVESTIGATIONS must strictly appear before PROCEDURE NOTE');
+        $invPackPos = strpos($htmlPack, 'Investigations');
+        $procPackPos = strpos($htmlPack, 'Surgery / Procedures');
+        $otPackPos = strpos($htmlPack, 'PROCEDURE NOTE');
+        $this->assertNotFalse($invPackPos);
+        $this->assertNotFalse($procPackPos);
+        $this->assertLessThan($procPackPos, $invPackPos, 'In document pack Digital Discharge Summary, Investigations must appear before Surgery / Procedures');
+        if ($otPackPos !== false) {
+            $this->assertLessThan($otPackPos, $invPackPos, 'In document pack, Investigations must strictly appear before PROCEDURE NOTE');
         }
+    }
+
+    public function test_digital_discharge_summary_groups_investigations_into_three_fixed_rows_with_rbs_first_and_equal_cards(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'RBS FIRST PATIENT',
+            'uhid' => 'UHID-INV-3ROW',
+            'ip_no' => 'IP-INV-3ROW',
+            'format' => 'general',
+            'surgery_type' => 'other',
+            'diagnosis' => 'Ureteric Calculus',
+            'vital_bp' => '120/80 mmHg',
+            'vital_pulse' => '76 /min',
+            'vital_spo2' => '99 %',
+            'investigations' => implode("\n", [
+                'UREA : 21.6',
+                'CREATININE : 0.84',
+                'URIC ACID : 5.97',
+                'RBS : 112.6',
+                'HB : 13.4',
+                'BG : O POSITIVE',
+                'ECG : Normal Sinus Rhythm',
+                'HCV : Negative',
+                'HIV : Negative',
+                'VDRL : Negative',
+                'HBsAG : Negative',
+                'TSH : 2.1',
+            ]),
+            'admission_at' => now(),
+            'created_by' => $this->doctor->id,
+            'approved_by' => $this->doctor->id,
+            'status' => 'approved',
+        ]);
+
+        $rows = \App\Services\DischargeSummaryFormatter::groupInvestigationsForGrid($admission->formatted_investigations);
+
+        $this->assertGreaterThanOrEqual(4, count($rows));
+        $this->assertSame(['BP', 'PULSE', 'SPO2', 'BLOOD GROUP', 'HB'], array_column($rows[0], 'label'));
+        $this->assertSame(['RBS', 'UREA', 'CREATININE', 'URIC ACID', 'ECG'], array_column($rows[1], 'label'));
+        $this->assertSame(['HCV', 'HIV', 'VDRL', 'HBSAG'], array_column($rows[2], 'label'));
+        $this->assertSame(['TSH'], array_column($rows[3], 'label'));
+
+        $stylesHtml = view('pdf.partials.discharge-summary-a4._styles')->render();
+        $this->assertStringContainsString('repeat(5, minmax(0, 1fr))', $stylesHtml);
+        $this->assertStringContainsString('grid-auto-rows: 1fr;', $stylesHtml);
+
+        $page1Html = view('pdf.partials.discharge-summary-a4._page1', ['admission' => $admission])->render();
+        $this->assertLessThan(strpos($page1Html, 'UREA'), strpos($page1Html, 'RBS'));
+
+        $packHtml = view('pdf.pack', ['admission' => $admission])->render();
+        $this->assertStringContainsString('a4-page', $packHtml);
+        $this->assertStringNotContainsString('DM / HT / ASTHMA / TB', $packHtml);
+    }
+
+    public function test_digital_discharge_summary_auto_aligns_single_column_clinical_row(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'SINGLE COL CLINICAL',
+            'uhid' => 'UHID-ALIGN-01',
+            'ip_no' => 'IP-ALIGN-01',
+            'format' => 'general',
+            'surgery_type' => 'other',
+            'diagnosis' => 'Hernia',
+            'clinical_history' => 'Swelling in right groin for 6 months',
+            'examination' => '',
+            'admission_at' => now(),
+            'created_by' => $this->doctor->id,
+            'approved_by' => $this->doctor->id,
+            'status' => 'approved',
+        ]);
+
+        $page1Html = view('pdf.partials.discharge-summary-a4._page1', ['admission' => $admission])->render();
+        $this->assertStringContainsString('<div class="a4-clinical-row" style="grid-template-columns: minmax(0, 1fr);">', $page1Html);
+        $this->assertStringNotContainsString('repeat(2, minmax(0, 1fr))', $page1Html);
+        $this->assertStringContainsString('<span class="a4-lbl">&nbsp;</span>', $page1Html);
+        $this->assertStringContainsString('Swelling in right groin for 6 months', $page1Html);
     }
 }

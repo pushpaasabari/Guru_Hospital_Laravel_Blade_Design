@@ -1741,3 +1741,395 @@ input[style*="text-transform: uppercase"]::placeholder {
   }
 }
 
+/* ─── Digital Discharge Summary Fonts & Sheet Preview Styles ──────────────── */
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/OpenSans-Regular.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 600;
+  src: url('/fonts/OpenSans-Bold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/fonts/OpenSans-Bold.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Nirmala';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/fonts/Nirmala.ttf') format('truetype');
+}
+@font-face {
+  font-family: 'Nirmala';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/fonts/NirmalaB.ttf') format('truetype');
+}
+
+.a4-preview-sheet {
+  background: #ffffff;
+  padding: 14mm 13mm;
+  margin: 0 auto 24px;
+  max-width: 223mm;
+  border: 1px solid var(--fg-border, #e2e8f0);
+  box-shadow: var(--fg-shadow-card, 0 8px 28px rgba(20, 30, 50, 0.05));
+  border-radius: 12px;
+  font-family: 'Open Sans', 'Helvetica Neue', Arial, 'Nirmala UI', 'Nirmala', sans-serif;
+  font-size: 10.3pt;
+  line-height: 1.25;
+  color: #1B2A2F;
+}
+
+.a4-preview-sheet * {
+  box-sizing: border-box;
+}
+
+.a4-preview-sheet .a4-header-band {
+  width: 100%;
+  color: #1B2A2F;
+  padding: 0 0 6px 0;
+  border-bottom: 1.5pt solid #0F5C63;
+  margin-bottom: 8px;
+}
+.a4-preview-sheet .a4-header-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.a4-preview-sheet .a4-header-left { width: 25%; vertical-align: middle; text-align: left; }
+.a4-preview-sheet .a4-header-center { width: 50%; vertical-align: middle; text-align: center; }
+.a4-preview-sheet .a4-header-right { width: 25%; vertical-align: middle; text-align: right; }
+.a4-preview-sheet .a4-doc-title {
+  font-size: 16pt;
+  font-weight: 700;
+  color: #0F5C63;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin: 0 0 2px 0;
+  line-height: 1.1;
+}
+.a4-preview-sheet .a4-doc-subtitle {
+  font-size: 9.5pt;
+  font-weight: 500;
+  color: #556970;
+  line-height: 1.2;
+}
+.a4-preview-sheet .a4-meta-lbl {
+  display: block;
+  font-size: 8.2pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #6B7B80;
+  line-height: 1.1;
+}
+.a4-preview-sheet .a4-meta-val {
+  display: block;
+  font-size: 10.3pt;
+  font-weight: 700;
+  color: #1B2A2F;
+  line-height: 1.2;
+}
+.a4-preview-sheet .a4-section-hdr {
+  font-size: 11pt;
+  font-weight: 700;
+  color: #0F5C63;
+  text-transform: uppercase;
+  letter-spacing: 0.35px;
+  border-bottom: 1.1pt solid #0F5C63;
+  padding-bottom: 2px;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+.a4-preview-sheet .a4-lbl {
+  display: block;
+  font-size: 8pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  color: #6B7B80;
+  line-height: 1.12;
+  margin-bottom: 2px;
+}
+.a4-preview-sheet .a4-val {
+  display: block;
+  font-size: 10.3pt;
+  font-weight: 400;
+  color: #1B2A2F;
+  line-height: 1.26;
+  word-wrap: break-word;
+}
+.a4-preview-sheet .a4-val-bold { font-weight: 700; }
+.a4-preview-sheet .a4-patient-card {
+  border: 0.75pt solid #D5E0E2;
+  margin-bottom: 7px;
+  background: #ffffff;
+}
+.a4-preview-sheet .a4-patient-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  border-bottom: 0.75pt solid #D5E0E2;
+}
+.a4-preview-sheet .a4-patient-cell {
+  padding: 5px 8px;
+  border-right: 0.75pt solid #D5E0E2;
+  min-width: 0;
+}
+.a4-preview-sheet .a4-patient-cell:last-child { border-right: none; }
+.a4-preview-sheet .a4-patient-name {
+  font-size: 12pt;
+  font-weight: 700;
+  color: #1B2A2F;
+  line-height: 1.15;
+}
+.a4-preview-sheet .a4-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 0.75pt solid #D5E0E2;
+  margin-bottom: 7px;
+}
+.a4-preview-sheet .a4-grid-cell {
+  padding: 5px 8px;
+  border-right: 0.75pt solid #D5E0E2;
+  border-bottom: 0.75pt solid #D5E0E2;
+  min-width: 0;
+}
+.a4-preview-sheet .a4-grid-3 > .a4-grid-cell:nth-child(3n) { border-right: none; }
+.a4-preview-sheet .a4-grid-3 > .a4-grid-cell:nth-last-child(-n+3) { border-bottom: none; }
+.a4-preview-sheet .a4-status-approved { color: #15803D; font-weight: 700; }
+.a4-preview-sheet .a4-diagnosis-card {
+  border: 0.75pt solid #D5E0E2;
+  border-left: 3pt solid #0F5C63;
+  padding: 5px 10px;
+  margin-bottom: 6px;
+}
+.a4-preview-sheet .a4-diagnosis-val {
+  font-size: 12.5pt;
+  font-weight: 700;
+  color: #0F5C63;
+  line-height: 1.24;
+}
+.a4-preview-sheet .a4-clinical-row {
+  display: grid;
+  border: 0.75pt solid #D5E0E2;
+  margin-bottom: 6px;
+}
+.a4-preview-sheet .a4-clinical-col {
+  padding: 5px 8px;
+  min-width: 0;
+}
+.a4-preview-sheet .a4-clinical-col + .a4-clinical-col {
+  border-left: 0.75pt solid #D5E0E2;
+}
+.a4-preview-sheet .a4-clinical-block {
+  border: 0.75pt solid #D5E0E2;
+  padding: 5px 8px;
+  margin-bottom: 6px;
+}
+.a4-preview-sheet .a4-inv-grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 5px;
+  margin-bottom: 7px;
+  align-items: stretch;
+}
+.a4-preview-sheet .a4-inv-card {
+  border: 0.75pt solid #D5E0E2;
+  border-radius: 5px;
+  padding: 5px 6px;
+  text-align: center;
+  background: #ffffff;
+  min-height: 54px;
+  height: 100%;
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+.a4-preview-sheet .a4-inv-card-hdr {
+  width: 100%;
+  font-size: 7.4pt;
+  font-weight: 700;
+  color: #1B2A2F;
+  text-transform: uppercase;
+  line-height: 1.15;
+  overflow-wrap: break-word;
+}
+.a4-preview-sheet .a4-inv-card-unit {
+  font-size: 6.8pt;
+  font-weight: 500;
+  color: #64748B;
+  text-transform: none;
+  white-space: nowrap;
+}
+.a4-preview-sheet .a4-inv-card-val {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10pt;
+  font-weight: 700;
+  color: #0F5C63;
+  line-height: 1.15;
+  margin: 2px 0;
+  overflow-wrap: anywhere;
+}
+.a4-preview-sheet .a4-inv-card-ref {
+  width: 100%;
+  font-size: 6.6pt;
+  font-weight: 500;
+  color: #64748B;
+  line-height: 1.1;
+  min-height: 7.5pt;
+}
+.a4-preview-sheet .a4-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  margin-bottom: 8px;
+}
+.a4-preview-sheet .a4-table th {
+  color: #0F5C63;
+  font-size: 8.8pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 5px 8px;
+  border: 0.6pt solid #D5E0E2;
+  border-bottom: 1.2pt solid #0F5C63;
+}
+.a4-preview-sheet .a4-table td {
+  padding: 4.5px 8px;
+  font-size: 10pt;
+  color: #1B2A2F;
+  border-bottom: 0.6pt solid #D5E0E2;
+  border-left: 0.6pt solid #D5E0E2;
+  border-right: 0.6pt solid #D5E0E2;
+  vertical-align: top;
+}
+.a4-preview-sheet .a4-outlined-card {
+  border: 0.75pt solid #D5E0E2;
+  padding: 6px 9px;
+  margin-bottom: 7px;
+}
+.a4-preview-sheet .a4-procedure-note {
+  text-align: justify;
+  text-justify: inter-word;
+}
+.a4-preview-sheet .a4-findings-list {
+  margin: 2px 0 0 0;
+  padding-left: 16px;
+  list-style-type: disc;
+}
+.a4-preview-sheet .a4-newborn-grid {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 7px;
+  align-items: stretch;
+}
+.a4-preview-sheet .a4-newborn-card { border: 0.75pt solid #D5E0E2; }
+.a4-preview-sheet .a4-newborn-title {
+  color: #0F5C63;
+  font-size: 10.5pt;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 5px 9px;
+  border-bottom: 0.75pt solid #D5E0E2;
+}
+.a4-preview-sheet .a4-newborn-body { padding: 6px 9px; font-size: 10pt; line-height: 1.35; }
+.a4-preview-sheet .a4-nb-lbl {
+  color: #6B7B80;
+  font-weight: 700;
+  font-size: 8.6pt;
+  text-transform: uppercase;
+  margin-right: 4px;
+}
+.a4-preview-sheet .a4-stent-card {
+  border: 0.75pt solid #D5E0E2;
+  border-left: 3pt solid #0F5C63;
+  padding: 6px 9px;
+  margin-bottom: 7px;
+}
+.a4-preview-sheet .a4-stent-hdr {
+  font-size: 9.5pt;
+  font-weight: 700;
+  color: #0F5C63;
+  text-transform: uppercase;
+  margin-bottom: 3px;
+}
+.a4-preview-sheet .a4-stent-ta,
+.a4-preview-sheet .a4-tamil-card {
+  font-family: 'Nirmala', 'Nirmala UI', 'Helvetica', Arial, sans-serif;
+  line-height: 1.38;
+}
+.a4-preview-sheet .a4-tamil-card {
+  border: 0.75pt solid #D5E0E2;
+  border-left: 2.5pt solid #0F5C63;
+  padding: 6px 9px;
+  margin-bottom: 7px;
+}
+.a4-preview-sheet .a4-warning-box {
+  border: 0.75pt solid #FCA5A5;
+  border-left: 3.5pt solid #B3261E;
+  padding: 6px 9px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+.a4-preview-sheet .a4-warning-title {
+  font-size: 10.3pt;
+  font-weight: 700;
+  color: #B3261E;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+.a4-preview-sheet .a4-signature-row {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 10px;
+  margin-bottom: 6px;
+}
+.a4-preview-sheet .a4-sig-line {
+  display: inline-block;
+  min-width: 65mm;
+  border-top: 0.8pt solid #1B2A2F;
+  padding-top: 4px;
+  margin-top: 14mm;
+  text-align: center;
+}
+.a4-preview-sheet .a4-sig-name { font-size: 10.5pt; font-weight: 700; color: #1B2A2F; }
+.a4-preview-sheet .a4-sig-desig { font-size: 8.6pt; color: #6B7B80; }
+.a4-preview-sheet .a4-stamp-box {
+  margin: 5px auto 0 auto;
+  padding: 4px 8px;
+  border: 1.2pt solid #1e3a8a;
+  border-radius: 2px;
+  text-align: center;
+  color: #1e3a8a;
+  line-height: 1.2;
+}
+.a4-preview-sheet .a4-stamp-name { font-size: 7.6pt; font-weight: 700; text-transform: uppercase; }
+.a4-preview-sheet .a4-stamp-reg,
+.a4-preview-sheet .a4-stamp-desig,
+.a4-preview-sheet .a4-stamp-sub,
+.a4-preview-sheet .a4-stamp-loc { font-size: 7pt; font-weight: 600; }
+.a4-preview-sheet .a4-footer-hairline {
+  border-top: 0.75pt solid #D5E0E2;
+  padding-top: 4px;
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 8.4pt;
+  color: #6B7B80;
+}
+

@@ -119,7 +119,7 @@ class PaymentInsuranceWorkflowTest extends TestCase
         $this->assertEquals('2027-06-30', $admission->policy_validity->format('Y-m-d'));
 
         // Render PDF views and confirm insurance metadata appears cleanly
-        $dsHtml = view('pdf.discharge-summary', compact('admission'))->render();
+        $dsHtml = view('pdf.discharge-summary-a4', compact('admission'))->render();
         $this->assertStringContainsString('Star Health Insurance', $dsHtml);
         $this->assertStringContainsString('SH-88412099', $dsHtml);
         $this->assertStringContainsString('PA-2026-1102', $dsHtml);

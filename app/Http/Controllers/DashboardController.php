@@ -16,6 +16,10 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status');
 
+        $inAdmissionCount = (int) Admission::query()
+            ->whereNull('discharge_at')
+            ->count();
+
         $counts = [
             'total' => (int) $statusCounts->sum(),
             'draft' => (int) ($statusCounts['draft'] ?? 0),
@@ -23,6 +27,7 @@ class DashboardController extends Controller
             'returned_for_correction' => (int) ($statusCounts['returned_for_correction'] ?? 0),
             'approved' => (int) ($statusCounts['approved'] ?? 0),
             'generated' => (int) ($statusCounts['generated'] ?? 0),
+            'in_admission' => $inAdmissionCount,
         ];
 
         $query = Admission::query()
@@ -32,7 +37,11 @@ class DashboardController extends Controller
             ->latest('id');
 
         if ($status = $request->input('status')) {
-            $query->where('status', $status);
+            if ($status === 'in_admission') {
+                $query->whereNull('discharge_at');
+            } else {
+                $query->where('status', $status);
+            }
         }
 
         if ($format = $request->input('format')) {

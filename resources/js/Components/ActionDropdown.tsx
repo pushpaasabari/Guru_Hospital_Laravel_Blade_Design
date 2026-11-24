@@ -306,12 +306,6 @@ export function buildPdfDownloadMenuItems(
     },
     {
       type: 'external',
-      label: '1B. Digital Discharge Summary',
-      href: `/admissions/${admissionId}/documents/pdf/discharge-summary-a4`,
-      iconClass: 'bi bi-file-earmark-richtext text-info',
-    },
-    {
-      type: 'external',
       label: '2. Operation Theatre Notes',
       href: `/admissions/${admissionId}/documents/pdf/operation-notes`,
       iconClass: 'bi bi-journal-medical text-success',

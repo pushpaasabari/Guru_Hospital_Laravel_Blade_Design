@@ -92,12 +92,9 @@ class AdmissionController extends Controller
             ->with('status', 'Admission details saved successfully. Proceed to Clinical Assessment.');
     }
 
-    public function show(Admission $admission): Response
+    public function show(Request $request, Admission $admission): Response
     {
-        $this->authorize('view', $admission);
-        $admission->loadDocumentRelations(true);
-
-        return Inertia::render('Documents/Pack', compact('admission'));
+        return app(DocumentPackController::class)->preview($request, $admission);
     }
 
     public function edit(Admission $admission): Response

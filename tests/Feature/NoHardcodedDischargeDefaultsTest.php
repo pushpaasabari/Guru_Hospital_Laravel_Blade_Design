@@ -61,7 +61,7 @@ class NoHardcodedDischargeDefaultsTest extends TestCase
         $this->assertSame([], $admission->formatted_medications);
         $this->assertSame([], $admission->formatted_newborns);
 
-        $html = view('pdf.discharge-summary', ['admission' => $admission])->render();
+        $html = view('pdf.discharge-summary-a4', ['admission' => $admission])->render();
         $this->assertStringContainsString('BLANK DELIVERY PATIENT', $html);
 
         foreach ([
@@ -146,7 +146,7 @@ class NoHardcodedDischargeDefaultsTest extends TestCase
         $this->assertSame('', $advice['review']);
         $this->assertSame('', $advice['tamil_note']);
 
-        $html = view('pdf.discharge-summary', ['admission' => $admission])->render();
+        $html = view('pdf.discharge-summary-a4', ['admission' => $admission])->render();
         $this->assertStringContainsString('BLANK SURGICAL PATIENT', $html);
 
         foreach ([

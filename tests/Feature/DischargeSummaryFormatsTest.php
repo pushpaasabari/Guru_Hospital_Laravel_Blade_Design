@@ -254,7 +254,8 @@ class DischargeSummaryFormatsTest extends TestCase
         $this->assertEquals('Inj. Pipzo', $admission->formatted_treatment_course[1]['medicine']);
         $this->assertEquals('4.5 g BD IV', $admission->formatted_treatment_course[1]['dose']);
         $this->assertCount(10, $admission->formatted_investigations);
-        $this->assertEquals('HB', $admission->formatted_investigations[0]['label']);
+        $this->assertEquals('BLOOD GROUP', $admission->formatted_investigations[0]['label']);
+        $this->assertEquals('HB', $admission->formatted_investigations[1]['label']);
         $this->assertEquals('110/70 mmHg', $admission->formatted_condition['bp']);
         $this->assertCount(3, $admission->formatted_medications);
         $this->assertStringContainsString('Cefixime', $admission->formatted_medications[0]['medicine']);

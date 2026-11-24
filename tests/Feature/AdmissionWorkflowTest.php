@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Admission;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
 class AdmissionWorkflowTest extends TestCase
@@ -534,19 +535,20 @@ class AdmissionWorkflowTest extends TestCase
             'medication_orders' => "* Tab. Cefixime + sulbactum (1-0-1) x 7 Days - After food\n* Tab. Acendol-P (1-0-1) x 7 Days - After food\n* Cap. Cyra-D (1-0-1) x 7 Days - Before food",
         ]);
 
-        // Formatted investigations
+        // Formatted investigations (Row 1: Blood Group, HB; Row 2: RBS, Urea, Creatinine, Uric Acid; Row 3: Viral)
         $inv = $admission->formatted_investigations;
         $this->assertCount(10, $inv);
-        $this->assertEquals('HB', $inv[0]['label']);
-        $this->assertEquals('12.9mgs %', $inv[0]['value']);
-        $this->assertEquals('g/dL', $inv[0]['unit']);
-        $this->assertEquals('12.0 - 16.0', $inv[0]['normal_range']);
-        $this->assertEquals('BLOOD GROUP', $inv[1]['label']);
-        $this->assertEquals('O POSITIVE', $inv[1]['value']);
-        $this->assertEquals('CREATININE', $inv[7]['label']);
-        $this->assertEquals('0.86 mg/dl', $inv[7]['value']);
-        $this->assertEquals('mg/dL', $inv[7]['unit']);
-        $this->assertEquals('0.6 - 1.2', $inv[7]['normal_range']);
+        $this->assertEquals('BLOOD GROUP', $inv[0]['label']);
+        $this->assertEquals('O POSITIVE', $inv[0]['value']);
+        $this->assertEquals('HB', $inv[1]['label']);
+        $this->assertEquals('12.9mgs %', $inv[1]['value']);
+        $this->assertEquals('g/dL', $inv[1]['unit']);
+        $this->assertEquals('12.0 - 16.0', $inv[1]['normal_range']);
+        $this->assertEquals('RBS', $inv[2]['label']);
+        $this->assertEquals('CREATININE', $inv[4]['label']);
+        $this->assertEquals('0.86 mg/dl', $inv[4]['value']);
+        $this->assertEquals('mg/dL', $inv[4]['unit']);
+        $this->assertEquals('0.6 - 1.2', $inv[4]['normal_range']);
 
         // Formatted medications 4-column
         $meds = $admission->formatted_medications;
@@ -704,6 +706,64 @@ class AdmissionWorkflowTest extends TestCase
         $this->assertNotNull($chol);
         $this->assertEquals('mg/dL', $chol['unit']);
         $this->assertEquals('< 200', $chol['normal_range']);
+    }
+
+    public function test_dashboard_in_admission_filter_returns_undischarged_patients_and_preview_includes_digital_summary(): void
+    {
+        $inAdmission = Admission::create([
+            'patient_name' => 'In Admission Patient',
+            'uhid' => 'GH-INADM-01',
+            'ip_no' => 'IP-INADM-01',
+            'admission_at' => now()->subDay(),
+            'discharge_at' => null,
+            'diagnosis' => 'Observation',
+            'format' => 'general',
+            'surgery_type' => 'other',
+            'status' => 'draft',
+            'created_by' => $this->nurse->id,
+        ]);
+
+        $discharged = Admission::create([
+            'patient_name' => 'Discharged Patient',
+            'uhid' => 'GH-DISC-01',
+            'ip_no' => 'IP-DISC-01',
+            'admission_at' => now()->subDays(3),
+            'discharge_at' => now()->subDay(),
+            'diagnosis' => 'Post Op Recovery',
+            'format' => 'general',
+            'surgery_type' => 'other',
+            'vital_bp' => '120/80 mmHg',
+            'investigations' => "UREA : 22\nRBS : 110\nHB : 13.0",
+            'status' => 'approved',
+            'created_by' => $this->nurse->id,
+            'approved_by' => $this->doctor->id,
+        ]);
+
+        $this->actingAs($this->nurse)
+            ->get(route('dashboard'))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Dashboard')
+                ->where('counts.in_admission', 1)
+            );
+
+        $this->actingAs($this->nurse)
+            ->get(route('dashboard', ['status' => 'in_admission']))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Dashboard')
+                ->where('filters.status', 'in_admission')
+                ->where('admissions.data', fn ($rows) => collect($rows)->pluck('id')->all() === [$inAdmission->id])
+            );
+
+        $this->actingAs($this->nurse)
+            ->get(route('documents.preview', $discharged))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Documents/Pack')
+                ->where('digitalSummary.investigation_rows.0.0.label', 'BP')
+                ->where('digitalSummary.investigation_rows.1.0.label', 'RBS')
+            );
     }
 }
 

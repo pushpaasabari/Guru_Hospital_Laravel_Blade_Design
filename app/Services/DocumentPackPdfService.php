@@ -40,20 +40,20 @@ class DocumentPackPdfService
             $safeOpType = trim($safeOpType, '_');
         }
 
-        if (in_array($type, ['discharge_summary_a4', 'discharge-summary-a4', 'digital_discharge_summary', 'a4_discharge_summary'], true)) {
+        if (in_array($type, [
+            'discharge_summary_a4',
+            'discharge-summary-a4',
+            'digital_discharge_summary',
+            'a4_discharge_summary',
+            'discharge_summary',
+            'discharge-summary',
+            'discharge',
+            'summary',
+            '1',
+        ], true)) {
             return [
                 'type' => self::TYPE_DISCHARGE_SUMMARY_A4,
                 'view' => 'pdf.discharge-summary-a4',
-                'title' => 'Discharge Summary (A4 Digital)',
-                'fileName' => "{$safeUhid}_{$safeName}_Discharge_Summary_A4.pdf",
-                'headerTitle' => "GURU HOSPITAL — Discharge Summary A4 (IP: {$admission->ip_no})",
-            ];
-        }
-
-        if (in_array($type, ['discharge_summary', 'discharge-summary', 'discharge', 'summary', '1'], true)) {
-            return [
-                'type' => self::TYPE_DISCHARGE_SUMMARY,
-                'view' => 'pdf.discharge-summary',
                 'title' => 'Discharge Summary',
                 'fileName' => "{$safeUhid}_{$safeName}_Discharge_Summary.pdf",
                 'headerTitle' => "GURU HOSPITAL — Discharge Summary (IP: {$admission->ip_no})",

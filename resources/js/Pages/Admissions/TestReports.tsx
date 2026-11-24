@@ -9,7 +9,7 @@ import {
   FREQUENT_LAB_TESTS,
   LabCatalogItem,
 } from '../../constants/labCatalog';
-import { formatInvestigations } from '../../utils/dischargeFormatter';
+import { formatInvestigations, groupInvestigationsForGrid } from '../../utils/dischargeFormatter';
 
 interface AdmissionData {
   id: number;
@@ -113,10 +113,10 @@ const serializeInvestigations = (core: LabValues, extra: ExtraTest[]): string =>
   if (core.hiv.trim()) lines.push(`HIV : ${core.hiv.trim()}`);
   if (core.vdrl.trim()) lines.push(`VDRL : ${core.vdrl.trim()}`);
   if (core.hbsag.trim()) lines.push(`HBsAG : ${core.hbsag.trim()}`);
+  if (core.rbs.trim()) lines.push(`RBS : ${core.rbs.trim()}`);
   if (core.urea.trim()) lines.push(`UREA : ${core.urea.trim()}`);
   if (core.creatinine.trim()) lines.push(`CREATININE : ${core.creatinine.trim()}`);
   if (core.uric_acid.trim()) lines.push(`URIC ACID : ${core.uric_acid.trim()}`);
-  if (core.rbs.trim()) lines.push(`RBS : ${core.rbs.trim()}`);
   if (core.ecg && core.ecg.trim()) lines.push(`ECG : ${core.ecg.trim()}`);
 
   for (const item of extra) {
@@ -245,17 +245,23 @@ export default function AdmissionsTestReports({ admission }: Props) {
     };
   }).filter((cat) => cat.tests.length > 0);
 
-  const previewInvestigations = formatInvestigations(
-    showRawEditor ? data.investigations : serializeInvestigations(coreValues, extraTests)
-  );
-
-  const { data, setData, put, transform, processing, errors } = useForm({
+  const { data, setData, put, transform, processing } = useForm({
     investigations: admission.investigations || serializeInvestigations(initial.core, initial.extra),
     vital_bp: admission.vital_bp || '',
     vital_pulse: admission.vital_pulse || '',
     vital_spo2: admission.vital_spo2 || '',
     next_step: 'surgery',
   });
+
+  const previewInvestigations = formatInvestigations(
+    showRawEditor ? data.investigations : serializeInvestigations(coreValues, extraTests),
+    {
+      vital_bp: data.vital_bp,
+      vital_pulse: data.vital_pulse,
+      vital_spo2: data.vital_spo2,
+    }
+  );
+  const previewRows = groupInvestigationsForGrid(previewInvestigations);
 
   const updateCore = (key: keyof LabValues, val: string) => {
     setCoreValues((prev) => ({ ...prev, [key]: val }));
@@ -613,6 +619,29 @@ export default function AdmissionsTestReports({ admission }: Props) {
                   <div className="col-md-3">
                     <div className="d-flex justify-content-between align-items-center mb-1">
                       <label className="form-label fw-semibold text-secondary small text-uppercase mb-0">
+                        RBS (Random Sugar)
+                      </label>
+                      <span className="badge bg-white text-muted border" style={{ fontSize: '0.68rem' }}>
+                        Ref: 70–140
+                      </span>
+                    </div>
+                    <div className="input-group">
+                      <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '75px' }}>
+                        RBS :
+                      </span>
+                      <input
+                        type="text"
+                        className="form-control"
+                        value={coreValues.rbs}
+                        onChange={(e) => updateCore('rbs', e.target.value)}
+                        placeholder="e.g. 100.8 mg/dL"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="col-md-3">
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <label className="form-label fw-semibold text-secondary small text-uppercase mb-0">
                         Blood Urea
                       </label>
                       <span className="badge bg-white text-muted border" style={{ fontSize: '0.68rem' }}>
@@ -675,29 +704,6 @@ export default function AdmissionsTestReports({ admission }: Props) {
                         value={coreValues.uric_acid}
                         onChange={(e) => updateCore('uric_acid', e.target.value)}
                         placeholder="e.g. 4.3 mg/dL"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="col-md-3">
-                    <div className="d-flex justify-content-between align-items-center mb-1">
-                      <label className="form-label fw-semibold text-secondary small text-uppercase mb-0">
-                        RBS (Random Sugar)
-                      </label>
-                      <span className="badge bg-white text-muted border" style={{ fontSize: '0.68rem' }}>
-                        Ref: 70–140
-                      </span>
-                    </div>
-                    <div className="input-group">
-                      <span className="input-group-text bg-white fw-bold text-dark" style={{ width: '75px' }}>
-                        RBS :
-                      </span>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={coreValues.rbs}
-                        onChange={(e) => updateCore('rbs', e.target.value)}
-                        placeholder="e.g. 100.8 mg/dL"
                       />
                     </div>
                   </div>
@@ -966,49 +972,52 @@ export default function AdmissionsTestReports({ admission }: Props) {
               <i className="bi bi-printer me-1"></i> Discharge Summary Print Preview (INVESTIGATIONS Section)
             </span>
             <span className="badge bg-light text-dark border">
-              Strict 5 or 6 Column Clinical Grid &bull; Units &amp; Normal Reference Ranges
+              Uniform 5-Column Clinical Rows &bull; Equal Size Cards
             </span>
           </div>
           <div className="card-body bg-white p-3">
-            {previewInvestigations.length === 0 ? (
+            {previewRows.length === 0 ? (
               <div className="text-muted text-center py-3">No investigations recorded.</div>
             ) : (
               <div
                 className="d-grid gap-2"
                 style={{
-                  gridTemplateColumns: `repeat(${previewInvestigations.length > 10 ? 6 : 5}, minmax(0, 1fr))`,
+                  gridTemplateColumns: 'repeat(5, minmax(0, 1fr))',
+                  gridAutoRows: '1fr',
                 }}
               >
-                {previewInvestigations.map((inv, idx) => (
-                  <div
-                    key={idx}
-                    className="p-2 border rounded bg-white text-center d-flex flex-column justify-content-between shadow-xs"
-                    style={{ minHeight: '62px' }}
-                  >
+                {previewRows.map((rowCards, rowIdx) =>
+                  rowCards.map((inv, cardIdx) => (
                     <div
-                      className="small fw-bold text-secondary text-uppercase text-truncate"
-                      style={{ fontSize: '0.68rem', letterSpacing: '0.02em' }}
-                      title={inv.label}
+                      key={`${rowIdx}-${cardIdx}`}
+                      className="p-2 border rounded bg-white text-center d-flex flex-column justify-content-between align-items-center shadow-xs"
+                      style={{
+                        minHeight: '66px',
+                        height: '100%',
+                        ...(rowIdx > 0 && cardIdx === 0 ? { gridColumnStart: 1 } : {}),
+                      }}
                     >
-                      {inv.label}
-                      {inv.unit && (
-                        <span className="fw-normal text-muted ms-1" style={{ fontSize: '0.62rem', textTransform: 'none' }}>
-                          ({inv.unit})
-                        </span>
-                      )}
-                    </div>
-                    <div className="fw-bold text-dark my-0.5 text-truncate" style={{ fontSize: '0.85rem' }} title={inv.value}>
-                      {inv.value || '—'}
-                    </div>
-                    {inv.normal_range ? (
-                      <div className="text-muted text-truncate" style={{ fontSize: '0.62rem', fontWeight: 500 }} title={`Ref: ${inv.normal_range}`}>
-                        Ref: {inv.normal_range}
+                      <div
+                        className="small fw-bold text-secondary text-uppercase w-100"
+                        style={{ fontSize: '0.68rem', letterSpacing: '0.02em', lineHeight: 1.15 }}
+                        title={inv.label}
+                      >
+                        {inv.label}
+                        {inv.unit && (
+                          <span className="fw-normal text-muted ms-1" style={{ fontSize: '0.62rem', textTransform: 'none' }}>
+                            ({inv.unit})
+                          </span>
+                        )}
                       </div>
-                    ) : (
-                      <div style={{ fontSize: '0.62rem' }}>&nbsp;</div>
-                    )}
-                  </div>
-                ))}
+                      <div className="fw-bold text-dark my-1 w-100" style={{ fontSize: '0.85rem', overflowWrap: 'anywhere' }} title={inv.value}>
+                        {inv.value || '—'}
+                      </div>
+                      <div className="text-muted w-100" style={{ fontSize: '0.62rem', fontWeight: 500, minHeight: '12px' }} title={inv.normal_range ? `Ref: ${inv.normal_range}` : ''}>
+                        {inv.normal_range ? `Ref: ${inv.normal_range}` : '\u00A0'}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             )}
           </div>

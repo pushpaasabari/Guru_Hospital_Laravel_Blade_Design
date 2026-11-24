@@ -205,12 +205,13 @@
     }
     .a4-patient-top {
         display: grid;
-        grid-template-columns: 1.7fr 1fr 1fr 1fr;
+        grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
         border-bottom: 0.75pt solid #D5E0E2;
     }
     .a4-patient-cell {
         padding: 3.5px 7px;
         border-right: 0.75pt solid #D5E0E2;
+        min-width: 0;
     }
     .a4-patient-cell:last-child {
         border-right: none;
@@ -223,7 +224,7 @@
     }
     .a4-patient-bottom {
         display: grid;
-        grid-template-columns: 1fr 2.5fr;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 2.5fr);
         background: transparent;
     }
     .a4-patient-bottom .a4-patient-cell {
@@ -233,7 +234,7 @@
     /* 3 & 4 & 8. 3-Column Label/Value Clean Grid (No Background Fill) */
     .a4-grid-3 {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         border: 0.75pt solid #D5E0E2;
         margin-bottom: 4px;
         background: transparent;
@@ -243,6 +244,7 @@
         padding: 3px 6px;
         border-right: 0.75pt solid #D5E0E2;
         border-bottom: 0.75pt solid #D5E0E2;
+        min-width: 0;
     }
     .a4-grid-3 > .a4-grid-cell:nth-child(3n) {
         border-right: none;
@@ -271,83 +273,109 @@
     }
     .a4-clinical-row {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 8px;
-        border-bottom: 0.6pt solid #D5E0E2;
-        padding: 2.5px 2px;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0;
+        border: 0.75pt solid #D5E0E2;
+        margin-bottom: 3.5px;
+    }
+    .a4-clinical-col {
+        padding: 3px 7px;
+        min-width: 0;
+    }
+    .a4-clinical-col + .a4-clinical-col {
+        border-left: 0.75pt solid #D5E0E2;
     }
     .a4-clinical-block {
-        border-bottom: 0.6pt solid #D5E0E2;
-        padding: 2.5px 2px;
+        border: 0.75pt solid #D5E0E2;
+        padding: 3px 7px;
+        margin-bottom: 3.5px;
     }
     .a4-outlined-card .a4-val,
     .a4-clinical-row .a4-val,
     .a4-clinical-block .a4-val {
-        font-size: 10.5pt;
+        font-size: 10.3pt;
         font-weight: 400;
     }
     .a4-history-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 4px 8px;
         padding: 2.5px 2px;
         border-bottom: 0.6pt solid #D5E0E2;
     }
 
-    /* 6. Investigations Grid (No Background Fill) */
-    /* 6. Investigations 5-Card Grid */
+    /* 6. Investigations 5-Card Uniform Grid */
     .a4-inv-grid-5 {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 3.5px;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        grid-auto-rows: 1fr;
+        gap: 4px;
         margin-bottom: 4px;
         background: transparent;
+        align-items: stretch;
     }
     .a4-inv-card {
         border: 0.75pt solid #D5E0E2;
         border-radius: 5px;
-        padding: 3.5px 4.5px;
+        padding: 4px 5px;
         text-align: center;
         background: #ffffff;
         min-height: 48px;
+        height: 100%;
+        width: 100%;
+        min-width: 0;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
+        align-items: center;
         box-sizing: border-box;
     }
     .a4-inv-card-hdr {
-        font-size: 7.6pt;
+        width: 100%;
+        font-size: 7.4pt;
         font-weight: 700;
         color: #1B2A2F;
         text-transform: uppercase;
         line-height: 1.15;
-        margin-bottom: 1.5px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        text-align: center;
+        overflow-wrap: break-word;
+        word-break: break-word;
     }
     .a4-inv-card-name {
         font-weight: 700;
         color: #1B2A2F;
     }
     .a4-inv-card-unit {
-        font-size: 7pt;
-        font-weight: 500;
-        color: #64748B;
-        text-transform: none;
-    }
-    .a4-inv-card-val {
-        font-size: 11pt;
-        font-weight: 700;
-        color: #0F5C63;
-        line-height: 1.15;
-        margin: 1.5px 0;
-    }
-    .a4-inv-card-ref {
         font-size: 6.8pt;
         font-weight: 500;
         color: #64748B;
+        text-transform: none;
+        white-space: nowrap;
+    }
+    .a4-inv-card-val {
+        width: 100%;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10pt;
+        font-weight: 700;
+        color: #0F5C63;
+        line-height: 1.15;
+        margin: 2px 0;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        text-align: center;
+    }
+    .a4-inv-card-ref {
+        width: 100%;
+        font-size: 6.6pt;
+        font-weight: 500;
+        color: #64748B;
         line-height: 1.1;
+        min-height: 7.5pt;
+        text-align: center;
+        overflow-wrap: break-word;
     }
 
     .a4-inv-grid {
@@ -470,9 +498,10 @@
     /* 9. Newborn Twin Cards Side by Side */
     .a4-newborn-grid {
         display: grid;
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
         margin-bottom: 6px;
+        align-items: stretch;
     }
     .a4-newborn-card {
         border: 0.75pt solid #D5E0E2;
@@ -712,13 +741,18 @@
     .a4-density-spacing .a4-grid-3,
     .a4-density-spacing .a4-diagnosis-card,
     .a4-density-spacing .a4-inv-grid,
+    .a4-density-spacing .a4-inv-grid-5,
     .a4-density-spacing .a4-table,
-    .a4-density-spacing .a4-outlined-card { margin-bottom: 2.5px; }
+    .a4-density-spacing .a4-outlined-card,
+    .a4-density-spacing .a4-clinical-row,
+    .a4-density-spacing .a4-clinical-block { margin-bottom: 2.5px; }
+    .a4-density-spacing .a4-inv-grid-5 { gap: 3px; }
+    .a4-density-spacing .a4-inv-card { padding: 3px 4px; min-height: 42px; }
     .a4-density-spacing .a4-patient-cell,
     .a4-density-spacing .a4-grid-cell,
-    .a4-density-spacing .a4-inv-box { padding: 2px 5px; }
-    .a4-density-spacing .a4-clinical-row,
+    .a4-density-spacing .a4-clinical-col,
     .a4-density-spacing .a4-clinical-block,
+    .a4-density-spacing .a4-inv-box { padding: 2px 5px; }
     .a4-density-spacing .a4-history-grid { padding: 1.5px 2px; }
     .a4-density-spacing .a4-table td,
     .a4-density-spacing .a4-table th { padding: 2px 5px; }
@@ -728,6 +762,9 @@
     .a4-compact-1 .a4-doc-title { font-size: 14pt; }
     .a4-compact-1 .a4-section-hdr { margin-top: 2.5px; margin-bottom: 1.5px; font-size: 8.8pt; }
     .a4-compact-1 .a4-val, .a4-compact-1 .a4-table td { font-size: 8.2pt; line-height: 1.2; }
+    .a4-compact-1 .a4-inv-card { min-height: 38px; padding: 2.5px 3.5px; }
+    .a4-compact-1 .a4-inv-card-hdr { font-size: 6.8pt; }
+    .a4-compact-1 .a4-inv-card-val { font-size: 9pt; }
     .a4-compact-1 .a4-sig-space { height: 13mm; }
 
     .a4-compact-2 .a4-header-band { padding-bottom: 1.5px; margin-bottom: 2px; }
@@ -735,6 +772,9 @@
     .a4-compact-2 .a4-patient-name { font-size: 10pt; }
     .a4-compact-2 .a4-diagnosis-val { font-size: 9.8pt; }
     .a4-compact-2 .a4-val, .a4-compact-2 .a4-table td, .a4-compact-2 .a4-warning-text { font-size: 7.8pt; line-height: 1.16; }
+    .a4-compact-2 .a4-inv-card { min-height: 34px; padding: 2px 3px; }
+    .a4-compact-2 .a4-inv-card-hdr { font-size: 6.4pt; }
+    .a4-compact-2 .a4-inv-card-val { font-size: 8.4pt; }
     .a4-compact-2 .a4-sig-space { height: 10mm; }
 </style>
 

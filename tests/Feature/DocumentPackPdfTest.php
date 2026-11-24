@@ -143,16 +143,12 @@ class DocumentPackPdfTest extends TestCase
         $pdfService = app(\App\Services\DocumentPackPdfService::class);
         $meta = $pdfService->resolveDocumentMetadata('discharge-summary', $deliveryAdmission);
 
-        $this->assertEquals('discharge_summary', $meta['type']);
+        $this->assertEquals('discharge_summary_a4', $meta['type']);
         $this->assertStringStartsWith('GURU HOSPITAL', $meta['headerTitle']);
 
-        $html = view('pdf.discharge-summary', ['admission' => $deliveryAdmission])->render();
-        $this->assertStringContainsString('size: 223mm 304mm;', $html);
-        $this->assertStringContainsString('padding: 70mm 13mm 30mm 13mm;', $html);
-        $this->assertStringNotContainsStringIgnoringCase('GURU HOSPITAL', $html);
-        $this->assertStringNotContainsString('Page 2 of 2', $html);
-        $this->assertStringNotContainsString('Prepared by', $html);
-        $this->assertStringNotContainsString('Dr. Karthik Rajan MS, MCh', $html);
+        $html = view('pdf.discharge-summary-a4', ['admission' => $deliveryAdmission])->render();
+        $this->assertStringContainsString('a4-page', $html);
+        $this->assertStringContainsString('DISCHARGE SUMMARY', $html);
         $this->assertStringContainsString('DR. AMBIKA M.S (O&amp;G)', $html);
 
         $pdfBytes = $pdfService->generateWithPlaywright($deliveryAdmission, 'discharge_summary');
@@ -201,8 +197,8 @@ class DocumentPackPdfTest extends TestCase
                     ->where('admission.investigations', fn ($inv) => str_contains($inv, 'Hb'))
                 );
 
-                $html = view('pdf.discharge-summary', ['admission' => $admission])->render();
-                $this->assertStringContainsString('INVESTIGATIONS', $html);
+                $html = view('pdf.discharge-summary-a4', ['admission' => $admission])->render();
+                $this->assertStringContainsString('Investigations', $html);
                 $this->assertStringNotContainsString('rounded font-monospace', $html);
             }
         }
@@ -259,7 +255,7 @@ class DocumentPackPdfTest extends TestCase
         $response->assertStatus(200);
         $response->assertHeader('Content-Type', 'application/pdf');
         $this->assertStringContainsString(
-            'Discharge_Summary_A4.pdf',
+            'Discharge_Summary.pdf',
             (string) $response->headers->get('Content-Disposition')
         );
 

@@ -65,7 +65,7 @@
                     <span class="a4-val a4-val-bold">{{ $admission->ip_no ?: '—' }}</span>
                 </div>
             </div>
-            <div class="a4-patient-bottom" style="display: grid; grid-template-columns: {{ $admission->attender_name ? '1fr 1.2fr 1.8fr' : '1fr 2.5fr' }};">
+            <div class="a4-patient-bottom" style="display: grid; grid-template-columns: {{ $admission->attender_name ? 'minmax(0, 1fr) minmax(0, 1.2fr) minmax(0, 1.8fr)' : 'minmax(0, 1fr) minmax(0, 2.5fr)' }};">
                 <div class="a4-patient-cell">
                     <span class="a4-lbl">Phone / Contact</span>
                     <span class="a4-val">{{ $admission->contact ?: '—' }}</span>
@@ -120,6 +120,8 @@
                     <span class="a4-lbl">Payment Mode</span>
                     <span class="a4-val">{{ $admission->payment_mode }}</span>
                 </div>
+            @else
+                <div class="a4-grid-cell"><span class="a4-lbl">&nbsp;</span><span class="a4-val">&nbsp;</span></div>
             @endif
         </div>
 
@@ -161,15 +163,15 @@
         @endphp
 
         @if($hasComplaints || $hasHpi)
-            <div class="a4-clinical-row">
+            <div class="a4-clinical-row" style="grid-template-columns: {{ ($hasComplaints && $hasHpi) ? 'repeat(2, minmax(0, 1fr))' : 'minmax(0, 1fr)' }};">
                 @if($hasComplaints)
-                    <div>
+                    <div class="a4-clinical-col">
                         <span class="a4-lbl">Presenting Complaints</span>
                         <span class="a4-val">{!! nl2br(e($sections['complaints'])) !!}</span>
                     </div>
                 @endif
                 @if($hasHpi)
-                    <div>
+                    <div class="a4-clinical-col">
                         <span class="a4-lbl">History of Present Illness</span>
                         <span class="a4-val">{!! nl2br(e($sections['hpi'])) !!}</span>
                     </div>
@@ -184,31 +186,32 @@
             </div>
         @endif
 
-        {{-- 6. Investigations (Card View: 5 cards per row) --}}
+        {{-- 6. Investigations (Row 1: Vitals BP/Pulse/SpO2, BG, HB | Row 2: Biochem/Renal/RBS + ECG | Row 3: Viral Screening) --}}
         @php
-            $validInvs = collect($investigations)->reject(function ($inv) {
-                $val = trim((string)($inv['value'] ?? ''));
-                return $val === '' || $val === '—' || $val === '-' || strcasecmp($val, 'nil') === 0 || strcasecmp($val, 'none') === 0;
-            })->values()->all();
+            $invRows = \App\Services\DischargeSummaryFormatter::groupInvestigationsForGrid($investigations);
         @endphp
-        @if(!empty($validInvs))
+        @if(!empty($invRows))
             <div class="a4-block" data-overflow-movable="page1">
                 <div class="a4-section-hdr">Investigations</div>
                 <div class="a4-inv-grid-5">
-                    @foreach($validInvs as $inv)
-                        <div class="a4-inv-card">
-                            <div class="a4-inv-card-hdr">
-                                <span class="a4-inv-card-name">{{ $inv['label'] }}</span>@if(!empty($inv['unit']) && !str_contains((string)$inv['value'], $inv['unit'])) <span class="a4-inv-card-unit">({{ $inv['unit'] }})</span>@endif
-                            </div>
-                            <div class="a4-inv-card-val">
-                                {{ $inv['value'] }}
-                            </div>
-                            @if(!empty($inv['normal_range']))
-                                <div class="a4-inv-card-ref">
-                                    Ref: {{ $inv['normal_range'] }}
+                    @foreach($invRows as $rowIdx => $rowCards)
+                        @foreach($rowCards as $cardIdx => $inv)
+                            <div class="a4-inv-card" @if($rowIdx > 0 && $cardIdx === 0) style="grid-column-start: 1;" @endif>
+                                <div class="a4-inv-card-hdr">
+                                    <span class="a4-inv-card-name">{{ $inv['label'] }}</span>@if(!empty($inv['unit']) && !str_contains((string)$inv['value'], $inv['unit'])) <span class="a4-inv-card-unit">({{ $inv['unit'] }})</span>@endif
                                 </div>
-                            @endif
-                        </div>
+                                <div class="a4-inv-card-val">
+                                    {{ $inv['value'] }}
+                                </div>
+                                <div class="a4-inv-card-ref">
+                                    @if(!empty($inv['normal_range']))
+                                        Ref: {{ $inv['normal_range'] }}
+                                    @else
+                                        &nbsp;
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
                     @endforeach
                 </div>
             </div>
@@ -288,6 +291,10 @@
                                 </ul>
                             </div>
                         </div>
+                    @else
+                        @for($emptyCell = count($surgeryCells) % 3; $emptyCell > 0 && $emptyCell < 3; $emptyCell++)
+                            <div class="a4-grid-cell"><span class="a4-lbl">&nbsp;</span><span class="a4-val">&nbsp;</span></div>
+                        @endfor
                     @endif
                 </div>
             </div>

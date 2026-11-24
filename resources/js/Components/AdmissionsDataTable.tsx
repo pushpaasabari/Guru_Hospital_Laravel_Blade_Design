@@ -41,6 +41,7 @@ export interface AdmissionsDataTableProps {
     returned_for_correction: number;
     approved: number;
     generated: number;
+    in_admission?: number;
   };
   filters?: {
     search?: string;
@@ -77,6 +78,9 @@ export default function AdmissionsDataTable({
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [intimationAdmission, setIntimationAdmission] = useState<any>(null);
 
+  const inAdmissionCount =
+    counts.in_admission ?? admissions.data.filter((item) => !item.discharge_at || String(item.discharge_at).trim() === '').length;
+
   // Status configuration
   const statusTabs = [
     { key: 'all', label: 'All Records', count: counts.total, icon: 'bi-grid' },
@@ -85,6 +89,7 @@ export default function AdmissionsDataTable({
     { key: 'generated', label: 'Generated', count: counts.generated, icon: 'bi-file-earmark-check', badgeBg: '#eff6ff', badgeColor: '#2563eb' },
     { key: 'draft', label: 'Drafts', count: counts.draft, icon: 'bi-pencil-square', badgeBg: '#f8fafc', badgeColor: '#64748b' },
     { key: 'returned_for_correction', label: 'Returned', count: counts.returned_for_correction, icon: 'bi-arrow-return-left', badgeBg: '#fef2f2', badgeColor: '#dc2626' },
+    { key: 'in_admission', label: 'In Admission', count: inAdmissionCount, icon: 'bi-person-check', badgeBg: '#ecfdf5', badgeColor: '#059669' },
   ];
 
   const getStatusBadge = (st: string) => {
@@ -132,8 +137,10 @@ export default function AdmissionsDataTable({
   const filteredItems = useMemo(() => {
     let items = admissions.data;
 
-    // Status filter
-    if (statusFilter !== 'all') {
+    // Status / admission state filter
+    if (statusFilter === 'in_admission') {
+      items = items.filter((item) => !item.discharge_at || String(item.discharge_at).trim() === '');
+    } else if (statusFilter !== 'all') {
       items = items.filter((item) => item.status === statusFilter);
     }
 
@@ -700,7 +707,7 @@ export default function AdmissionsDataTable({
                             items={buildPdfDownloadMenuItems(item.id, undefined, () => setIntimationAdmission(item))}
                             primaryAction={
                               <a
-                                href={`/admissions/${item.id}/documents/pdf/discharge-summary-a4`}
+                                href={`/admissions/${item.id}/documents/pdf/discharge-summary`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="btn btn-outline-primary"

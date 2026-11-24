@@ -8,88 +8,92 @@ use Carbon\Carbon;
 class DischargeSummaryFormatter
 {
     /**
-     * Standard order for core lab investigations and full hospital catalog.
+     * Standard order for core lab investigations and full hospital catalog:
+     * Row 1: Vital Signs (BP, Pulse, SpO2), Blood Group, HB
+     * Row 2: Biochemistry, Renal Function & Blood Sugar (RBS first), ECG
+     * Row 3: Viral & Infectious Disease Screening (HCV, HIV, VDRL, HBsAg)
+     * Row 4+: Additional Hospital Catalog Tests
      */
     public const INVESTIGATION_ORDER = [
-        'HB' => 1,
-        'BLOOD GROUP' => 2,
-        'BP' => 3,
-        'PULSE' => 4,
-        'SPO2' => 5,
-        'HIV' => 6,
-        'HCV' => 7,
-        'VDRL' => 8,
-        'HBSAG' => 9,
-        'UREA' => 10,
-        'CREATININE' => 11,
-        'URIC ACID' => 12,
-        'RBS' => 13,
-        'ECG' => 14,
-        'CBC' => 12,
-        'ESR' => 13,
-        'BT, CT' => 14,
-        'PT - INR' => 15,
-        'APTT' => 16,
-        'PERIPHERAL SMEAR' => 17,
-        'URINE ROUTINE' => 18,
-        'RFT' => 19,
-        'LFT' => 20,
-        'SR. BILIRUBIN' => 21,
-        'SERUM ELECTROLYTES' => 22,
-        'FASTING (FBS)' => 23,
-        'PPBS' => 24,
-        'HBA1C' => 25,
-        'OGCT' => 26,
-        'SERUM CALCIUM' => 27,
-        'SERUM AMYLASE' => 28,
-        'SERUM LIPASE' => 29,
-        'TOTAL IRON' => 30,
-        'TIBC' => 31,
-        'SERUM FERRITIN' => 32,
-        'CHOLESTEROL' => 33,
-        'TRIGLYCERIDES' => 34,
-        'HDL' => 35,
-        'LDL' => 36,
-        'VLDL' => 37,
-        'CRP' => 38,
-        'WIDAL' => 39,
-        'RA FACTOR' => 40,
-        'ASO TITER' => 41,
-        'DENGUE SEROLOGY' => 42,
-        'SCRUB TYPHUS' => 43,
-        'TSH' => 44,
-        'TFT' => 45,
-        'TROPONIN-T' => 46,
-        'CK-MB' => 47,
-        'CHEST X-RAY (PA)' => 48,
-        'X-RAY KUB' => 49,
-        'URINE C/S' => 50,
-        'SPUTUM C/S' => 51,
-        'PUS C/S' => 52,
-        'BLOOD C/S' => 53,
-        'SPUTUM AFB' => 54,
-        'GEN-XPERT (MTB)' => 55,
-        'CA 125' => 56,
-        'FPSA' => 57,
-        'S PSA' => 58,
-        'TESTOSTERONE' => 59,
-        'ESTRADIOL' => 60,
-        'AMH' => 61,
-        'ANA' => 62,
-        'PROLACTIN' => 63,
-        'LH, FSH' => 64,
-        'D-DIMER' => 65,
-        'BETA HCG' => 66,
-        'SEMEN ANALYSIS' => 67,
-        'SEMEN C/S' => 68,
-        'SEMEN-XPERT' => 69,
-        'SPOT PCR' => 70,
-        'SPOT MICROALBUMIN' => 71,
-        'SPOT SODIUM' => 72,
-        'SMEAR FOR MP/MF' => 73,
-        'PACKAGE - 1' => 74,
-        'PACKAGE - 2' => 75,
-        'PACKAGE - 3' => 76,
+        'BP' => 1,
+        'PULSE' => 2,
+        'SPO2' => 3,
+        'BLOOD GROUP' => 4,
+        'HB' => 5,
+        'RBS' => 6,
+        'UREA' => 7,
+        'CREATININE' => 8,
+        'URIC ACID' => 9,
+        'ECG' => 10,
+        'HCV' => 11,
+        'HIV' => 12,
+        'VDRL' => 13,
+        'HBSAG' => 14,
+        'CBC' => 20,
+        'ESR' => 21,
+        'BT, CT' => 22,
+        'PT - INR' => 23,
+        'APTT' => 24,
+        'PERIPHERAL SMEAR' => 25,
+        'URINE ROUTINE' => 26,
+        'RFT' => 27,
+        'LFT' => 28,
+        'SR. BILIRUBIN' => 29,
+        'SERUM ELECTROLYTES' => 30,
+        'FASTING (FBS)' => 31,
+        'PPBS' => 32,
+        'HBA1C' => 33,
+        'OGCT' => 34,
+        'SERUM CALCIUM' => 35,
+        'SERUM AMYLASE' => 36,
+        'SERUM LIPASE' => 37,
+        'TOTAL IRON' => 38,
+        'TIBC' => 39,
+        'SERUM FERRITIN' => 40,
+        'CHOLESTEROL' => 41,
+        'TRIGLYCERIDES' => 42,
+        'HDL' => 43,
+        'LDL' => 44,
+        'VLDL' => 45,
+        'CRP' => 46,
+        'WIDAL' => 47,
+        'RA FACTOR' => 48,
+        'ASO TITER' => 49,
+        'DENGUE SEROLOGY' => 50,
+        'SCRUB TYPHUS' => 51,
+        'TSH' => 52,
+        'TFT' => 53,
+        'TROPONIN-T' => 54,
+        'CK-MB' => 55,
+        'CHEST X-RAY (PA)' => 56,
+        'X-RAY KUB' => 57,
+        'URINE C/S' => 58,
+        'SPUTUM C/S' => 59,
+        'PUS C/S' => 60,
+        'BLOOD C/S' => 61,
+        'SPUTUM AFB' => 62,
+        'GEN-XPERT (MTB)' => 63,
+        'CA 125' => 64,
+        'FPSA' => 65,
+        'S PSA' => 66,
+        'TESTOSTERONE' => 67,
+        'ESTRADIOL' => 68,
+        'AMH' => 69,
+        'ANA' => 70,
+        'PROLACTIN' => 71,
+        'LH, FSH' => 72,
+        'D-DIMER' => 73,
+        'BETA HCG' => 74,
+        'SEMEN ANALYSIS' => 75,
+        'SEMEN C/S' => 76,
+        'SEMEN-XPERT' => 77,
+        'SPOT PCR' => 78,
+        'SPOT MICROALBUMIN' => 79,
+        'SPOT SODIUM' => 80,
+        'SMEAR FOR MP/MF' => 81,
+        'PACKAGE - 1' => 82,
+        'PACKAGE - 2' => 83,
+        'PACKAGE - 3' => 84,
     ];
 
     /**
@@ -806,6 +810,56 @@ class DischargeSummaryFormatter
         });
 
         return $items;
+    }
+
+    /**
+     * Filter out empty investigation items and group them into standardized clinical rows:
+     * Row 1: Vital Signs (BP, PULSE, SPO2), BLOOD GROUP, HB
+     * Row 2: Biochemistry / Renal / Blood Sugar (RBS, UREA, CREATININE, URIC ACID), ECG
+     * Row 3: Viral & Infectious Disease Screening (HCV, HIV, VDRL, HBSAG)
+     * Row 4+: Remaining / Additional Investigations
+     *
+     * @param array<int, array{label: string, value: string, unit: string, normal_range: string, reference: string}> $investigations
+     * @return array<int, array<int, array{label: string, value: string, unit: string, normal_range: string, reference: string}>>
+     */
+    public static function groupInvestigationsForGrid(array $investigations): array
+    {
+        $valid = collect($investigations)->reject(function ($inv) {
+            $val = trim((string) ($inv['value'] ?? ''));
+            return $val === '' || $val === '—' || $val === '-' || strcasecmp($val, 'nil') === 0 || strcasecmp($val, 'none') === 0;
+        })->values();
+
+        if ($valid->isEmpty()) {
+            return [];
+        }
+
+        $row1Labels = ['BP', 'PULSE', 'SPO2', 'BLOOD GROUP', 'HB'];
+        $row2Labels = ['RBS', 'UREA', 'CREATININE', 'URIC ACID', 'ECG'];
+        $row3Labels = ['HCV', 'HIV', 'VDRL', 'HBSAG'];
+
+        $row1 = $valid->filter(fn ($i) => in_array($i['label'], $row1Labels, true))->values()->all();
+        $row2 = $valid->filter(fn ($i) => in_array($i['label'], $row2Labels, true))->values()->all();
+        $row3 = $valid->filter(fn ($i) => in_array($i['label'], $row3Labels, true))->values()->all();
+        $coreSet = array_merge($row1Labels, $row2Labels, $row3Labels);
+        $extra = $valid->reject(fn ($i) => in_array($i['label'], $coreSet, true))->values()->all();
+
+        $rows = [];
+        if (!empty($row1)) {
+            $rows[] = $row1;
+        }
+        if (!empty($row2)) {
+            $rows[] = $row2;
+        }
+        if (!empty($row3)) {
+            $rows[] = $row3;
+        }
+        if (!empty($extra)) {
+            foreach (array_chunk($extra, 5) as $chunk) {
+                $rows[] = $chunk;
+            }
+        }
+
+        return $rows;
     }
 
     /**

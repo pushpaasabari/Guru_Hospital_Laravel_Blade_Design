@@ -43,85 +43,85 @@ export interface FormattedNewbornCard {
 }
 
 const INVESTIGATION_ORDER: Record<string, number> = {
-  HB: 1,
-  'BLOOD GROUP': 2,
-  BP: 3,
-  PULSE: 4,
-  SPO2: 5,
-  HIV: 6,
-  HCV: 7,
-  VDRL: 8,
-  HBSAG: 9,
-  UREA: 10,
-  CREATININE: 11,
-  'URIC ACID': 12,
-  RBS: 13,
-  ECG: 14,
-  CBC: 15,
-  ESR: 16,
-  'BT, CT': 17,
-  'PT - INR': 18,
-  APTT: 19,
-  'PERIPHERAL SMEAR': 20,
-  'URINE ROUTINE': 21,
-  RFT: 22,
-  LFT: 23,
-  'SR. BILIRUBIN': 24,
-  'SERUM ELECTROLYTES': 25,
-  'FASTING (FBS)': 26,
-  PPBS: 27,
-  HBA1C: 28,
-  OGCT: 29,
-  'SERUM CALCIUM': 30,
-  'SERUM AMYLASE': 31,
-  'SERUM LIPASE': 32,
-  'TOTAL IRON': 33,
-  TIBC: 34,
-  'SERUM FERRITIN': 35,
-  CHOLESTEROL: 36,
-  TRIGLYCERIDES: 37,
-  HDL: 38,
-  LDL: 39,
-  VLDL: 40,
-  CRP: 41,
-  WIDAL: 42,
-  'RA FACTOR': 43,
-  'ASO TITER': 44,
-  'DENGUE SEROLOGY': 45,
-  'SCRUB TYPHUS': 46,
-  TSH: 47,
-  TFT: 48,
-  'TROPONIN-T': 49,
-  'CK-MB': 50,
-  'CHEST X-RAY (PA)': 51,
-  'X-RAY KUB': 52,
-  'URINE C/S': 53,
-  'SPUTUM C/S': 54,
-  'PUS C/S': 55,
-  'BLOOD C/S': 56,
-  'SPUTUM AFB': 57,
-  'GEN-XPERT (MTB)': 58,
-  'CA 125': 59,
-  FPSA: 60,
-  'S PSA': 61,
-  TESTOSTERONE: 62,
-  ESTRADIOL: 63,
-  AMH: 64,
-  ANA: 65,
-  PROLACTIN: 66,
-  'LH, FSH': 67,
-  'D-DIMER': 68,
-  'BETA HCG': 69,
-  'SEMEN ANALYSIS': 70,
-  'SEMEN C/S': 71,
-  'SEMEN-XPERT': 72,
-  'SPOT PCR': 73,
-  'SPOT MICROALBUMIN': 74,
-  'SPOT SODIUM': 75,
-  'SMEAR FOR MP/MF': 76,
-  'PACKAGE - 1': 77,
-  'PACKAGE - 2': 78,
-  'PACKAGE - 3': 79,
+  BP: 1,
+  PULSE: 2,
+  SPO2: 3,
+  'BLOOD GROUP': 4,
+  HB: 5,
+  RBS: 6,
+  UREA: 7,
+  CREATININE: 8,
+  'URIC ACID': 9,
+  ECG: 10,
+  HCV: 11,
+  HIV: 12,
+  VDRL: 13,
+  HBSAG: 14,
+  CBC: 20,
+  ESR: 21,
+  'BT, CT': 22,
+  'PT - INR': 23,
+  APTT: 24,
+  'PERIPHERAL SMEAR': 25,
+  'URINE ROUTINE': 26,
+  RFT: 27,
+  LFT: 28,
+  'SR. BILIRUBIN': 29,
+  'SERUM ELECTROLYTES': 30,
+  'FASTING (FBS)': 31,
+  PPBS: 32,
+  HBA1C: 33,
+  OGCT: 34,
+  'SERUM CALCIUM': 35,
+  'SERUM AMYLASE': 36,
+  'SERUM LIPASE': 37,
+  'TOTAL IRON': 38,
+  TIBC: 39,
+  'SERUM FERRITIN': 40,
+  CHOLESTEROL: 41,
+  TRIGLYCERIDES: 42,
+  HDL: 43,
+  LDL: 44,
+  VLDL: 45,
+  CRP: 46,
+  WIDAL: 47,
+  'RA FACTOR': 48,
+  'ASO TITER': 49,
+  'DENGUE SEROLOGY': 50,
+  'SCRUB TYPHUS': 51,
+  TSH: 52,
+  TFT: 53,
+  'TROPONIN-T': 54,
+  'CK-MB': 55,
+  'CHEST X-RAY (PA)': 56,
+  'X-RAY KUB': 57,
+  'URINE C/S': 58,
+  'SPUTUM C/S': 59,
+  'PUS C/S': 60,
+  'BLOOD C/S': 61,
+  'SPUTUM AFB': 62,
+  'GEN-XPERT (MTB)': 63,
+  'CA 125': 64,
+  FPSA: 65,
+  'S PSA': 66,
+  TESTOSTERONE: 67,
+  ESTRADIOL: 68,
+  AMH: 69,
+  ANA: 70,
+  PROLACTIN: 71,
+  'LH, FSH': 72,
+  'D-DIMER': 73,
+  'BETA HCG': 74,
+  'SEMEN ANALYSIS': 75,
+  'SEMEN C/S': 76,
+  'SEMEN-XPERT': 77,
+  'SPOT PCR': 78,
+  'SPOT MICROALBUMIN': 79,
+  'SPOT SODIUM': 80,
+  'SMEAR FOR MP/MF': 81,
+  'PACKAGE - 1': 82,
+  'PACKAGE - 2': 83,
+  'PACKAGE - 3': 84,
 };
 
 export const INVESTIGATION_STANDARDS: Record<string, { unit: string; normal_range: string; reference: string }> = {
@@ -584,6 +584,34 @@ export function formatInvestigations(
   });
 
   return items;
+}
+
+export function groupInvestigationsForGrid(investigations: FormattedInvestigation[]): FormattedInvestigation[][] {
+  const valid = investigations.filter((inv) => {
+    const val = String(inv.value ?? '').trim();
+    return val !== '' && val !== '—' && val !== '-' && !/^(nil|none)$/i.test(val);
+  });
+
+  if (valid.length === 0) return [];
+
+  const row1Labels = new Set(['BP', 'PULSE', 'SPO2', 'BLOOD GROUP', 'HB']);
+  const row2Labels = new Set(['RBS', 'UREA', 'CREATININE', 'URIC ACID', 'ECG']);
+  const row3Labels = new Set(['HCV', 'HIV', 'VDRL', 'HBSAG']);
+
+  const row1 = valid.filter((i) => row1Labels.has(i.label));
+  const row2 = valid.filter((i) => row2Labels.has(i.label));
+  const row3 = valid.filter((i) => row3Labels.has(i.label));
+  const extra = valid.filter((i) => !row1Labels.has(i.label) && !row2Labels.has(i.label) && !row3Labels.has(i.label));
+
+  const rows: FormattedInvestigation[][] = [];
+  if (row1.length > 0) rows.push(row1);
+  if (row2.length > 0) rows.push(row2);
+  if (row3.length > 0) rows.push(row3);
+  for (let i = 0; i < extra.length; i += 5) {
+    rows.push(extra.slice(i, i + 5));
+  }
+
+  return rows;
 }
 
 export function formatConditionOnDischarge(text?: string | null): FormattedCondition {
