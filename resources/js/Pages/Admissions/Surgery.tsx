@@ -350,7 +350,7 @@ export default function AdmissionsSurgery({
                 <div className="col-md-4">
                   <label className="form-label required">
                     RCH ID (PICME No)
-                    <span className="badge bg-danger-subtle text-danger ms-2" style={{ fontSize: '0.68rem' }}>
+                    <span className="badge bg-success-subtle text-success border border-success-subtle ms-2" style={{ fontSize: '0.68rem' }}>
                       DELIVERY / OBSTETRIC
                     </span>
                   </label>

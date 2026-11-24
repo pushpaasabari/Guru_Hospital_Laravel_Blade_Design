@@ -448,7 +448,16 @@ export default function MonthWiseReport({
                       <span className="badge bg-light text-dark border text-uppercase me-1" style={{ fontSize: '10px' }}>
                         {item.format}
                       </span>
-                      <span className="badge bg-secondary" style={{ fontSize: '10px' }}>
+                      <span
+                        className={`badge ${
+                          item.surgery_type === 'delivery'
+                            ? 'bg-success-subtle text-success border border-success-subtle'
+                            : item.surgery_type === 'medical'
+                              ? 'bg-info-subtle text-info border border-info-subtle'
+                              : 'bg-primary-subtle text-primary border border-primary-subtle'
+                        }`}
+                        style={{ fontSize: '10px' }}
+                      >
                         {item.surgery_type === 'delivery'
                           ? 'Delivery'
                           : item.surgery_type === 'medical'

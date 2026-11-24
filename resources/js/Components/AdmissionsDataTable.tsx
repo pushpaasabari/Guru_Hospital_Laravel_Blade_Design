@@ -627,7 +627,9 @@ export default function AdmissionsDataTable({
                       </div>
                       <div className="text-muted small text-truncate mt-0.5" style={{ maxWidth: '180px', fontSize: '11.5px' }}>
                         {item.department ? `${item.department}` : ''}
-                        {item.ward_room_no ? ` &bull; ${item.ward_room_no}` : ''}
+                        {item.ward_room_no && (
+                          <> &bull; {item.ward_room_no}</>
+                        )}
                       </div>
                     </td>
 
@@ -640,9 +642,9 @@ export default function AdmissionsDataTable({
                         <span
                           className={`badge ${
                             item.surgery_type === 'delivery'
-                              ? 'bg-danger-subtle text-danger border border-danger-subtle'
-                              : item.surgery_type === 'medical'
                               ? 'bg-success-subtle text-success border border-success-subtle'
+                              : item.surgery_type === 'medical'
+                              ? 'bg-info-subtle text-info border border-info-subtle'
                               : 'bg-primary-subtle text-primary border border-primary-subtle'
                           }`}
                           style={{ fontSize: '9.5px' }}

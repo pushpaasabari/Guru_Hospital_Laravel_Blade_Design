@@ -1173,18 +1173,15 @@
             @if($admission->newborns->isNotEmpty())
                 @foreach($admission->newborns as $i => $baby)
                     <div style="margin-bottom: 4px;">
-                        Alive {{ $baby->sex ?? 'Female' }} baby on {{ $baby->birth_at?->format('d.m.Y @ h.iA') ?? ($admission->procedure_at?->format('d.m.Y @ h.iA') ?? '') }}<br>
-                        Baby Weight {{ $baby->birth_weight_kg ? number_format($baby->birth_weight_kg, 3) . 'Kg' : '2.650Kg' }}
+                        Alive {{ $baby->sex ?: 'newborn' }} baby on {{ $baby->birth_at?->format('d.m.Y @ h.iA') ?? ($admission->procedure_at?->format('d.m.Y @ h.iA') ?? '') }}<br>
+                        Baby Weight {{ $baby->birth_weight_kg ? number_format($baby->birth_weight_kg, 3) . 'Kg' : '—' }}
                         @if($baby->neonatal_care)
                             <span style="color: #555;">({{ $baby->neonatal_care }})</span>
                         @endif
                     </div>
                 @endforeach
             @else
-                <div>
-                    Alive Female baby on {{ $admission->procedure_at?->format('d.m.Y @ h.iA') ?? now()->format('d.m.Y @ h.iA') }}<br>
-                    Baby Weight 2.650Kg
-                </div>
+                <div>Newborn details not recorded.</div>
             @endif
         </td>
     </tr>

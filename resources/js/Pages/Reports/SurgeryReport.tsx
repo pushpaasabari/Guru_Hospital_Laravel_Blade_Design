@@ -322,8 +322,8 @@ export default function SurgeryReport({ surgeries, metrics, filters, clinicalSta
                       <div className="fw-bold text-dark">{item.patient_name}</div>
                       <div className="text-muted small">
                         UHID: <span className="font-monospace text-dark">{item.uhid}</span> &bull; IP: <span className="font-monospace text-dark">{item.ip_no}</span>
-                        {item.sex && ` &bull; ${item.sex.toUpperCase()}`}
-                        {item.age && ` &bull; ${item.age} Yrs`}
+                        {item.sex && <> &bull; {item.sex.toUpperCase()}</>}
+                        {item.age && <> &bull; {item.age} Yrs</>}
                       </div>
                     </td>
                     <td>

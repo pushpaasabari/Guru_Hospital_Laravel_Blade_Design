@@ -1944,24 +1944,20 @@ export default function Pack({ admission, initialDoc = 'all', initialMode = 'she
                     {admission.newborns && admission.newborns.length > 0 ? (
                       admission.newborns.map((baby, i) => (
                         <div key={i} className="mb-1">
-                          Alive {baby.sex || 'Female'} baby on{' '}
+                          Alive {baby.sex || 'newborn'} baby on{' '}
                           {formatDateTime(baby.birth_at || admission.procedure_at)}
                           <br />
                           Baby Weight{' '}
                           {baby.birth_weight_kg
                             ? `${Number(baby.birth_weight_kg).toFixed(3)}Kg`
-                            : '2.650Kg'}
+                            : '—'}
                           {baby.neonatal_care && (
                             <span className="text-muted small"> ({baby.neonatal_care})</span>
                           )}
                         </div>
                       ))
                     ) : (
-                      <div>
-                        Alive Female baby on {formatDateTime(admission.procedure_at)}
-                        <br />
-                        Baby Weight 2.650Kg
-                      </div>
+                      <div className="text-muted">Newborn details not recorded.</div>
                     )}
                   </td>
                 </tr>

@@ -348,7 +348,7 @@ export default function BirthReport({ deliveries, metrics, filters, clinicalStaf
                       <div className="fw-bold text-dark">{item.patient_name}</div>
                       <div className="text-muted small">
                         UHID: <span className="font-monospace text-dark">{item.uhid}</span> &bull; IP: <span className="font-monospace text-dark">{item.ip_no}</span>
-                        {item.age && ` &bull; ${item.age} Yrs`}
+                        {item.age && <> &bull; {item.age} Yrs</>}
                       </div>
                     </td>
                     <td>
@@ -371,26 +371,36 @@ export default function BirthReport({ deliveries, metrics, filters, clinicalStaf
                     <td>
                       {item.newborns && item.newborns.length > 0 ? (
                         <div className="d-flex flex-column gap-1">
-                          {item.newborns.map((b, idx) => (
-                            <div key={b.id || idx} className="d-flex align-items-center gap-2">
-                              <span
-                                className={`badge ${
-                                  b.sex === 'male' ? 'bg-primary-subtle text-primary border border-primary-subtle' : 'bg-danger-subtle text-danger border border-danger-subtle'
-                                }`}
-                                style={{ fontSize: '11px', textTransform: 'capitalize' }}
-                              >
-                                {b.sex === 'male' ? 'Boy' : 'Girl'}
-                              </span>
-                              <span className="small text-dark fw-medium">
-                                {b.birth_weight_kg ? `${b.birth_weight_kg} kg` : '—'}
-                              </span>
-                              {(b.apgar_1_min || b.apgar_5_min) && (
-                                <span className="text-muted small" style={{ fontSize: '10.5px' }}>
-                                  (APGAR: {b.apgar_1_min || '—'}/{b.apgar_5_min || '—'})
+                          {item.newborns.map((b, idx) => {
+                            const normalizedSex = (b.sex || '').trim().toLowerCase();
+                            const isMale = normalizedSex === 'male' || normalizedSex === 'boy';
+                            const isFemale = normalizedSex === 'female' || normalizedSex === 'girl';
+                            const badgeClass = isMale
+                              ? 'bg-primary-subtle text-primary border border-primary-subtle'
+                              : isFemale
+                              ? 'bg-danger-subtle text-danger border border-danger-subtle'
+                              : 'bg-secondary-subtle text-secondary border border-secondary-subtle';
+                            const sexLabel = isMale ? 'Boy' : isFemale ? 'Girl' : b.sex?.trim() || 'Not Recorded';
+
+                            return (
+                              <div key={b.id || idx} className="d-flex align-items-center gap-2">
+                                <span
+                                  className={`badge ${badgeClass}`}
+                                  style={{ fontSize: '11px', textTransform: 'capitalize' }}
+                                >
+                                  {sexLabel}
                                 </span>
-                              )}
-                            </div>
-                          ))}
+                                <span className="small text-dark fw-medium">
+                                  {b.birth_weight_kg ? `${b.birth_weight_kg} kg` : '—'}
+                                </span>
+                                {(b.apgar_1_min || b.apgar_5_min) && (
+                                  <span className="text-muted small" style={{ fontSize: '10.5px' }}>
+                                    (APGAR: {b.apgar_1_min || '—'}/{b.apgar_5_min || '—'})
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       ) : (
                         <span className="text-muted italic small">No newborn record</span>

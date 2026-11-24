@@ -74,7 +74,7 @@ class ReportController extends Controller
         // Newborn gender filter
         if ($babySex = $request->input('baby_sex')) {
             $query->whereHas('newborns', function ($q) use ($babySex) {
-                $q->where('sex', $babySex);
+                $q->whereRaw('LOWER(sex) = ?', [strtolower(trim((string) $babySex))]);
             });
         }
 
@@ -90,8 +90,8 @@ class ReportController extends Controller
 
         $allNewborns = $allDeliveries->flatMap->newborns;
         $totalBabies = $allNewborns->count();
-        $maleBabies = $allNewborns->where('sex', 'male')->count();
-        $femaleBabies = $allNewborns->where('sex', 'female')->count();
+        $maleBabies = $allNewborns->filter(fn ($b) => strtolower(trim((string) $b->sex)) === 'male')->count();
+        $femaleBabies = $allNewborns->filter(fn ($b) => strtolower(trim((string) $b->sex)) === 'female')->count();
         $avgWeightKg = $totalBabies > 0 ? round($allNewborns->whereNotNull('birth_weight_kg')->avg('birth_weight_kg'), 2) : 0;
 
         $lscsCount = $allDeliveries->filter(function ($a) {

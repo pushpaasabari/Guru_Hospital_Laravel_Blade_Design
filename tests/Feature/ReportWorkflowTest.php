@@ -86,6 +86,52 @@ class ReportWorkflowTest extends TestCase
         );
     }
 
+    public function test_birth_report_counts_and_filters_baby_gender_case_insensitively(): void
+    {
+        $admBoy = $this->createAdmission([
+            'patient_name' => 'Mother Boy',
+            'surgery_type' => 'delivery',
+            'procedure_done' => 'Emergency LSCS',
+        ]);
+        Newborn::create([
+            'admission_id' => $admBoy->id,
+            'sex' => 'Male',
+            'birth_at' => now(),
+            'birth_weight_kg' => 3.10,
+        ]);
+
+        $admGirl = $this->createAdmission([
+            'patient_name' => 'Mother Girl',
+            'surgery_type' => 'delivery',
+            'procedure_done' => 'Normal Delivery',
+        ]);
+        Newborn::create([
+            'admission_id' => $admGirl->id,
+            'sex' => 'Female',
+            'birth_at' => now(),
+            'birth_weight_kg' => 2.85,
+        ]);
+
+        // Summary metrics should count both Male and Female accurately
+        $allResponse = $this->actingAs($this->user)->get('/reports/birth');
+        $allResponse->assertStatus(200);
+        $allResponse->assertInertia(fn (Assert $page) => $page
+            ->component('Reports/BirthReport')
+            ->where('metrics.total_babies', 2)
+            ->where('metrics.male_babies', 1)
+            ->where('metrics.female_babies', 1)
+        );
+
+        // Filtering by baby_sex=male should match 'Male'
+        $maleFilter = $this->actingAs($this->user)->get('/reports/birth?baby_sex=male');
+        $maleFilter->assertStatus(200);
+        $maleFilter->assertInertia(fn (Assert $page) => $page
+            ->component('Reports/BirthReport')
+            ->where('deliveries.total', 1)
+            ->where('deliveries.data.0.patient_name', 'MOTHER BOY')
+        );
+    }
+
     public function test_birth_report_csv_export(): void
     {
         $this->createAdmission([
