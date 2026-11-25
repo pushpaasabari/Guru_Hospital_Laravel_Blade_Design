@@ -42,7 +42,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
     return currentPath.startsWith(path);
   };
 
-  const adminPaths = ['/templates', '/clinical-staff', '/anesthesia-types', '/users', '/audit-logs'];
+  const adminPaths = ['/templates', '/clinical-staff', '/anesthesia-types', '/users', '/backups', '/audit-logs'];
   const isAnyAdminActive = adminPaths.some((p) => isLinkActive(p));
 
   const reportPaths = ['/reports/birth', '/reports/surgery', '/reports/medical', '/reports/month-wise', '/reports'];
@@ -379,6 +379,17 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                           >
                             <i className="bi bi-people icon-users"></i>
                             <span>Staff Users</span>
+                          </Link>
+
+                          <Link
+                            href="/backups"
+                            prefetch
+                            className={`fg-sidebar-sublink ${isLinkActive('/backups') ? 'active' : ''}`}
+                            onClick={closeMobile}
+                            title="Database Backups & Google Drive Sync"
+                          >
+                            <i className="bi bi-cloud-arrow-up text-success"></i>
+                            <span>Database Backups</span>
                           </Link>
                         </>
                       )}

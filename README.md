@@ -114,3 +114,11 @@ php artisan test
    - Ensure web server / PHP-FPM user (`www-data`) owns or has write access to `storage/` and `bootstrap/cache/`.
    - Confirm `public/fonts/Nirmala.ttf` and `public/fonts/NirmalaB.ttf` are present for Tamil stent notice rendering.
    - Verify health endpoint `GET /up` returns HTTP `200`.
+
+5. **Automated Daily Database Backup to Google Drive (02:00 AM IST):**
+   - Add the Laravel scheduler cron entry for the web user (`crontab -e`):
+     ```bash
+     * * * * * cd /var/www/guru-hospital && php artisan schedule:run >> /dev/null 2>&1
+     ```
+   - Open **Administration → Database Backups** in the web app (or set `GOOGLE_DRIVE_*` in `.env`) to authorize Google Drive OAuth 2.0 (personal `@gmail.com` or Workspace) or paste a Workspace Shared Drive Service Account JSON key, and click **Test Google Drive** / **Run Backup Now**.
+   - Local compressed archives are stored privately under `storage/app/private/backups/` (default 7-day local retention, 30-day Google Drive retention).

@@ -22,6 +22,10 @@ class LogHttpActivityMiddleware
         'password',
         'password_confirmation',
         'current_password',
+        'google_client_secret',
+        'google_refresh_token',
+        'google_service_account_json',
+        'code',
         '_token',
         '_method',
     ];

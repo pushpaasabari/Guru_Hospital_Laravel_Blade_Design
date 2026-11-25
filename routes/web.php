@@ -6,6 +6,7 @@ use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ClinicalStaffController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DatabaseBackupController;
 use App\Http\Controllers\DocumentApprovalController;
 use App\Http\Controllers\DocumentPackController;
 use App\Http\Controllers\ReportController;
@@ -100,5 +101,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
     Route::patch('/users/{user}/toggle', [UserController::class, 'toggleActive'])->name('users.toggle');
+
+    // Database Backups & Google Drive Auto-Sync (Admins)
+    Route::get('/backups', [DatabaseBackupController::class, 'index'])->name('backups.index');
+    Route::put('/backups/settings', [DatabaseBackupController::class, 'updateSettings'])->name('backups.settings.update');
+    Route::post('/backups/run', [DatabaseBackupController::class, 'runNow'])->name('backups.run');
+    Route::post('/backups/test-connection', [DatabaseBackupController::class, 'testConnection'])->name('backups.test');
+    Route::get('/backups/google/connect', [DatabaseBackupController::class, 'connectGoogle'])->name('backups.google.connect');
+    Route::get('/backups/google/callback', [DatabaseBackupController::class, 'callbackGoogle'])->name('backups.google.callback');
+    Route::post('/backups/google/disconnect', [DatabaseBackupController::class, 'disconnectGoogle'])->name('backups.google.disconnect');
+    Route::get('/backups/{databaseBackup}/download', [DatabaseBackupController::class, 'download'])->name('backups.download');
+    Route::delete('/backups/{databaseBackup}', [DatabaseBackupController::class, 'destroy'])->name('backups.destroy');
 });
 
