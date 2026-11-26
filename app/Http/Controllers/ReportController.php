@@ -24,7 +24,8 @@ class ReportController extends Controller
     }
 
     /**
-     * Day Wise / Daily Clinical Register Report
+     * Day Wise / Complete Daily Clinical Register Report
+     * Covers: 1. Admissions, 2. Discharges, 3. Inpatients (Active Census)
      */
     public function day(Request $request, DocumentPackPdfService $pdfService)
     {
@@ -40,6 +41,58 @@ class ReportController extends Controller
             $dateBasis = 'any';
         }
 
+        $section = (string) $request->input('section', 'all');
+        if (!in_array($section, ['all', 'admissions', 'discharges', 'inpatients'], true)) {
+            $section = 'all';
+        }
+
+        $search = trim((string) $request->input('search'));
+        $workflow = (string) $request->input('surgery_type', '');
+        $format = (string) $request->input('format', '');
+        $surgeon = (string) $request->input('surgeon', '');
+
+        $applyCommonFilters = function ($q) use ($search, $workflow, $format, $surgeon) {
+            if ($search !== '') {
+                $q->filterSearch($search, true);
+            }
+            if ($workflow !== '') {
+                $q->where('surgery_type', $workflow);
+            }
+            if ($format !== '') {
+                $q->where('format', $format);
+            }
+            if ($surgeon !== '') {
+                $q->where(function ($sub) use ($surgeon) {
+                    $sub->where('surgeon', $surgeon)
+                        ->orWhere('consultant', $surgeon);
+                });
+            }
+        };
+
+        $applyDateWindow = function ($q, array $columns) use ($allDates, $dateFrom, $dateTo, $selectedDate) {
+            if ($dateFrom || $dateTo) {
+                $q->where(function ($outer) use ($columns, $dateFrom, $dateTo) {
+                    foreach ($columns as $col) {
+                        $outer->orWhere(function ($sub) use ($col, $dateFrom, $dateTo) {
+                            if ($dateFrom) {
+                                $sub->whereDate($col, '>=', $dateFrom);
+                            }
+                            if ($dateTo) {
+                                $sub->whereDate($col, '<=', $dateTo);
+                            }
+                        });
+                    }
+                });
+            } elseif (!$allDates && $selectedDate !== '') {
+                $q->where(function ($outer) use ($columns, $selectedDate) {
+                    foreach ($columns as $col) {
+                        $outer->orWhereDate($col, $selectedDate);
+                    }
+                });
+            }
+        };
+
+        // Combined operative/day register query preserved for date-basis filtering & pagination compatibility
         $query = Admission::query()
             ->with('newborns')
             ->latest('admission_at')
@@ -52,62 +105,83 @@ class ReportController extends Controller
             default => ['admission_at', 'procedure_at', 'discharge_at'],
         };
 
-        if ($dateFrom || $dateTo) {
-            $query->where(function ($q) use ($dateColumns, $dateFrom, $dateTo) {
-                foreach ($dateColumns as $col) {
-                    $q->orWhere(function ($sub) use ($col, $dateFrom, $dateTo) {
-                        if ($dateFrom) {
-                            $sub->whereDate($col, '>=', $dateFrom);
-                        }
-                        if ($dateTo) {
-                            $sub->whereDate($col, '<=', $dateTo);
-                        }
-                    });
-                }
-            });
-        } elseif (!$allDates && $selectedDate !== '') {
-            $query->where(function ($q) use ($dateColumns, $selectedDate) {
-                foreach ($dateColumns as $col) {
-                    $q->orWhereDate($col, $selectedDate);
-                }
-            });
+        $applyDateWindow($query, $dateColumns);
+        $applyCommonFilters($query);
+
+        // 1. Admissions in selected period
+        $admissionsQuery = Admission::query()
+            ->with('newborns')
+            ->latest('admission_at')
+            ->latest('id');
+        $applyDateWindow($admissionsQuery, ['admission_at']);
+        $applyCommonFilters($admissionsQuery);
+
+        // 2. Discharges in selected period
+        $dischargesQuery = Admission::query()
+            ->with('newborns')
+            ->whereNotNull('discharge_at')
+            ->latest('discharge_at')
+            ->latest('id');
+        $applyDateWindow($dischargesQuery, ['discharge_at']);
+        $applyCommonFilters($dischargesQuery);
+
+        // 3. Active Inpatients (ward census as of selected/end date, or live in-admission when All Dates)
+        $censusDate = (!$allDates && ($dateTo || $selectedDate !== ''))
+            ? ($dateTo ?: $selectedDate)
+            : now()->toDateString();
+
+        $inpatientsQuery = Admission::query()
+            ->with('newborns')
+            ->latest('admission_at')
+            ->latest('id');
+        $applyCommonFilters($inpatientsQuery);
+        if ($allDates) {
+            $inpatientsQuery->whereNull('discharge_at');
+        } else {
+            $inpatientsQuery
+                ->whereDate('admission_at', '<=', $censusDate)
+                ->where(function ($q) use ($censusDate) {
+                    $q->whereNull('discharge_at')
+                        ->orWhereDate('discharge_at', '>', $censusDate);
+                });
         }
 
-        if ($search = trim((string) $request->input('search'))) {
-            $query->filterSearch($search, true);
-        }
+        $admissionsList = $this->enrichDayAdmissions($admissionsQuery->get(), $censusDate);
+        $dischargesList = $this->enrichDayAdmissions($dischargesQuery->get(), $censusDate);
+        $inpatientsList = $this->enrichDayAdmissions($inpatientsQuery->get(), $censusDate);
+        $allMatches = $this->enrichDayAdmissions((clone $query)->get(), $censusDate);
 
-        if ($workflow = $request->input('surgery_type')) {
-            $query->where('surgery_type', $workflow);
-        }
-
-        if ($format = $request->input('format')) {
-            $query->where('format', $format);
-        }
-
-        if ($surgeon = $request->input('surgeon')) {
-            $query->where(function ($q) use ($surgeon) {
-                $q->where('surgeon', $surgeon)
-                    ->orWhere('consultant', $surgeon);
-            });
-        }
+        $sections = [
+            'admissions' => $admissionsList->values(),
+            'discharges' => $dischargesList->values(),
+            'inpatients' => $inpatientsList->values(),
+        ];
 
         if ($request->input('export') === 'csv') {
             $label = $allDates
                 ? 'all_dates'
                 : (($dateFrom || $dateTo) ? trim(($dateFrom ?: 'start') . '_to_' . ($dateTo ?: 'end')) : $selectedDate);
-            return $this->exportDayCsv($query->get(), $label);
+            return $this->exportDayCsv($sections, $section, $label);
         }
 
-        $allMatches = (clone $query)->get();
         $deliveries = $allMatches->filter(fn ($a) => $a->surgery_type === 'delivery' || $a->newborns->isNotEmpty());
+        $censusDeliveries = $inpatientsList->merge($admissionsList)->merge($dischargesList)
+            ->unique('id')
+            ->filter(fn ($a) => $a->surgery_type === 'delivery' || $a->newborns->isNotEmpty());
+
         $metrics = [
             'total_cases' => $allMatches->count(),
+            'admissions_count' => $admissionsList->count(),
+            'discharges_section_count' => $dischargesList->count(),
+            'inpatients_count' => $inpatientsList->count(),
+            'census_date' => $censusDate,
             'surgeries_count' => $allMatches->where('surgery_type', 'other')->count(),
             'deliveries_count' => $deliveries->count(),
             'babies_count' => $deliveries->flatMap->newborns->count(),
+            'census_deliveries_count' => $censusDeliveries->count(),
+            'census_babies_count' => $censusDeliveries->flatMap->newborns->count(),
             'medical_count' => $allMatches->where('surgery_type', 'medical')->count(),
-            'discharges_count' => $allMatches->filter(fn ($a) => !empty($a->discharge_at))->count(),
+            'discharges_count' => $dischargesList->count(),
         ];
 
         if (in_array($request->input('export'), ['image', 'pdf'], true)) {
@@ -116,24 +190,26 @@ class ReportController extends Controller
                 ? 'all_dates'
                 : (($dateFrom || $dateTo) ? trim(($dateFrom ?: 'start') . '_to_' . ($dateTo ?: 'end')) : $selectedDate);
             $periodLabel = $allDates
-                ? 'All Dates'
+                ? 'All Dates (Live Ward Census)'
                 : (($dateFrom || $dateTo)
                     ? trim(($dateFrom ? Carbon::parse($dateFrom)->format('d.m.Y') : 'Start') . ' to ' . ($dateTo ? Carbon::parse($dateTo)->format('d.m.Y') : 'End'))
                     : 'Date: ' . Carbon::parse($selectedDate)->format('d.m.Y'));
-            $basisLabel = match ($dateBasis) {
-                'admission' => 'DOA Only',
-                'procedure' => 'DOO Only',
-                'discharge' => 'DOD Only',
-                default => 'Any (DOA / DOO / DOD)',
+            $sectionLabel = match ($section) {
+                'admissions' => '1. Admissions Only',
+                'discharges' => '2. Discharges Only',
+                'inpatients' => '3. Inpatients Census Only',
+                default => 'Complete Daily Register (Admissions • Discharges • Inpatients)',
             };
 
             return $this->streamPlaywrightReport(
                 'pdf.day-report-image',
                 [
+                    'sections' => $sections,
+                    'sectionFilter' => $section,
                     'records' => $allMatches,
                     'metrics' => $metrics,
                     'periodLabel' => $periodLabel,
-                    'basisLabel' => $basisLabel,
+                    'basisLabel' => $sectionLabel,
                 ],
                 "day_report_{$label}",
                 "GURU HOSPITAL — Day Report ({$periodLabel})",
@@ -148,12 +224,14 @@ class ReportController extends Controller
         }
 
         $records = $query->paginate($perPage)->withQueryString();
+        $this->enrichDayAdmissions($records->getCollection(), $censusDate);
 
         $filters = [
             'date' => $selectedDate,
             'date_from' => $dateFrom ?: '',
             'date_to' => $dateTo ?: '',
             'date_basis' => $dateBasis,
+            'section' => $section,
             'all_dates' => $allDates,
             'search' => $request->input('search', ''),
             'surgery_type' => $request->input('surgery_type', ''),
@@ -164,7 +242,40 @@ class ReportController extends Controller
 
         $clinicalStaff = ClinicalStaff::cachedActive();
 
-        return Inertia::render('Reports/DayReport', compact('records', 'metrics', 'filters', 'clinicalStaff'));
+        return Inertia::render('Reports/DayReport', compact('records', 'sections', 'metrics', 'filters', 'clinicalStaff'));
+    }
+
+    /**
+     * Attach computed MRD, payment summary, review date, and stay-day counts for Day Report views and exports.
+     */
+    protected function enrichDayAdmissions($collection, string $censusDate)
+    {
+        $censusEnd = Carbon::parse($censusDate)->startOfDay();
+
+        return $collection->each(function (Admission $adm) use ($censusEnd) {
+            $adm->append(['resolved_mrd_no', 'payment_summary']);
+
+            if ($adm->admission_at) {
+                $admitDay = Carbon::parse($adm->admission_at)->startOfDay();
+                $dischDay = $adm->discharge_at ? Carbon::parse($adm->discharge_at)->startOfDay() : null;
+                $adm->setAttribute(
+                    'stay_days',
+                    $dischDay
+                        ? max(1, (int) $admitDay->diffInDays($dischDay))
+                        : max(1, (int) $admitDay->diffInDays($censusEnd) + 1)
+                );
+                $adm->setAttribute(
+                    'census_stay_days',
+                    $admitDay->lte($censusEnd) ? max(1, (int) $admitDay->diffInDays($censusEnd) + 1) : 1
+                );
+            } else {
+                $adm->setAttribute('stay_days', null);
+                $adm->setAttribute('census_stay_days', null);
+            }
+
+            $review = $adm->formatted_advice_and_review;
+            $adm->setAttribute('resolved_review_date', $review['review_date'] ?? null);
+        });
     }
 
     /**
@@ -943,14 +1054,33 @@ class ReportController extends Controller
     }
 
     /**
-     * CSV Exporter for Day Report
+     * Format vital measurements concisely for reports and CSV export.
      */
-    protected function exportDayCsv($admissions, string $label): StreamedResponse
+    protected function formatVitalsText(?string $bp, ?string $pulse, ?string $spo2): string
+    {
+        return implode(' | ', array_filter([
+            $bp ? "BP: {$bp}" : null,
+            $pulse ? "Pulse: {$pulse}" : null,
+            $spo2 ? "SpO2: {$spo2}" : null,
+        ]));
+    }
+
+    /**
+     * CSV Exporter for Complete Daily Report (Admissions, Discharges, and Inpatients)
+     */
+    protected function exportDayCsv(array $sections, string $sectionFilter, string $label): StreamedResponse
     {
         $safeLabel = preg_replace('/[^a-zA-Z0-9_-]+/', '_', $label) ?: date('Y-m-d');
         $filename = "day_report_{$safeLabel}_" . date('Y-m-d_His') . '.csv';
 
-        return response()->streamDownload(function () use ($admissions) {
+        $sectionMap = [
+            'admissions' => '1. Admission',
+            'discharges' => '2. Discharge',
+            'inpatients' => '3. Inpatient',
+        ];
+        $activeKeys = $sectionFilter === 'all' ? array_keys($sectionMap) : [$sectionFilter];
+
+        return response()->streamDownload(function () use ($sections, $sectionMap, $activeKeys) {
             $handle = fopen('php://output', 'w');
             fputcsv($handle, [
                 'S.No',
@@ -964,76 +1094,150 @@ class ReportController extends Controller
                 'Surgical & Anesthesia Team',
                 'Delivery Details',
                 'Baby Details',
+                'Day Section',
+                'MRD File No',
+                'Age / Sex',
+                'Attender & Relation',
+                'Contact',
+                'Address',
+                'Department / Ward',
+                'Consultant',
+                'Workflow',
+                'Format & Payment / Insurance',
+                'Diagnosis & ICD',
+                'Admission Vitals',
+                'Stay Days',
+                'Discharge Condition & Vitals',
+                'Discharge Advice / Follow-Up / Removal Dates',
+                'Handover / Floor / MRD Incharge & Status',
             ]);
 
-            foreach ($admissions->values() as $idx => $adm) {
-                $procParts = array_filter([
-                    $adm->procedure_done ?: $adm->procedure_name,
-                    $adm->incision ? 'Incision: ' . $adm->incision : null,
-                ]);
-                if (empty($procParts) && $adm->surgery_type === 'medical') {
-                    $procParts[] = 'Medical Management' . ($adm->diagnosis ? ' (' . $adm->diagnosis . ')' : '');
-                }
+            $serial = 0;
+            foreach ($activeKeys as $key) {
+                $sectionLabel = $sectionMap[$key] ?? ucfirst($key);
+                $items = $sections[$key] ?? collect();
 
-                $teamParts = array_filter([
-                    $adm->surgeon ? 'Surgeon: ' . $adm->surgeon : null,
-                    $adm->assisted_surgeon ? 'Asst. Surgeon: ' . $adm->assisted_surgeon : null,
-                    $adm->consultant ? 'Consultant: ' . $adm->consultant : null,
-                    $adm->pediatrician_name ? 'Pediatrician: ' . $adm->pediatrician_name : null,
-                    $adm->anaesthetist ? 'Anaesthetist: ' . $adm->anaesthetist : null,
-                    $adm->assisted_anaesthetist ? 'Asst. Anaesthetist: ' . $adm->assisted_anaesthetist : null,
-                    $adm->anaesthesia_type ? 'Anaesthesia: ' . $adm->anaesthesia_type : null,
-                    $adm->staff_nurse ? 'Staff Nurse: ' . $adm->staff_nurse : null,
-                    $adm->ot_technician ? 'OT Tech: ' . $adm->ot_technician : null,
-                ]);
+                foreach ($items as $adm) {
+                    $serial++;
+                    $procParts = array_filter([
+                        $adm->procedure_done ?: $adm->procedure_name,
+                        $adm->incision ? 'Incision: ' . $adm->incision : null,
+                    ]);
+                    if (empty($procParts) && $adm->surgery_type === 'medical') {
+                        $procParts[] = 'Medical Management' . ($adm->diagnosis ? ' (' . $adm->diagnosis . ')' : '');
+                    }
 
-                $isDelivery = $adm->surgery_type === 'delivery' || $adm->newborns->isNotEmpty();
-                $deliveryDetails = '';
-                $babyDetails = '';
-
-                if ($isDelivery) {
-                    $deliveryDetails = implode(' | ', array_filter([
-                        $adm->procedure_done ?: $adm->procedure_name ?: 'Delivery',
-                        $adm->picme_no ? 'PICME/RCH: ' . $adm->picme_no : null,
+                    $teamParts = array_filter([
+                        $adm->surgeon ? 'Surgeon: ' . $adm->surgeon : null,
+                        $adm->assisted_surgeon ? 'Asst. Surgeon: ' . $adm->assisted_surgeon : null,
+                        $adm->consultant ? 'Consultant: ' . $adm->consultant : null,
                         $adm->pediatrician_name ? 'Pediatrician: ' . $adm->pediatrician_name : null,
-                    ]));
+                        $adm->anaesthetist ? 'Anaesthetist: ' . $adm->anaesthetist : null,
+                        $adm->assisted_anaesthetist ? 'Asst. Anaesthetist: ' . $adm->assisted_anaesthetist : null,
+                        $adm->anaesthesia_type ? 'Anaesthesia: ' . $adm->anaesthesia_type : null,
+                        $adm->staff_nurse ? 'Staff Nurse: ' . $adm->staff_nurse : null,
+                        $adm->ot_technician ? 'OT Tech: ' . $adm->ot_technician : null,
+                    ]);
 
-                    $babyDetails = $adm->newborns->map(function ($baby, $bIdx) {
-                        $formattedVax = Newborn::formatBirthVaccinesText(
-                            $baby->birth_vaccines,
-                            $baby->vaccine_dates,
-                            $baby->vaccine_date
-                        );
-                        $vaxStr = $formattedVax !== '' ? 'Vaccines: ' . $formattedVax : null;
+                    $isDelivery = $adm->surgery_type === 'delivery' || $adm->newborns->isNotEmpty();
+                    $deliveryDetails = '';
+                    $babyDetails = '';
 
-                        return 'Baby ' . ($bIdx + 1) . ': ' . implode(', ', array_filter([
-                            $baby->sex ?: null,
-                            $baby->birth_at ? 'Born ' . Carbon::parse($baby->birth_at)->format('d.m.Y h:i A') : null,
-                            $baby->birth_weight_kg ? 'Birth Wt ' . number_format((float) $baby->birth_weight_kg, 2) . ' kg' : null,
-                            $baby->discharge_weight_kg ? 'Disch Wt ' . number_format((float) $baby->discharge_weight_kg, 2) . ' kg' : null,
-                            ($baby->apgar_1_min !== null || $baby->apgar_5_min !== null)
-                                ? 'APGAR ' . ($baby->apgar_1_min ?? '-') . '/' . ($baby->apgar_5_min ?? '-')
-                                : null,
-                            $baby->neonatal_care ? 'Care: ' . $baby->neonatal_care : null,
-                            $baby->notes ? 'Notes: ' . $baby->notes : null,
-                            $vaxStr,
+                    if ($isDelivery) {
+                        $deliveryDetails = implode(' | ', array_filter([
+                            $adm->procedure_done ?: $adm->procedure_name ?: 'Delivery',
+                            $adm->picme_no ? 'PICME/RCH: ' . $adm->picme_no : null,
+                            $adm->vhn_name ? 'VHN: ' . $adm->vhn_name : null,
+                            $adm->phc ? 'PHC: ' . $adm->phc : null,
+                            $adm->pediatrician_name ? 'Pediatrician: ' . $adm->pediatrician_name : null,
                         ]));
-                    })->implode(' || ');
-                }
 
-                fputcsv($handle, [
-                    $idx + 1,
-                    $adm->patient_name,
-                    $adm->uhid,
-                    $adm->ip_no,
-                    $adm->admission_at ? Carbon::parse($adm->admission_at)->format('d.m.Y') : '',
-                    $adm->procedure_at ? Carbon::parse($adm->procedure_at)->format('d.m.Y h:i A') : '',
-                    $adm->discharge_at ? Carbon::parse($adm->discharge_at)->format('d.m.Y') : '',
-                    implode(' | ', $procParts),
-                    implode(' | ', $teamParts),
-                    $deliveryDetails,
-                    $babyDetails,
-                ]);
+                        $babyDetails = $adm->newborns->map(function ($baby, $bIdx) {
+                            $formattedVax = Newborn::formatBirthVaccinesText(
+                                $baby->birth_vaccines,
+                                $baby->vaccine_dates,
+                                $baby->vaccine_date
+                            );
+                            $vaxStr = $formattedVax !== '' ? 'Vaccines: ' . $formattedVax : null;
+
+                            return 'Baby ' . ($bIdx + 1) . ': ' . implode(', ', array_filter([
+                                $baby->sex ?: null,
+                                $baby->birth_at ? 'Born ' . Carbon::parse($baby->birth_at)->format('d.m.Y h:i A') : null,
+                                $baby->birth_weight_kg ? 'Birth Wt ' . number_format((float) $baby->birth_weight_kg, 2) . ' kg' : null,
+                                $baby->discharge_weight_kg ? 'Disch Wt ' . number_format((float) $baby->discharge_weight_kg, 2) . ' kg' : null,
+                                ($baby->apgar_1_min !== null || $baby->apgar_5_min !== null)
+                                    ? 'APGAR ' . ($baby->apgar_1_min ?? '-') . '/' . ($baby->apgar_5_min ?? '-')
+                                    : null,
+                                $baby->neonatal_care ? 'Care: ' . $baby->neonatal_care : null,
+                                $baby->notes ? 'Notes: ' . $baby->notes : null,
+                                $vaxStr,
+                            ]));
+                        })->implode(' || ');
+                    }
+
+                    $attenderText = implode(' ', array_filter([
+                        $adm->attender_name,
+                        $adm->attender_relation ? '(' . $adm->attender_relation . ')' : null,
+                    ]));
+                    $deptWard = implode(' / ', array_filter([$adm->department, $adm->ward_room_no]));
+                    $diagIcd = implode(' | ', array_filter([
+                        $adm->diagnosis,
+                        $adm->icd_code ? 'ICD: ' . $adm->icd_code : null,
+                    ]));
+                    $admitVitals = $this->formatVitalsText($adm->vital_bp, $adm->vital_pulse, $adm->vital_spo2);
+                    $dischVitals = $this->formatVitalsText($adm->discharge_bp, $adm->discharge_pulse, $adm->discharge_spo2);
+                    $dischConditionSummary = implode(' | ', array_filter([
+                        $adm->discharge_condition,
+                        $dischVitals ?: null,
+                    ]));
+                    $adviceFollowup = implode(' | ', array_filter([
+                        $adm->discharge_advice,
+                        $adm->post_surgery_diet ? 'Diet: ' . $adm->post_surgery_diet : null,
+                        $adm->post_surgery_activity ? 'Activity: ' . $adm->post_surgery_activity : null,
+                        $adm->follow_up ? 'Follow-up: ' . $adm->follow_up : null,
+                        $adm->suture_removal_date ? 'Suture Removal: ' . Carbon::parse($adm->suture_removal_date)->format('d.m.Y') : null,
+                        $adm->stent_removal_date ? 'Stent Removal: ' . Carbon::parse($adm->stent_removal_date)->format('d.m.Y') : null,
+                    ]));
+                    $inchargeStatus = implode(' | ', array_filter([
+                        $adm->handover_name ? 'Handover: ' . $adm->handover_name : null,
+                        $adm->floor_incharge_name ? 'Floor: ' . $adm->floor_incharge_name : null,
+                        $adm->mrd_incharge_name ? 'MRD: ' . $adm->mrd_incharge_name : null,
+                        $adm->status ? 'Status: ' . strtoupper(str_replace('_', ' ', $adm->status)) : null,
+                    ]));
+                    $stayDaysVal = $key === 'inpatients'
+                        ? ($adm->census_stay_days ?? $adm->stay_days)
+                        : $adm->stay_days;
+
+                    fputcsv($handle, [
+                        $serial,
+                        $adm->patient_name,
+                        $adm->uhid,
+                        $adm->ip_no,
+                        $adm->admission_at ? Carbon::parse($adm->admission_at)->format('d.m.Y h:i A') : '',
+                        $adm->procedure_at ? Carbon::parse($adm->procedure_at)->format('d.m.Y h:i A') : '',
+                        $adm->discharge_at ? Carbon::parse($adm->discharge_at)->format('d.m.Y h:i A') : '',
+                        implode(' | ', $procParts),
+                        implode(' | ', $teamParts),
+                        $deliveryDetails,
+                        $babyDetails,
+                        $sectionLabel,
+                        $adm->resolved_mrd_no,
+                        implode(' / ', array_filter([$adm->age ? $adm->age . ' Yrs' : null, $adm->sex])),
+                        $attenderText,
+                        $adm->contact,
+                        $adm->address,
+                        $deptWard,
+                        $adm->consultant,
+                        strtoupper((string) $adm->surgery_type),
+                        trim(strtoupper((string) $adm->format) . ($adm->payment_summary && $adm->payment_summary !== '—' ? ' — ' . $adm->payment_summary : '')),
+                        $diagIcd,
+                        $admitVitals,
+                        $stayDaysVal ? $stayDaysVal . ' day(s)' : '',
+                        $dischConditionSummary,
+                        $adviceFollowup,
+                        $inchargeStatus,
+                    ]);
+                }
             }
 
             fclose($handle);

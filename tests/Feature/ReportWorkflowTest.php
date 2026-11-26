@@ -365,6 +365,146 @@ class ReportWorkflowTest extends TestCase
         $this->assertStringStartsWith('%PDF-', $pdfBytes);
     }
 
+    public function test_day_report_shows_complete_admission_discharge_and_inpatient_sections(): void
+    {
+        $targetDate = '2026-11-26';
+
+        $newAdmit = $this->createAdmission([
+            'patient_name' => 'NEW ADMIT DAY PATIENT',
+            'attender_name' => 'RAMESH',
+            'attender_relation' => 'Husband',
+            'contact' => '9876543210',
+            'address' => '12 Main Road, Dharmapuri',
+            'uhid' => 'GH-ADM-101',
+            'ip_no' => 'IP-ADM-101',
+            'admission_at' => '2026-11-26 09:15:00',
+            'discharge_at' => null,
+            'department' => 'OBG',
+            'ward_room_no' => 'W-102',
+            'consultant' => 'DR. AMBIKA',
+            'diagnosis' => 'Term Pregnancy',
+            'vital_bp' => '120/80',
+            'vital_pulse' => '82',
+            'vital_spo2' => '99%',
+            'surgery_type' => 'delivery',
+        ]);
+
+        $discharged = $this->createAdmission([
+            'patient_name' => 'DISCHARGED DAY PATIENT',
+            'uhid' => 'GH-DIS-102',
+            'ip_no' => 'IP-DIS-102',
+            'admission_at' => '2026-11-23 10:00:00',
+            'procedure_at' => '2026-11-24 11:00:00',
+            'discharge_at' => '2026-11-26 14:30:00',
+            'surgery_type' => 'other',
+            'procedure_done' => 'RIGHT URSL',
+            'diagnosis' => 'Ureteric Calculus',
+            'discharge_condition' => 'Afebrile, vitals stable',
+            'discharge_bp' => '118/76',
+            'discharge_advice' => 'Low salt soft diet',
+            'follow_up' => 'Review after 1 week',
+            'suture_removal_date' => '2026-12-03',
+            'handover_name' => 'Sister Devi',
+            'floor_incharge_name' => 'Nurse Kavitha',
+            'mrd_incharge_name' => 'Kala MRD',
+            'payment_mode' => 'Insurance',
+            'format' => 'cmchistn',
+            'insurance_type' => 'CMCHISTN',
+        ]);
+
+        $continuingInpatient = $this->createAdmission([
+            'patient_name' => 'CONTINUING WARD INPATIENT',
+            'uhid' => 'GH-IP-103',
+            'ip_no' => 'IP-IP-103',
+            'admission_at' => '2026-11-24 08:00:00',
+            'procedure_at' => null,
+            'discharge_at' => null,
+            'surgery_type' => 'medical',
+            'ward_room_no' => 'ICU-2',
+            'diagnosis' => 'Acute Gastroenteritis',
+            'consultant' => 'DR. JAYAPRAKASH',
+        ]);
+
+        $this->createAdmission([
+            'patient_name' => 'PRIOR DISCHARGED CASE',
+            'uhid' => 'GH-OLD-104',
+            'ip_no' => 'IP-OLD-104',
+            'admission_at' => '2026-11-20 09:00:00',
+            'discharge_at' => '2026-11-25 18:00:00',
+            'surgery_type' => 'medical',
+        ]);
+
+        $resp = $this->actingAs($this->user)->get('/reports/day?date=' . $targetDate);
+        $resp->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Reports/DayReport')
+                ->where('metrics.admissions_count', 1)
+                ->where('metrics.discharges_section_count', 1)
+                ->where('metrics.inpatients_count', 2)
+                ->where('sections.admissions.0.patient_name', 'NEW ADMIT DAY PATIENT')
+                ->where('sections.discharges.0.patient_name', 'DISCHARGED DAY PATIENT')
+                ->where('sections.discharges.0.stay_days', 3)
+                ->has('sections.inpatients', 2)
+            );
+
+        // Verify continuing prior-day inpatient is present under inpatients census with stay days
+        $inpatientsCsvResp = $this->actingAs($this->user)->get('/reports/day?date=' . $targetDate . '&section=inpatients&export=csv');
+        $inpatientsCsvResp->assertOk();
+        $inpatientsCsv = $inpatientsCsvResp->streamedContent();
+        $this->assertStringContainsString('CONTINUING WARD INPATIENT', $inpatientsCsv);
+        $this->assertStringContainsString('NEW ADMIT DAY PATIENT', $inpatientsCsv);
+        $this->assertStringNotContainsString('DISCHARGED DAY PATIENT', $inpatientsCsv);
+        $this->assertStringNotContainsString('PRIOR DISCHARGED CASE', $inpatientsCsv);
+
+        $dischargesCsv = $this->actingAs($this->user)
+            ->get('/reports/day?date=' . $targetDate . '&section=discharges&export=csv')
+            ->streamedContent();
+        $this->assertStringContainsString('DISCHARGED DAY PATIENT', $dischargesCsv);
+        $this->assertStringContainsString('Afebrile, vitals stable', $dischargesCsv);
+        $this->assertStringContainsString('Sister Devi', $dischargesCsv);
+        $this->assertStringContainsString('Kala MRD', $dischargesCsv);
+        $this->assertStringContainsString('03.12.2026', $dischargesCsv);
+        $this->assertStringNotContainsString('CONTINUING WARD INPATIENT', $dischargesCsv);
+
+        $admissionsCsv = $this->actingAs($this->user)
+            ->get('/reports/day?date=' . $targetDate . '&section=admissions&export=csv')
+            ->streamedContent();
+        $this->assertStringContainsString('NEW ADMIT DAY PATIENT', $admissionsCsv);
+        $this->assertStringContainsString('RAMESH (Husband)', $admissionsCsv);
+        $this->assertStringContainsString('9876543210', $admissionsCsv);
+        $this->assertStringContainsString('BP: 120/80', $admissionsCsv);
+
+        // Verify full 3-section Blade HTML renders all sections cleanly
+        $html = view('pdf.day-report-image', [
+            'sections' => [
+                'admissions' => collect([$newAdmit->load('newborns')]),
+                'discharges' => collect([$discharged->load('newborns')]),
+                'inpatients' => collect([$newAdmit->load('newborns'), $continuingInpatient->load('newborns')]),
+            ],
+            'sectionFilter' => 'all',
+            'metrics' => [
+                'admissions_count' => 1,
+                'discharges_section_count' => 1,
+                'inpatients_count' => 2,
+                'deliveries_count' => 1,
+                'babies_count' => 0,
+                'surgeries_count' => 1,
+                'medical_count' => 1,
+                'census_date' => $targetDate,
+            ],
+            'periodLabel' => 'Date: 26.11.2026',
+            'basisLabel' => 'Complete Daily Register (Admissions • Discharges • Inpatients)',
+            'logoDataUri' => null,
+        ])->render();
+
+        $this->assertStringContainsString('1. Complete Admission Details', $html);
+        $this->assertStringContainsString('2. Complete Discharge Details', $html);
+        $this->assertStringContainsString('3. Complete Inpatient Details', $html);
+        $this->assertStringContainsString('NEW ADMIT DAY PATIENT', $html);
+        $this->assertStringContainsString('DISCHARGED DAY PATIENT', $html);
+        $this->assertStringContainsString('CONTINUING WARD INPATIENT', $html);
+    }
+
     public function test_mrd_report_filters_renders_and_exports_csv_png_and_pdf(): void
     {
         $mrdSigned = $this->createAdmission([

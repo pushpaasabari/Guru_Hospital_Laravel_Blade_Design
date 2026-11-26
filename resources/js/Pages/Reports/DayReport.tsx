@@ -1,55 +1,9 @@
 import React, { useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
-import Pagination from '../../Components/Pagination';
-import { formatDate, formatDateTime } from '../../utils/dateFormatter';
-import { formatBirthVaccinesText } from '../../utils/dischargeFormatter';
+import DayReportSectionTable, { DayRecord, DaySectionKey } from '../../Components/DayReportSectionTable';
+import { formatDate } from '../../utils/dateFormatter';
 import { downloadReportFile } from '../../utils/reportDownload';
-
-interface NewbornItem {
-  id: number;
-  sex?: string | null;
-  birth_at?: string | null;
-  birth_weight_kg?: number | string | null;
-  discharge_weight_kg?: number | string | null;
-  apgar_1_min?: number | null;
-  apgar_5_min?: number | null;
-  neonatal_care?: string | null;
-  notes?: string | null;
-  birth_vaccines?: string[] | null;
-  vaccine_date?: string | null;
-  vaccine_dates?: Record<string, string> | null;
-}
-
-interface DayRecord {
-  id: number;
-  patient_name: string;
-  uhid: string;
-  ip_no: string;
-  age?: string | null;
-  sex?: string | null;
-  admission_at?: string | null;
-  procedure_at?: string | null;
-  discharge_at?: string | null;
-  format?: string | null;
-  surgery_type: string;
-  diagnosis?: string | null;
-  picme_no?: string | null;
-  procedure_done?: string | null;
-  procedure_name?: string | null;
-  incision?: string | null;
-  consultant?: string | null;
-  surgeon?: string | null;
-  assisted_surgeon?: string | null;
-  pediatrician_name?: string | null;
-  anaesthetist?: string | null;
-  assisted_anaesthetist?: string | null;
-  anaesthesia_type?: string | null;
-  staff_nurse?: string | null;
-  ot_technician?: string | null;
-  status: string;
-  newborns?: NewbornItem[];
-}
 
 interface Props {
   records: {
@@ -60,11 +14,22 @@ interface Props {
     per_page: number;
     last_page: number;
   };
+  sections: {
+    admissions: DayRecord[];
+    discharges: DayRecord[];
+    inpatients: DayRecord[];
+  };
   metrics: {
     total_cases: number;
+    admissions_count: number;
+    discharges_section_count: number;
+    inpatients_count: number;
+    census_date?: string;
     surgeries_count: number;
     deliveries_count: number;
     babies_count: number;
+    census_deliveries_count?: number;
+    census_babies_count?: number;
     medical_count: number;
     discharges_count: number;
   };
@@ -73,6 +38,7 @@ interface Props {
     date_from?: string;
     date_to?: string;
     date_basis?: string;
+    section?: string;
     all_dates?: boolean;
     search?: string;
     surgery_type?: string;
@@ -83,14 +49,15 @@ interface Props {
   clinicalStaff: Array<{ id: number; name: string; category?: string }>;
 }
 
-export default function DayReport({ records, metrics, filters, clinicalStaff }: Props) {
+export default function DayReport({ sections, metrics, filters, clinicalStaff }: Props) {
   const [selectedDate, setSelectedDate] = useState(filters.date || '');
   const [dateFrom, setDateFrom] = useState(filters.date_from || '');
   const [dateTo, setDateTo] = useState(filters.date_to || '');
-  const [dateBasis, setDateBasis] = useState(filters.date_basis || 'any');
+  const [sectionFilter, setSectionFilter] = useState<string>(filters.section || 'all');
   const [allDates, setAllDates] = useState(Boolean(filters.all_dates));
   const [search, setSearch] = useState(filters.search || '');
   const [surgeryType, setSurgeryType] = useState(filters.surgery_type || '');
+  const [format, setFormat] = useState(filters.format || '');
   const [surgeon, setSurgeon] = useState(filters.surgeon || '');
   const [downloadingFormat, setDownloadingFormat] = useState<'image' | 'pdf' | null>(null);
 
@@ -101,10 +68,11 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
     date: (overrides.all_dates ?? allDates) ? 'all' : (overrides.date ?? selectedDate),
     date_from: overrides.date_from ?? dateFrom,
     date_to: overrides.date_to ?? dateTo,
-    date_basis: overrides.date_basis ?? dateBasis,
+    section: overrides.section ?? sectionFilter,
     all_dates: (overrides.all_dates ?? allDates) ? 1 : '',
     search: overrides.search ?? search,
     surgery_type: overrides.surgery_type ?? surgeryType,
+    format: overrides.format ?? format,
     surgeon: overrides.surgeon ?? surgeon,
   });
 
@@ -146,15 +114,21 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
     }
   };
 
+  const handleSectionTab = (nextSection: string) => {
+    setSectionFilter(nextSection);
+    router.get('/reports/day', buildQueryParams({ section: nextSection }), { preserveState: true });
+  };
+
   const handleReset = () => {
     const today = toLocalIso(new Date());
     setSelectedDate(today);
     setDateFrom('');
     setDateTo('');
-    setDateBasis('any');
+    setSectionFilter('all');
     setAllDates(false);
     setSearch('');
     setSurgeryType('');
+    setFormat('');
     setSurgeon('');
     router.get('/reports/day');
   };
@@ -192,7 +166,18 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
 
   const todayIso = toLocalIso(new Date());
   const yesterdayIso = toLocalIso(new Date(Date.now() - 86400000));
-  const startIndex = ((records.current_page || 1) - 1) * (records.per_page || 50);
+
+  const visibleSections: DaySectionKey[] =
+    sectionFilter === 'admissions' || sectionFilter === 'discharges' || sectionFilter === 'inpatients'
+      ? [sectionFilter]
+      : ['admissions', 'discharges', 'inpatients'];
+
+  const safeSections = sections || { admissions: [], discharges: [], inpatients: [] };
+  const periodText = allDates
+    ? 'All Dates (Live Ward Census)'
+    : dateFrom || dateTo
+    ? `${dateFrom ? formatDate(dateFrom) : 'Start'} to ${dateTo ? formatDate(dateTo) : 'End'}`
+    : `Date: ${formatDate(selectedDate)}`;
 
   return (
     <AppLayout>
@@ -210,7 +195,8 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
             </h1>
           </div>
           <p className="text-muted mb-0" style={{ fontSize: '13.5px' }}>
-            Daily clinical register covering admissions (DOA), operations (DOO), discharges (DOD), teams, and deliveries
+            Complete daily hospital register covering <strong>1. Admissions</strong>, <strong>2. Discharges</strong>, and{' '}
+            <strong>3. Inpatients (Active Bed Census)</strong>
           </p>
         </div>
 
@@ -275,11 +261,13 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
         <div className="col-6 col-md-3">
           <div className="card h-100 border-0 shadow-sm p-3" style={{ borderRadius: '16px' }}>
             <div className="text-muted small text-uppercase fw-semibold" style={{ fontSize: '11px' }}>
-              Total Cases
+              1. Admissions
             </div>
-            <div className="h3 fw-bold text-dark mt-2 mb-0">{metrics.total_cases}</div>
+            <div className="h3 fw-bold mt-2 mb-0" style={{ color: '#0369a1' }}>
+              {metrics.admissions_count ?? safeSections.admissions.length}
+            </div>
             <div className="text-muted small mt-1" style={{ fontSize: '11.5px' }}>
-              {allDates ? 'Across all dates' : dateFrom || dateTo ? 'Selected range' : `Date: ${formatDate(selectedDate)}`}
+              {periodText}
             </div>
           </div>
         </div>
@@ -287,13 +275,13 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
         <div className="col-6 col-md-3">
           <div className="card h-100 border-0 shadow-sm p-3" style={{ borderRadius: '16px' }}>
             <div className="text-muted small text-uppercase fw-semibold" style={{ fontSize: '11px' }}>
-              Surgical OT Cases
+              2. Discharges
             </div>
-            <div className="h3 fw-bold mt-2 mb-0" style={{ color: '#d97706' }}>
-              {metrics.surgeries_count}
+            <div className="h3 fw-bold mt-2 mb-0" style={{ color: '#15803d' }}>
+              {metrics.discharges_section_count ?? metrics.discharges_count ?? safeSections.discharges.length}
             </div>
             <div className="text-muted small mt-1" style={{ fontSize: '11.5px' }}>
-              Non-obstetric procedures
+              Completed discharges in period
             </div>
           </div>
         </div>
@@ -301,36 +289,37 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
         <div className="col-6 col-md-3">
           <div className="card h-100 border-0 shadow-sm p-3" style={{ borderRadius: '16px' }}>
             <div className="text-muted small text-uppercase fw-semibold" style={{ fontSize: '11px' }}>
-              Deliveries &amp; Babies
+              3. Active Inpatients
             </div>
-            <div className="h3 fw-bold mt-2 mb-0" style={{ color: '#16a34a' }}>
+            <div className="h3 fw-bold mt-2 mb-0" style={{ color: '#b45309' }}>
+              {metrics.inpatients_count ?? safeSections.inpatients.length}
+            </div>
+            <div className="text-muted small mt-1" style={{ fontSize: '11.5px' }}>
+              Ward census {metrics.census_date ? `as of ${formatDate(metrics.census_date)}` : 'active'}
+            </div>
+          </div>
+        </div>
+
+        <div className="col-6 col-md-3">
+          <div className="card h-100 border-0 shadow-sm p-3" style={{ borderRadius: '16px' }}>
+            <div className="text-muted small text-uppercase fw-semibold" style={{ fontSize: '11px' }}>
+              OT, Deliveries &amp; Babies
+            </div>
+            <div className="h3 fw-bold text-dark mt-2 mb-0">
               {metrics.deliveries_count}{' '}
-              <span className="fs-6 fw-normal text-muted">({metrics.babies_count} babies)</span>
+              <span className="fs-6 fw-normal text-muted">
+                ({metrics.babies_count} babies)
+              </span>
             </div>
             <div className="text-muted small mt-1" style={{ fontSize: '11.5px' }}>
-              Obstetric deliveries
-            </div>
-          </div>
-        </div>
-
-        <div className="col-6 col-md-3">
-          <div className="card h-100 border-0 shadow-sm p-3" style={{ borderRadius: '16px' }}>
-            <div className="text-muted small text-uppercase fw-semibold" style={{ fontSize: '11px' }}>
-              Discharges / Medical
-            </div>
-            <div className="h3 fw-bold text-primary mt-2 mb-0">
-              {metrics.discharges_count}{' '}
-              <span className="fs-6 fw-normal text-muted">/ {metrics.medical_count} Med</span>
-            </div>
-            <div className="text-muted small mt-1" style={{ fontSize: '11.5px' }}>
-              Discharged patients &amp; medical cases
+              {metrics.surgeries_count} Surgical OT &bull; {metrics.medical_count} Medical
             </div>
           </div>
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="card border-0 shadow-sm mb-4 no-print" style={{ borderRadius: '16px' }}>
+      <div className="card border-0 shadow-sm mb-3 no-print" style={{ borderRadius: '16px' }}>
         <div className="card-body p-3">
           <form onSubmit={handleFilter} className="row g-2 align-items-end">
             <div className="col-6 col-md-2">
@@ -348,16 +337,16 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
             </div>
 
             <div className="col-6 col-md-2">
-              <label className="form-label small text-muted mb-1">Match Date By</label>
+              <label className="form-label small text-muted mb-1">Report Section</label>
               <select
                 className="form-select form-select-sm"
-                value={dateBasis}
-                onChange={(e) => setDateBasis(e.target.value)}
+                value={sectionFilter}
+                onChange={(e) => setSectionFilter(e.target.value)}
               >
-                <option value="any">Any (DOA / DOO / DOD)</option>
-                <option value="admission">DOA Only</option>
-                <option value="procedure">DOO Only</option>
-                <option value="discharge">DOD Only</option>
+                <option value="all">All 3 Sections</option>
+                <option value="admissions">1. Admissions Only</option>
+                <option value="discharges">2. Discharges Only</option>
+                <option value="inpatients">3. Inpatients Only</option>
               </select>
             </div>
 
@@ -375,7 +364,22 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
               </select>
             </div>
 
-            <div className="col-6 col-md-3">
+            <div className="col-6 col-md-2">
+              <label className="form-label small text-muted mb-1">Format</label>
+              <select
+                className="form-select form-select-sm"
+                value={format}
+                onChange={(e) => setFormat(e.target.value)}
+              >
+                <option value="">All Formats</option>
+                <option value="general">General</option>
+                <option value="cmchistn">CMCHISTN</option>
+                <option value="private">Private / TPA</option>
+                <option value="employee">Employee</option>
+              </select>
+            </div>
+
+            <div className="col-6 col-md-2">
               <label className="form-label small text-muted mb-1">Surgeon / Consultant</label>
               <select
                 className="form-select form-select-sm"
@@ -391,12 +395,12 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
               </select>
             </div>
 
-            <div className="col-12 col-md-3">
-              <label className="form-label small text-muted mb-1">Search Name / UHID / IP No</label>
+            <div className="col-6 col-md-2">
+              <label className="form-label small text-muted mb-1">Search Patient / ID</label>
               <input
                 type="text"
                 className="form-control form-control-sm"
-                placeholder="Patient name, UHID, IP No..."
+                placeholder="Name, UHID, IP No..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
               />
@@ -476,270 +480,45 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
         </div>
       </div>
 
-      {/* Day Register Table */}
-      <div className="card border-0 shadow-sm" style={{ borderRadius: '18px' }}>
-        <div className="card-header bg-white py-3 px-4 border-0 d-flex align-items-center justify-content-between">
-          <div className="d-flex align-items-center gap-2">
-            <span className="p-2 rounded-circle" style={{ color: '#0284c7', backgroundColor: '#e0f2fe' }}>
-              <i className="bi bi-journal-text"></i>
-            </span>
-            <div>
-              <h5 className="card-title mb-0 fw-bold text-dark" style={{ fontSize: '15.5px' }}>
-                Daily Clinical &amp; OT Register
-              </h5>
-              <div className="text-muted small" style={{ fontSize: '12px' }}>
-                Showing {records.data.length} of {records.total} records
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="table-responsive">
-          <table className="table table-hover align-top mb-0" style={{ fontSize: '12.5px' }}>
-            <thead className="table-light text-muted small text-uppercase" style={{ fontSize: '11px', letterSpacing: '0.04em' }}>
-              <tr>
-                <th className="ps-3 text-center" style={{ width: '50px' }}>S.No</th>
-                <th style={{ minWidth: '170px' }}>Name / UHID / IPNO</th>
-                <th style={{ minWidth: '100px' }}>DOA</th>
-                <th style={{ minWidth: '125px' }}>DOO</th>
-                <th style={{ minWidth: '100px' }}>DOD</th>
-                <th style={{ minWidth: '190px' }}>Procedure Done &amp; Incision</th>
-                <th style={{ minWidth: '210px' }}>Surgical &amp; Anesthesia Team</th>
-                <th style={{ minWidth: '260px' }}>Delivery &amp; Baby Details (If Delivery)</th>
-                <th className="text-end pe-3 no-print">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {records.data.length === 0 ? (
-                <tr>
-                  <td colSpan={9} className="text-center py-5 text-muted">
-                    <i className="bi bi-calendar-x fs-2 d-block mb-2 text-muted"></i>
-                    No clinical records matched the selected day filter.
-                  </td>
-                </tr>
-              ) : (
-                records.data.map((item, idx) => {
-                  const isDelivery =
-                    item.surgery_type === 'delivery' || (item.newborns && item.newborns.length > 0);
-                  const procedureLabel =
-                    item.procedure_done ||
-                    item.procedure_name ||
-                    (item.surgery_type === 'medical'
-                      ? `Medical Case${item.diagnosis ? `: ${item.diagnosis}` : ''}`
-                      : '—');
-
-                  return (
-                    <tr key={item.id}>
-                      <td className="ps-3 text-center fw-semibold text-muted">
-                        {startIndex + idx + 1}
-                      </td>
-
-                      <td>
-                        <div className="fw-bold text-dark">{item.patient_name}</div>
-                        <div className="text-muted small">
-                          UHID: <span className="font-monospace text-dark">{item.uhid}</span>
-                        </div>
-                        <div className="text-muted small">
-                          IPNO: <span className="font-monospace text-dark">{item.ip_no}</span>
-                        </div>
-                        {(item.age || item.sex) && (
-                          <div className="text-muted" style={{ fontSize: '11px' }}>
-                            {[item.age ? `${item.age} Yrs` : null, item.sex].filter(Boolean).join(' • ')}
-                          </div>
-                        )}
-                      </td>
-
-                      <td className="text-nowrap">
-                        {item.admission_at ? formatDate(item.admission_at) : '—'}
-                      </td>
-
-                      <td>
-                        {item.procedure_at ? formatDateTime(item.procedure_at) : '—'}
-                      </td>
-
-                      <td className="text-nowrap">
-                        {item.discharge_at ? (
-                          <span className="text-dark fw-medium">{formatDate(item.discharge_at)}</span>
-                        ) : (
-                          <span className="badge bg-info-subtle text-info-emphasis border border-info-subtle">
-                            In Admission
-                          </span>
-                        )}
-                      </td>
-
-                      <td>
-                        <div className="fw-semibold text-dark">{procedureLabel}</div>
-                        {item.incision && (
-                          <div className="text-muted small mt-1">
-                            <span className="fw-semibold">Incision:</span> {item.incision}
-                          </div>
-                        )}
-                      </td>
-
-                      <td>
-                        <div className="d-flex flex-column gap-1 small">
-                          {item.surgeon && (
-                            <div>
-                              <span className="text-muted fw-semibold">Surgeon:</span>{' '}
-                              <span className="text-dark">{item.surgeon}</span>
-                            </div>
-                          )}
-                          {item.assisted_surgeon && (
-                            <div>
-                              <span className="text-muted fw-semibold">Asst. Surgeon:</span>{' '}
-                              <span>{item.assisted_surgeon}</span>
-                            </div>
-                          )}
-                          {item.consultant && (
-                            <div>
-                              <span className="text-muted fw-semibold">Consultant:</span>{' '}
-                              <span>{item.consultant}</span>
-                            </div>
-                          )}
-                          {item.pediatrician_name && (
-                            <div>
-                              <span className="text-muted fw-semibold">Pediatrician:</span>{' '}
-                              <span>{item.pediatrician_name}</span>
-                            </div>
-                          )}
-                          {item.anaesthetist && (
-                            <div>
-                              <span className="text-muted fw-semibold">Anaesthetist:</span>{' '}
-                              <span>
-                                {item.anaesthetist}
-                                {item.assisted_anaesthetist ? ` (Asst: ${item.assisted_anaesthetist})` : ''}
-                              </span>
-                            </div>
-                          )}
-                          {item.anaesthesia_type && (
-                            <div>
-                              <span className="badge bg-light text-dark border">
-                                {item.anaesthesia_type}
-                              </span>
-                            </div>
-                          )}
-                          {(item.staff_nurse || item.ot_technician) && (
-                            <div className="text-muted" style={{ fontSize: '11px' }}>
-                              {[
-                                item.staff_nurse ? `Nurse: ${item.staff_nurse}` : null,
-                                item.ot_technician ? `OT Tech: ${item.ot_technician}` : null,
-                              ]
-                                .filter(Boolean)
-                                .join(' | ')}
-                            </div>
-                          )}
-                          {!item.surgeon && !item.consultant && !item.anaesthetist && (
-                            <span className="text-muted">—</span>
-                          )}
-                        </div>
-                      </td>
-
-                      <td>
-                        {!isDelivery ? (
-                          <span className="text-muted small">—</span>
-                        ) : (
-                          <div className="d-flex flex-column gap-2 small">
-                            <div className="p-2 rounded bg-light border">
-                              <div className="fw-semibold text-success">
-                                <i className="bi bi-heart-pulse me-1"></i>
-                                Delivery: {item.procedure_done || item.procedure_name || 'Obstetric Delivery'}
-                              </div>
-                              {item.picme_no && (
-                                <div className="text-muted" style={{ fontSize: '11.5px' }}>
-                                  PICME / RCH ID: <span className="font-monospace text-dark">{item.picme_no}</span>
-                                </div>
-                              )}
-                            </div>
-
-                            {item.newborns && item.newborns.length > 0 ? (
-                              item.newborns.map((baby, bIdx) => {
-                                const sexLower = (baby.sex || '').trim().toLowerCase();
-                                const isMale = sexLower === 'male' || sexLower === 'boy';
-                                const isFemale = sexLower === 'female' || sexLower === 'girl';
-                                const badgeClass = isMale
-                                  ? 'bg-primary-subtle text-primary border border-primary-subtle'
-                                  : isFemale
-                                  ? 'bg-success-subtle text-success border border-success-subtle'
-                                  : 'bg-secondary-subtle text-secondary border border-secondary-subtle';
-                                const sexLabel = isMale ? 'Boy' : isFemale ? 'Girl' : baby.sex || 'Not Recorded';
-                                const vaccinesText = formatBirthVaccinesText(
-                                  baby.birth_vaccines,
-                                  baby.vaccine_dates,
-                                  baby.vaccine_date
-                                );
-
-                                return (
-                                  <div key={baby.id || bIdx} className="p-2 rounded border bg-white">
-                                    <div className="d-flex flex-wrap align-items-center gap-2 mb-1">
-                                      <span className={`badge ${badgeClass}`}>{sexLabel}</span>
-                                      {baby.birth_at && (
-                                        <span className="text-muted" style={{ fontSize: '11.5px' }}>
-                                          {formatDateTime(baby.birth_at)}
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div style={{ fontSize: '11.5px' }}>
-                                      <strong>Birth Wt:</strong>{' '}
-                                      {baby.birth_weight_kg ? `${Number(baby.birth_weight_kg).toFixed(2)} kg` : '—'}
-                                      {baby.discharge_weight_kg && (
-                                        <>
-                                          {' '}| <strong>Disch Wt:</strong>{' '}
-                                          {Number(baby.discharge_weight_kg).toFixed(2)} kg
-                                        </>
-                                      )}
-                                      {(baby.apgar_1_min !== null || baby.apgar_5_min !== null) && (
-                                        <>
-                                          {' '}| <strong>APGAR:</strong> {baby.apgar_1_min ?? '—'}/
-                                          {baby.apgar_5_min ?? '—'}
-                                        </>
-                                      )}
-                                    </div>
-                                    {baby.neonatal_care && (
-                                      <div className="text-muted" style={{ fontSize: '11px' }}>
-                                        <strong>Care:</strong> {baby.neonatal_care}
-                                      </div>
-                                    )}
-                                    {baby.notes && (
-                                      <div className="text-dark" style={{ fontSize: '11px' }}>
-                                        <strong>Notes / Presentation:</strong> {baby.notes}
-                                      </div>
-                                    )}
-                                    {vaccinesText && (
-                                      <div className="text-success" style={{ fontSize: '11px' }}>
-                                        <strong>Vaccines:</strong> {vaccinesText}
-                                      </div>
-                                    )}
-                                  </div>
-                                );
-                              })
-                            ) : (
-                              <span className="text-muted fst-italic" style={{ fontSize: '11.5px' }}>
-                                Newborn details not recorded
-                              </span>
-                            )}
-                          </div>
-                        )}
-                      </td>
-
-                      <td className="text-end pe-3 no-print">
-                        <Link
-                          href={`/admissions/${item.id}/documents/preview`}
-                          className="btn btn-sm btn-outline-secondary"
-                          style={{ borderRadius: '8px', fontSize: '12px' }}
-                        >
-                          <i className="bi bi-eye me-1"></i> Review
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        <Pagination links={records.links} />
+      {/* Section Switcher Tabs */}
+      <div className="d-flex flex-wrap gap-2 mb-3 no-print">
+        {[
+          {
+            key: 'all',
+            label: 'All 3 Sections',
+            count: safeSections.admissions.length + safeSections.discharges.length + safeSections.inpatients.length,
+          },
+          { key: 'admissions', label: '1. Admissions', count: safeSections.admissions.length },
+          { key: 'discharges', label: '2. Discharges', count: safeSections.discharges.length },
+          { key: 'inpatients', label: '3. Inpatients', count: safeSections.inpatients.length },
+        ].map((tab) => {
+          const active = sectionFilter === tab.key;
+          return (
+            <button
+              key={tab.key}
+              type="button"
+              onClick={() => handleSectionTab(tab.key)}
+              className={`btn btn-sm d-flex align-items-center gap-2 ${active ? 'btn-dark shadow-sm' : 'btn-white bg-white border text-dark'}`}
+              style={{ borderRadius: '10px', padding: '6px 14px', fontSize: '12.5px', fontWeight: 600 }}
+            >
+              <span>{tab.label}</span>
+              <span className={`badge ${active ? 'bg-light text-dark' : 'bg-secondary-subtle text-dark'}`}>
+                {tab.count}
+              </span>
+            </button>
+          );
+        })}
       </div>
+
+      {/* Dedicated Complete Detail Sections */}
+      {visibleSections.map((key) => (
+        <DayReportSectionTable
+          key={key}
+          sectionKey={key}
+          items={safeSections[key] || []}
+          censusDate={metrics.census_date}
+        />
+      ))}
     </AppLayout>
   );
 }
