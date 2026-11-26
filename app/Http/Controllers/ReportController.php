@@ -6,6 +6,7 @@ use App\Models\Admission;
 use App\Models\AnesthesiaType;
 use App\Models\ClinicalStaff;
 use App\Models\Newborn;
+use App\Services\DocumentPackPdfService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -25,7 +26,7 @@ class ReportController extends Controller
     /**
      * Day Wise / Daily Clinical Register Report
      */
-    public function day(Request $request)
+    public function day(Request $request, DocumentPackPdfService $pdfService)
     {
         $allDates = $request->boolean('all_dates') || $request->input('date') === 'all';
         $dateFrom = $request->input('date_from');
@@ -108,6 +109,25 @@ class ReportController extends Controller
             'medical_count' => $allMatches->where('surgery_type', 'medical')->count(),
             'discharges_count' => $allMatches->filter(fn ($a) => !empty($a->discharge_at))->count(),
         ];
+
+        if ($request->input('export') === 'image') {
+            $label = $allDates
+                ? 'all_dates'
+                : (($dateFrom || $dateTo) ? trim(($dateFrom ?: 'start') . '_to_' . ($dateTo ?: 'end')) : $selectedDate);
+            $periodLabel = $allDates
+                ? 'All Dates'
+                : (($dateFrom || $dateTo)
+                    ? trim(($dateFrom ? Carbon::parse($dateFrom)->format('d.m.Y') : 'Start') . ' to ' . ($dateTo ? Carbon::parse($dateTo)->format('d.m.Y') : 'End'))
+                    : 'Date: ' . Carbon::parse($selectedDate)->format('d.m.Y'));
+            $basisLabel = match ($dateBasis) {
+                'admission' => 'DOA Only',
+                'procedure' => 'DOO Only',
+                'discharge' => 'DOD Only',
+                default => 'Any (DOA / DOO / DOD)',
+            };
+
+            return $this->exportDayImage($allMatches, $metrics, $label, $periodLabel, $basisLabel, $pdfService);
+        }
 
         $perPage = (int) $request->input('per_page', 50);
         if ($perPage < 5 || $perPage > 200) {
@@ -837,11 +857,13 @@ class ReportController extends Controller
                         $adm->pediatrician_name ? 'Pediatrician: ' . $adm->pediatrician_name : null,
                     ]));
 
-                    $babyDetails = $adm->newborns->map(function ($baby, $bIdx) use ($adm) {
-                        $vaccines = array_values(array_filter((array) ($baby->birth_vaccines ?? [])));
-                        $vaxStr = !empty($vaccines)
-                            ? 'Vaccines: ' . implode(', ', $vaccines) . ($baby->vaccine_date ? ' (' . Carbon::parse($baby->vaccine_date)->format('d.m.Y') . ')' : '')
-                            : null;
+                    $babyDetails = $adm->newborns->map(function ($baby, $bIdx) {
+                        $formattedVax = Newborn::formatBirthVaccinesText(
+                            $baby->birth_vaccines,
+                            $baby->vaccine_dates,
+                            $baby->vaccine_date
+                        );
+                        $vaxStr = $formattedVax !== '' ? 'Vaccines: ' . $formattedVax : null;
 
                         return 'Baby ' . ($bIdx + 1) . ': ' . implode(', ', array_filter([
                             $baby->sex ?: null,
@@ -876,6 +898,45 @@ class ReportController extends Controller
             fclose($handle);
         }, $filename, [
             'Content-Type' => 'text/csv',
+        ]);
+    }
+
+    /**
+     * Full-Page High-Resolution PNG Exporter for Day Report
+     */
+    protected function exportDayImage(
+        $records,
+        array $metrics,
+        string $label,
+        string $periodLabel,
+        string $basisLabel,
+        DocumentPackPdfService $pdfService
+    ): Response {
+        $safeLabel = preg_replace('/[^a-zA-Z0-9_-]+/', '_', $label) ?: date('Y-m-d');
+        $filename = "day_report_{$safeLabel}_" . date('Y-m-d_His') . '.png';
+
+        $logoPath = public_path('images/guru-hospital-logo.png');
+        $logoDataUri = is_file($logoPath)
+            ? 'data:image/png;base64,' . base64_encode((string) file_get_contents($logoPath))
+            : null;
+
+        $html = view('pdf.day-report-image', [
+            'records' => $records,
+            'metrics' => $metrics,
+            'periodLabel' => $periodLabel,
+            'basisLabel' => $basisLabel,
+            'logoDataUri' => $logoDataUri,
+        ])->render();
+
+        $pngBytes = $pdfService->generateReportImageWithPlaywright($html, "GURU HOSPITAL — Day Report ({$periodLabel})");
+
+        return response($pngBytes, 200, [
+            'Content-Type' => 'image/png',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+            'Content-Length' => strlen($pngBytes),
+            'Cache-Control' => 'private, no-cache, no-store, must-revalidate',
+            'Pragma' => 'no-cache',
+            'Expires' => '0',
         ]);
     }
 }

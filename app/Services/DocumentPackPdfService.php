@@ -164,14 +164,32 @@ class DocumentPackPdfService
         $meta = $this->resolveDocumentMetadata($type, $admission);
         $html = view($meta['view'], compact('admission'))->render();
 
+        return $this->renderHtmlWithPlaywright($html, $meta['type'], $meta['headerTitle'], 'pdf');
+    }
+
+    /**
+     * Renders an HTML report document into a complete full-page PNG image via Playwright Chromium.
+     */
+    public function generateReportImageWithPlaywright(string $html, string $title = 'GURU HOSPITAL — Day Report'): string
+    {
+        return $this->renderHtmlWithPlaywright($html, 'report_image', $title, 'png', 90);
+    }
+
+    private function renderHtmlWithPlaywright(
+        string $html,
+        string $type,
+        string $headerTitle,
+        string $extension = 'pdf',
+        int $timeout = 60
+    ): string {
         $tempDir = storage_path('app/temp_pdf');
         if (!is_dir($tempDir)) {
             @mkdir($tempDir, 0755, true);
         }
 
-        $uniqueId = uniqid('pdf_', true);
+        $uniqueId = uniqid($extension.'_', true);
         $tempHtml = "{$tempDir}/{$uniqueId}.html";
-        $tempPdf = "{$tempDir}/{$uniqueId}.pdf";
+        $tempOutput = "{$tempDir}/{$uniqueId}.{$extension}";
 
         file_put_contents($tempHtml, $html);
 
@@ -184,37 +202,38 @@ class DocumentPackPdfService
                 $nodeBinary,
                 $scriptPath,
                 '--input', $tempHtml,
-                '--output', $tempPdf,
-                '--title', $meta['headerTitle'],
-                '--type', $meta['type'],
+                '--output', $tempOutput,
+                '--title', $headerTitle,
+                '--type', $type,
             ], base_path(), $env);
 
-            $process->setTimeout(60);
+            $process->setTimeout($timeout);
             $process->run();
 
-            if ($process->isSuccessful() && file_exists($tempPdf) && filesize($tempPdf) > 0) {
-                return (string) file_get_contents($tempPdf);
+            if ($process->isSuccessful() && file_exists($tempOutput) && filesize($tempOutput) > 0) {
+                return (string) file_get_contents($tempOutput);
             }
 
             $errorDetail = trim($process->getErrorOutput() ?: $process->getOutput());
-            Log::error('Playwright Chromium PDF process failed', [
-                'type' => $meta['type'],
+            Log::error('Playwright Chromium render process failed', [
+                'type' => $type,
+                'extension' => $extension,
                 'exit_code' => $process->getExitCode(),
                 'error' => $errorDetail,
             ]);
 
             throw new RuntimeException(
-                'Chromium + Playwright PDF generation failed' . ($errorDetail ? ": {$errorDetail}" : '.')
+                'Chromium + Playwright rendering failed' . ($errorDetail ? ": {$errorDetail}" : '.')
             );
         } catch (RuntimeException $e) {
             throw $e;
         } catch (\Throwable $e) {
-            Log::error('Playwright Chromium PDF exception: ' . $e->getMessage());
-            throw new RuntimeException('Chromium + Playwright PDF generation error: ' . $e->getMessage(), 0, $e);
+            Log::error('Playwright Chromium exception: ' . $e->getMessage());
+            throw new RuntimeException('Chromium + Playwright rendering error: ' . $e->getMessage(), 0, $e);
         } finally {
             @unlink($tempHtml);
-            if (file_exists($tempPdf)) {
-                @unlink($tempPdf);
+            if (file_exists($tempOutput)) {
+                @unlink($tempOutput);
             }
         }
     }

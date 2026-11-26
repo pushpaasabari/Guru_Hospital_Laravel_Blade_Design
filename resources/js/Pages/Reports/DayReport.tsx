@@ -3,6 +3,7 @@ import { Head, Link, router } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import Pagination from '../../Components/Pagination';
 import { formatDate, formatDateTime } from '../../utils/dateFormatter';
+import { formatBirthVaccinesText } from '../../utils/dischargeFormatter';
 
 interface NewbornItem {
   id: number;
@@ -16,6 +17,7 @@ interface NewbornItem {
   notes?: string | null;
   birth_vaccines?: string[] | null;
   vaccine_date?: string | null;
+  vaccine_dates?: Record<string, string> | null;
 }
 
 interface DayRecord {
@@ -89,6 +91,7 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
   const [search, setSearch] = useState(filters.search || '');
   const [surgeryType, setSurgeryType] = useState(filters.surgery_type || '');
   const [surgeon, setSurgeon] = useState(filters.surgeon || '');
+  const [downloadingImage, setDownloadingImage] = useState(false);
 
   const toLocalIso = (d: Date) =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -155,7 +158,7 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
     router.get('/reports/day');
   };
 
-  const handleExportCsv = () => {
+  const buildExportUrl = (formatType: 'csv' | 'image') => {
     const raw = buildQueryParams();
     const params = new URLSearchParams();
     Object.entries(raw).forEach(([k, v]) => {
@@ -163,8 +166,41 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
         params.set(k, String(v));
       }
     });
-    params.set('export', 'csv');
-    window.location.href = `/reports/day?${params.toString()}`;
+    params.set('export', formatType);
+    return `/reports/day?${params.toString()}`;
+  };
+
+  const handleExportCsv = () => {
+    window.location.href = buildExportUrl('csv');
+  };
+
+  const handleDownloadImage = async () => {
+    setDownloadingImage(true);
+    try {
+      const response = await fetch(buildExportUrl('image'), {
+        credentials: 'same-origin',
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      const blob = await response.blob();
+      const disposition = response.headers.get('Content-Disposition') || '';
+      const filenameMatch = disposition.match(/filename="?([^"]+)"?/i);
+      const filename = filenameMatch?.[1] || `day_report_${selectedDate || 'complete'}.png`;
+
+      const blobUrl = window.URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = blobUrl;
+      anchor.download = filename;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      window.URL.revokeObjectURL(blobUrl);
+    } catch {
+      alert('Failed to generate Day Report image. Please try again.');
+    } finally {
+      setDownloadingImage(false);
+    }
   };
 
   const todayIso = toLocalIso(new Date());
@@ -192,6 +228,24 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
         </div>
 
         <div className="d-flex align-items-center gap-2 no-print">
+          <button
+            type="button"
+            onClick={handleDownloadImage}
+            disabled={downloadingImage}
+            className="btn btn-primary d-flex align-items-center gap-1 shadow-sm"
+            style={{ borderRadius: '10px', fontSize: '13px' }}
+          >
+            {downloadingImage ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-1" role="status"></span>
+                Generating Image...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-file-earmark-image"></i> Download Image
+              </>
+            )}
+          </button>
           <button
             type="button"
             onClick={handleExportCsv}
@@ -603,9 +657,11 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
                                   ? 'bg-success-subtle text-success border border-success-subtle'
                                   : 'bg-secondary-subtle text-secondary border border-secondary-subtle';
                                 const sexLabel = isMale ? 'Boy' : isFemale ? 'Girl' : baby.sex || 'Not Recorded';
-                                const vaccines = Array.isArray(baby.birth_vaccines)
-                                  ? baby.birth_vaccines.filter(Boolean)
-                                  : [];
+                                const vaccinesText = formatBirthVaccinesText(
+                                  baby.birth_vaccines,
+                                  baby.vaccine_dates,
+                                  baby.vaccine_date
+                                );
 
                                 return (
                                   <div key={baby.id || bIdx} className="p-2 rounded border bg-white">
@@ -643,11 +699,9 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
                                         <strong>Notes / Presentation:</strong> {baby.notes}
                                       </div>
                                     )}
-                                    {(vaccines.length > 0 || baby.vaccine_date) && (
+                                    {vaccinesText && (
                                       <div className="text-success" style={{ fontSize: '11px' }}>
-                                        <strong>Vaccines:</strong>{' '}
-                                        {vaccines.length > 0 ? vaccines.join(', ') : 'Recorded'}
-                                        {baby.vaccine_date ? ` (${formatDate(baby.vaccine_date)})` : ''}
+                                        <strong>Vaccines:</strong> {vaccinesText}
                                       </div>
                                     )}
                                   </div>

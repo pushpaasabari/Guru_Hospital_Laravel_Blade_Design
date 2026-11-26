@@ -27,6 +27,8 @@ trait HasNewbornValidationRules
             'newborns.*.birth_vaccines' => ['nullable', 'array'],
             'newborns.*.birth_vaccines.*' => ['string', Rule::in(Newborn::BIRTH_VACCINES)],
             'newborns.*.vaccine_date' => ['nullable', 'date'],
+            'newborns.*.vaccine_dates' => ['nullable', 'array'],
+            'newborns.*.vaccine_dates.*' => ['nullable', 'date'],
         ];
     }
 }

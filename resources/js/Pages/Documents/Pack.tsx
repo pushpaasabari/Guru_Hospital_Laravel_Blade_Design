@@ -26,6 +26,7 @@ interface Newborn {
   notes?: string;
   birth_vaccines?: string[];
   vaccine_date?: string;
+  vaccine_dates?: Record<string, string>;
 }
 
 interface User {

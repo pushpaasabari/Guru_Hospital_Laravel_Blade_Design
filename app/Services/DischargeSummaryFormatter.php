@@ -1275,14 +1275,11 @@ class DischargeSummaryFormatter
             $neonatalCare = $baby->neonatal_care ?: '—';
             $notes = trim((string) ($baby->notes ?? ''));
 
-            $vaccines = array_values(array_filter((array) ($baby->birth_vaccines ?? [])));
-            $vaxDate = $baby->vaccine_date ? $baby->vaccine_date->format('d.m.Y') : '';
-            $birthVaccinesText = '';
-            if (!empty($vaccines)) {
-                $birthVaccinesText = implode(', ', $vaccines) . ($vaxDate ? " (Given on {$vaxDate})" : '');
-            } elseif ($vaxDate !== '') {
-                $birthVaccinesText = "Given on {$vaxDate}";
-            }
+            $birthVaccinesText = \App\Models\Newborn::formatBirthVaccinesText(
+                $baby->birth_vaccines,
+                $baby->vaccine_dates,
+                $baby->vaccine_date
+            );
 
             $cards[] = [
                 'title' => $title,

@@ -790,6 +790,62 @@ export function formatAdviceAndReview(adviceText?: string | null, followUpText?:
   return { advice_items: items, review_text: reviewText, review_date: reviewDate, tamil_note };
 }
 
+const CANONICAL_BIRTH_VACCINES = ['Vitamin K', 'BCG', 'OPV', 'HEP-B1'] as const;
+
+function formatDotDate(raw?: string | null): string {
+  if (!raw) return '';
+  const trimmed = String(raw).trim();
+  if (!trimmed) return '';
+  const iso = trimmed.slice(0, 10);
+  const dt = new Date(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? `${iso}T00:00:00` : trimmed);
+  if (Number.isNaN(dt.getTime())) return trimmed;
+  return `${String(dt.getDate()).padStart(2, '0')}.${String(dt.getMonth() + 1).padStart(2, '0')}.${dt.getFullYear()}`;
+}
+
+export function formatBirthVaccinesText(
+  vaccines?: string[] | null,
+  vaccineDates?: Record<string, string> | null,
+  fallbackDate?: string | null
+): string {
+  const inputSet = new Set(Array.isArray(vaccines) ? vaccines.filter(Boolean) : []);
+  const selected = CANONICAL_BIRTH_VACCINES.filter((v) => inputSet.has(v));
+  const fallbackFormatted = formatDotDate(fallbackDate);
+
+  if (selected.length === 0) {
+    return fallbackFormatted ? `Given on ${fallbackFormatted}` : '';
+  }
+
+  const grouped = new Map<string, string[]>();
+  const distinctDates = new Set<string>();
+
+  for (const vaccine of selected) {
+    const rawDate = vaccineDates?.[vaccine];
+    const formattedDate = formatDotDate(rawDate) || fallbackFormatted;
+    if (formattedDate) {
+      distinctDates.add(formattedDate);
+    }
+    const existing = grouped.get(formattedDate) || [];
+    existing.push(vaccine);
+    grouped.set(formattedDate, existing);
+  }
+
+  if (distinctDates.size === 1 && !grouped.has('')) {
+    const onlyDate = Array.from(distinctDates)[0];
+    return `${selected.join(', ')} (Given on ${onlyDate})`;
+  }
+
+  if (distinctDates.size === 0) {
+    return selected.join(', ');
+  }
+
+  const parts: string[] = [];
+  grouped.forEach((names, dateLabel) => {
+    parts.push(dateLabel ? `${names.join(', ')} (${dateLabel})` : names.join(', '));
+  });
+
+  return parts.join('; ');
+}
+
 export function formatNewborns(admission: any): FormattedNewbornCard[] {
   const newborns = admission.newborns || [];
   if (!newborns || newborns.length === 0) return [];
@@ -826,21 +882,11 @@ export function formatNewborns(admission: any): FormattedNewbornCard[] {
 
     let neonatalCare = baby.neonatal_care || '—';
     const notes = String(baby.notes || '').trim();
-
-    const vaccines = Array.isArray(baby.birth_vaccines) ? baby.birth_vaccines.filter(Boolean) : [];
-    let vaxDate = '';
-    if (baby.vaccine_date) {
-      const vd = new Date(String(baby.vaccine_date).slice(0, 10) + 'T00:00:00');
-      if (!Number.isNaN(vd.getTime())) {
-        vaxDate = `${String(vd.getDate()).padStart(2, '0')}.${String(vd.getMonth() + 1).padStart(2, '0')}.${vd.getFullYear()}`;
-      }
-    }
-    let birthVaccinesText = '';
-    if (vaccines.length > 0) {
-      birthVaccinesText = vaccines.join(', ') + (vaxDate ? ` (Given on ${vaxDate})` : '');
-    } else if (vaxDate) {
-      birthVaccinesText = `Given on ${vaxDate}`;
-    }
+    const birthVaccinesText = formatBirthVaccinesText(
+      baby.birth_vaccines,
+      baby.vaccine_dates,
+      baby.vaccine_date
+    );
 
     cards.push({
       title,

@@ -842,6 +842,41 @@ class AdmissionWorkflowTest extends TestCase
                 ->where('digitalSummary.newborn_cards.0.notes', 'Cephalic presentation, clear liquor')
                 ->where('digitalSummary.newborn_cards.0.birth_vaccines_text', 'Vitamin K, BCG, OPV, HEP-B1 (Given on 26.11.2026)')
             );
+
+        // Update with distinct dates per vaccine (Vitamin K on birth date 2026-11-24; BCG/OPV/HEP-B1 on 2026-11-26)
+        $this->actingAs($this->nurse)
+            ->put(route('admissions.surgery.update', $admission), [
+                'procedure_name' => 'Normal Vaginal Delivery',
+                'newborns' => [
+                    [
+                        'sex' => 'Female',
+                        'birth_at' => '2026-11-24 14:30:00',
+                        'birth_weight_kg' => '2.90',
+                        'discharge_weight_kg' => '2.78',
+                        'notes' => 'Cephalic presentation, clear liquor',
+                        'birth_vaccines' => ['Vitamin K', 'BCG', 'OPV', 'HEP-B1'],
+                        'vaccine_dates' => [
+                            'Vitamin K' => '2026-11-24',
+                            'BCG' => '2026-11-26',
+                            'OPV' => '2026-11-26',
+                            'HEP-B1' => '2026-11-26',
+                        ],
+                    ],
+                ],
+                'next_step' => 'stay',
+            ])
+            ->assertRedirect(route('admissions.surgery', $admission));
+
+        $admission->refresh();
+        $this->assertEquals([
+            'Vitamin K' => '2026-11-24',
+            'BCG' => '2026-11-26',
+            'OPV' => '2026-11-26',
+            'HEP-B1' => '2026-11-26',
+        ], $admission->newborns->first()->vaccine_dates);
+
+        $diffDateHtml = view('pdf.discharge-summary-a4', ['admission' => $admission])->render();
+        $this->assertStringContainsString('Vitamin K (24.11.2026); BCG, OPV, HEP-B1 (26.11.2026)', $diffDateHtml);
     }
 }
 

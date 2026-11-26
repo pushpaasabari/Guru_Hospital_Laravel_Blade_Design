@@ -24,6 +24,7 @@ interface Newborn {
   notes?: string;
   birth_vaccines?: string[];
   vaccine_date?: string;
+  vaccine_dates?: Record<string, string>;
 }
 
 interface AdmissionData {
@@ -88,13 +89,30 @@ export default function AdmissionsSurgery({
 
   const initialNewborns: Newborn[] =
     admission.newborns && admission.newborns.length > 0
-      ? admission.newborns.map((nb) => ({
-          ...nb,
-          birth_at: nb.birth_at ? nb.birth_at.slice(0, 16) : '',
-          discharge_weight_kg: nb.discharge_weight_kg ?? '',
-          birth_vaccines: Array.isArray(nb.birth_vaccines) ? nb.birth_vaccines : [],
-          vaccine_date: nb.vaccine_date ? String(nb.vaccine_date).slice(0, 10) : '',
-        }))
+      ? admission.newborns.map((nb) => {
+          const selectedVax = Array.isArray(nb.birth_vaccines) ? nb.birth_vaccines : [];
+          const fallbackDate = nb.vaccine_date ? String(nb.vaccine_date).slice(0, 10) : '';
+          const perVaxDates: Record<string, string> = {};
+          if (nb.vaccine_dates && typeof nb.vaccine_dates === 'object') {
+            Object.entries(nb.vaccine_dates).forEach(([k, v]) => {
+              if (v) perVaxDates[k] = String(v).slice(0, 10);
+            });
+          }
+          selectedVax.forEach((v) => {
+            if (!perVaxDates[v] && fallbackDate) {
+              perVaxDates[v] = fallbackDate;
+            }
+          });
+
+          return {
+            ...nb,
+            birth_at: nb.birth_at ? nb.birth_at.slice(0, 16) : '',
+            discharge_weight_kg: nb.discharge_weight_kg ?? '',
+            birth_vaccines: selectedVax,
+            vaccine_date: fallbackDate,
+            vaccine_dates: perVaxDates,
+          };
+        })
       : isDelivery
       ? [
           {
@@ -108,6 +126,7 @@ export default function AdmissionsSurgery({
             notes: '',
             birth_vaccines: [],
             vaccine_date: '',
+            vaccine_dates: {},
           },
         ]
       : [];
@@ -241,6 +260,7 @@ export default function AdmissionsSurgery({
         notes: '',
         birth_vaccines: [],
         vaccine_date: '',
+        vaccine_dates: {},
       },
     ]);
   };
@@ -259,13 +279,42 @@ export default function AdmissionsSurgery({
   };
 
   const toggleBabyVaccine = (index: number, vaccine: string) => {
-    const current = Array.isArray(data.newborns[index]?.birth_vaccines)
-      ? data.newborns[index].birth_vaccines!
-      : [];
-    const next = current.includes(vaccine)
+    const currentBaby = data.newborns[index] || {};
+    const current = Array.isArray(currentBaby.birth_vaccines) ? currentBaby.birth_vaccines : [];
+    const nextDates = { ...(currentBaby.vaccine_dates || {}) };
+    const isRemoving = current.includes(vaccine);
+    const next = isRemoving
       ? current.filter((v) => v !== vaccine)
       : BIRTH_VACCINES.filter((v) => v === vaccine || current.includes(v));
-    updateBaby(index, 'birth_vaccines', next);
+
+    if (isRemoving) {
+      delete nextDates[vaccine];
+    }
+
+    const updated = [...data.newborns];
+    updated[index] = { ...currentBaby, birth_vaccines: next, vaccine_dates: nextDates };
+    setData('newborns', updated);
+  };
+
+  const updateBabyVaccineDate = (index: number, vaccine: string, dateValue: string) => {
+    const currentBaby = data.newborns[index] || {};
+    const current = Array.isArray(currentBaby.birth_vaccines) ? currentBaby.birth_vaccines : [];
+    const nextDates = { ...(currentBaby.vaccine_dates || {}) };
+
+    if (dateValue) {
+      nextDates[vaccine] = dateValue;
+    } else {
+      delete nextDates[vaccine];
+    }
+
+    const next =
+      dateValue && !current.includes(vaccine)
+        ? BIRTH_VACCINES.filter((v) => v === vaccine || current.includes(v))
+        : current;
+
+    const updated = [...data.newborns];
+    updated[index] = { ...currentBaby, birth_vaccines: next, vaccine_dates: nextDates };
+    setData('newborns', updated);
   };
 
   const submitStage = (step: 'stay' | 'discharge', e: React.FormEvent) => {
@@ -1008,38 +1057,51 @@ export default function AdmissionsSurgery({
 
                       <div className="col-12">
                         <div className="bg-white border rounded-3 p-3">
-                          <div className="row g-3 align-items-end">
-                            <div className="col-md-8">
-                              <div className="d-flex justify-content-between align-items-center mb-2">
-                                <label className="form-label fw-semibold mb-0">
-                                  <i className="bi bi-shield-plus text-success me-1"></i>
-                                  Birth Vaccines Given
-                                </label>
-                                <button
-                                  type="button"
-                                  className="btn btn-link btn-sm p-0 text-decoration-none"
-                                  onClick={() => {
-                                    const allSelected = BIRTH_VACCINES.every((v) =>
-                                      (baby.birth_vaccines || []).includes(v)
-                                    );
-                                    updateBaby(
-                                      idx,
-                                      'birth_vaccines',
-                                      allSelected ? [] : [...BIRTH_VACCINES]
-                                    );
-                                  }}
-                                >
-                                  {BIRTH_VACCINES.every((v) => (baby.birth_vaccines || []).includes(v))
-                                    ? 'Clear All'
-                                    : 'Select All'}
-                                </button>
+                          <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                            <div>
+                              <label className="form-label fw-semibold mb-0">
+                                <i className="bi bi-shield-plus text-success me-1"></i>
+                                Birth Vaccines Given &amp; Administration Dates
+                              </label>
+                              <div className="text-muted" style={{ fontSize: '11.5px' }}>
+                                Select each vaccine given and enter its own administration date (e.g. Vitamin K on birth date, BCG / OPV / HEP-B1 on discharge date).
                               </div>
-                              <div className="d-flex flex-wrap gap-3">
-                                {BIRTH_VACCINES.map((vaccine) => {
-                                  const checked = (baby.birth_vaccines || []).includes(vaccine);
-                                  const checkboxId = `newborn_${idx}_vax_${vaccine.replace(/[^a-zA-Z0-9]/g, '_')}`;
-                                  return (
-                                    <div key={vaccine} className="form-check form-check-inline m-0">
+                            </div>
+                            <div className="d-flex align-items-center gap-2">
+                              <button
+                                type="button"
+                                className="btn btn-link btn-sm p-0 text-decoration-none"
+                                onClick={() => {
+                                  const allSelected = BIRTH_VACCINES.every((v) =>
+                                    (baby.birth_vaccines || []).includes(v)
+                                  );
+                                  if (allSelected) {
+                                    const updated = [...data.newborns];
+                                    updated[idx] = { ...baby, birth_vaccines: [], vaccine_dates: {} };
+                                    setData('newborns', updated);
+                                  } else {
+                                    updateBaby(idx, 'birth_vaccines', [...BIRTH_VACCINES]);
+                                  }
+                                }}
+                              >
+                                {BIRTH_VACCINES.every((v) => (baby.birth_vaccines || []).includes(v))
+                                  ? 'Clear All'
+                                  : 'Select All'}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="row g-2">
+                            {BIRTH_VACCINES.map((vaccine) => {
+                              const checked = (baby.birth_vaccines || []).includes(vaccine);
+                              const checkboxId = `newborn_${idx}_vax_${vaccine.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                              const vaxDateVal = baby.vaccine_dates?.[vaccine] || '';
+                              const birthDateSrc = String(baby.birth_at || data.procedure_at || '').slice(0, 10);
+
+                              return (
+                                <div key={vaccine} className="col-md-6">
+                                  <div className={`border rounded-2 p-2 d-flex align-items-center justify-content-between gap-2 ${checked ? 'border-success bg-success-subtle bg-opacity-10' : 'bg-light'}`}>
+                                    <div className="form-check m-0">
                                       <input
                                         id={checkboxId}
                                         type="checkbox"
@@ -1055,36 +1117,32 @@ export default function AdmissionsSurgery({
                                         {vaccine}
                                       </label>
                                     </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
 
-                            <div className="col-md-4">
-                              <div className="d-flex justify-content-between align-items-center mb-1">
-                                <label className="form-label mb-0">Vaccines Given On (Date)</label>
-                                {(baby.birth_at || data.procedure_at) && (
-                                  <button
-                                    type="button"
-                                    className="btn btn-link btn-sm p-0 text-decoration-none"
-                                    onClick={() => {
-                                      const srcDate = String(baby.birth_at || data.procedure_at || '').slice(0, 10);
-                                      if (srcDate) {
-                                        updateBaby(idx, 'vaccine_date', srcDate);
-                                      }
-                                    }}
-                                  >
-                                    Use Birth Date
-                                  </button>
-                                )}
-                              </div>
-                              <input
-                                type="date"
-                                className="form-control"
-                                value={baby.vaccine_date || ''}
-                                onChange={(e) => updateBaby(idx, 'vaccine_date', e.target.value)}
-                              />
-                            </div>
+                                    <div className="d-flex align-items-center gap-1">
+                                      {birthDateSrc && (
+                                        <button
+                                          type="button"
+                                          className="btn btn-outline-secondary btn-sm py-0 px-2"
+                                          style={{ fontSize: '11px', height: '30px' }}
+                                          title={`Set ${vaccine} date to Birth Date (${birthDateSrc})`}
+                                          onClick={() => updateBabyVaccineDate(idx, vaccine, birthDateSrc)}
+                                        >
+                                          Birth Date
+                                        </button>
+                                      )}
+                                      <input
+                                        type="date"
+                                        className="form-control form-control-sm"
+                                        style={{ width: '145px' }}
+                                        aria-label={`${vaccine} given date`}
+                                        value={vaxDateVal}
+                                        onChange={(e) => updateBabyVaccineDate(idx, vaccine, e.target.value)}
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       </div>

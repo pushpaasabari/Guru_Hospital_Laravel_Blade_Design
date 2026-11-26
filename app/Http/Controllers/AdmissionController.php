@@ -406,14 +406,36 @@ class AdmissionController extends Controller
         }
 
         foreach ($newborns as $newborn) {
-            if (!empty($newborn['birth_vaccines']) && is_array($newborn['birth_vaccines'])) {
-                $selected = array_values(array_intersect(
-                    Newborn::BIRTH_VACCINES,
-                    $newborn['birth_vaccines']
-                ));
-                $newborn['birth_vaccines'] = !empty($selected) ? $selected : null;
-            } else {
-                $newborn['birth_vaccines'] = null;
+            $rawDates = is_array($newborn['vaccine_dates'] ?? null) ? $newborn['vaccine_dates'] : [];
+            $selected = !empty($newborn['birth_vaccines']) && is_array($newborn['birth_vaccines'])
+                ? array_values(array_intersect(Newborn::BIRTH_VACCINES, $newborn['birth_vaccines']))
+                : [];
+
+            // Also include any vaccine whose date was picked directly
+            foreach (Newborn::BIRTH_VACCINES as $vax) {
+                if (!empty($rawDates[$vax]) && !in_array($vax, $selected, true)) {
+                    $selected[] = $vax;
+                }
+            }
+            $selected = array_values(array_intersect(Newborn::BIRTH_VACCINES, $selected));
+
+            $cleanDates = [];
+            foreach ($selected as $vax) {
+                $val = trim((string) ($rawDates[$vax] ?? ''));
+                if ($val !== '') {
+                    $cleanDates[$vax] = substr($val, 0, 10);
+                } elseif (!empty($newborn['vaccine_date'])) {
+                    $cleanDates[$vax] = substr((string) $newborn['vaccine_date'], 0, 10);
+                }
+            }
+
+            $newborn['birth_vaccines'] = !empty($selected) ? $selected : null;
+            $newborn['vaccine_dates'] = !empty($cleanDates) ? $cleanDates : null;
+            if (empty($newborn['vaccine_date']) && !empty($cleanDates)) {
+                $firstDate = reset($cleanDates);
+                if (count(array_unique($cleanDates)) === 1) {
+                    $newborn['vaccine_date'] = $firstDate;
+                }
             }
 
             if (collect($newborn)->filter(fn ($v) => $v !== null && $v !== '' && $v !== [])->isNotEmpty()) {

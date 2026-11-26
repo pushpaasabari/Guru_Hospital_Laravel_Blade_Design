@@ -268,7 +268,10 @@ class ReportWorkflowTest extends TestCase
             'neonatal_care' => 'Routine newborn care',
             'notes' => 'Cephalic presentation',
             'birth_vaccines' => ['Vitamin K', 'BCG'],
-            'vaccine_date' => '2026-11-26',
+            'vaccine_dates' => [
+                'Vitamin K' => '2026-11-24',
+                'BCG' => '2026-11-26',
+            ],
         ]);
 
         $otherDay = $this->createAdmission([
@@ -318,8 +321,38 @@ class ReportWorkflowTest extends TestCase
         $this->assertStringContainsString('Pfannenstiel incision', $csv);
         $this->assertStringContainsString('DR. AMBIKA', $csv);
         $this->assertStringContainsString('Cephalic presentation', $csv);
-        $this->assertStringContainsString('Vitamin K, BCG', $csv);
+        $this->assertStringContainsString('Vitamin K (24.11.2026); BCG (26.11.2026)', $csv);
         $this->assertNotContains($otherDay->patient_name, [$csv]);
         $this->assertStringNotContainsString('OTHER DAY CASE', $csv);
+
+        // Blade image view renders complete columns and delivery/baby details
+        $imageHtml = view('pdf.day-report-image', [
+            'records' => collect([$delivery->load('newborns')]),
+            'metrics' => [
+                'total_cases' => 1,
+                'surgeries_count' => 0,
+                'deliveries_count' => 1,
+                'babies_count' => 1,
+                'medical_count' => 0,
+                'discharges_count' => 0,
+            ],
+            'periodLabel' => 'Date: 26.11.2026',
+            'basisLabel' => 'Any (DOA / DOO / DOD)',
+            'logoDataUri' => null,
+        ])->render();
+        $this->assertStringContainsString('GURU HOSPITAL — DAY REPORT', $imageHtml);
+        $this->assertStringContainsString('DELIVERY DAY MOTHER', $imageHtml);
+        $this->assertStringContainsString('Pfannenstiel incision', $imageHtml);
+        $this->assertStringContainsString('DR. AMBIKA', $imageHtml);
+        $this->assertStringContainsString('Cephalic presentation', $imageHtml);
+        $this->assertStringContainsString('Vitamin K (24.11.2026); BCG (26.11.2026)', $imageHtml);
+
+        // Full Playwright PNG image endpoint returns a valid PNG binary of the complete Day Report
+        $imgResp = $this->actingAs($this->user)->get('/reports/day?date=' . $targetDate . '&export=image');
+        $imgResp->assertOk();
+        $this->assertEquals('image/png', (string) $imgResp->headers->get('content-type'));
+        $this->assertStringContainsString('.png', (string) $imgResp->headers->get('content-disposition'));
+        $pngBytes = (string) $imgResp->getContent();
+        $this->assertStringStartsWith("\x89PNG\r\n\x1a\n", $pngBytes);
     }
 }

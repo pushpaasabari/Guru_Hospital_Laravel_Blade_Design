@@ -41,6 +41,34 @@ async function main() {
   const browser = await launchChromium();
 
   try {
+    if (docType === 'report_image') {
+      const context = await browser.newContext({
+        viewport: { width: 1600, height: 900 },
+        deviceScaleFactor: 2,
+      });
+      const page = await context.newPage();
+      await page.setContent(htmlContent, { waitUntil: 'load' });
+      await page.evaluate(() => document.fonts?.ready);
+
+      const sheetWidth = await page.evaluate(() => {
+        const el = document.querySelector('.report-sheet');
+        return el ? Math.ceil(el.scrollWidth) : 1600;
+      });
+      if (sheetWidth > 1600) {
+        await page.setViewportSize({ width: sheetWidth, height: 900 });
+      }
+
+      await page.screenshot({
+        path: outputFile,
+        type: 'png',
+        fullPage: true,
+        animations: 'disabled',
+      });
+
+      console.log('PLAYWRIGHT_IMAGE_SUCCESS');
+      return;
+    }
+
     const context = await browser.newContext();
     const page = await context.newPage();
 
