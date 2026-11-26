@@ -50,6 +50,7 @@ class ReportWorkflowTest extends TestCase
     {
         $this->get('/reports')->assertRedirect('/login');
         $this->get('/reports/day')->assertRedirect('/login');
+        $this->get('/reports/mrd')->assertRedirect('/login');
         $this->get('/reports/birth')->assertRedirect('/login');
         $this->get('/reports/surgery')->assertRedirect('/login');
         $this->get('/reports/medical')->assertRedirect('/login');
@@ -362,5 +363,93 @@ class ReportWorkflowTest extends TestCase
         $this->assertStringContainsString('.pdf', (string) $pdfResp->headers->get('content-disposition'));
         $pdfBytes = (string) $pdfResp->getContent();
         $this->assertStringStartsWith('%PDF-', $pdfBytes);
+    }
+
+    public function test_mrd_report_filters_renders_and_exports_csv_png_and_pdf(): void
+    {
+        $mrdSigned = $this->createAdmission([
+            'patient_name' => 'MRD SIGNED PATIENT',
+            'uhid' => 'GH-MRD-001',
+            'ip_no' => '2026/9901',
+            'mrd_no' => 'MRD-2026/9901',
+            'icd_code' => 'N20.1',
+            'diagnosis' => 'Ureteric Calculus',
+            'surgery_type' => 'other',
+            'procedure_done' => 'RIGHT URSL & DJ STENTING',
+            'admission_at' => '2026-11-24 09:00:00',
+            'discharge_at' => '2026-11-26 15:00:00',
+            'payment_mode' => 'Insurance',
+            'format' => 'cmchistn',
+            'insurance_type' => 'CMCHISTN',
+            'insurance_company' => 'Star Health / TN',
+            'handover_name' => 'Sister Meena',
+            'floor_incharge_name' => 'Matron Lakshmi',
+            'mrd_incharge_name' => 'MRD Officer Selvam',
+            'status' => 'generated',
+        ]);
+
+        $mrdPending = $this->createAdmission([
+            'patient_name' => 'MRD PENDING PATIENT',
+            'uhid' => 'GH-MRD-002',
+            'ip_no' => '2026/9902',
+            'diagnosis' => 'Acute Appendicitis',
+            'surgery_type' => 'other',
+            'payment_mode' => 'Cash',
+            'mrd_incharge_name' => null,
+            'status' => 'draft',
+        ]);
+
+        $this->actingAs($this->user)
+            ->get('/reports/mrd')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Reports/MrdReport')
+                ->where('metrics.total_files', 2)
+                ->where('metrics.mrd_signed_count', 1)
+                ->where('metrics.icd_coded_count', 1)
+                ->where('metrics.insurance_count', 1)
+                ->where('metrics.cash_count', 1)
+            );
+
+        // Filter by MRD handover status = signed
+        $this->actingAs($this->user)
+            ->get('/reports/mrd?handover_status=signed')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('records.total', 1)
+                ->where('records.data.0.patient_name', 'MRD SIGNED PATIENT')
+                ->where('records.data.0.resolved_mrd_no', 'MRD-2026/9901')
+            );
+
+        // Search by ICD code
+        $this->actingAs($this->user)
+            ->get('/reports/mrd?search=N20.1')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('records.total', 1)
+                ->where('records.data.0.id', $mrdSigned->id)
+            );
+
+        // CSV export contains exact MRD register columns
+        $csvResp = $this->actingAs($this->user)->get('/reports/mrd?handover_status=signed&export=csv');
+        $csvResp->assertOk();
+        $csv = $csvResp->streamedContent();
+        $this->assertStringContainsString('"MRD File No","Patient Name",UHID,IPNO', $csv);
+        $this->assertStringContainsString('MRD-2026/9901', $csv);
+        $this->assertStringContainsString('N20.1', $csv);
+        $this->assertStringContainsString('MRD Officer Selvam', $csv);
+        $this->assertStringNotContainsString($mrdPending->patient_name, $csv);
+
+        // Full Playwright PNG image export
+        $imgResp = $this->actingAs($this->user)->get('/reports/mrd?handover_status=signed&export=image');
+        $imgResp->assertOk();
+        $this->assertEquals('image/png', (string) $imgResp->headers->get('content-type'));
+        $this->assertStringStartsWith("\x89PNG\r\n\x1a\n", (string) $imgResp->getContent());
+
+        // Full Playwright A4 Landscape PDF export
+        $pdfResp = $this->actingAs($this->user)->get('/reports/mrd?handover_status=signed&export=pdf');
+        $pdfResp->assertOk();
+        $this->assertEquals('application/pdf', (string) $pdfResp->headers->get('content-type'));
+        $this->assertStringStartsWith('%PDF-', (string) $pdfResp->getContent());
     }
 }

@@ -127,7 +127,19 @@ class ReportController extends Controller
                 default => 'Any (DOA / DOO / DOD)',
             };
 
-            return $this->exportDayRendered($allMatches, $metrics, $label, $periodLabel, $basisLabel, $exportFormat, $pdfService);
+            return $this->streamPlaywrightReport(
+                'pdf.day-report-image',
+                [
+                    'records' => $allMatches,
+                    'metrics' => $metrics,
+                    'periodLabel' => $periodLabel,
+                    'basisLabel' => $basisLabel,
+                ],
+                "day_report_{$label}",
+                "GURU HOSPITAL — Day Report ({$periodLabel})",
+                $exportFormat,
+                $pdfService
+            );
         }
 
         $perPage = (int) $request->input('per_page', 50);
@@ -153,6 +165,134 @@ class ReportController extends Controller
         $clinicalStaff = ClinicalStaff::cachedActive();
 
         return Inertia::render('Reports/DayReport', compact('records', 'metrics', 'filters', 'clinicalStaff'));
+    }
+
+    /**
+     * MRD Report (Medical Records Department Register)
+     */
+    public function mrd(Request $request, DocumentPackPdfService $pdfService)
+    {
+        $query = Admission::query()
+            ->latest('discharge_at')
+            ->latest('admission_at')
+            ->latest('id');
+
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        $dateField = $request->input('date_basis') === 'discharge' ? 'discharge_at' : 'admission_at';
+
+        if ($dateFrom) {
+            $query->whereDate($dateField, '>=', $dateFrom);
+        }
+        if ($dateTo) {
+            $query->whereDate($dateField, '<=', $dateTo);
+        }
+
+        if ($search = trim((string) $request->input('search'))) {
+            $query->where(function ($q) use ($search) {
+                $q->where('patient_name', 'like', "%{$search}%")
+                    ->orWhere('uhid', 'like', "%{$search}%")
+                    ->orWhere('ip_no', 'like', "%{$search}%")
+                    ->orWhere('mrd_no', 'like', "%{$search}%")
+                    ->orWhere('icd_code', 'like', "%{$search}%")
+                    ->orWhere('diagnosis', 'like', "%{$search}%");
+            });
+        }
+
+        if ($paymentMode = $request->input('payment_mode')) {
+            if (strtolower((string) $paymentMode) === 'insurance') {
+                $query->where(function ($q) {
+                    $q->where('payment_mode', 'insurance')
+                        ->orWhereIn('format', ['cmchistn', 'private']);
+                });
+            } elseif (strtolower((string) $paymentMode) === 'cash') {
+                $query->where(function ($q) {
+                    $q->whereNull('payment_mode')
+                        ->orWhereIn('payment_mode', ['cash', 'self', 'Cash', 'Self']);
+                });
+            }
+        }
+
+        if ($workflow = $request->input('surgery_type')) {
+            $query->where('surgery_type', $workflow);
+        }
+
+        if ($status = $request->input('status')) {
+            $query->where('status', $status);
+        }
+
+        if ($handoverStatus = $request->input('handover_status')) {
+            if ($handoverStatus === 'signed') {
+                $query->whereNotNull('mrd_incharge_name')->where('mrd_incharge_name', '!=', '');
+            } elseif ($handoverStatus === 'pending') {
+                $query->where(function ($q) {
+                    $q->whereNull('mrd_incharge_name')->orWhere('mrd_incharge_name', '');
+                });
+            }
+        }
+
+        if ($request->input('export') === 'csv') {
+            return $this->exportMrdCsv($query->get());
+        }
+
+        $allMatches = (clone $query)->get();
+        $insuranceCount = $allMatches->filter(fn ($a) => $a->isInsurance() || in_array($a->format, ['cmchistn', 'private'], true))->count();
+
+        $metrics = [
+            'total_files' => $allMatches->count(),
+            'discharged_count' => $allMatches->filter(fn ($a) => !empty($a->discharge_at))->count(),
+            'icd_coded_count' => $allMatches->filter(fn ($a) => trim((string) $a->icd_code) !== '')->count(),
+            'mrd_signed_count' => $allMatches->filter(fn ($a) => trim((string) $a->mrd_incharge_name) !== '')->count(),
+            'generated_count' => $allMatches->where('status', 'generated')->count(),
+            'insurance_count' => $insuranceCount,
+            'cash_count' => $allMatches->count() - $insuranceCount,
+        ];
+
+        if (in_array($request->input('export'), ['image', 'pdf'], true)) {
+            $exportFormat = (string) $request->input('export');
+            $periodLabel = ($dateFrom || $dateTo)
+                ? trim(($dateFrom ? Carbon::parse($dateFrom)->format('d.m.Y') : 'Start') . ' to ' . ($dateTo ? Carbon::parse($dateTo)->format('d.m.Y') : 'End'))
+                : 'All MRD Records';
+            $rangeSlug = ($dateFrom || $dateTo) ? trim(($dateFrom ?: 'start') . '_to_' . ($dateTo ?: 'end')) : 'all';
+
+            return $this->streamPlaywrightReport(
+                'pdf.mrd-report-image',
+                [
+                    'records' => $allMatches,
+                    'metrics' => $metrics,
+                    'periodLabel' => $periodLabel,
+                ],
+                "mrd_report_{$rangeSlug}",
+                "GURU HOSPITAL — MRD Report ({$periodLabel})",
+                $exportFormat,
+                $pdfService
+            );
+        }
+
+        $perPage = (int) $request->input('per_page', 50);
+        if ($perPage < 5 || $perPage > 200) {
+            $perPage = 50;
+        }
+
+        $records = $query->paginate($perPage)->withQueryString();
+        $records->through(function (Admission $adm) {
+            return $adm->append(['resolved_mrd_no', 'payment_summary']);
+        });
+        $filters = $request->only([
+            'date_from',
+            'date_to',
+            'date_basis',
+            'search',
+            'payment_mode',
+            'surgery_type',
+            'status',
+            'handover_status',
+            'per_page',
+        ]);
+        $filters['date_basis'] = $request->input('date_basis', 'admission');
+        $filters['per_page'] = $perPage;
+
+        return Inertia::render('Reports/MrdReport', compact('records', 'metrics', 'filters'));
     }
 
     /**
@@ -903,38 +1043,32 @@ class ReportController extends Controller
     }
 
     /**
-     * Full-Page High-Resolution PNG / A4 Landscape PDF Exporter for Day Report
+     * Full-Page High-Resolution PNG / A4 Landscape PDF Exporter for Reports
      */
-    protected function exportDayRendered(
-        $records,
-        array $metrics,
-        string $label,
-        string $periodLabel,
-        string $basisLabel,
+    protected function streamPlaywrightReport(
+        string $view,
+        array $viewData,
+        string $filenamePrefix,
+        string $title,
         string $formatType,
         DocumentPackPdfService $pdfService
     ): Response {
         $isPdf = $formatType === 'pdf';
         $ext = $isPdf ? 'pdf' : 'png';
         $contentType = $isPdf ? 'application/pdf' : 'image/png';
-        $safeLabel = preg_replace('/[^a-zA-Z0-9_-]+/', '_', $label) ?: date('Y-m-d');
-        $filename = "day_report_{$safeLabel}_" . date('Y-m-d_His') . ".{$ext}";
+        $safePrefix = preg_replace('/[^a-zA-Z0-9_-]+/', '_', $filenamePrefix) ?: 'report';
+        $filename = "{$safePrefix}_" . date('Y-m-d_His') . ".{$ext}";
 
         $logoPath = public_path('images/guru-hospital-logo.png');
         $logoDataUri = is_file($logoPath)
             ? 'data:image/png;base64,' . base64_encode((string) file_get_contents($logoPath))
             : null;
 
-        $html = view('pdf.day-report-image', [
-            'records' => $records,
-            'metrics' => $metrics,
-            'periodLabel' => $periodLabel,
-            'basisLabel' => $basisLabel,
+        $html = view($view, array_merge($viewData, [
             'logoDataUri' => $logoDataUri,
             'isPdf' => $isPdf,
-        ])->render();
+        ]))->render();
 
-        $title = "GURU HOSPITAL — Day Report ({$periodLabel})";
         $bytes = $isPdf
             ? $pdfService->generateReportPdfWithPlaywright($html, $title)
             : $pdfService->generateReportImageWithPlaywright($html, $title);
@@ -946,6 +1080,77 @@ class ReportController extends Controller
             'Cache-Control' => 'private, no-cache, no-store, must-revalidate',
             'Pragma' => 'no-cache',
             'Expires' => '0',
+        ]);
+    }
+
+    /**
+     * CSV Exporter for MRD Report
+     */
+    protected function exportMrdCsv($admissions): StreamedResponse
+    {
+        $filename = 'mrd_report_' . date('Y-m-d_His') . '.csv';
+
+        return response()->streamDownload(function () use ($admissions) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, [
+                'S.No',
+                'MRD File No',
+                'Patient Name',
+                'UHID',
+                'IPNO',
+                'Age',
+                'Sex',
+                'DOA',
+                'DOD',
+                'LOS (Days)',
+                'Diagnosis',
+                'ICD Code',
+                'Workflow',
+                'Procedure Done',
+                'Consultant',
+                'Department',
+                'Format',
+                'Payment / Insurance',
+                'Handover Name',
+                'Floor Incharge',
+                'MRD Incharge',
+                'Status',
+            ]);
+
+            foreach ($admissions->values() as $idx => $adm) {
+                $los = ($adm->admission_at && $adm->discharge_at)
+                    ? max(1, Carbon::parse($adm->admission_at)->diffInDays(Carbon::parse($adm->discharge_at)))
+                    : '';
+
+                fputcsv($handle, [
+                    $idx + 1,
+                    $adm->resolved_mrd_no,
+                    $adm->patient_name,
+                    $adm->uhid,
+                    $adm->ip_no,
+                    $adm->age,
+                    $adm->sex,
+                    $adm->admission_at ? Carbon::parse($adm->admission_at)->format('d.m.Y') : '',
+                    $adm->discharge_at ? Carbon::parse($adm->discharge_at)->format('d.m.Y') : '',
+                    $los,
+                    $adm->diagnosis,
+                    $adm->icd_code,
+                    $adm->surgery_type,
+                    $adm->procedure_done ?: $adm->procedure_name,
+                    $adm->consultant,
+                    $adm->department,
+                    $adm->format,
+                    $adm->payment_summary,
+                    $adm->handover_name,
+                    $adm->floor_incharge_name,
+                    $adm->mrd_incharge_name,
+                    $adm->status,
+                ]);
+            }
+
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
         ]);
     }
 }

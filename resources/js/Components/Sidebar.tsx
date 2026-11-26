@@ -45,7 +45,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
   const adminPaths = ['/templates', '/clinical-staff', '/anesthesia-types', '/users', '/backups', '/audit-logs'];
   const isAnyAdminActive = adminPaths.some((p) => isLinkActive(p));
 
-  const reportPaths = ['/reports/day', '/reports/birth', '/reports/surgery', '/reports/medical', '/reports/month-wise', '/reports'];
+  const reportPaths = ['/reports/day', '/reports/mrd', '/reports/birth', '/reports/surgery', '/reports/medical', '/reports/month-wise', '/reports'];
   const isAnyReportActive = reportPaths.some((p) => isLinkActive(p));
 
   const [adminMenuOpen, setAdminMenuOpen] = useState<boolean>(() => {
@@ -256,7 +256,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                   ></i>
                 </button>
 
-                {/* Submenu with 5 Sub-Items */}
+                {/* Submenu with 6 Sub-Items */}
                 {reportMenuOpen && (
                   <div className="fg-sidebar-submenu" role="menu" aria-label="Report Submenu">
                     <Link
@@ -268,6 +268,17 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                     >
                       <i className="bi bi-calendar-day text-info"></i>
                       <span>Day Report</span>
+                    </Link>
+
+                    <Link
+                      href="/reports/mrd"
+                      prefetch
+                      className={`fg-sidebar-sublink ${isLinkActive('/reports/mrd') ? 'active' : ''}`}
+                      onClick={closeMobile}
+                      title="MRD Report"
+                    >
+                      <i className="bi bi-folder-check text-success"></i>
+                      <span>MRD Report</span>
                     </Link>
 
                     <Link

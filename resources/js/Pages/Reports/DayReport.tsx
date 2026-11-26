@@ -4,6 +4,7 @@ import AppLayout from '../../Layouts/AppLayout';
 import Pagination from '../../Components/Pagination';
 import { formatDate, formatDateTime } from '../../utils/dateFormatter';
 import { formatBirthVaccinesText } from '../../utils/dischargeFormatter';
+import { downloadReportFile } from '../../utils/reportDownload';
 
 interface NewbornItem {
   id: number;
@@ -177,26 +178,11 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
   const handleDownloadBinary = async (formatType: 'image' | 'pdf') => {
     setDownloadingFormat(formatType);
     try {
-      const response = await fetch(buildExportUrl(formatType), {
-        credentials: 'same-origin',
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`);
-      }
-      const blob = await response.blob();
-      const disposition = response.headers.get('Content-Disposition') || '';
-      const filenameMatch = disposition.match(/filename="?([^"]+)"?/i);
       const ext = formatType === 'pdf' ? 'pdf' : 'png';
-      const filename = filenameMatch?.[1] || `day_report_${selectedDate || 'complete'}.${ext}`;
-
-      const blobUrl = window.URL.createObjectURL(blob);
-      const anchor = document.createElement('a');
-      anchor.href = blobUrl;
-      anchor.download = filename;
-      document.body.appendChild(anchor);
-      anchor.click();
-      anchor.remove();
-      window.URL.revokeObjectURL(blobUrl);
+      await downloadReportFile(
+        buildExportUrl(formatType),
+        `day_report_${selectedDate || 'complete'}.${ext}`
+      );
     } catch {
       alert(`Failed to generate Day Report ${formatType.toUpperCase()}. Please try again.`);
     } finally {
