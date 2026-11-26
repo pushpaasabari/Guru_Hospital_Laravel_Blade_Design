@@ -20,21 +20,29 @@
             src: url('data:font/ttf;base64,{{ base64_encode(file_get_contents(public_path('fonts/OpenSans-Bold.ttf'))) }}') format('truetype');
         }
         @endif
+        @if(!empty($isPdf))
+        @page {
+            size: A4 landscape;
+            margin: 10mm 10mm 14mm 10mm;
+        }
+        @endif
         * {
             box-sizing: border-box;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
         html, body {
             margin: 0;
             padding: 0;
-            background: #f8fafc;
+            background: {{ !empty($isPdf) ? '#ffffff' : '#f8fafc' }};
             font-family: 'Open Sans', 'Segoe UI', Arial, sans-serif;
             color: #0f172a;
             -webkit-font-smoothing: antialiased;
         }
         .report-sheet {
-            width: 1580px;
+            width: {{ !empty($isPdf) ? '100%' : '1580px' }};
             background: #ffffff;
-            padding: 24px 28px 22px 28px;
+            padding: {{ !empty($isPdf) ? '0' : '24px 28px 22px 28px' }};
         }
         .header-band {
             display: flex;
@@ -112,30 +120,50 @@
             width: 100%;
             border-collapse: collapse;
             table-layout: fixed;
-            font-size: 11.5px;
+            font-size: {{ !empty($isPdf) ? '8.5pt' : '11.5px' }};
+        }
+        table.day-table thead {
+            display: table-header-group;
+        }
+        table.day-table tbody tr {
+            break-inside: avoid;
+            page-break-inside: avoid;
         }
         table.day-table th {
             background: #0f5c63;
             color: #ffffff;
             text-align: left;
-            font-size: 10.5px;
+            font-size: {{ !empty($isPdf) ? '7.8pt' : '10.5px' }};
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.04em;
-            padding: 8px 8px;
+            padding: {{ !empty($isPdf) ? '5px 5px' : '8px 8px' }};
             border: 1px solid #0d4f55;
             vertical-align: middle;
         }
         table.day-table td {
-            padding: 8px 8px;
+            padding: {{ !empty($isPdf) ? '5px 5px' : '8px 8px' }};
             border: 1px solid #cbd5e1;
             vertical-align: top;
             word-wrap: break-word;
-            line-height: 1.4;
+            line-height: 1.38;
         }
         table.day-table tbody tr:nth-child(even) td {
             background: #f8fafc;
         }
+        @if(!empty($isPdf))
+        .col-sno { width: 4%; text-align: center; }
+        .col-patient { width: 14%; }
+        .col-doa { width: 7%; }
+        .col-doo { width: 9%; }
+        .col-dod { width: 7.5%; }
+        .col-proc { width: 15.5%; }
+        .col-team { width: 18%; }
+        .col-delivery { width: 25%; }
+        .pt-name { font-size: 9pt; }
+        .meta-line { font-size: 8pt; }
+        .badge { font-size: 7.5pt; }
+        @else
         .col-sno { width: 44px; text-align: center; }
         .col-patient { width: 195px; }
         .col-doa { width: 88px; }
@@ -144,6 +172,7 @@
         .col-proc { width: 235px; }
         .col-team { width: 270px; }
         .col-delivery { width: 480px; }
+        @endif
 
         .pt-name {
             font-weight: 700;

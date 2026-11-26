@@ -175,6 +175,14 @@ class DocumentPackPdfService
         return $this->renderHtmlWithPlaywright($html, 'report_image', $title, 'png', 90);
     }
 
+    /**
+     * Renders an HTML report document into an A4 Landscape PDF via Playwright Chromium.
+     */
+    public function generateReportPdfWithPlaywright(string $html, string $title = 'GURU HOSPITAL — Day Report'): string
+    {
+        return $this->renderHtmlWithPlaywright($html, 'report_pdf', $title, 'pdf', 90);
+    }
+
     private function renderHtmlWithPlaywright(
         string $html,
         string $type,

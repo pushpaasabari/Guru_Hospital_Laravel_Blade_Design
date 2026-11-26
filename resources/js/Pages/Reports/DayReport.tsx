@@ -91,7 +91,7 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
   const [search, setSearch] = useState(filters.search || '');
   const [surgeryType, setSurgeryType] = useState(filters.surgery_type || '');
   const [surgeon, setSurgeon] = useState(filters.surgeon || '');
-  const [downloadingImage, setDownloadingImage] = useState(false);
+  const [downloadingFormat, setDownloadingFormat] = useState<'image' | 'pdf' | null>(null);
 
   const toLocalIso = (d: Date) =>
     `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
@@ -158,7 +158,7 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
     router.get('/reports/day');
   };
 
-  const buildExportUrl = (formatType: 'csv' | 'image') => {
+  const buildExportUrl = (formatType: 'csv' | 'image' | 'pdf') => {
     const raw = buildQueryParams();
     const params = new URLSearchParams();
     Object.entries(raw).forEach(([k, v]) => {
@@ -174,10 +174,10 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
     window.location.href = buildExportUrl('csv');
   };
 
-  const handleDownloadImage = async () => {
-    setDownloadingImage(true);
+  const handleDownloadBinary = async (formatType: 'image' | 'pdf') => {
+    setDownloadingFormat(formatType);
     try {
-      const response = await fetch(buildExportUrl('image'), {
+      const response = await fetch(buildExportUrl(formatType), {
         credentials: 'same-origin',
       });
       if (!response.ok) {
@@ -186,7 +186,8 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
       const blob = await response.blob();
       const disposition = response.headers.get('Content-Disposition') || '';
       const filenameMatch = disposition.match(/filename="?([^"]+)"?/i);
-      const filename = filenameMatch?.[1] || `day_report_${selectedDate || 'complete'}.png`;
+      const ext = formatType === 'pdf' ? 'pdf' : 'png';
+      const filename = filenameMatch?.[1] || `day_report_${selectedDate || 'complete'}.${ext}`;
 
       const blobUrl = window.URL.createObjectURL(blob);
       const anchor = document.createElement('a');
@@ -197,9 +198,9 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
       anchor.remove();
       window.URL.revokeObjectURL(blobUrl);
     } catch {
-      alert('Failed to generate Day Report image. Please try again.');
+      alert(`Failed to generate Day Report ${formatType.toUpperCase()}. Please try again.`);
     } finally {
-      setDownloadingImage(false);
+      setDownloadingFormat(null);
     }
   };
 
@@ -227,15 +228,33 @@ export default function DayReport({ records, metrics, filters, clinicalStaff }: 
           </p>
         </div>
 
-        <div className="d-flex align-items-center gap-2 no-print">
+        <div className="d-flex flex-wrap align-items-center gap-2 no-print">
           <button
             type="button"
-            onClick={handleDownloadImage}
-            disabled={downloadingImage}
+            onClick={() => handleDownloadBinary('pdf')}
+            disabled={downloadingFormat !== null}
+            className="btn btn-danger d-flex align-items-center gap-1 shadow-sm"
+            style={{ borderRadius: '10px', fontSize: '13px' }}
+          >
+            {downloadingFormat === 'pdf' ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-1" role="status"></span>
+                Generating PDF...
+              </>
+            ) : (
+              <>
+                <i className="bi bi-file-earmark-pdf"></i> Download PDF
+              </>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => handleDownloadBinary('image')}
+            disabled={downloadingFormat !== null}
             className="btn btn-primary d-flex align-items-center gap-1 shadow-sm"
             style={{ borderRadius: '10px', fontSize: '13px' }}
           >
-            {downloadingImage ? (
+            {downloadingFormat === 'image' ? (
               <>
                 <span className="spinner-border spinner-border-sm me-1" role="status"></span>
                 Generating Image...

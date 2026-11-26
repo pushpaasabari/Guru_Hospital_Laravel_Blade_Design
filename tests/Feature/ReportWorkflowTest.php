@@ -354,5 +354,13 @@ class ReportWorkflowTest extends TestCase
         $this->assertStringContainsString('.png', (string) $imgResp->headers->get('content-disposition'));
         $pngBytes = (string) $imgResp->getContent();
         $this->assertStringStartsWith("\x89PNG\r\n\x1a\n", $pngBytes);
+
+        // Full Playwright A4 Landscape PDF endpoint returns a valid PDF binary
+        $pdfResp = $this->actingAs($this->user)->get('/reports/day?date=' . $targetDate . '&export=pdf');
+        $pdfResp->assertOk();
+        $this->assertEquals('application/pdf', (string) $pdfResp->headers->get('content-type'));
+        $this->assertStringContainsString('.pdf', (string) $pdfResp->headers->get('content-disposition'));
+        $pdfBytes = (string) $pdfResp->getContent();
+        $this->assertStringStartsWith('%PDF-', $pdfBytes);
     }
 }

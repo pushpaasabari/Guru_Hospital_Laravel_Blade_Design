@@ -69,6 +69,33 @@ async function main() {
       return;
     }
 
+    if (docType === 'report_pdf') {
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      await page.setContent(htmlContent, { waitUntil: 'load' });
+      await page.evaluate(() => document.fonts?.ready);
+
+      await page.pdf({
+        path: outputFile,
+        format: 'A4',
+        landscape: true,
+        printBackground: true,
+        preferCSSPageSize: true,
+        displayHeaderFooter: true,
+        headerTemplate: '<div style="font-size: 1px;"></div>',
+        footerTemplate: `
+          <div style="font-family: Arial, sans-serif; font-size: 8pt; width: 100%; display: flex; justify-content: space-between; padding: 0 10mm; color: #555555; box-sizing: border-box;">
+            <span>${escapeHtml(headerTitle)}</span>
+            <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
+          </div>
+        `,
+        margin: { top: '10mm', bottom: '14mm', left: '10mm', right: '10mm' },
+      });
+
+      console.log('PLAYWRIGHT_REPORT_PDF_SUCCESS');
+      return;
+    }
+
     const context = await browser.newContext();
     const page = await context.newPage();
 

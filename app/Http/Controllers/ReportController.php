@@ -110,7 +110,8 @@ class ReportController extends Controller
             'discharges_count' => $allMatches->filter(fn ($a) => !empty($a->discharge_at))->count(),
         ];
 
-        if ($request->input('export') === 'image') {
+        if (in_array($request->input('export'), ['image', 'pdf'], true)) {
+            $exportFormat = (string) $request->input('export');
             $label = $allDates
                 ? 'all_dates'
                 : (($dateFrom || $dateTo) ? trim(($dateFrom ?: 'start') . '_to_' . ($dateTo ?: 'end')) : $selectedDate);
@@ -126,7 +127,7 @@ class ReportController extends Controller
                 default => 'Any (DOA / DOO / DOD)',
             };
 
-            return $this->exportDayImage($allMatches, $metrics, $label, $periodLabel, $basisLabel, $pdfService);
+            return $this->exportDayRendered($allMatches, $metrics, $label, $periodLabel, $basisLabel, $exportFormat, $pdfService);
         }
 
         $perPage = (int) $request->input('per_page', 50);
@@ -902,18 +903,22 @@ class ReportController extends Controller
     }
 
     /**
-     * Full-Page High-Resolution PNG Exporter for Day Report
+     * Full-Page High-Resolution PNG / A4 Landscape PDF Exporter for Day Report
      */
-    protected function exportDayImage(
+    protected function exportDayRendered(
         $records,
         array $metrics,
         string $label,
         string $periodLabel,
         string $basisLabel,
+        string $formatType,
         DocumentPackPdfService $pdfService
     ): Response {
+        $isPdf = $formatType === 'pdf';
+        $ext = $isPdf ? 'pdf' : 'png';
+        $contentType = $isPdf ? 'application/pdf' : 'image/png';
         $safeLabel = preg_replace('/[^a-zA-Z0-9_-]+/', '_', $label) ?: date('Y-m-d');
-        $filename = "day_report_{$safeLabel}_" . date('Y-m-d_His') . '.png';
+        $filename = "day_report_{$safeLabel}_" . date('Y-m-d_His') . ".{$ext}";
 
         $logoPath = public_path('images/guru-hospital-logo.png');
         $logoDataUri = is_file($logoPath)
@@ -926,14 +931,18 @@ class ReportController extends Controller
             'periodLabel' => $periodLabel,
             'basisLabel' => $basisLabel,
             'logoDataUri' => $logoDataUri,
+            'isPdf' => $isPdf,
         ])->render();
 
-        $pngBytes = $pdfService->generateReportImageWithPlaywright($html, "GURU HOSPITAL — Day Report ({$periodLabel})");
+        $title = "GURU HOSPITAL — Day Report ({$periodLabel})";
+        $bytes = $isPdf
+            ? $pdfService->generateReportPdfWithPlaywright($html, $title)
+            : $pdfService->generateReportImageWithPlaywright($html, $title);
 
-        return response($pngBytes, 200, [
-            'Content-Type' => 'image/png',
+        return response($bytes, 200, [
+            'Content-Type' => $contentType,
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
-            'Content-Length' => strlen($pngBytes),
+            'Content-Length' => strlen($bytes),
             'Cache-Control' => 'private, no-cache, no-store, must-revalidate',
             'Pragma' => 'no-cache',
             'Expires' => '0',
