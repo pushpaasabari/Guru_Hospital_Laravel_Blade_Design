@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import MultiSelectField, { MultiSelectOption } from './MultiSelectField';
 
 export interface AnesthesiaTypeItem {
   id: number;
@@ -15,6 +16,7 @@ interface AnesthesiaSelectProps {
   anesthesiaList?: AnesthesiaTypeItem[];
   placeholder?: string;
   required?: boolean;
+  multiple?: boolean;
 }
 
 export default function AnesthesiaSelect({
@@ -25,9 +27,31 @@ export default function AnesthesiaSelect({
   anesthesiaList,
   placeholder = '-- Select Anaesthesia Type --',
   required = false,
+  multiple = false,
 }: AnesthesiaSelectProps) {
   const [customMode, setCustomMode] = useState(false);
   const typeList = types ?? anesthesiaList ?? [];
+
+  if (multiple) {
+    const multiOptions: MultiSelectOption[] = typeList.map((t) => ({
+      key: t.id,
+      value: t.name,
+      label: t.name,
+      matchKey: t.code || undefined,
+    }));
+
+    return (
+      <MultiSelectField
+        label={label}
+        value={value}
+        onChange={onChange}
+        options={multiOptions}
+        placeholder={placeholder}
+        customPlaceholder="Add custom anaesthesia type (e.g. Block)..."
+        required={required}
+      />
+    );
+  }
 
   // Match if current value matches either the name or code
   const hasMatch = typeList.some((t) => t.name === value || (t.code && t.code === value));

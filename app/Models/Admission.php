@@ -272,7 +272,8 @@ class Admission extends Model
      */
     public function getDoctorStampDetailsAttribute(): ?array
     {
-        $doctor = trim((string) ($this->consultant ?: $this->surgeon));
+        $rawDoctor = trim((string) ($this->consultant ?: $this->surgeon));
+        $doctor = trim((string) (preg_split('/[;\r\n|]+/', $rawDoctor)[0] ?? ''));
         if ($doctor === '') {
             return null;
         }
@@ -355,7 +356,8 @@ class Admission extends Model
      */
     public function getConsultantWithDegreeAttribute(): string
     {
-        $consultant = trim((string) ($this->consultant ?: $this->surgeon));
+        $rawConsultant = trim((string) ($this->consultant ?: $this->surgeon));
+        $consultant = trim((string) (preg_split('/[;\r\n|]+/', $rawConsultant)[0] ?? ''));
         if ($consultant === '') {
             return '—';
         }

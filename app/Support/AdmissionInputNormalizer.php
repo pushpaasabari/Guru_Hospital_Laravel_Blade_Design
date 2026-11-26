@@ -31,6 +31,43 @@ class AdmissionInputNormalizer
     ];
 
     /**
+     * Join an array or delimited string of clinical selections cleanly, preserving commas inside degrees.
+     *
+     * @param  string|array<int, string>|null  $value
+     */
+    public static function joinMulti(string|array|null $value, bool $uppercase = true): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        $items = is_array($value)
+            ? $value
+            : (preg_split('/[;\r\n|]+/', (string) $value) ?: []);
+
+        $seen = [];
+        $result = [];
+
+        foreach ($items as $item) {
+            $cleaned = trim((string) $item);
+            if ($cleaned === '') {
+                continue;
+            }
+            if ($uppercase) {
+                $cleaned = mb_strtoupper($cleaned, 'UTF-8');
+            }
+            $key = mb_strtolower($cleaned, 'UTF-8');
+            if (isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $result[] = $cleaned;
+        }
+
+        return $result === [] ? null : implode('; ', $result);
+    }
+
+    /**
      * Convert a nullable clinical text value to uppercase, returning null when blank.
      */
     public static function toUpper(?string $value): ?string

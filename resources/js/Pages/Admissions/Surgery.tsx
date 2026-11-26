@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
-import { handleNormalizedInputChange, toUpperCaseValue } from '../../utils/inputNormalizers';
+import { toUpperCaseValue } from '../../utils/inputNormalizers';
 import AnesthesiaSelect, { AnesthesiaTypeItem } from '../../Components/AnesthesiaSelect';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
 import { PROCEDURE_TEMPLATES } from '../../constants/procedureTemplates';
@@ -506,8 +506,13 @@ export default function AdmissionsSurgery({
 
         {/* Section 2: Surgical Team */}
         <div className="card mb-4 border-0 shadow-sm">
-          <div className="card-header bg-white py-3 fw-bold text-dark">
-            <span className="badge bg-primary me-2">4.2</span> Surgical &amp; Anaesthesia Team
+          <div className="card-header bg-white py-3 fw-bold text-dark d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+              <span className="badge bg-primary me-2">4.2</span> Surgical &amp; Anaesthesia Team
+            </div>
+            <span className="badge bg-light text-muted border fw-normal" style={{ fontSize: '0.72rem' }}>
+              Multiple choice enabled for all team &amp; anaesthesia fields
+            </span>
           </div>
           <div className="card-body">
             <div className="row g-3">
@@ -518,8 +523,9 @@ export default function AdmissionsSurgery({
                   value={data.surgeon}
                   onChange={(val) => setData('surgeon', val)}
                   staffList={clinicalStaff}
-                  placeholder="-- Select Surgeon --"
+                  placeholder="-- Select Surgeon(s) --"
                   uppercase
+                  multiple
                 />
               </div>
 
@@ -530,8 +536,9 @@ export default function AdmissionsSurgery({
                   value={data.assisted_surgeon}
                   onChange={(val) => setData('assisted_surgeon', val)}
                   staffList={clinicalStaff}
-                  placeholder="-- Select Assisted Surgeon --"
+                  placeholder="-- Select Assisted Surgeon(s) --"
                   uppercase
+                  multiple
                 />
               </div>
 
@@ -542,8 +549,9 @@ export default function AdmissionsSurgery({
                   value={data.anaesthetist}
                   onChange={(val) => setData('anaesthetist', val)}
                   staffList={clinicalStaff}
-                  placeholder="-- Select Anaesthetist --"
+                  placeholder="-- Select Anaesthetist(s) --"
                   uppercase
+                  multiple
                 />
               </div>
 
@@ -554,8 +562,9 @@ export default function AdmissionsSurgery({
                   value={data.assisted_anaesthetist}
                   onChange={(val) => setData('assisted_anaesthetist', val)}
                   staffList={clinicalStaff}
-                  placeholder="-- Select Assisted Anaesthetist --"
+                  placeholder="-- Select Assisted Anaesthetist(s) --"
                   uppercase
+                  multiple
                 />
               </div>
 
@@ -566,7 +575,8 @@ export default function AdmissionsSurgery({
                   onChange={(val) => setData('anaesthesia_type', val)}
                   types={anesthesiaTypes}
                   anesthesiaList={anesthesiaTypes}
-                  placeholder="-- Select Anaesthesia Type --"
+                  placeholder="-- Select Anaesthesia Type(s) --"
+                  multiple
                 />
               </div>
 
@@ -577,8 +587,9 @@ export default function AdmissionsSurgery({
                   value={data.staff_nurse}
                   onChange={(val) => setData('staff_nurse', val)}
                   staffList={clinicalStaff}
-                  placeholder="-- Select Staff Nurse --"
+                  placeholder="-- Select Staff Nurse(s) --"
                   uppercase
+                  multiple
                 />
               </div>
 
@@ -589,8 +600,9 @@ export default function AdmissionsSurgery({
                   value={data.ot_technician}
                   onChange={(val) => setData('ot_technician', val)}
                   staffList={clinicalStaff}
-                  placeholder="-- Select OT Technician --"
+                  placeholder="-- Select OT Technician(s) --"
                   uppercase
+                  multiple
                 />
               </div>
 
@@ -601,22 +613,22 @@ export default function AdmissionsSurgery({
                   value={data.pediatrician_name}
                   onChange={(val) => setData('pediatrician_name', val)}
                   staffList={clinicalStaff}
-                  placeholder="-- Select Pediatrician --"
+                  placeholder="-- Select Pediatrician(s) --"
                   uppercase
+                  multiple
                 />
               </div>
 
               <div className="col-md-4">
-                <label className="form-label">Assistant / Other Clinical Help</label>
-                <input
-                  type="text"
-                  className="form-control"
-                  style={{ textTransform: 'uppercase' }}
+                <StaffSelect
+                  label="Assistant / Other Clinical Help"
+                  role="all"
                   value={data.assisted_by}
-                  onChange={(e) =>
-                    handleNormalizedInputChange(e, toUpperCaseValue, (val) => setData('assisted_by', val))
-                  }
-                  placeholder="e.g. STAFF NURSE KAVITHA"
+                  onChange={(val) => setData('assisted_by', val)}
+                  staffList={clinicalStaff}
+                  placeholder="-- Select Assistant(s) / Clinical Help --"
+                  uppercase
+                  multiple
                 />
               </div>
             </div>

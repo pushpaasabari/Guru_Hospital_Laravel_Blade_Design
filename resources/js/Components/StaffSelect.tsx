@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import MultiSelectField, { MultiSelectOption } from './MultiSelectField';
 import { handleNormalizedInputChange, toUpperCaseValue } from '../utils/inputNormalizers';
 
 export interface ClinicalStaffMember {
@@ -22,6 +23,7 @@ interface StaffSelectProps {
   isCustom?: boolean;
   onCustomToggle?: (isCustom: boolean) => void;
   uppercase?: boolean;
+  multiple?: boolean;
 }
 
 const ROLE_ALIASES: Record<string, string[]> = {
@@ -86,6 +88,7 @@ export default function StaffSelect({
   isCustom,
   onCustomToggle,
   uppercase = false,
+  multiple = false,
 }: StaffSelectProps) {
   const [internalCustom, setInternalCustom] = useState(false);
 
@@ -137,6 +140,28 @@ export default function StaffSelect({
     }
   });
   const uniqueList = Array.from(deduplicatedMap.values());
+
+  if (multiple) {
+    const multiOptions: MultiSelectOption[] = uniqueList.map((s) => ({
+      key: s.id,
+      value: normalize(s.name),
+      label: formatStaffOptionLabel(s),
+      matchKey: normalize(getBaseStaffName(s.name)),
+    }));
+
+    return (
+      <MultiSelectField
+        label={label}
+        value={currentValue}
+        onChange={onChange}
+        options={multiOptions}
+        placeholder={placeholder}
+        customPlaceholder={`Add custom ${label.toLowerCase()}...`}
+        required={required}
+        uppercase={uppercase}
+      />
+    );
+  }
 
   // Check if current value matches one in the list
   const hasMatch = uniqueList.some(

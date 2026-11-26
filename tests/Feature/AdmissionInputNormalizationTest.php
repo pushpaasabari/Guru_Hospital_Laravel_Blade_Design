@@ -241,5 +241,83 @@ class AdmissionInputNormalizationTest extends TestCase
         $updateInvalid->assertSessionHasErrors('contact');
         $this->assertEquals('9876543210', $admission->fresh()->contact);
     }
+
+    public function test_surgery_stage_supports_multiple_choice_surgical_and_anaesthesia_team_fields(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'Priya Devi',
+            'sex' => 'Female',
+            'uhid' => '2026/3001',
+            'ip_no' => 'IP-MULTI-01',
+            'admission_at' => '2026-11-26 08:00:00',
+            'diagnosis' => 'Previous LSCS with CPD',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+            'status' => 'draft',
+            'created_by' => $this->nurse->id,
+        ]);
+
+        // Submit multiple choices (exceeding 160 chars in places, plus comma inside qualification)
+        $response = $this->actingAs($this->nurse)->put(route('admissions.surgery.update', $admission), [
+            'procedure_at' => '2026-11-26 10:30:00',
+            'procedure_done' => 'Emergency LSCS',
+            'surgeon' => [
+                'Dr. Ambika M.S (O&G)',
+                'Dr. Karthik Rajan MS, MCh',
+                'dr. ambika m.s (o&g)',
+                'Dr. N. Jayaprakash MS (Gen Surg), MCh (Urology), Dharmapuri',
+                'Dr. Senior Visiting Consultant Surgeon F.M.A.S., F.I.A.G.E.S.',
+            ],
+            'assisted_surgeon' => ['Dr. K. Senthil MBBS', 'Dr. A. Meenakshi MBBS'],
+            'anaesthetist' => 'Dr. M.S Karthick; Dr. R. Vignesh MBBS, DA',
+            'assisted_anaesthetist' => ['Dr. R. Vignesh MBBS, DA', 'Staff Nurse Deepa'],
+            'anaesthesia_type' => ['Spinal Anesthesia (SA)', 'Epidural Anesthesia (EA)'],
+            'staff_nurse' => ['Staff Nurse Anitha', 'Miss Soudnharya', 'Staff Nurse Kavitha'],
+            'ot_technician' => ['OT Tech Selvam', 'OT Tech Murugan'],
+            'pediatrician_name' => ['Dr. Nithyapriya (Paediatrician)', 'Dr. S. Ramesh MD (Pediatrics)'],
+            'assisted_by' => ['Staff Nurse Kavitha', 'OT Tech Selvam'],
+            'next_step' => 'stay',
+        ]);
+
+        $response->assertSessionHasNoErrors();
+
+        $fresh = $admission->fresh();
+        $this->assertGreaterThan(160, strlen((string) $fresh->surgeon));
+        $this->assertSame(
+            'DR. AMBIKA M.S (O&G); DR. KARTHIK RAJAN MS, MCH; DR. N. JAYAPRAKASH MS (GEN SURG), MCH (UROLOGY), DHARMAPURI; DR. SENIOR VISITING CONSULTANT SURGEON F.M.A.S., F.I.A.G.E.S.',
+            $fresh->surgeon
+        );
+        $this->assertSame('DR. K. SENTHIL MBBS; DR. A. MEENAKSHI MBBS', $fresh->assisted_surgeon);
+        $this->assertSame('DR. M.S KARTHICK; DR. R. VIGNESH MBBS, DA', $fresh->anaesthetist);
+        $this->assertSame('DR. R. VIGNESH MBBS, DA; STAFF NURSE DEEPA', $fresh->assisted_anaesthetist);
+        $this->assertSame('Spinal Anesthesia (SA); Epidural Anesthesia (EA)', $fresh->anaesthesia_type);
+        $this->assertSame('STAFF NURSE ANITHA; MISS SOUDNHARYA; STAFF NURSE KAVITHA', $fresh->staff_nurse);
+        $this->assertSame('OT TECH SELVAM; OT TECH MURUGAN', $fresh->ot_technician);
+        $this->assertSame('DR. NITHYAPRIYA (PAEDIATRICIAN); DR. S. RAMESH MD (PEDIATRICS)', $fresh->pediatrician_name);
+        $this->assertSame('STAFF NURSE KAVITHA; OT TECH SELVAM', $fresh->assisted_by);
+
+        // Stamp lookup resolves primary doctor cleanly even when multiple surgeons are recorded
+        $this->assertSame('DR.K.AMBIKA, MS.,(O&G)', $fresh->doctor_stamp_details['name'] ?? null);
+
+        // Surgery report filters match individual team selections within multi-value strings
+        $this->actingAs($this->nurse)
+            ->get('/reports/surgery?surgeon=' . urlencode('Karthik Rajan') . '&anaesthesia_type=' . urlencode('Epidural Anesthesia'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Reports/SurgeryReport')
+                ->where('surgeries.total', 1)
+                ->where('surgeries.data.0.ip_no', 'IP-MULTI-01')
+            );
+
+        // Day report surgeon filter also matches secondary multi-selected surgeon
+        $this->actingAs($this->nurse)
+            ->get('/reports/day?date=2026-11-26&surgeon=' . urlencode('Karthik Rajan'))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->component('Reports/DayReport')
+                ->where('metrics.inpatients_count', 1)
+                ->where('sections.inpatients.0.ip_no', 'IP-MULTI-01')
+            );
+    }
 }
 

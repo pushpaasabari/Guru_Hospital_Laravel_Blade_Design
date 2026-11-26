@@ -63,8 +63,9 @@ class ReportController extends Controller
             }
             if ($surgeon !== '') {
                 $q->where(function ($sub) use ($surgeon) {
-                    $sub->where('surgeon', $surgeon)
-                        ->orWhere('consultant', $surgeon);
+                    $sub->where('surgeon', 'like', "%{$surgeon}%")
+                        ->orWhere('assisted_surgeon', 'like', "%{$surgeon}%")
+                        ->orWhere('consultant', 'like', "%{$surgeon}%");
                 });
             }
         };
@@ -449,9 +450,10 @@ class ReportController extends Controller
         // Doctor (Surgeon / Consultant / Pediatrician)
         if ($doctor = $request->input('doctor')) {
             $query->where(function ($q) use ($doctor) {
-                $q->where('surgeon', $doctor)
-                  ->orWhere('consultant', $doctor)
-                  ->orWhere('pediatrician_name', $doctor);
+                $q->where('surgeon', 'like', "%{$doctor}%")
+                  ->orWhere('assisted_surgeon', 'like', "%{$doctor}%")
+                  ->orWhere('consultant', 'like', "%{$doctor}%")
+                  ->orWhere('pediatrician_name', 'like', "%{$doctor}%");
             });
         }
 
@@ -546,17 +548,23 @@ class ReportController extends Controller
 
         // Surgeon
         if ($surgeon = $request->input('surgeon')) {
-            $query->where('surgeon', $surgeon);
+            $query->where(function ($q) use ($surgeon) {
+                $q->where('surgeon', 'like', "%{$surgeon}%")
+                  ->orWhere('assisted_surgeon', 'like', "%{$surgeon}%");
+            });
         }
 
         // Anaesthetist
         if ($anaesthetist = $request->input('anaesthetist')) {
-            $query->where('anaesthetist', $anaesthetist);
+            $query->where(function ($q) use ($anaesthetist) {
+                $q->where('anaesthetist', 'like', "%{$anaesthetist}%")
+                  ->orWhere('assisted_anaesthetist', 'like', "%{$anaesthetist}%");
+            });
         }
 
         // Anesthesia Type
         if ($anaesthesiaType = $request->input('anaesthesia_type')) {
-            $query->where('anaesthesia_type', $anaesthesiaType);
+            $query->where('anaesthesia_type', 'like', "%{$anaesthesiaType}%");
         }
 
         // Format
@@ -581,15 +589,15 @@ class ReportController extends Controller
         $stentPlacedCount = $allSurgeries->whereNotNull('stent_removal_date')->count();
 
         $topSurgeons = $allSurgeries->whereNotNull('surgeon')
-            ->groupBy('surgeon')
-            ->map->count()
+            ->flatMap(fn ($s) => array_filter(array_map('trim', preg_split('/[;\r\n|]+/', (string) $s->surgeon) ?: [])))
+            ->countBy()
             ->sortDesc()
             ->take(5)
             ->toArray();
 
         $anesthesiaBreakdown = $allSurgeries->whereNotNull('anaesthesia_type')
-            ->groupBy('anaesthesia_type')
-            ->map->count()
+            ->flatMap(fn ($s) => array_filter(array_map('trim', preg_split('/[;\r\n|]+/', (string) $s->anaesthesia_type) ?: [])))
+            ->countBy()
             ->sortDesc()
             ->take(5)
             ->toArray();
