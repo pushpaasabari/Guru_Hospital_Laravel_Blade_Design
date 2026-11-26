@@ -319,5 +319,74 @@ class AdmissionInputNormalizationTest extends TestCase
                 ->where('sections.inpatients.0.ip_no', 'IP-MULTI-01')
             );
     }
+
+    public function test_quick_add_popup_endpoints_persist_and_enforce_permissions(): void
+    {
+        $auditor = User::create([
+            'name' => 'Auditor Readonly',
+            'email' => 'auditor.quick@guruhospital.local',
+            'password' => bcrypt('Secret123!'),
+            'role' => 'auditor',
+            'is_active' => true,
+        ]);
+
+        // Read-only auditors cannot quick-add clinical staff or anaesthesia types
+        $this->actingAs($auditor)
+            ->postJson(route('admissions.quick-staff'), [
+                'name' => 'DR. UNAUTHORIZED',
+                'category' => 'surgeon',
+            ])
+            ->assertForbidden();
+
+        $this->actingAs($auditor)
+            ->postJson(route('admissions.quick-anesthesia'), [
+                'name' => 'Unauthorized Block',
+            ])
+            ->assertForbidden();
+
+        // Admission editors (nurse/doctor/admin) can quick-add clinical staff via popup modal
+        $staffResp = $this->actingAs($this->nurse)->postJson(route('admissions.quick-staff'), [
+            'name' => 'DR. SANTHOSH KUMAR M.S',
+            'category' => 'surgeon',
+            'qualification' => 'M.S (Gen Surg)',
+            'department' => 'Surgical Oncology',
+        ]);
+
+        $staffResp->assertCreated()
+            ->assertJsonPath('staff.name', 'DR. SANTHOSH KUMAR M.S')
+            ->assertJsonPath('staff.category', 'surgeon')
+            ->assertJsonPath('created', true);
+
+        $this->assertDatabaseHas('clinical_staff', [
+            'name' => 'DR. SANTHOSH KUMAR M.S',
+            'category' => 'surgeon',
+            'is_active' => true,
+        ]);
+
+        // Duplicate name in different case/role merges role cleanly without duplicate row
+        $mergeResp = $this->actingAs($this->nurse)->postJson(route('admissions.quick-staff'), [
+            'name' => 'dr. santhosh kumar m.s',
+            'category' => 'assisted_surgeon',
+        ]);
+        $mergeResp->assertOk()->assertJsonPath('created', false);
+        $this->assertContains('assisted_surgeon', $mergeResp->json('staff.roles'));
+
+        // Quick-add anaesthesia type via popup modal
+        $anesResp = $this->actingAs($this->nurse)->postJson(route('admissions.quick-anesthesia'), [
+            'name' => 'Regional Femoral Nerve Block',
+            'code' => 'RFNB',
+            'description' => 'Ultrasound-guided femoral block',
+        ]);
+
+        $anesResp->assertCreated()
+            ->assertJsonPath('anesthesiaType.name', 'Regional Femoral Nerve Block')
+            ->assertJsonPath('anesthesiaType.code', 'RFNB');
+
+        $this->assertDatabaseHas('anesthesia_types', [
+            'name' => 'Regional Femoral Nerve Block',
+            'code' => 'RFNB',
+            'is_active' => true,
+        ]);
+    }
 }
 

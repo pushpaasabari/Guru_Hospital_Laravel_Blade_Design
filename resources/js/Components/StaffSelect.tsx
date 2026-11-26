@@ -24,6 +24,8 @@ interface StaffSelectProps {
   onCustomToggle?: (isCustom: boolean) => void;
   uppercase?: boolean;
   multiple?: boolean;
+  onRequestAddNew?: () => void;
+  addNewLabel?: string;
 }
 
 const ROLE_ALIASES: Record<string, string[]> = {
@@ -89,6 +91,8 @@ export default function StaffSelect({
   onCustomToggle,
   uppercase = false,
   multiple = false,
+  onRequestAddNew,
+  addNewLabel,
 }: StaffSelectProps) {
   const [internalCustom, setInternalCustom] = useState(false);
 
@@ -159,6 +163,8 @@ export default function StaffSelect({
         customPlaceholder={`Add custom ${label.toLowerCase()}...`}
         required={required}
         uppercase={uppercase}
+        onRequestAddNew={onRequestAddNew}
+        addNewLabel={addNewLabel}
       />
     );
   }

@@ -17,6 +17,8 @@ interface AnesthesiaSelectProps {
   placeholder?: string;
   required?: boolean;
   multiple?: boolean;
+  onRequestAddNew?: () => void;
+  addNewLabel?: string;
 }
 
 export default function AnesthesiaSelect({
@@ -28,6 +30,8 @@ export default function AnesthesiaSelect({
   placeholder = '-- Select Anaesthesia Type --',
   required = false,
   multiple = false,
+  onRequestAddNew,
+  addNewLabel,
 }: AnesthesiaSelectProps) {
   const [customMode, setCustomMode] = useState(false);
   const typeList = types ?? anesthesiaList ?? [];
@@ -49,6 +53,8 @@ export default function AnesthesiaSelect({
         placeholder={placeholder}
         customPlaceholder="Add custom anaesthesia type (e.g. Block)..."
         required={required}
+        onRequestAddNew={onRequestAddNew}
+        addNewLabel={addNewLabel}
       />
     );
   }

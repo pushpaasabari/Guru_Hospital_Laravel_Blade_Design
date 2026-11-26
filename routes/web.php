@@ -36,6 +36,8 @@ Route::middleware('auth')->group(function () {
     Route::get('/admissions', [AdmissionController::class, 'index'])->name('admissions.index');
     Route::get('/admissions/create', [AdmissionController::class, 'create'])->name('admissions.create');
     Route::post('/admissions', [AdmissionController::class, 'store'])->name('admissions.store');
+    Route::post('/admissions/quick-staff', [ClinicalStaffController::class, 'quickStore'])->name('admissions.quick-staff');
+    Route::post('/admissions/quick-anesthesia', [AnesthesiaTypeController::class, 'quickStore'])->name('admissions.quick-anesthesia');
     Route::get('/admissions/{admission}', [AdmissionController::class, 'show'])->name('admissions.show');
     Route::get('/admissions/{admission}/edit', [AdmissionController::class, 'edit'])->name('admissions.edit');
     Route::get('/admissions/{admission}/admission', [AdmissionController::class, 'edit'])->name('admissions.admission');

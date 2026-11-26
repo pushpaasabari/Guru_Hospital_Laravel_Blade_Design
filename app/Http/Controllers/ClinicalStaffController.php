@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\ClinicalStaff;
 use App\Services\AuditService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -167,6 +168,73 @@ class ClinicalStaffController extends Controller
 
         return redirect()->route('clinical-staff.index')
             ->with('status', "Clinical staff '{$clinicalStaff->name}' " . ($clinicalStaff->is_active ? 'activated' : 'deactivated') . " successfully.");
+    }
+
+    /**
+     * Quick-add clinical staff member via popup modal during Stage 3 OT/Delivery team entry.
+     */
+    public function quickStore(Request $request): JsonResponse
+    {
+        $currentUser = $request->user();
+        if (!$currentUser || !$currentUser->canEditAdmissions()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:160'],
+            'category' => ['required', 'string', Rule::in(array_keys(ClinicalStaff::ROLES))],
+            'qualification' => ['nullable', 'string', 'max:120'],
+            'department' => ['nullable', 'string', 'max:120'],
+        ]);
+
+        $cleanName = trim($validated['name']);
+        $normalizedKey = mb_strtolower($cleanName, 'UTF-8');
+
+        $existing = ClinicalStaff::query()
+            ->whereRaw('LOWER(TRIM(name)) = ?', [$normalizedKey])
+            ->first();
+
+        if ($existing) {
+            $roles = is_array($existing->roles) ? $existing->roles : [$existing->category];
+            if (!in_array($validated['category'], $roles, true)) {
+                $roles[] = $validated['category'];
+            }
+            $existing->roles = array_values(array_unique($roles));
+            if (!$existing->qualification && !empty($validated['qualification'])) {
+                $existing->qualification = $validated['qualification'];
+            }
+            if (!$existing->department && !empty($validated['department'])) {
+                $existing->department = $validated['department'];
+            }
+            $existing->is_active = true;
+            $existing->save();
+
+            return response()->json([
+                'staff' => $existing->only(['id', 'name', 'category', 'roles', 'qualification', 'department']),
+                'created' => false,
+            ]);
+        }
+
+        $newStaff = ClinicalStaff::create([
+            'name' => $cleanName,
+            'category' => $validated['category'],
+            'roles' => [$validated['category']],
+            'qualification' => $validated['qualification'] ?? null,
+            'department' => $validated['department'] ?? null,
+            'is_active' => true,
+        ]);
+
+        AuditService::log(
+            'clinical_staff.quick_created',
+            'ClinicalStaff',
+            $newStaff->id,
+            "Clinical staff '{$newStaff->name}' (Category: {$newStaff->category}) quick-added from Surgery stage by {$currentUser->name}"
+        );
+
+        return response()->json([
+            'staff' => $newStaff->only(['id', 'name', 'category', 'roles', 'qualification', 'department']),
+            'created' => true,
+        ], 201);
     }
 }
 

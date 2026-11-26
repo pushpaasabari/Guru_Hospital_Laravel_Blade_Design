@@ -18,6 +18,8 @@ interface MultiSelectFieldProps {
   customPlaceholder?: string;
   required?: boolean;
   uppercase?: boolean;
+  onRequestAddNew?: () => void;
+  addNewLabel?: string;
 }
 
 export default function MultiSelectField({
@@ -29,6 +31,8 @@ export default function MultiSelectField({
   customPlaceholder = 'Add custom entry...',
   required = false,
   uppercase = false,
+  onRequestAddNew,
+  addNewLabel = 'Add New',
 }: MultiSelectFieldProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -93,7 +97,7 @@ export default function MultiSelectField({
 
   return (
     <div>
-      <div className="d-flex justify-content-between align-items-center mb-1">
+      <div className="d-flex justify-content-between align-items-center mb-1 gap-2">
         <label className={`form-label mb-0 ${required ? 'required' : ''}`}>
           {label}
           {selectedItems.length > 0 && (
@@ -102,16 +106,28 @@ export default function MultiSelectField({
             </span>
           )}
         </label>
-        {selectedItems.length > 0 && (
-          <button
-            type="button"
-            className="btn btn-link p-0 text-decoration-none small text-danger"
-            style={{ fontSize: '0.74rem' }}
-            onClick={() => onChange('')}
-          >
-            Clear
-          </button>
-        )}
+        <div className="d-flex align-items-center gap-2">
+          {selectedItems.length > 0 && (
+            <button
+              type="button"
+              className="btn btn-link p-0 text-decoration-none small text-danger"
+              style={{ fontSize: '0.74rem' }}
+              onClick={() => onChange('')}
+            >
+              Clear
+            </button>
+          )}
+          {onRequestAddNew && (
+            <button
+              type="button"
+              className="btn btn-link p-0 text-decoration-none small text-primary fw-semibold"
+              style={{ fontSize: '0.75rem' }}
+              onClick={onRequestAddNew}
+            >
+              + {addNewLabel}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Selected Value Chips */}
@@ -192,40 +208,60 @@ export default function MultiSelectField({
             )}
           </div>
 
-          <div className="input-group input-group-sm mt-2 pt-2 border-top">
-            <input
-              type="text"
-              className="form-control"
-              style={uppercase ? { textTransform: 'uppercase' } : undefined}
-              placeholder={customPlaceholder}
-              value={customDraft}
-              onChange={(e) =>
-                uppercase
-                  ? handleNormalizedInputChange(e, toUpperCaseValue, setCustomDraft)
-                  : setCustomDraft(e.target.value)
-              }
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  handleAddCustom();
+          {onRequestAddNew ? (
+            <div className="d-flex justify-content-between align-items-center gap-2 mt-2 pt-2 border-top">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-primary"
+                onClick={onRequestAddNew}
+              >
+                <i className="bi bi-plus-circle me-1"></i>
+                {addNewLabel} {label}
+              </button>
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary"
+                onClick={() => setIsOpen(false)}
+              >
+                Done
+              </button>
+            </div>
+          ) : (
+            <div className="input-group input-group-sm mt-2 pt-2 border-top">
+              <input
+                type="text"
+                className="form-control"
+                style={uppercase ? { textTransform: 'uppercase' } : undefined}
+                placeholder={customPlaceholder}
+                value={customDraft}
+                onChange={(e) =>
+                  uppercase
+                    ? handleNormalizedInputChange(e, toUpperCaseValue, setCustomDraft)
+                    : setCustomDraft(e.target.value)
                 }
-              }}
-            />
-            <button
-              type="button"
-              className="btn btn-outline-primary"
-              onClick={handleAddCustom}
-            >
-              + Add
-            </button>
-            <button
-              type="button"
-              className="btn btn-outline-secondary"
-              onClick={() => setIsOpen(false)}
-            >
-              Done
-            </button>
-          </div>
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleAddCustom();
+                  }
+                }}
+              />
+              <button
+                type="button"
+                className="btn btn-outline-primary"
+                onClick={handleAddCustom}
+              >
+                + Add
+              </button>
+              <button
+                type="button"
+                className="btn btn-outline-secondary"
+                onClick={() => setIsOpen(false)}
+              >
+                Done
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

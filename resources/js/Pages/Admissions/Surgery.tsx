@@ -3,7 +3,9 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '../../Layouts/AppLayout';
 import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
 import { toUpperCaseValue } from '../../utils/inputNormalizers';
+import { joinMultiValues, parseMultiValues } from '../../utils/multiSelect';
 import AnesthesiaSelect, { AnesthesiaTypeItem } from '../../Components/AnesthesiaSelect';
+import QuickAddTeamModal, { QuickAddModalConfig } from '../../Components/QuickAddTeamModal';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
 import { PROCEDURE_TEMPLATES } from '../../constants/procedureTemplates';
 import Icd10SelectorModal from '../../Components/Icd10SelectorModal';
@@ -193,6 +195,53 @@ export default function AdmissionsSurgery({
   const [hasStent, setHasStent] = useState<boolean>(hasStentInText);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [showIcdModal, setShowIcdModal] = useState<boolean>(false);
+  const [staffOptions, setStaffOptions] = useState<ClinicalStaffMember[]>(clinicalStaff);
+  const [anesthesiaOptions, setAnesthesiaOptions] = useState<AnesthesiaTypeItem[]>(anesthesiaTypes);
+  const [quickAddConfig, setQuickAddConfig] = useState<QuickAddModalConfig | null>(null);
+
+  type TeamFieldKey =
+    | 'surgeon'
+    | 'assisted_surgeon'
+    | 'anaesthetist'
+    | 'assisted_anaesthetist'
+    | 'anaesthesia_type'
+    | 'staff_nurse'
+    | 'ot_technician'
+    | 'pediatrician_name'
+    | 'assisted_by';
+
+  const handleStaffAdded = (fieldKey: string, staff: ClinicalStaffMember, useUpper: boolean) => {
+    setStaffOptions((prev) => {
+      const idx = prev.findIndex((item) => item.id === staff.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = staff;
+        return next;
+      }
+      return [...prev, staff];
+    });
+
+    const typedKey = fieldKey as TeamFieldKey;
+    const normFn = useUpper ? toUpperCaseValue : (v: string) => v.trim();
+    const existing = parseMultiValues(data[typedKey], [], normFn);
+    setData(typedKey, joinMultiValues([...existing, staff.name], normFn));
+  };
+
+  const handleAnesthesiaAdded = (fieldKey: string, item: AnesthesiaTypeItem) => {
+    setAnesthesiaOptions((prev) => {
+      const idx = prev.findIndex((existingItem) => existingItem.id === item.id);
+      if (idx >= 0) {
+        const next = [...prev];
+        next[idx] = item;
+        return next;
+      }
+      return [...prev, item];
+    });
+
+    const typedKey = fieldKey as TeamFieldKey;
+    const existing = parseMultiValues(data[typedKey], []);
+    setData(typedKey, joinMultiValues([...existing, item.name]));
+  };
 
   const handleLoadProcedureTemplate = (templateId: string) => {
     setSelectedTemplateId(templateId);
@@ -511,126 +560,63 @@ export default function AdmissionsSurgery({
               <span className="badge bg-primary me-2">4.2</span> Surgical &amp; Anaesthesia Team
             </div>
             <span className="badge bg-light text-muted border fw-normal" style={{ fontSize: '0.72rem' }}>
-              Multiple choice enabled for all team &amp; anaesthesia fields
+              Multiple choice enabled &bull; Click &ldquo;+ Add New&rdquo; on any field to add via popup
             </span>
           </div>
           <div className="card-body">
             <div className="row g-3">
-              <div className="col-md-4">
-                <StaffSelect
-                  label="Surgeon"
-                  role="surgeon"
-                  value={data.surgeon}
-                  onChange={(val) => setData('surgeon', val)}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select Surgeon(s) --"
-                  uppercase
-                  multiple
-                />
-              </div>
-
-              <div className="col-md-4">
-                <StaffSelect
-                  label="Assisted Surgeon"
-                  role="assisted_surgeon"
-                  value={data.assisted_surgeon}
-                  onChange={(val) => setData('assisted_surgeon', val)}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select Assisted Surgeon(s) --"
-                  uppercase
-                  multiple
-                />
-              </div>
-
-              <div className="col-md-4">
-                <StaffSelect
-                  label="Anaesthetist"
-                  role="anaesthetist"
-                  value={data.anaesthetist}
-                  onChange={(val) => setData('anaesthetist', val)}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select Anaesthetist(s) --"
-                  uppercase
-                  multiple
-                />
-              </div>
-
-              <div className="col-md-4">
-                <StaffSelect
-                  label="Assisted Anaesthetist"
-                  role="assisted_anaesthetist"
-                  value={data.assisted_anaesthetist}
-                  onChange={(val) => setData('assisted_anaesthetist', val)}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select Assisted Anaesthetist(s) --"
-                  uppercase
-                  multiple
-                />
-              </div>
-
-              <div className="col-md-4">
-                <AnesthesiaSelect
-                  label="Anaesthesia Type"
-                  value={data.anaesthesia_type}
-                  onChange={(val) => setData('anaesthesia_type', val)}
-                  types={anesthesiaTypes}
-                  anesthesiaList={anesthesiaTypes}
-                  placeholder="-- Select Anaesthesia Type(s) --"
-                  multiple
-                />
-              </div>
-
-              <div className="col-md-4">
-                <StaffSelect
-                  label="Scrub / Staff Nurse"
-                  role="staff_nurse"
-                  value={data.staff_nurse}
-                  onChange={(val) => setData('staff_nurse', val)}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select Staff Nurse(s) --"
-                  uppercase
-                  multiple
-                />
-              </div>
-
-              <div className="col-md-4">
-                <StaffSelect
-                  label="OT Technician"
-                  role="ot_technician"
-                  value={data.ot_technician}
-                  onChange={(val) => setData('ot_technician', val)}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select OT Technician(s) --"
-                  uppercase
-                  multiple
-                />
-              </div>
-
-              <div className="col-md-4">
-                <StaffSelect
-                  label="Pediatrician / Neonatologist"
-                  role="consultant_pediatrician"
-                  value={data.pediatrician_name}
-                  onChange={(val) => setData('pediatrician_name', val)}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select Pediatrician(s) --"
-                  uppercase
-                  multiple
-                />
-              </div>
-
-              <div className="col-md-4">
-                <StaffSelect
-                  label="Assistant / Other Clinical Help"
-                  role="all"
-                  value={data.assisted_by}
-                  onChange={(val) => setData('assisted_by', val)}
-                  staffList={clinicalStaff}
-                  placeholder="-- Select Assistant(s) / Clinical Help --"
-                  uppercase
-                  multiple
-                />
-              </div>
+              {([
+                { key: 'surgeon', label: 'Surgeon', role: 'surgeon', placeholder: '-- Select Surgeon(s) --' },
+                { key: 'assisted_surgeon', label: 'Assisted Surgeon', role: 'assisted_surgeon', placeholder: '-- Select Assisted Surgeon(s) --' },
+                { key: 'anaesthetist', label: 'Anaesthetist', role: 'anaesthetist', placeholder: '-- Select Anaesthetist(s) --' },
+                { key: 'assisted_anaesthetist', label: 'Assisted Anaesthetist', role: 'assisted_anaesthetist', placeholder: '-- Select Assisted Anaesthetist(s) --' },
+                { key: 'anaesthesia_type', label: 'Anaesthesia Type', kind: 'anesthesia', placeholder: '-- Select Anaesthesia Type(s) --' },
+                { key: 'staff_nurse', label: 'Scrub / Staff Nurse', role: 'staff_nurse', placeholder: '-- Select Staff Nurse(s) --' },
+                { key: 'ot_technician', label: 'OT Technician', role: 'ot_technician', placeholder: '-- Select OT Technician(s) --' },
+                { key: 'pediatrician_name', label: 'Pediatrician / Neonatologist', role: 'consultant_pediatrician', placeholder: '-- Select Pediatrician(s) --' },
+                { key: 'assisted_by', label: 'Assistant / Other Clinical Help', role: 'all', placeholder: '-- Select Assistant(s) / Clinical Help --' },
+              ] as const).map((field) => (
+                <div key={field.key} className="col-md-4">
+                  {'kind' in field && field.kind === 'anesthesia' ? (
+                    <AnesthesiaSelect
+                      label={field.label}
+                      value={data.anaesthesia_type}
+                      onChange={(val) => setData('anaesthesia_type', val)}
+                      types={anesthesiaOptions}
+                      anesthesiaList={anesthesiaOptions}
+                      placeholder={field.placeholder}
+                      multiple
+                      onRequestAddNew={() =>
+                        setQuickAddConfig({
+                          fieldKey: field.key,
+                          fieldLabel: field.label,
+                          mode: 'anesthesia',
+                        })
+                      }
+                    />
+                  ) : (
+                    <StaffSelect
+                      label={field.label}
+                      role={field.role}
+                      value={data[field.key]}
+                      onChange={(val) => setData(field.key, val)}
+                      staffList={staffOptions}
+                      placeholder={field.placeholder}
+                      uppercase
+                      multiple
+                      onRequestAddNew={() =>
+                        setQuickAddConfig({
+                          fieldKey: field.key,
+                          fieldLabel: field.label,
+                          mode: 'staff',
+                          defaultRole: field.role,
+                          uppercase: true,
+                        })
+                      }
+                    />
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -1198,6 +1184,13 @@ export default function AdmissionsSurgery({
         onClose={() => setShowIcdModal(false)}
         onSelect={(code) => setData('icd_code', code)}
         currentCode={data.icd_code}
+      />
+
+      <QuickAddTeamModal
+        config={quickAddConfig}
+        onClose={() => setQuickAddConfig(null)}
+        onStaffAdded={handleStaffAdded}
+        onAnesthesiaAdded={handleAnesthesiaAdded}
       />
     </AppLayout>
   );

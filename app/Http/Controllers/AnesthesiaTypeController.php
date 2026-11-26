@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AnesthesiaType;
 use App\Services\AuditService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -144,6 +145,62 @@ class AnesthesiaTypeController extends Controller
 
         return redirect()->route('anesthesia-types.index')
             ->with('status', "Anesthesia type '{$anesthesiaType->name}' " . ($anesthesiaType->is_active ? 'activated' : 'deactivated') . " successfully.");
+    }
+
+    /**
+     * Quick-add anaesthesia type via popup modal during Stage 3 OT/Delivery team entry.
+     */
+    public function quickStore(Request $request): JsonResponse
+    {
+        $currentUser = $request->user();
+        if (!$currentUser || !$currentUser->canEditAdmissions()) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:120'],
+            'code' => ['nullable', 'string', 'max:40'],
+            'description' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $cleanName = trim($validated['name']);
+        $normalizedKey = mb_strtolower($cleanName, 'UTF-8');
+
+        $existing = AnesthesiaType::query()
+            ->whereRaw('LOWER(TRIM(name)) = ?', [$normalizedKey])
+            ->first();
+
+        if ($existing) {
+            if (!$existing->is_active) {
+                $existing->is_active = true;
+                $existing->save();
+            }
+
+            return response()->json([
+                'anesthesiaType' => $existing->only(['id', 'name', 'code', 'description']),
+                'created' => false,
+            ]);
+        }
+
+        $newType = AnesthesiaType::create([
+            'name' => $cleanName,
+            'code' => $validated['code'] ?? null,
+            'description' => $validated['description'] ?? null,
+            'sort_order' => (int) (AnesthesiaType::max('sort_order') ?? 0) + 1,
+            'is_active' => true,
+        ]);
+
+        AuditService::log(
+            'anesthesia_type.quick_created',
+            'AnesthesiaType',
+            $newType->id,
+            "Anesthesia type '{$newType->name}' quick-added from Surgery stage by {$currentUser->name}"
+        );
+
+        return response()->json([
+            'anesthesiaType' => $newType->only(['id', 'name', 'code', 'description']),
+            'created' => true,
+        ], 201);
     }
 }
 
