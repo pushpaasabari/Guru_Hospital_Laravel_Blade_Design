@@ -110,8 +110,20 @@
                             <div class="a4-nb-line"><span class="a4-nb-lbl">Sex:</span>{{ $card['sex'] }}</div>
                             <div class="a4-nb-line"><span class="a4-nb-lbl">Birth Time:</span>{{ $card['born'] }}</div>
                             <div class="a4-nb-line"><span class="a4-nb-lbl">Mode:</span>{{ $card['mode'] }}</div>
-                            <div class="a4-nb-line"><span class="a4-nb-lbl">Weight:</span><strong>{{ $card['weight'] }}</strong> &nbsp;|&nbsp; <span class="a4-nb-lbl">APGAR:</span>{{ $card['apgar'] }}</div>
+                            <div class="a4-nb-line">
+                                <span class="a4-nb-lbl">Birth Weight:</span><strong>{{ $card['weight'] }}</strong>
+                                @if(!empty($card['discharge_weight']))
+                                    &nbsp;|&nbsp; <span class="a4-nb-lbl">Discharge Weight:</span><strong>{{ $card['discharge_weight'] }}</strong>
+                                @endif
+                                &nbsp;|&nbsp; <span class="a4-nb-lbl">APGAR:</span>{{ $card['apgar'] }}
+                            </div>
                             <div class="a4-nb-line"><span class="a4-nb-lbl">Neonatal Care:</span>{{ $card['neonatal_care'] }}</div>
+                            @if(!empty($card['notes']))
+                                <div class="a4-nb-line"><span class="a4-nb-lbl">Baby Notes / Presentation:</span>{{ $card['notes'] }}</div>
+                            @endif
+                            @if(!empty($card['birth_vaccines_text']))
+                                <div class="a4-nb-line"><span class="a4-nb-lbl">Birth Vaccines:</span>{{ $card['birth_vaccines_text'] }}</div>
+                            @endif
                         </div>
                     </div>
                 @endforeach

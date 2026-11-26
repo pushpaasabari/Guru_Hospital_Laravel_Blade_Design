@@ -17,11 +17,15 @@ interface Newborn {
   baby_identifier?: string;
   sex?: string;
   birth_weight_kg?: number;
+  discharge_weight_kg?: number;
   birth_at?: string;
   apgar_1_min?: string;
   apgar_5_min?: string;
   gestational_age_weeks?: number;
   neonatal_care?: string;
+  notes?: string;
+  birth_vaccines?: string[];
+  vaccine_date?: string;
 }
 
 interface User {
@@ -812,6 +816,11 @@ export default function Pack({
                                 : '—'}
                               {baby.neonatal_care && (
                                 <span className="text-muted small"> ({baby.neonatal_care})</span>
+                              )}
+                              {baby.notes && (
+                                <div className="small text-secondary">
+                                  Presentation / Notes: {baby.notes}
+                                </div>
                               )}
                             </div>
                           ))

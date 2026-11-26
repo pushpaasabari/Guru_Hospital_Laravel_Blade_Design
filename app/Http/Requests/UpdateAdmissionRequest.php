@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use App\Http\Requests\Concerns\HasClinicalInputNormalization;
 use App\Http\Requests\Concerns\HasInsuranceValidationRules;
+use App\Http\Requests\Concerns\HasNewbornValidationRules;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -11,6 +12,7 @@ class UpdateAdmissionRequest extends FormRequest
 {
     use HasClinicalInputNormalization;
     use HasInsuranceValidationRules;
+    use HasNewbornValidationRules;
     public function authorize(): bool
     {
         $admission = $this->route('admission');
@@ -93,14 +95,7 @@ class UpdateAdmissionRequest extends FormRequest
             'mrd_incharge_name' => ['nullable', 'string', 'max:160'],
 
             // Dynamic Newborns
-            'newborns' => ['nullable', 'array'],
-            'newborns.*.sex' => ['nullable', Rule::in(['Female', 'Male', 'Other', 'Not recorded'])],
-            'newborns.*.birth_at' => ['nullable', 'date'],
-            'newborns.*.birth_weight_kg' => ['nullable', 'numeric', 'min:0.1', 'max:8'],
-            'newborns.*.apgar_1_min' => ['nullable', 'integer', 'min:0', 'max:10'],
-            'newborns.*.apgar_5_min' => ['nullable', 'integer', 'min:0', 'max:10'],
-            'newborns.*.neonatal_care' => ['nullable', 'string', 'max:3000'],
-            'newborns.*.notes' => ['nullable', 'string', 'max:3000'],
+            ...$this->newbornRules(),
         ];
     }
 

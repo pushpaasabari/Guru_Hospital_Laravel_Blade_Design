@@ -494,6 +494,9 @@
                         @if($baby->neonatal_care)
                             <span style="color: #555;">({{ $baby->neonatal_care }})</span>
                         @endif
+                        @if($baby->notes)
+                            <div style="color: #333; font-size: 9.5pt;">Presentation / Notes: {{ $baby->notes }}</div>
+                        @endif
                     </div>
                 @endforeach
             @else

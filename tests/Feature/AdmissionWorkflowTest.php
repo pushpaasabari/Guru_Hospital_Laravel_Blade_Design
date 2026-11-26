@@ -765,5 +765,83 @@ class AdmissionWorkflowTest extends TestCase
                 ->where('digitalSummary.investigation_rows.1.0.label', 'RBS')
             );
     }
+
+    public function test_newborn_discharge_weight_vaccines_and_baby_notes_persist_and_render_in_discharge_summary(): void
+    {
+        $admission = Admission::create([
+            'patient_name' => 'Kalaivani M',
+            'uhid' => 'GH-NB-001',
+            'ip_no' => 'IP-NB-001',
+            'age' => '25',
+            'sex' => 'Female',
+            'admission_at' => '2026-11-24 09:00:00',
+            'discharge_at' => '2026-11-26 11:00:00',
+            'diagnosis' => 'Full Term Pregnancy in Labour',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+            'status' => 'approved',
+            'created_by' => $this->nurse->id,
+            'approved_by' => $this->doctor->id,
+        ]);
+
+        // Reject invalid vaccine selection
+        $this->actingAs($this->nurse)
+            ->put(route('admissions.surgery.update', $admission), [
+                'newborns' => [
+                    [
+                        'sex' => 'Female',
+                        'birth_vaccines' => ['Vitamin K', 'InvalidShot'],
+                    ],
+                ],
+            ])
+            ->assertSessionHasErrors('newborns.0.birth_vaccines.1');
+
+        // Persist Stage 4 newborn fields including discharge weight, vaccines, vaccine date, and notes
+        $this->actingAs($this->nurse)
+            ->put(route('admissions.surgery.update', $admission), [
+                'procedure_name' => 'Normal Vaginal Delivery',
+                'newborns' => [
+                    [
+                        'sex' => 'Female',
+                        'birth_at' => '2026-11-24 14:30:00',
+                        'birth_weight_kg' => '2.90',
+                        'discharge_weight_kg' => '2.78',
+                        'apgar_1_min' => 8,
+                        'apgar_5_min' => 9,
+                        'neonatal_care' => 'Routine newborn care, baby cried immediately',
+                        'notes' => 'Cephalic presentation, clear liquor',
+                        'birth_vaccines' => ['HEP-B1', 'Vitamin K', 'OPV', 'BCG'],
+                        'vaccine_date' => '2026-11-26',
+                    ],
+                ],
+                'next_step' => 'stay',
+            ])
+            ->assertRedirect(route('admissions.surgery', $admission));
+
+        $admission->refresh();
+        $baby = $admission->newborns->first();
+        $this->assertNotNull($baby);
+        $this->assertEquals(2.78, $baby->discharge_weight_kg);
+        $this->assertSame(['Vitamin K', 'BCG', 'OPV', 'HEP-B1'], $baby->birth_vaccines);
+        $this->assertEquals('2026-11-26', $baby->vaccine_date?->format('Y-m-d'));
+        $this->assertEquals('Cephalic presentation, clear liquor', $baby->notes);
+
+        // Verify Digital Discharge Summary Blade view renders all newborn fields
+        $dsHtml = view('pdf.discharge-summary-a4', ['admission' => $admission])->render();
+        $this->assertStringContainsString('2.90 kg', $dsHtml);
+        $this->assertStringContainsString('2.78 kg', $dsHtml);
+        $this->assertStringContainsString('Cephalic presentation, clear liquor', $dsHtml);
+        $this->assertStringContainsString('Vitamin K, BCG, OPV, HEP-B1 (Given on 26.11.2026)', $dsHtml);
+
+        // Verify Document Preview Inertia prop also carries the fields
+        $this->actingAs($this->nurse)
+            ->get(route('documents.preview', $admission))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('digitalSummary.newborn_cards.0.discharge_weight', '2.78 kg')
+                ->where('digitalSummary.newborn_cards.0.notes', 'Cephalic presentation, clear liquor')
+                ->where('digitalSummary.newborn_cards.0.birth_vaccines_text', 'Vitamin K, BCG, OPV, HEP-B1 (Given on 26.11.2026)')
+            );
+    }
 }
 

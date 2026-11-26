@@ -71,6 +71,7 @@ Route::middleware('auth')->group(function () {
 
     // Clinical Reports
     Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+    Route::get('/reports/day', [ReportController::class, 'day'])->name('reports.day');
     Route::get('/reports/birth', [ReportController::class, 'birth'])->name('reports.birth');
     Route::get('/reports/surgery', [ReportController::class, 'surgery'])->name('reports.surgery');
     Route::get('/reports/medical', [ReportController::class, 'medical'])->name('reports.medical');

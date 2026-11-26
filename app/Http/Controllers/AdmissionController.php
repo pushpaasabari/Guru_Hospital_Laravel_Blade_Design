@@ -11,6 +11,7 @@ use App\Models\Admission;
 use App\Models\AnesthesiaType;
 use App\Models\ClinicalStaff;
 use App\Models\DocumentRevision;
+use App\Models\Newborn;
 use App\Services\AuditService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -405,7 +406,17 @@ class AdmissionController extends Controller
         }
 
         foreach ($newborns as $newborn) {
-            if (collect($newborn)->filter(fn ($v) => $v !== null && $v !== '')->isNotEmpty()) {
+            if (!empty($newborn['birth_vaccines']) && is_array($newborn['birth_vaccines'])) {
+                $selected = array_values(array_intersect(
+                    Newborn::BIRTH_VACCINES,
+                    $newborn['birth_vaccines']
+                ));
+                $newborn['birth_vaccines'] = !empty($selected) ? $selected : null;
+            } else {
+                $newborn['birth_vaccines'] = null;
+            }
+
+            if (collect($newborn)->filter(fn ($v) => $v !== null && $v !== '' && $v !== [])->isNotEmpty()) {
                 $admission->newborns()->create($newborn);
             }
         }

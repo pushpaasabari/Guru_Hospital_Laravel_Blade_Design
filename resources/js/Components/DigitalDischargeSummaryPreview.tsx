@@ -50,8 +50,11 @@ export interface DigitalSummaryPayload {
     born: string;
     mode: string;
     weight: string;
+    discharge_weight?: string | null;
     apgar: string;
     neonatal_care: string;
+    notes?: string;
+    birth_vaccines_text?: string;
   }>;
   medications?: Array<{
     medicine: string;
@@ -749,15 +752,34 @@ export default function DigitalDischargeSummaryPreview({
                       {card.mode}
                     </div>
                     <div>
-                      <span className="a4-nb-lbl">Weight:</span>
-                      <strong>{card.weight}</strong> &nbsp;|&nbsp;{' '}
-                      <span className="a4-nb-lbl">APGAR:</span>
+                      <span className="a4-nb-lbl">Birth Weight:</span>
+                      <strong>{card.weight}</strong>
+                      {card.discharge_weight && (
+                        <>
+                          {' '}
+                          &nbsp;|&nbsp; <span className="a4-nb-lbl">Discharge Weight:</span>
+                          <strong>{card.discharge_weight}</strong>
+                        </>
+                      )}{' '}
+                      &nbsp;|&nbsp; <span className="a4-nb-lbl">APGAR:</span>
                       {card.apgar}
                     </div>
                     <div>
                       <span className="a4-nb-lbl">Neonatal Care:</span>
                       {card.neonatal_care}
                     </div>
+                    {card.notes && (
+                      <div>
+                        <span className="a4-nb-lbl">Baby Notes / Presentation:</span>
+                        {card.notes}
+                      </div>
+                    )}
+                    {card.birth_vaccines_text && (
+                      <div>
+                        <span className="a4-nb-lbl">Birth Vaccines:</span>
+                        {card.birth_vaccines_text}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}

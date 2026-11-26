@@ -1227,7 +1227,7 @@ class DischargeSummaryFormatter
      * Format newborn details into structured cards.
      *
      * @param Admission $admission
-     * @return array<int, array{title: string, sex: string, born: string, mode: string, weight: string, apgar: string, neonatal_care: string}>
+     * @return array<int, array{title: string, sex: string, born: string, mode: string, weight: string, discharge_weight: ?string, apgar: string, neonatal_care: string, notes: string, birth_vaccines_text: string}>
      */
     public static function formatNewborns(Admission $admission): array
     {
@@ -1267,11 +1267,22 @@ class DischargeSummaryFormatter
             }
 
             $weight = $baby->birth_weight_kg ? number_format($baby->birth_weight_kg, 2) . ' kg' : '—';
+            $dischargeWeight = $baby->discharge_weight_kg ? number_format((float) $baby->discharge_weight_kg, 2) . ' kg' : null;
             $apgar = ($baby->apgar_1_min !== null || $baby->apgar_5_min !== null)
                 ? ($baby->apgar_1_min ?? '—') . '/10, ' . ($baby->apgar_5_min ?? '—') . '/10'
                 : '—';
 
             $neonatalCare = $baby->neonatal_care ?: '—';
+            $notes = trim((string) ($baby->notes ?? ''));
+
+            $vaccines = array_values(array_filter((array) ($baby->birth_vaccines ?? [])));
+            $vaxDate = $baby->vaccine_date ? $baby->vaccine_date->format('d.m.Y') : '';
+            $birthVaccinesText = '';
+            if (!empty($vaccines)) {
+                $birthVaccinesText = implode(', ', $vaccines) . ($vaxDate ? " (Given on {$vaxDate})" : '');
+            } elseif ($vaxDate !== '') {
+                $birthVaccinesText = "Given on {$vaxDate}";
+            }
 
             $cards[] = [
                 'title' => $title,
@@ -1279,8 +1290,11 @@ class DischargeSummaryFormatter
                 'born' => $bornTime,
                 'mode' => $mode,
                 'weight' => $weight,
+                'discharge_weight' => $dischargeWeight,
                 'apgar' => $apgar,
                 'neonatal_care' => $neonatalCare,
+                'notes' => $notes,
+                'birth_vaccines_text' => $birthVaccinesText,
             ];
         }
 

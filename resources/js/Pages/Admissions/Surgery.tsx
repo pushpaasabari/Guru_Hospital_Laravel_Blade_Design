@@ -10,15 +10,20 @@ import Icd10SelectorModal from '../../Components/Icd10SelectorModal';
 import { ICD10_CATALOG } from '../../constants/icd10Catalog';
 import { formatDate } from '../../utils/dateFormatter';
 
+const BIRTH_VACCINES = ['Vitamin K', 'BCG', 'OPV', 'HEP-B1'] as const;
+
 interface Newborn {
   id?: number;
   sex?: string;
   birth_at?: string;
   birth_weight_kg?: string | number;
+  discharge_weight_kg?: string | number;
   apgar_1_min?: number;
   apgar_5_min?: number;
   neonatal_care?: string;
   notes?: string;
+  birth_vaccines?: string[];
+  vaccine_date?: string;
 }
 
 interface AdmissionData {
@@ -86,6 +91,9 @@ export default function AdmissionsSurgery({
       ? admission.newborns.map((nb) => ({
           ...nb,
           birth_at: nb.birth_at ? nb.birth_at.slice(0, 16) : '',
+          discharge_weight_kg: nb.discharge_weight_kg ?? '',
+          birth_vaccines: Array.isArray(nb.birth_vaccines) ? nb.birth_vaccines : [],
+          vaccine_date: nb.vaccine_date ? String(nb.vaccine_date).slice(0, 10) : '',
         }))
       : isDelivery
       ? [
@@ -93,10 +101,13 @@ export default function AdmissionsSurgery({
             sex: '',
             birth_at: '',
             birth_weight_kg: '',
+            discharge_weight_kg: '',
             apgar_1_min: undefined,
             apgar_5_min: undefined,
             neonatal_care: 'Routine newborn care',
             notes: '',
+            birth_vaccines: [],
+            vaccine_date: '',
           },
         ]
       : [];
@@ -223,10 +234,13 @@ export default function AdmissionsSurgery({
         sex: '',
         birth_at: '',
         birth_weight_kg: '',
+        discharge_weight_kg: '',
         apgar_1_min: undefined,
         apgar_5_min: undefined,
         neonatal_care: 'Routine newborn care',
         notes: '',
+        birth_vaccines: [],
+        vaccine_date: '',
       },
     ]);
   };
@@ -242,6 +256,16 @@ export default function AdmissionsSurgery({
     const updated = [...data.newborns];
     updated[index] = { ...updated[index], [field]: val };
     setData('newborns', updated);
+  };
+
+  const toggleBabyVaccine = (index: number, vaccine: string) => {
+    const current = Array.isArray(data.newborns[index]?.birth_vaccines)
+      ? data.newborns[index].birth_vaccines!
+      : [];
+    const next = current.includes(vaccine)
+      ? current.filter((v) => v !== vaccine)
+      : BIRTH_VACCINES.filter((v) => v === vaccine || current.includes(v));
+    updateBaby(index, 'birth_vaccines', next);
   };
 
   const submitStage = (step: 'stay' | 'discharge', e: React.FormEvent) => {
@@ -881,7 +905,7 @@ export default function AdmissionsSurgery({
                     </div>
 
                     <div className="row g-3">
-                      <div className="col-md-3">
+                      <div className="col-md-4">
                         <label className="form-label required">Sex</label>
                         <select
                           className="form-select"
@@ -896,7 +920,7 @@ export default function AdmissionsSurgery({
                         </select>
                       </div>
 
-                      <div className="col-md-3">
+                      <div className="col-md-4">
                         <label className="form-label">Birth Date &amp; Time</label>
                         <input
                           type="datetime-local"
@@ -906,11 +930,13 @@ export default function AdmissionsSurgery({
                         />
                       </div>
 
-                      <div className="col-md-2">
+                      <div className="col-md-4">
                         <label className="form-label">Birth Weight (kg)</label>
                         <input
                           type="number"
                           step="0.01"
+                          min="0.1"
+                          max="8"
                           className="form-control"
                           value={baby.birth_weight_kg || ''}
                           onChange={(e) => updateBaby(idx, 'birth_weight_kg', e.target.value)}
@@ -918,7 +944,21 @@ export default function AdmissionsSurgery({
                         />
                       </div>
 
-                      <div className="col-md-2">
+                      <div className="col-md-4">
+                        <label className="form-label">Baby Weight on Discharge (kg)</label>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0.1"
+                          max="8"
+                          className="form-control"
+                          value={baby.discharge_weight_kg || ''}
+                          onChange={(e) => updateBaby(idx, 'discharge_weight_kg', e.target.value)}
+                          placeholder="e.g. 2.75"
+                        />
+                      </div>
+
+                      <div className="col-md-4">
                         <label className="form-label">Apgar (1 min)</label>
                         <input
                           type="number"
@@ -931,7 +971,7 @@ export default function AdmissionsSurgery({
                         />
                       </div>
 
-                      <div className="col-md-2">
+                      <div className="col-md-4">
                         <label className="form-label">Apgar (5 min)</label>
                         <input
                           type="number"
@@ -964,6 +1004,89 @@ export default function AdmissionsSurgery({
                           onChange={(e) => updateBaby(idx, 'notes', e.target.value)}
                           placeholder="e.g. Cephalic presentation, clear liquor, no birth injuries"
                         />
+                      </div>
+
+                      <div className="col-12">
+                        <div className="bg-white border rounded-3 p-3">
+                          <div className="row g-3 align-items-end">
+                            <div className="col-md-8">
+                              <div className="d-flex justify-content-between align-items-center mb-2">
+                                <label className="form-label fw-semibold mb-0">
+                                  <i className="bi bi-shield-plus text-success me-1"></i>
+                                  Birth Vaccines Given
+                                </label>
+                                <button
+                                  type="button"
+                                  className="btn btn-link btn-sm p-0 text-decoration-none"
+                                  onClick={() => {
+                                    const allSelected = BIRTH_VACCINES.every((v) =>
+                                      (baby.birth_vaccines || []).includes(v)
+                                    );
+                                    updateBaby(
+                                      idx,
+                                      'birth_vaccines',
+                                      allSelected ? [] : [...BIRTH_VACCINES]
+                                    );
+                                  }}
+                                >
+                                  {BIRTH_VACCINES.every((v) => (baby.birth_vaccines || []).includes(v))
+                                    ? 'Clear All'
+                                    : 'Select All'}
+                                </button>
+                              </div>
+                              <div className="d-flex flex-wrap gap-3">
+                                {BIRTH_VACCINES.map((vaccine) => {
+                                  const checked = (baby.birth_vaccines || []).includes(vaccine);
+                                  const checkboxId = `newborn_${idx}_vax_${vaccine.replace(/[^a-zA-Z0-9]/g, '_')}`;
+                                  return (
+                                    <div key={vaccine} className="form-check form-check-inline m-0">
+                                      <input
+                                        id={checkboxId}
+                                        type="checkbox"
+                                        className="form-check-input"
+                                        checked={checked}
+                                        onChange={() => toggleBabyVaccine(idx, vaccine)}
+                                      />
+                                      <label
+                                        htmlFor={checkboxId}
+                                        className="form-check-label fw-semibold text-dark"
+                                        style={{ cursor: 'pointer' }}
+                                      >
+                                        {vaccine}
+                                      </label>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+
+                            <div className="col-md-4">
+                              <div className="d-flex justify-content-between align-items-center mb-1">
+                                <label className="form-label mb-0">Vaccines Given On (Date)</label>
+                                {(baby.birth_at || data.procedure_at) && (
+                                  <button
+                                    type="button"
+                                    className="btn btn-link btn-sm p-0 text-decoration-none"
+                                    onClick={() => {
+                                      const srcDate = String(baby.birth_at || data.procedure_at || '').slice(0, 10);
+                                      if (srcDate) {
+                                        updateBaby(idx, 'vaccine_date', srcDate);
+                                      }
+                                    }}
+                                  >
+                                    Use Birth Date
+                                  </button>
+                                )}
+                              </div>
+                              <input
+                                type="date"
+                                className="form-control"
+                                value={baby.vaccine_date || ''}
+                                onChange={(e) => updateBaby(idx, 'vaccine_date', e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

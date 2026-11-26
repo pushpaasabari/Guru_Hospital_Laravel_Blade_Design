@@ -23,6 +23,118 @@ class ReportController extends Controller
     }
 
     /**
+     * Day Wise / Daily Clinical Register Report
+     */
+    public function day(Request $request)
+    {
+        $allDates = $request->boolean('all_dates') || $request->input('date') === 'all';
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+        $selectedDate = (!$allDates && !$dateFrom && !$dateTo)
+            ? ($request->input('date') ?: now()->toDateString())
+            : (string) $request->input('date', '');
+
+        $dateBasis = (string) $request->input('date_basis', 'any');
+        if (!in_array($dateBasis, ['any', 'admission', 'procedure', 'discharge'], true)) {
+            $dateBasis = 'any';
+        }
+
+        $query = Admission::query()
+            ->with('newborns')
+            ->latest('admission_at')
+            ->latest('id');
+
+        $dateColumns = match ($dateBasis) {
+            'admission' => ['admission_at'],
+            'procedure' => ['procedure_at'],
+            'discharge' => ['discharge_at'],
+            default => ['admission_at', 'procedure_at', 'discharge_at'],
+        };
+
+        if ($dateFrom || $dateTo) {
+            $query->where(function ($q) use ($dateColumns, $dateFrom, $dateTo) {
+                foreach ($dateColumns as $col) {
+                    $q->orWhere(function ($sub) use ($col, $dateFrom, $dateTo) {
+                        if ($dateFrom) {
+                            $sub->whereDate($col, '>=', $dateFrom);
+                        }
+                        if ($dateTo) {
+                            $sub->whereDate($col, '<=', $dateTo);
+                        }
+                    });
+                }
+            });
+        } elseif (!$allDates && $selectedDate !== '') {
+            $query->where(function ($q) use ($dateColumns, $selectedDate) {
+                foreach ($dateColumns as $col) {
+                    $q->orWhereDate($col, $selectedDate);
+                }
+            });
+        }
+
+        if ($search = trim((string) $request->input('search'))) {
+            $query->filterSearch($search, true);
+        }
+
+        if ($workflow = $request->input('surgery_type')) {
+            $query->where('surgery_type', $workflow);
+        }
+
+        if ($format = $request->input('format')) {
+            $query->where('format', $format);
+        }
+
+        if ($surgeon = $request->input('surgeon')) {
+            $query->where(function ($q) use ($surgeon) {
+                $q->where('surgeon', $surgeon)
+                    ->orWhere('consultant', $surgeon);
+            });
+        }
+
+        if ($request->input('export') === 'csv') {
+            $label = $allDates
+                ? 'all_dates'
+                : (($dateFrom || $dateTo) ? trim(($dateFrom ?: 'start') . '_to_' . ($dateTo ?: 'end')) : $selectedDate);
+            return $this->exportDayCsv($query->get(), $label);
+        }
+
+        $allMatches = (clone $query)->get();
+        $deliveries = $allMatches->filter(fn ($a) => $a->surgery_type === 'delivery' || $a->newborns->isNotEmpty());
+        $metrics = [
+            'total_cases' => $allMatches->count(),
+            'surgeries_count' => $allMatches->where('surgery_type', 'other')->count(),
+            'deliveries_count' => $deliveries->count(),
+            'babies_count' => $deliveries->flatMap->newborns->count(),
+            'medical_count' => $allMatches->where('surgery_type', 'medical')->count(),
+            'discharges_count' => $allMatches->filter(fn ($a) => !empty($a->discharge_at))->count(),
+        ];
+
+        $perPage = (int) $request->input('per_page', 50);
+        if ($perPage < 5 || $perPage > 200) {
+            $perPage = 50;
+        }
+
+        $records = $query->paginate($perPage)->withQueryString();
+
+        $filters = [
+            'date' => $selectedDate,
+            'date_from' => $dateFrom ?: '',
+            'date_to' => $dateTo ?: '',
+            'date_basis' => $dateBasis,
+            'all_dates' => $allDates,
+            'search' => $request->input('search', ''),
+            'surgery_type' => $request->input('surgery_type', ''),
+            'format' => $request->input('format', ''),
+            'surgeon' => $request->input('surgeon', ''),
+            'per_page' => $perPage,
+        ];
+
+        $clinicalStaff = ClinicalStaff::cachedActive();
+
+        return Inertia::render('Reports/DayReport', compact('records', 'metrics', 'filters', 'clinicalStaff'));
+    }
+
+    /**
      * 1. Birth Report
      */
     public function birth(Request $request)
@@ -663,6 +775,104 @@ class ReportController extends Controller
                     $adm->status,
                 ]);
             }
+            fclose($handle);
+        }, $filename, [
+            'Content-Type' => 'text/csv',
+        ]);
+    }
+
+    /**
+     * CSV Exporter for Day Report
+     */
+    protected function exportDayCsv($admissions, string $label): StreamedResponse
+    {
+        $safeLabel = preg_replace('/[^a-zA-Z0-9_-]+/', '_', $label) ?: date('Y-m-d');
+        $filename = "day_report_{$safeLabel}_" . date('Y-m-d_His') . '.csv';
+
+        return response()->streamDownload(function () use ($admissions) {
+            $handle = fopen('php://output', 'w');
+            fputcsv($handle, [
+                'S.No',
+                'Name',
+                'UHID',
+                'IPNO',
+                'DOA',
+                'DOO',
+                'DOD',
+                'Procedure Done & Incision',
+                'Surgical & Anesthesia Team',
+                'Delivery Details',
+                'Baby Details',
+            ]);
+
+            foreach ($admissions->values() as $idx => $adm) {
+                $procParts = array_filter([
+                    $adm->procedure_done ?: $adm->procedure_name,
+                    $adm->incision ? 'Incision: ' . $adm->incision : null,
+                ]);
+                if (empty($procParts) && $adm->surgery_type === 'medical') {
+                    $procParts[] = 'Medical Management' . ($adm->diagnosis ? ' (' . $adm->diagnosis . ')' : '');
+                }
+
+                $teamParts = array_filter([
+                    $adm->surgeon ? 'Surgeon: ' . $adm->surgeon : null,
+                    $adm->assisted_surgeon ? 'Asst. Surgeon: ' . $adm->assisted_surgeon : null,
+                    $adm->consultant ? 'Consultant: ' . $adm->consultant : null,
+                    $adm->pediatrician_name ? 'Pediatrician: ' . $adm->pediatrician_name : null,
+                    $adm->anaesthetist ? 'Anaesthetist: ' . $adm->anaesthetist : null,
+                    $adm->assisted_anaesthetist ? 'Asst. Anaesthetist: ' . $adm->assisted_anaesthetist : null,
+                    $adm->anaesthesia_type ? 'Anaesthesia: ' . $adm->anaesthesia_type : null,
+                    $adm->staff_nurse ? 'Staff Nurse: ' . $adm->staff_nurse : null,
+                    $adm->ot_technician ? 'OT Tech: ' . $adm->ot_technician : null,
+                ]);
+
+                $isDelivery = $adm->surgery_type === 'delivery' || $adm->newborns->isNotEmpty();
+                $deliveryDetails = '';
+                $babyDetails = '';
+
+                if ($isDelivery) {
+                    $deliveryDetails = implode(' | ', array_filter([
+                        $adm->procedure_done ?: $adm->procedure_name ?: 'Delivery',
+                        $adm->picme_no ? 'PICME/RCH: ' . $adm->picme_no : null,
+                        $adm->pediatrician_name ? 'Pediatrician: ' . $adm->pediatrician_name : null,
+                    ]));
+
+                    $babyDetails = $adm->newborns->map(function ($baby, $bIdx) use ($adm) {
+                        $vaccines = array_values(array_filter((array) ($baby->birth_vaccines ?? [])));
+                        $vaxStr = !empty($vaccines)
+                            ? 'Vaccines: ' . implode(', ', $vaccines) . ($baby->vaccine_date ? ' (' . Carbon::parse($baby->vaccine_date)->format('d.m.Y') . ')' : '')
+                            : null;
+
+                        return 'Baby ' . ($bIdx + 1) . ': ' . implode(', ', array_filter([
+                            $baby->sex ?: null,
+                            $baby->birth_at ? 'Born ' . Carbon::parse($baby->birth_at)->format('d.m.Y h:i A') : null,
+                            $baby->birth_weight_kg ? 'Birth Wt ' . number_format((float) $baby->birth_weight_kg, 2) . ' kg' : null,
+                            $baby->discharge_weight_kg ? 'Disch Wt ' . number_format((float) $baby->discharge_weight_kg, 2) . ' kg' : null,
+                            ($baby->apgar_1_min !== null || $baby->apgar_5_min !== null)
+                                ? 'APGAR ' . ($baby->apgar_1_min ?? '-') . '/' . ($baby->apgar_5_min ?? '-')
+                                : null,
+                            $baby->neonatal_care ? 'Care: ' . $baby->neonatal_care : null,
+                            $baby->notes ? 'Notes: ' . $baby->notes : null,
+                            $vaxStr,
+                        ]));
+                    })->implode(' || ');
+                }
+
+                fputcsv($handle, [
+                    $idx + 1,
+                    $adm->patient_name,
+                    $adm->uhid,
+                    $adm->ip_no,
+                    $adm->admission_at ? Carbon::parse($adm->admission_at)->format('d.m.Y') : '',
+                    $adm->procedure_at ? Carbon::parse($adm->procedure_at)->format('d.m.Y h:i A') : '',
+                    $adm->discharge_at ? Carbon::parse($adm->discharge_at)->format('d.m.Y') : '',
+                    implode(' | ', $procParts),
+                    implode(' | ', $teamParts),
+                    $deliveryDetails,
+                    $babyDetails,
+                ]);
+            }
+
             fclose($handle);
         }, $filename, [
             'Content-Type' => 'text/csv',

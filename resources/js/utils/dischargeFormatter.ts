@@ -38,8 +38,11 @@ export interface FormattedNewbornCard {
   born: string;
   mode: string;
   weight: string;
+  discharge_weight?: string | null;
   apgar: string;
   neonatal_care: string;
+  notes?: string;
+  birth_vaccines_text?: string;
 }
 
 const INVESTIGATION_ORDER: Record<string, number> = {
@@ -816,13 +819,41 @@ export function formatNewborns(admission: any): FormattedNewbornCard[] {
     else if (/normal|natural/i.test(babyNotes)) mode = 'Labour natural with episiotomy';
 
     const weight = baby.birth_weight_kg ? `${Number(baby.birth_weight_kg).toFixed(2)} kg` : '—';
+    const dischargeWeight = baby.discharge_weight_kg ? `${Number(baby.discharge_weight_kg).toFixed(2)} kg` : null;
     const apgar = (baby.apgar_1_min !== null && baby.apgar_1_min !== undefined) || (baby.apgar_5_min !== null && baby.apgar_5_min !== undefined)
       ? `${baby.apgar_1_min ?? '—'}/10, ${baby.apgar_5_min ?? '—'}/10`
       : '—';
 
     let neonatalCare = baby.neonatal_care || '—';
+    const notes = String(baby.notes || '').trim();
 
-    cards.push({ title, sex, born: bornTime, mode, weight, apgar, neonatal_care: neonatalCare });
+    const vaccines = Array.isArray(baby.birth_vaccines) ? baby.birth_vaccines.filter(Boolean) : [];
+    let vaxDate = '';
+    if (baby.vaccine_date) {
+      const vd = new Date(String(baby.vaccine_date).slice(0, 10) + 'T00:00:00');
+      if (!Number.isNaN(vd.getTime())) {
+        vaxDate = `${String(vd.getDate()).padStart(2, '0')}.${String(vd.getMonth() + 1).padStart(2, '0')}.${vd.getFullYear()}`;
+      }
+    }
+    let birthVaccinesText = '';
+    if (vaccines.length > 0) {
+      birthVaccinesText = vaccines.join(', ') + (vaxDate ? ` (Given on ${vaxDate})` : '');
+    } else if (vaxDate) {
+      birthVaccinesText = `Given on ${vaxDate}`;
+    }
+
+    cards.push({
+      title,
+      sex,
+      born: bornTime,
+      mode,
+      weight,
+      discharge_weight: dischargeWeight,
+      apgar,
+      neonatal_care: neonatalCare,
+      notes,
+      birth_vaccines_text: birthVaccinesText,
+    });
   });
 
   return cards;

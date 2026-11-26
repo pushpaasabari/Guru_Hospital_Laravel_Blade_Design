@@ -49,6 +49,7 @@ class ReportWorkflowTest extends TestCase
     public function test_guest_is_redirected_to_login(): void
     {
         $this->get('/reports')->assertRedirect('/login');
+        $this->get('/reports/day')->assertRedirect('/login');
         $this->get('/reports/birth')->assertRedirect('/login');
         $this->get('/reports/surgery')->assertRedirect('/login');
         $this->get('/reports/medical')->assertRedirect('/login');
@@ -234,5 +235,91 @@ class ReportWorkflowTest extends TestCase
         $response = $this->actingAs($this->user)->get('/reports/month-wise?export=csv');
         $response->assertStatus(200);
         $this->assertStringContainsString('text/csv', (string) $response->headers->get('content-type'));
+    }
+
+    public function test_day_report_shows_clinical_team_procedure_delivery_and_baby_details_and_exports_csv(): void
+    {
+        $targetDate = '2026-11-26';
+
+        $delivery = $this->createAdmission([
+            'patient_name' => 'DELIVERY DAY MOTHER',
+            'uhid' => 'GH-DAY-DEL-01',
+            'ip_no' => 'IP-DAY-DEL-01',
+            'admission_at' => '2026-11-24 09:00:00',
+            'procedure_at' => '2026-11-26 08:30:00',
+            'discharge_at' => null,
+            'surgery_type' => 'delivery',
+            'procedure_done' => 'Emergency LSCS',
+            'incision' => 'Pfannenstiel incision',
+            'surgeon' => 'DR. AMBIKA',
+            'anaesthetist' => 'DR. RAMESH',
+            'anaesthesia_type' => 'Spinal Anaesthesia',
+            'picme_no' => '123456789012',
+        ]);
+
+        Newborn::create([
+            'admission_id' => $delivery->id,
+            'sex' => 'Female',
+            'birth_at' => '2026-11-26 08:45:00',
+            'birth_weight_kg' => 3.05,
+            'discharge_weight_kg' => 2.95,
+            'apgar_1_min' => 8,
+            'apgar_5_min' => 9,
+            'neonatal_care' => 'Routine newborn care',
+            'notes' => 'Cephalic presentation',
+            'birth_vaccines' => ['Vitamin K', 'BCG'],
+            'vaccine_date' => '2026-11-26',
+        ]);
+
+        $otherDay = $this->createAdmission([
+            'patient_name' => 'OTHER DAY CASE',
+            'uhid' => 'GH-OTHER-02',
+            'ip_no' => 'IP-OTHER-02',
+            'admission_at' => '2026-11-20 10:00:00',
+            'procedure_at' => '2026-11-20 12:00:00',
+            'discharge_at' => '2026-11-21 10:00:00',
+            'surgery_type' => 'other',
+            'procedure_done' => 'Laparoscopic Cholecystectomy',
+        ]);
+
+        // Filtering by targetDate should match delivery via DOO even though DOA was 2 days earlier
+        $response = $this->actingAs($this->user)->get('/reports/day?date=' . $targetDate);
+        $response->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Reports/DayReport')
+                ->where('records.total', 1)
+                ->where('records.data.0.patient_name', 'DELIVERY DAY MOTHER')
+                ->where('records.data.0.incision', 'Pfannenstiel incision')
+                ->where('records.data.0.newborns.0.notes', 'Cephalic presentation')
+                ->where('records.data.0.newborns.0.discharge_weight_kg', 2.95)
+                ->where('metrics.deliveries_count', 1)
+                ->where('metrics.babies_count', 1)
+            );
+
+        // Date basis 'admission' only should exclude admission from 2026-11-24
+        $this->actingAs($this->user)
+            ->get('/reports/day?date=' . $targetDate . '&date_basis=admission')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('records.total', 0));
+
+        // All dates mode includes both records
+        $this->actingAs($this->user)
+            ->get('/reports/day?all_dates=1')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('records.total', 2));
+
+        // CSV Export contains exact requested headers and baby/delivery/team values
+        $csvResp = $this->actingAs($this->user)->get('/reports/day?date=' . $targetDate . '&export=csv');
+        $csvResp->assertOk();
+        $this->assertStringContainsString('text/csv', (string) $csvResp->headers->get('content-type'));
+        $csv = $csvResp->streamedContent();
+        $this->assertStringContainsString('S.No,Name,UHID,IPNO,DOA,DOO,DOD,"Procedure Done & Incision","Surgical & Anesthesia Team","Delivery Details","Baby Details"', $csv);
+        $this->assertStringContainsString('DELIVERY DAY MOTHER', $csv);
+        $this->assertStringContainsString('Pfannenstiel incision', $csv);
+        $this->assertStringContainsString('DR. AMBIKA', $csv);
+        $this->assertStringContainsString('Cephalic presentation', $csv);
+        $this->assertStringContainsString('Vitamin K, BCG', $csv);
+        $this->assertNotContains($otherDay->patient_name, [$csv]);
+        $this->assertStringNotContainsString('OTHER DAY CASE', $csv);
     }
 }

@@ -45,7 +45,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
   const adminPaths = ['/templates', '/clinical-staff', '/anesthesia-types', '/users', '/backups', '/audit-logs'];
   const isAnyAdminActive = adminPaths.some((p) => isLinkActive(p));
 
-  const reportPaths = ['/reports/birth', '/reports/surgery', '/reports/medical', '/reports/month-wise', '/reports'];
+  const reportPaths = ['/reports/day', '/reports/birth', '/reports/surgery', '/reports/medical', '/reports/month-wise', '/reports'];
   const isAnyReportActive = reportPaths.some((p) => isLinkActive(p));
 
   const [adminMenuOpen, setAdminMenuOpen] = useState<boolean>(() => {
@@ -256,9 +256,20 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                   ></i>
                 </button>
 
-                {/* Submenu with 4 Sub-Items */}
+                {/* Submenu with 5 Sub-Items */}
                 {reportMenuOpen && (
                   <div className="fg-sidebar-submenu" role="menu" aria-label="Report Submenu">
+                    <Link
+                      href="/reports/day"
+                      prefetch
+                      className={`fg-sidebar-sublink ${isLinkActive('/reports/day') ? 'active' : ''}`}
+                      onClick={closeMobile}
+                      title="Day Report"
+                    >
+                      <i className="bi bi-calendar-day text-info"></i>
+                      <span>Day Report</span>
+                    </Link>
+
                     <Link
                       href="/reports/birth"
                       prefetch
