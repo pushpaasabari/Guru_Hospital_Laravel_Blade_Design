@@ -1,11 +1,6 @@
 import fs from 'fs';
 import { launchChromium } from './launch-chromium.js';
 
-// Clear Electron's node-mode flag once running so child Chromium processes start normally.
-if (process.env.ELECTRON_RUN_AS_NODE) {
-  delete process.env.ELECTRON_RUN_AS_NODE;
-}
-
 function escapeHtml(text) {
   return String(text)
     .replace(/&/g, '&amp;')

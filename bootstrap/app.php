@@ -8,7 +8,7 @@ use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-$app = Application::configure(basePath: dirname(__DIR__))
+return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
@@ -67,24 +67,3 @@ $app = Application::configure(basePath: dirname(__DIR__))
             }
         });
     })->create();
-
-$desktopEnvPath = getenv('LARAVEL_ENV_PATH') ?: ($_SERVER['LARAVEL_ENV_PATH'] ?? ($_ENV['LARAVEL_ENV_PATH'] ?? null));
-if (is_string($desktopEnvPath) && $desktopEnvPath !== '') {
-    $app->useEnvironmentPath($desktopEnvPath);
-}
-
-$desktopStoragePath = getenv('LARAVEL_STORAGE_PATH') ?: ($_SERVER['LARAVEL_STORAGE_PATH'] ?? ($_ENV['LARAVEL_STORAGE_PATH'] ?? null));
-if (is_string($desktopStoragePath) && $desktopStoragePath !== '') {
-    $app->useStoragePath($desktopStoragePath);
-}
-
-foreach (['APP_SERVICES_CACHE', 'APP_PACKAGES_CACHE', 'APP_CONFIG_CACHE', 'APP_ROUTES_CACHE', 'APP_EVENTS_CACHE'] as $cacheEnvKey) {
-    $cachePath = getenv($cacheEnvKey) ?: ($_SERVER[$cacheEnvKey] ?? ($_ENV[$cacheEnvKey] ?? null));
-    if (is_string($cachePath) && preg_match('/^[A-Za-z]:[\\\\\\/]/', $cachePath)) {
-        $drive = substr($cachePath, 0, 2);
-        $app->addAbsoluteCachePathPrefix(strtoupper($drive));
-        $app->addAbsoluteCachePathPrefix(strtolower($drive));
-    }
-}
-
-return $app;

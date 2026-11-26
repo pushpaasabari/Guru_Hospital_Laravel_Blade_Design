@@ -24,9 +24,6 @@
 /storage/fonts/installed-fonts.json
 /vendor
 /.venv
-/desktop/node_modules
-/desktop/build
-/desktop/dist
 Homestead.json
 Homestead.yaml
 Thumbs.db
