@@ -414,24 +414,24 @@ export default function MrdReport({ records, metrics, filters }: Props) {
         </div>
 
         <div className="table-responsive">
-          <table className="table table-hover align-top mb-0" style={{ fontSize: '12.5px' }}>
+          <table className="table table-hover align-top mb-0 fg-fit-table fg-table-compact fg-table-stack-lg" style={{ fontSize: '12px' }}>
             <thead className="table-light text-muted small text-uppercase" style={{ fontSize: '11px', letterSpacing: '0.04em' }}>
               <tr>
-                <th className="ps-3 text-center" style={{ width: '50px' }}>S.No</th>
-                <th style={{ minWidth: '130px' }}>MRD File No.</th>
-                <th style={{ minWidth: '180px' }}>Patient / UHID / IP No.</th>
-                <th style={{ minWidth: '135px' }}>DOA &amp; DOD (LOS)</th>
-                <th style={{ minWidth: '190px' }}>Diagnosis &amp; ICD Code</th>
-                <th style={{ minWidth: '175px' }}>Procedure / Consultant</th>
-                <th style={{ minWidth: '185px' }}>Payment / Insurance</th>
-                <th style={{ minWidth: '180px' }}>MRD File Handover &amp; Sign</th>
-                <th>Status</th>
-                <th className="text-end pe-3 no-print">Actions</th>
+                <th className="ps-3 text-center" style={{ width: '4%' }}>S.No</th>
+                <th style={{ width: '9%' }}>MRD File No.</th>
+                <th style={{ width: '14%' }}>Patient / UHID / IP No.</th>
+                <th style={{ width: '10%' }}>DOA &amp; DOD (LOS)</th>
+                <th style={{ width: '13%' }}>Diagnosis &amp; ICD Code</th>
+                <th style={{ width: '12%' }}>Procedure / Consultant</th>
+                <th style={{ width: '11%' }}>Payment / Insurance</th>
+                <th style={{ width: '11%' }}>MRD File Handover &amp; Sign</th>
+                <th style={{ width: '7%' }}>Status</th>
+                <th className="text-end pe-3 no-print" style={{ width: '9%' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {records.data.length === 0 ? (
-                <tr>
+                <tr className="fg-empty-row">
                   <td colSpan={10} className="text-center py-5 text-muted">
                     <i className="bi bi-folder-x fs-2 d-block mb-2 text-muted"></i>
                     No MRD records matched the selected filter criteria.
@@ -454,11 +454,11 @@ export default function MrdReport({ records, metrics, filters }: Props) {
 
                   return (
                     <tr key={item.id}>
-                      <td className="ps-3 text-center fw-semibold text-muted">
+                      <td className="ps-3 text-center fw-semibold text-muted" data-label="S.No">
                         {startIndex + idx + 1}
                       </td>
 
-                      <td>
+                      <td data-label="MRD File No.">
                         <div className="font-monospace fw-bold text-dark">{mrdNo || '—'}</div>
                         {item.format && (
                           <span className="badge bg-light text-secondary border text-uppercase mt-1" style={{ fontSize: '10px' }}>
@@ -467,7 +467,7 @@ export default function MrdReport({ records, metrics, filters }: Props) {
                         )}
                       </td>
 
-                      <td>
+                      <td data-label="Patient / UHID / IP No.">
                         <div className="fw-bold text-dark">{item.patient_name}</div>
                         <div className="text-muted small">
                           UHID: <span className="font-monospace text-dark">{item.uhid}</span>
@@ -482,7 +482,7 @@ export default function MrdReport({ records, metrics, filters }: Props) {
                         )}
                       </td>
 
-                      <td className="small">
+                      <td className="small" data-label="DOA & DOD (LOS)">
                         <div>
                           <span className="text-muted fw-semibold">DOA:</span>{' '}
                           {item.admission_at ? formatDate(item.admission_at) : '—'}
@@ -504,7 +504,7 @@ export default function MrdReport({ records, metrics, filters }: Props) {
                         )}
                       </td>
 
-                      <td>
+                      <td data-label="Diagnosis & ICD Code">
                         <div className="fw-medium text-dark">{item.diagnosis || '—'}</div>
                         {item.icd_code && (
                           <span className="badge bg-primary-subtle text-primary border border-primary-subtle mt-1" style={{ fontSize: '10.5px' }}>
@@ -513,7 +513,7 @@ export default function MrdReport({ records, metrics, filters }: Props) {
                         )}
                       </td>
 
-                      <td>
+                      <td data-label="Procedure / Consultant">
                         <div className="fw-semibold text-dark">{procLabel}</div>
                         {item.consultant && (
                           <div className="text-muted small mt-1">{item.consultant}</div>
@@ -525,11 +525,11 @@ export default function MrdReport({ records, metrics, filters }: Props) {
                         )}
                       </td>
 
-                      <td className="small">
+                      <td className="small" data-label="Payment / Insurance">
                         <div className="fw-medium text-dark">{paymentText}</div>
                       </td>
 
-                      <td className="small">
+                      <td className="small" data-label="MRD File Handover & Sign">
                         <div>
                           <span className="text-muted fw-semibold">Handover:</span>{' '}
                           {item.handover_name || '—'}
@@ -546,7 +546,7 @@ export default function MrdReport({ records, metrics, filters }: Props) {
                         </div>
                       </td>
 
-                      <td>
+                      <td data-label="Status">
                         <span
                           className={`badge border text-uppercase ${
                             item.status === 'generated'
@@ -559,20 +559,20 @@ export default function MrdReport({ records, metrics, filters }: Props) {
                         </span>
                       </td>
 
-                      <td className="text-end pe-3 text-nowrap no-print">
-                        <div className="d-inline-flex gap-1">
+                      <td className="text-end pe-3 no-print" data-label="Actions">
+                        <div className="d-flex flex-wrap justify-content-end gap-1">
                           <a
                             href={`/admissions/${item.id}/documents/pdf/mrd-form`}
                             className="btn btn-sm btn-outline-success"
                             title="Download MRD Inpatient Form PDF"
-                            style={{ borderRadius: '8px', fontSize: '12px' }}
+                            style={{ borderRadius: '8px', fontSize: '11px', padding: '3px 7px' }}
                           >
                             <i className="bi bi-file-earmark-pdf me-1"></i>MRD Form
                           </a>
                           <Link
                             href={`/admissions/${item.id}/documents/preview`}
                             className="btn btn-sm btn-outline-secondary"
-                            style={{ borderRadius: '8px', fontSize: '12px' }}
+                            style={{ borderRadius: '8px', fontSize: '11px', padding: '3px 7px' }}
                           >
                             <i className="bi bi-eye me-1"></i>Review
                           </Link>

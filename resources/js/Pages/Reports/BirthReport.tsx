@@ -322,20 +322,20 @@ export default function BirthReport({ deliveries, metrics, filters, clinicalStaf
         </div>
 
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0" style={{ fontSize: '13px' }}>
+          <table className="table table-hover align-middle mb-0 fg-fit-table fg-table-compact fg-mobile-stack-table" style={{ fontSize: '12.5px' }}>
             <thead className="table-light text-muted small text-uppercase" style={{ fontSize: '11px', letterSpacing: '0.04em' }}>
               <tr>
-                <th className="ps-4">Mother Details</th>
-                <th>Admission / Delivery</th>
-                <th>Procedure / Obstetrician</th>
-                <th>Newborn Baby Details</th>
-                <th>Status</th>
-                <th className="text-end pe-4">Actions</th>
+                <th className="ps-4" style={{ width: '21%' }}>Mother Details</th>
+                <th style={{ width: '15%' }}>Admission / Delivery</th>
+                <th style={{ width: '22%' }}>Procedure / Obstetrician</th>
+                <th style={{ width: '22%' }}>Newborn Baby Details</th>
+                <th style={{ width: '10%' }}>Status</th>
+                <th className="text-end pe-4" style={{ width: '10%' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {deliveries.data.length === 0 ? (
-                <tr>
+                <tr className="fg-empty-row">
                   <td colSpan={6} className="text-center py-5 text-muted">
                     <i className="bi bi-folder-x fs-2 d-block mb-2 text-muted"></i>
                     No delivery records found for the selected criteria.
@@ -344,14 +344,14 @@ export default function BirthReport({ deliveries, metrics, filters, clinicalStaf
               ) : (
                 deliveries.data.map((item) => (
                   <tr key={item.id}>
-                    <td className="ps-4">
+                    <td className="ps-4" data-label="Mother Details">
                       <div className="fw-bold text-dark">{item.patient_name}</div>
                       <div className="text-muted small">
                         UHID: <span className="font-monospace text-dark">{item.uhid}</span> &bull; IP: <span className="font-monospace text-dark">{item.ip_no}</span>
                         {item.age && <> &bull; {item.age} Yrs</>}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Admission / Delivery">
                       <div>{item.procedure_at ? formatDateTime(item.procedure_at) : (item.admission_at ? formatDate(item.admission_at) : '—')}</div>
                       {item.discharge_at && (
                         <div className="text-muted small" style={{ fontSize: '11.5px' }}>
@@ -359,7 +359,7 @@ export default function BirthReport({ deliveries, metrics, filters, clinicalStaf
                         </div>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Procedure / Obstetrician">
                       <div className="fw-semibold text-dark">
                         {item.procedure_done || item.procedure_name || 'Delivery'}
                       </div>
@@ -368,7 +368,7 @@ export default function BirthReport({ deliveries, metrics, filters, clinicalStaf
                         {item.pediatrician_name && ` | Ped: ${item.pediatrician_name}`}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Newborn Baby Details">
                       {item.newborns && item.newborns.length > 0 ? (
                         <div className="d-flex flex-column gap-1">
                           {item.newborns.map((b, idx) => {
@@ -383,7 +383,7 @@ export default function BirthReport({ deliveries, metrics, filters, clinicalStaf
                             const sexLabel = isMale ? 'Boy' : isFemale ? 'Girl' : b.sex?.trim() || 'Not Recorded';
 
                             return (
-                              <div key={b.id || idx} className="d-flex align-items-center gap-2">
+                              <div key={b.id || idx} className="d-flex flex-wrap align-items-center gap-1">
                                 <span
                                   className={`badge ${badgeClass}`}
                                   style={{ fontSize: '11px', textTransform: 'capitalize' }}
@@ -406,16 +406,16 @@ export default function BirthReport({ deliveries, metrics, filters, clinicalStaf
                         <span className="text-muted italic small">No newborn record</span>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <span className="badge bg-light text-secondary border text-uppercase" style={{ fontSize: '10px' }}>
                         {item.status.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td className="text-end pe-4">
+                    <td className="text-end pe-4" data-label="Actions">
                       <Link
                         href={`/admissions/${item.id}/documents/preview`}
                         className="btn btn-sm btn-outline-secondary"
-                        style={{ borderRadius: '8px', fontSize: '12px' }}
+                        style={{ borderRadius: '8px', fontSize: '12px', padding: '4px 8px' }}
                       >
                         <i className="bi bi-eye me-1"></i> Review
                       </Link>

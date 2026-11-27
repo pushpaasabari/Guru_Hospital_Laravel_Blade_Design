@@ -761,20 +761,20 @@ export default function Index({ settings, backups, stats }: Props) {
         </div>
 
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0">
+          <table className="table table-hover align-middle mb-0 fg-fit-table fg-mobile-stack-table">
             <thead className="table-light">
               <tr>
-                <th>Timestamp</th>
-                <th>Archive File</th>
-                <th>Engine &amp; Size</th>
-                <th>Trigger</th>
-                <th>Status</th>
-                <th className="text-end">Actions</th>
+                <th style={{ width: '15%' }}>Timestamp</th>
+                <th style={{ width: '30%' }}>Archive File</th>
+                <th style={{ width: '13%' }}>Engine &amp; Size</th>
+                <th style={{ width: '14%' }}>Trigger</th>
+                <th style={{ width: '12%' }}>Status</th>
+                <th style={{ width: '16%' }} className="text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
               {backups.data.length === 0 ? (
-                <tr>
+                <tr className="fg-empty-row">
                   <td colSpan={6} className="text-center py-5 text-muted">
                     <i className="bi bi-cloud-slash fs-2 d-block mb-2"></i>
                     No backups recorded yet. Click <strong>Run Backup Now</strong> to create your first compressed SQL archive.
@@ -783,13 +783,13 @@ export default function Index({ settings, backups, stats }: Props) {
               ) : (
                 backups.data.map((backup) => (
                   <tr key={backup.id}>
-                    <td className="text-nowrap small">
+                    <td className="small" data-label="Timestamp">
                       <div className="fw-semibold text-dark">{formatTimestamp(backup.created_at)}</div>
                       {backup.duration_ms !== null && (
                         <div className="text-muted">{(backup.duration_ms / 1000).toFixed(2)}s</div>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Archive File">
                       <div className="font-monospace small fw-semibold text-dark">{backup.file_name}</div>
                       {backup.sha256_checksum && (
                         <div className="text-muted font-monospace" style={{ fontSize: '11px' }}>
@@ -800,19 +800,19 @@ export default function Index({ settings, backups, stats }: Props) {
                         <div className="text-danger small mt-1">{backup.error_message}</div>
                       )}
                     </td>
-                    <td className="small">
+                    <td className="small" data-label="Engine & Size">
                       <span className="badge bg-light text-dark border text-uppercase me-1">
                         {backup.database_driver}
                       </span>
                       <span className="fw-semibold">{backup.human_size}</span>
                     </td>
-                    <td className="small">
+                    <td className="small" data-label="Trigger">
                       <div className="text-capitalize fw-semibold">{backup.trigger_type}</div>
                       <div className="text-muted">{backup.triggered_by_name}</div>
                     </td>
-                    <td>{renderStatusBadge(backup.status)}</td>
-                    <td className="text-end text-nowrap">
-                      <div className="d-inline-flex gap-1">
+                    <td data-label="Status">{renderStatusBadge(backup.status)}</td>
+                    <td className="text-end" data-label="Actions">
+                      <div className="d-inline-flex flex-wrap justify-content-end gap-1">
                         {backup.google_drive_web_link && !backup.google_drive_deleted_at && (
                           <a
                             href={backup.google_drive_web_link}

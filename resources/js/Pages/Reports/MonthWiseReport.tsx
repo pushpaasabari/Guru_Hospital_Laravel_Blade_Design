@@ -274,17 +274,17 @@ export default function MonthWiseReport({
         </div>
 
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0 text-center" style={{ fontSize: '13px' }}>
+          <table className="table table-hover align-middle mb-0 text-center fg-fit-table fg-table-compact fg-table-stack-lg" style={{ fontSize: '12.5px' }}>
             <thead className="table-light text-muted small text-uppercase" style={{ fontSize: '11px', letterSpacing: '0.04em' }}>
               <tr>
-                <th className="text-start ps-4">Month</th>
-                <th>Total Inpatients</th>
-                <th>Deliveries</th>
-                <th>Surgeries</th>
-                <th>Medical Cases</th>
-                <th>Discharged</th>
-                <th>Insurance / Cash</th>
-                <th className="text-end pe-4">Action</th>
+                <th className="text-start ps-4" style={{ width: '15%' }}>Month</th>
+                <th style={{ width: '11%' }}>Total Inpatients</th>
+                <th style={{ width: '10%' }}>Deliveries</th>
+                <th style={{ width: '10%' }}>Surgeries</th>
+                <th style={{ width: '11%' }}>Medical Cases</th>
+                <th style={{ width: '10%' }}>Discharged</th>
+                <th style={{ width: '18%' }}>Insurance / Cash</th>
+                <th className="text-end pe-4" style={{ width: '15%' }}>Action</th>
               </tr>
             </thead>
             <tbody>
@@ -297,7 +297,7 @@ export default function MonthWiseReport({
                     style={{ cursor: 'pointer' }}
                     onClick={() => handleMonthSelect(String(item.month_num))}
                   >
-                    <td className="text-start ps-4 fw-bold text-dark">
+                    <td className="text-start ps-4 fw-bold text-dark" data-label="Month">
                       <span className="me-2">
                         {isSelected ? (
                           <i className="bi bi-check-circle-fill text-primary"></i>
@@ -307,39 +307,39 @@ export default function MonthWiseReport({
                       </span>
                       {item.month_name}
                     </td>
-                    <td>
+                    <td data-label="Total Inpatients">
                       <span className="badge bg-light text-dark border px-2 py-1" style={{ fontSize: '12px' }}>
                         {item.total_admissions}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Deliveries">
                       <span className="text-pink fw-semibold" style={{ color: '#db2777' }}>
                         {item.deliveries_count}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Surgeries">
                       <span className="text-warning fw-semibold" style={{ color: '#d97706' }}>
                         {item.surgeries_count}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Medical Cases">
                       <span className="text-success fw-semibold" style={{ color: '#16a34a' }}>
                         {item.medical_count}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Discharged">
                       <span className="text-secondary fw-semibold">{item.discharged_count}</span>
                     </td>
-                    <td>
+                    <td data-label="Insurance / Cash">
                       <span className="small text-muted">
                         {item.insurance_count} Ins / {item.cash_count} Cash
                       </span>
                     </td>
-                    <td className="text-end pe-4">
+                    <td className="text-end pe-4" data-label="Action">
                       <button
                         type="button"
                         className={`btn btn-sm ${isSelected ? 'btn-primary' : 'btn-outline-primary'}`}
-                        style={{ borderRadius: '6px', fontSize: '11.5px', padding: '3px 10px' }}
+                        style={{ borderRadius: '6px', fontSize: '11px', padding: '3px 8px' }}
                       >
                         {isSelected ? 'Viewing' : 'View Patients'}
                       </button>
@@ -410,20 +410,20 @@ export default function MonthWiseReport({
         </div>
 
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0" style={{ fontSize: '13px' }}>
+          <table className="table table-hover align-middle mb-0 fg-fit-table fg-mobile-stack-table" style={{ fontSize: '13px' }}>
             <thead className="table-light text-muted small text-uppercase" style={{ fontSize: '11px', letterSpacing: '0.04em' }}>
               <tr>
-                <th className="ps-4">Patient Details</th>
-                <th>Admission / Discharge</th>
-                <th>Format &amp; Workflow</th>
-                <th>Consultant &amp; Ward</th>
-                <th>Status</th>
-                <th className="text-end pe-4">Actions</th>
+                <th className="ps-4" style={{ width: '24%' }}>Patient Details</th>
+                <th style={{ width: '16%' }}>Admission / Discharge</th>
+                <th style={{ width: '16%' }}>Format &amp; Workflow</th>
+                <th style={{ width: '22%' }}>Consultant &amp; Ward</th>
+                <th style={{ width: '11%' }}>Status</th>
+                <th className="text-end pe-4" style={{ width: '11%' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {admissions.data.length === 0 ? (
-                <tr>
+                <tr className="fg-empty-row">
                   <td colSpan={6} className="text-center py-5 text-muted">
                     <i className="bi bi-folder-x fs-2 d-block mb-2 text-muted"></i>
                     No patient records found for this period.
@@ -432,19 +432,19 @@ export default function MonthWiseReport({
               ) : (
                 admissions.data.map((item) => (
                   <tr key={item.id}>
-                    <td className="ps-4">
+                    <td className="ps-4" data-label="Patient Details">
                       <div className="fw-bold text-dark">{item.patient_name}</div>
                       <div className="text-muted small">
                         UHID: <span className="font-monospace text-dark">{item.uhid}</span> &bull; IP: <span className="font-monospace text-dark">{item.ip_no}</span>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Admission / Discharge">
                       <div>{item.admission_at ? formatDate(item.admission_at) : '—'}</div>
                       <div className="text-muted small">
                         to {item.discharge_at ? formatDate(item.discharge_at) : '—'}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Format & Workflow">
                       <span className="badge bg-light text-dark border text-uppercase me-1" style={{ fontSize: '10px' }}>
                         {item.format}
                       </span>
@@ -465,7 +465,7 @@ export default function MonthWiseReport({
                             : 'Other Surgery'}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Consultant & Ward">
                       <div className="text-dark fw-medium" style={{ fontSize: '12.5px' }}>
                         {item.consultant || '—'}
                       </div>
@@ -473,16 +473,16 @@ export default function MonthWiseReport({
                         {item.department || '—'} {item.ward_room_no && `(${item.ward_room_no})`}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <span className="badge bg-light text-secondary border text-uppercase" style={{ fontSize: '10px' }}>
                         {item.status.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td className="text-end pe-4">
+                    <td className="text-end pe-4" data-label="Actions">
                       <Link
                         href={`/admissions/${item.id}/documents/preview`}
                         className="btn btn-sm btn-outline-secondary"
-                        style={{ borderRadius: '8px', fontSize: '12px' }}
+                        style={{ borderRadius: '8px', fontSize: '12px', padding: '4px 8px' }}
                       >
                         <i className="bi bi-eye me-1"></i> Review
                       </Link>

@@ -827,49 +827,49 @@ export default function AdmissionsDataTable({
 
       {/* 3B. The Dynamic Interactive DataTable (>= 768px) */}
       <div className="table-responsive d-none d-md-block">
-        <table className="table table-hover align-middle mb-0" style={{ fontSize: '13.5px' }}>
+        <table className="table table-hover align-middle mb-0 fg-fit-table" style={{ fontSize: '13px' }}>
           <thead className="table-light text-muted small text-uppercase" style={{ letterSpacing: '0.04em', fontSize: '11px' }}>
             <tr>
               <th
                 onClick={() => handleSort('patient_name')}
-                style={{ cursor: 'pointer', userSelect: 'none', width: '28%' }}
+                style={{ cursor: 'pointer', userSelect: 'none', width: isArchive ? '24%' : '26%' }}
                 className={sortField === 'patient_name' ? 'bg-primary-subtle text-primary' : ''}
               >
-                <div className="d-flex align-items-center justify-content-between">
-                  <span>Patient Details</span>
+                <div className="d-flex align-items-center justify-content-between gap-1">
+                  <span className="min-w-0">Patient Details</span>
                   {renderSortIcon('patient_name')}
                 </div>
               </th>
 
               <th
                 onClick={() => handleSort('admission_at')}
-                style={{ cursor: 'pointer', userSelect: 'none', width: '20%' }}
+                style={{ cursor: 'pointer', userSelect: 'none', width: isArchive ? '15%' : '18%' }}
                 className={sortField === 'admission_at' ? 'bg-primary-subtle text-primary' : ''}
               >
-                <div className="d-flex align-items-center justify-content-between">
-                  <span>Admission / Stay</span>
+                <div className="d-flex align-items-center justify-content-between gap-1">
+                  <span className="min-w-0">Admission / Stay</span>
                   {renderSortIcon('admission_at')}
                 </div>
               </th>
 
               <th
                 onClick={() => handleSort('consultant')}
-                style={{ cursor: 'pointer', userSelect: 'none', width: '20%' }}
+                style={{ cursor: 'pointer', userSelect: 'none', width: isArchive ? '17%' : '19%' }}
                 className={sortField === 'consultant' ? 'bg-primary-subtle text-primary' : ''}
               >
-                <div className="d-flex align-items-center justify-content-between">
-                  <span>Doctor &amp; Department</span>
+                <div className="d-flex align-items-center justify-content-between gap-1">
+                  <span className="min-w-0">Doctor &amp; Department</span>
                   {renderSortIcon('consultant')}
                 </div>
               </th>
 
               <th
                 onClick={() => handleSort('format')}
-                style={{ cursor: 'pointer', userSelect: 'none', width: '14%' }}
+                style={{ cursor: 'pointer', userSelect: 'none', width: isArchive ? '13%' : '15%' }}
                 className={sortField === 'format' ? 'bg-primary-subtle text-primary' : ''}
               >
-                <div className="d-flex align-items-center justify-content-between">
-                  <span>Format &amp; Workflow</span>
+                <div className="d-flex align-items-center justify-content-between gap-1">
+                  <span className="min-w-0">Format &amp; Workflow</span>
                   {renderSortIcon('format')}
                 </div>
               </th>
@@ -879,13 +879,13 @@ export default function AdmissionsDataTable({
                 style={{ cursor: 'pointer', userSelect: 'none', width: '10%' }}
                 className={sortField === 'status' ? 'bg-primary-subtle text-primary' : ''}
               >
-                <div className="d-flex align-items-center justify-content-between">
-                  <span>Status</span>
+                <div className="d-flex align-items-center justify-content-between gap-1">
+                  <span className="min-w-0">Status</span>
                   {renderSortIcon('status')}
                 </div>
               </th>
 
-              <th className="text-end pe-3" style={{ width: '8%', userSelect: 'none' }}>
+              <th className="text-end pe-3" style={{ width: isArchive ? '21%' : '12%', userSelect: 'none' }}>
                 Actions
               </th>
             </tr>
@@ -941,8 +941,8 @@ export default function AdmissionsDataTable({
                         >
                           {initial}
                         </div>
-                        <div>
-                          <div className="fw-bold text-dark text-truncate" style={{ maxWidth: '240px' }}>
+                        <div className="min-w-0 flex-grow-1">
+                          <div className="fw-bold text-dark">
                             {item.patient_name}
                           </div>
                           <div className="d-flex flex-wrap align-items-center gap-1 mt-0.5">
@@ -959,7 +959,7 @@ export default function AdmissionsDataTable({
                             </span>
                           </div>
                           {isArchive && item.diagnosis && (
-                            <div className="text-muted text-truncate mt-0.5" style={{ maxWidth: '240px', fontSize: '11px' }} title={item.diagnosis}>
+                            <div className="text-muted mt-0.5" style={{ fontSize: '11px', lineHeight: 1.3 }} title={item.diagnosis}>
                               {item.diagnosis}
                             </div>
                           )}
@@ -973,7 +973,7 @@ export default function AdmissionsDataTable({
                         <i className="bi bi-box-arrow-in-right text-success" style={{ fontSize: '12px' }}></i>
                         <span>{item.admission_at ? formatDate(item.admission_at) : '—'}</span>
                       </div>
-                      <div className="d-flex align-items-center gap-1 text-muted small mt-0.5" style={{ fontSize: '11.5px' }}>
+                      <div className="d-flex align-items-center gap-1 text-muted small mt-0.5 flex-wrap" style={{ fontSize: '11.5px' }}>
                         <i className="bi bi-box-arrow-right text-muted" style={{ fontSize: '12px' }}></i>
                         <span>to {item.discharge_at ? formatDate(item.discharge_at) : '—'}</span>
                         {stayDuration && (
@@ -986,11 +986,11 @@ export default function AdmissionsDataTable({
 
                     {/* Consultant & Dept */}
                     <td>
-                      <div className="text-dark fw-medium text-truncate" style={{ maxWidth: '180px', fontSize: '12.5px' }}>
+                      <div className="text-dark fw-medium" style={{ fontSize: '12.5px' }}>
                         <i className="bi bi-person-badge text-primary me-1" style={{ fontSize: '12px' }}></i>
                         {item.consultant || '—'}
                       </div>
-                      <div className="text-muted small text-truncate mt-0.5" style={{ maxWidth: '180px', fontSize: '11.5px' }}>
+                      <div className="text-muted small mt-0.5" style={{ fontSize: '11.5px' }}>
                         {item.department ? `${item.department}` : ''}
                         {item.ward_room_no && (
                           <> &bull; {item.ward_room_no}</>
@@ -1041,7 +1041,7 @@ export default function AdmissionsDataTable({
 
                     {/* Actions */}
                     <td className="text-end pe-3">
-                      <div className="btn-group btn-group-sm">
+                      <div className="d-inline-flex flex-wrap justify-content-end align-items-center gap-1">
                         <ActionDropdown
                           toggleTitle="Preview separate documents"
                           fontSize="12px"
@@ -1065,13 +1065,13 @@ export default function AdmissionsDataTable({
                           />
                         ) : (
                           auth.user?.can_edit && (item.status === 'draft' || item.status === 'returned_for_correction') && (
-                            <Link href={`/admissions/${item.id}/edit`} prefetch className="btn btn-outline-secondary" title="Edit Clinical Workflow">
+                            <Link href={`/admissions/${item.id}/edit`} prefetch className="btn btn-sm btn-outline-secondary" title="Edit Clinical Workflow">
                               <i className="bi bi-pencil"></i>
                             </Link>
                           )
                         )}
                         {isArchive && (
-                          <Link href={`/documents/${item.id}/history`} prefetch className="btn btn-outline-secondary" title="Document Audit Trail & History">
+                          <Link href={`/documents/${item.id}/history`} prefetch className="btn btn-sm btn-outline-secondary" title="Document Audit Trail & History">
                             <i className="bi bi-clock-history"></i>
                           </Link>
                         )}

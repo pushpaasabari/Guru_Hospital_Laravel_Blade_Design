@@ -295,21 +295,21 @@ export default function SurgeryReport({ surgeries, metrics, filters, clinicalSta
         </div>
 
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0" style={{ fontSize: '13px' }}>
+          <table className="table table-hover align-middle mb-0 fg-fit-table fg-table-compact fg-mobile-stack-table" style={{ fontSize: '12.5px' }}>
             <thead className="table-light text-muted small text-uppercase" style={{ fontSize: '11px', letterSpacing: '0.04em' }}>
               <tr>
-                <th className="ps-4">Patient Details</th>
-                <th>Surgery Date &amp; Time</th>
-                <th>Procedure Done &amp; Incision</th>
-                <th>Surgical &amp; Anesthesia Team</th>
-                <th>Operative Details</th>
-                <th>Status</th>
-                <th className="text-end pe-4">Actions</th>
+                <th className="ps-4" style={{ width: '19%' }}>Patient Details</th>
+                <th style={{ width: '13%' }}>Surgery Date &amp; Time</th>
+                <th style={{ width: '18%' }}>Procedure Done &amp; Incision</th>
+                <th style={{ width: '17%' }}>Surgical &amp; Anesthesia Team</th>
+                <th style={{ width: '14%' }}>Operative Details</th>
+                <th style={{ width: '9%' }}>Status</th>
+                <th className="text-end pe-4" style={{ width: '10%' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {surgeries.data.length === 0 ? (
-                <tr>
+                <tr className="fg-empty-row">
                   <td colSpan={7} className="text-center py-5 text-muted">
                     <i className="bi bi-folder-x fs-2 d-block mb-2 text-muted"></i>
                     No surgical records found for the selected criteria.
@@ -318,7 +318,7 @@ export default function SurgeryReport({ surgeries, metrics, filters, clinicalSta
               ) : (
                 surgeries.data.map((item) => (
                   <tr key={item.id}>
-                    <td className="ps-4">
+                    <td className="ps-4" data-label="Patient Details">
                       <div className="fw-bold text-dark">{item.patient_name}</div>
                       <div className="text-muted small">
                         UHID: <span className="font-monospace text-dark">{item.uhid}</span> &bull; IP: <span className="font-monospace text-dark">{item.ip_no}</span>
@@ -326,7 +326,7 @@ export default function SurgeryReport({ surgeries, metrics, filters, clinicalSta
                         {item.age && <> &bull; {item.age} Yrs</>}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Surgery Date & Time">
                       <div>{item.procedure_at ? formatDateTime(item.procedure_at) : (item.admission_at ? formatDate(item.admission_at) : '—')}</div>
                       {item.discharge_at && (
                         <div className="text-muted small" style={{ fontSize: '11.5px' }}>
@@ -334,7 +334,7 @@ export default function SurgeryReport({ surgeries, metrics, filters, clinicalSta
                         </div>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Procedure Done & Incision">
                       <div className="fw-semibold text-dark">
                         {item.procedure_done || item.procedure_name || 'Surgical Procedure'}
                       </div>
@@ -344,7 +344,7 @@ export default function SurgeryReport({ surgeries, metrics, filters, clinicalSta
                         </div>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Surgical & Anesthesia Team">
                       <div className="text-dark fw-medium" style={{ fontSize: '12.5px' }}>
                         Surgeon: {item.surgeon || '—'}
                       </div>
@@ -353,7 +353,7 @@ export default function SurgeryReport({ surgeries, metrics, filters, clinicalSta
                         {item.anaesthesia_type && ` (${item.anaesthesia_type})`}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Operative Details">
                       <div className="d-flex flex-wrap gap-1 align-items-center">
                         {item.blood_loss_ml && (
                           <span className="badge bg-light text-danger border" style={{ fontSize: '10.5px' }}>
@@ -372,16 +372,16 @@ export default function SurgeryReport({ surgeries, metrics, filters, clinicalSta
                         )}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <span className="badge bg-light text-secondary border text-uppercase" style={{ fontSize: '10px' }}>
                         {item.status.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td className="text-end pe-4">
+                    <td className="text-end pe-4" data-label="Actions">
                       <Link
                         href={`/admissions/${item.id}/documents/preview`}
                         className="btn btn-sm btn-outline-secondary"
-                        style={{ borderRadius: '8px', fontSize: '12px' }}
+                        style={{ borderRadius: '8px', fontSize: '12px', padding: '4px 8px' }}
                       >
                         <i className="bi bi-eye me-1"></i> Review
                       </Link>

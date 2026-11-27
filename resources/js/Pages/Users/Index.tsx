@@ -71,25 +71,25 @@ export default function Index({ users }: Props) {
 
       <div className="card shadow-sm border-0" style={{ borderRadius: '20px' }}>
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0">
+          <table className="table table-hover align-middle mb-0 fg-fit-table fg-mobile-stack-table">
             <thead className="table-light text-muted small text-uppercase">
               <tr>
-                <th>Staff Name & Email</th>
-                <th>Role & Permissions</th>
-                <th>Department</th>
-                <th>Doctor Reg No (TMC)</th>
-                <th>Status</th>
-                <th className="text-end">Actions</th>
+                <th style={{ width: '27%' }}>Staff Name &amp; Email</th>
+                <th style={{ width: '16%' }}>Role &amp; Permissions</th>
+                <th style={{ width: '15%' }}>Department</th>
+                <th style={{ width: '15%' }}>Doctor Reg No (TMC)</th>
+                <th style={{ width: '13%' }}>Status</th>
+                <th style={{ width: '14%' }} className="text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
               {users.map((u) => (
                 <tr key={u.id}>
-                  <td>
+                  <td data-label="Staff Name & Email">
                     <div className="fw-bold text-dark">{u.name}</div>
                     <div className="text-muted small">{u.email}</div>
                   </td>
-                  <td>
+                  <td data-label="Role & Permissions">
                     <span
                       className="badge bg-secondary text-uppercase"
                       style={{ fontSize: '0.7rem' }}
@@ -97,10 +97,10 @@ export default function Index({ users }: Props) {
                       {u.role.replace(/_/g, ' ')}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Department">
                     <span className="small">{u.department || 'General'}</span>
                   </td>
-                  <td>
+                  <td data-label="Doctor Reg No (TMC)">
                     {u.doctor_reg_no ? (
                       <span className="badge bg-light text-dark border font-monospace">
                         {u.doctor_reg_no}
@@ -109,14 +109,14 @@ export default function Index({ users }: Props) {
                       <span className="text-muted small">—</span>
                     )}
                   </td>
-                  <td>
+                  <td data-label="Status">
                     {u.is_active ? (
                       <span className="badge badge-approved">Active</span>
                     ) : (
                       <span className="badge badge-returned_for_correction">Deactivated</span>
                     )}
                   </td>
-                  <td className="text-end">
+                  <td className="text-end" data-label="Actions">
                     {u.id !== currentUser?.id ? (
                       <button
                         type="button"

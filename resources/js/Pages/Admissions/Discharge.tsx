@@ -547,15 +547,15 @@ export default function AdmissionsDischarge({
 
             {/* Medications Table Repeater */}
             <div className="table-responsive mb-3">
-              <table className="table table-bordered align-middle mb-2" style={{ minWidth: '640px' }}>
+              <table className="table table-bordered align-middle mb-2 fg-fit-table fg-table-compact fg-mobile-stack-table">
                 <thead className="table-light">
-                  <tr style={{ fontSize: '0.86rem' }}>
-                    <th style={{ width: '4%' }}>#</th>
-                    <th style={{ width: '40%' }}>Medication (Dropdown / Type Name)</th>
+                  <tr style={{ fontSize: '0.84rem' }}>
+                    <th style={{ width: '5%' }}>#</th>
+                    <th style={{ width: '37%' }}>Medication (Dropdown / Type Name)</th>
                     <th style={{ width: '18%' }}>Frequency</th>
-                    <th style={{ width: '16%' }}>Duration</th>
+                    <th style={{ width: '15%' }}>Duration</th>
                     <th style={{ width: '16%' }}>Timing</th>
-                    <th style={{ width: '6%', textAlign: 'center' }}>Action</th>
+                    <th style={{ width: '9%', textAlign: 'center' }}>Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -564,8 +564,8 @@ export default function AdmissionsDischarge({
                     const isNewMed = trimmedMed.length > 0 && !knownMedicationKeys.has(trimmedMed.toLowerCase());
                     return (
                     <tr key={idx}>
-                      <td className="fw-bold text-secondary text-center">{idx + 1}</td>
-                      <td>
+                      <td className="fw-bold text-secondary text-center" data-label="#">{idx + 1}</td>
+                      <td data-label="Medication">
                         <div className="input-group input-group-sm">
                           <input
                             type="text"
@@ -587,7 +587,7 @@ export default function AdmissionsDischarge({
                           )}
                         </div>
                       </td>
-                      <td>
+                      <td data-label="Frequency">
                         <select
                           className="form-select form-select-sm"
                           value={med.frequency}
@@ -600,7 +600,7 @@ export default function AdmissionsDischarge({
                           ))}
                         </select>
                       </td>
-                      <td>
+                      <td data-label="Duration">
                         <input
                           type="text"
                           className="form-control form-control-sm"
@@ -610,7 +610,7 @@ export default function AdmissionsDischarge({
                           list="common-durations-list"
                         />
                       </td>
-                      <td>
+                      <td data-label="Timing">
                         <select
                           className="form-select form-select-sm"
                           value={med.timing}
@@ -623,7 +623,7 @@ export default function AdmissionsDischarge({
                           ))}
                         </select>
                       </td>
-                      <td className="text-center">
+                      <td className="text-center" data-label="Action">
                         <div className="btn-group btn-group-sm">
                           <button
                             type="button"
@@ -666,7 +666,7 @@ export default function AdmissionsDischarge({
               <div className="fw-bold text-dark small text-uppercase mb-2">
                 <i className="bi bi-eye me-1"></i> Document Print Preview: 4-Column Medication Table
               </div>
-              <table className="table table-sm table-bordered bg-white mb-0" style={{ fontSize: '0.84rem' }}>
+              <table className="table table-sm table-bordered bg-white mb-0 fg-fit-table fg-table-compact" style={{ fontSize: '0.84rem' }}>
                 <thead className="table-dark">
                   <tr>
                     <th style={{ width: '44%' }}>Medicine</th>

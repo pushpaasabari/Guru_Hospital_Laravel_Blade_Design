@@ -296,21 +296,21 @@ export default function MedicalReport({ medicalCases, metrics, filters, clinical
         </div>
 
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0" style={{ fontSize: '13px' }}>
+          <table className="table table-hover align-middle mb-0 fg-fit-table fg-table-compact fg-mobile-stack-table" style={{ fontSize: '12.5px' }}>
             <thead className="table-light text-muted small text-uppercase" style={{ fontSize: '11px', letterSpacing: '0.04em' }}>
               <tr>
-                <th className="ps-4">Patient Details</th>
-                <th>Admission / Stay</th>
-                <th>Diagnosis</th>
-                <th>Consultant &amp; Ward</th>
-                <th>Condition at Discharge</th>
-                <th>Status</th>
-                <th className="text-end pe-4">Actions</th>
+                <th className="ps-4" style={{ width: '19%' }}>Patient Details</th>
+                <th style={{ width: '12%' }}>Admission / Stay</th>
+                <th style={{ width: '18%' }}>Diagnosis</th>
+                <th style={{ width: '16%' }}>Consultant &amp; Ward</th>
+                <th style={{ width: '16%' }}>Condition at Discharge</th>
+                <th style={{ width: '9%' }}>Status</th>
+                <th className="text-end pe-4" style={{ width: '10%' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {medicalCases.data.length === 0 ? (
-                <tr>
+                <tr className="fg-empty-row">
                   <td colSpan={7} className="text-center py-5 text-muted">
                     <i className="bi bi-folder-x fs-2 d-block mb-2 text-muted"></i>
                     No medical inpatient records found for the selected criteria.
@@ -319,7 +319,7 @@ export default function MedicalReport({ medicalCases, metrics, filters, clinical
               ) : (
                 medicalCases.data.map((item) => (
                   <tr key={item.id}>
-                    <td className="ps-4">
+                    <td className="ps-4" data-label="Patient Details">
                       <div className="fw-bold text-dark">{item.patient_name}</div>
                       <div className="text-muted small">
                         UHID: <span className="font-monospace text-dark">{item.uhid}</span> &bull; IP: <span className="font-monospace text-dark">{item.ip_no}</span>
@@ -327,18 +327,18 @@ export default function MedicalReport({ medicalCases, metrics, filters, clinical
                         {item.age && <> &bull; {item.age} Yrs</>}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Admission / Stay">
                       <div>{item.admission_at ? formatDate(item.admission_at) : '—'}</div>
                       <div className="text-muted small" style={{ fontSize: '11.5px' }}>
                         Stay: <span className="badge bg-light text-dark border">{getStayDays(item.admission_at, item.discharge_at)}</span>
                       </div>
                     </td>
-                    <td>
-                      <div className="fw-semibold text-dark text-truncate" style={{ maxWidth: '240px' }} title={item.diagnosis}>
+                    <td data-label="Diagnosis">
+                      <div className="fw-semibold text-dark" title={item.diagnosis}>
                         {item.diagnosis || 'Medical Evaluation'}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Consultant & Ward">
                       <div className="text-dark fw-medium" style={{ fontSize: '12.5px' }}>
                         {item.consultant || '—'}
                       </div>
@@ -346,7 +346,7 @@ export default function MedicalReport({ medicalCases, metrics, filters, clinical
                         {item.department || 'General Medicine'} {item.ward_room_no && `(${item.ward_room_no})`}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Condition at Discharge">
                       {item.discharge_condition ? (
                         <div>
                           <div className="small text-dark fw-medium">{item.discharge_condition}</div>
@@ -360,16 +360,16 @@ export default function MedicalReport({ medicalCases, metrics, filters, clinical
                         <span className="text-muted small italic">Admitted / In Treatment</span>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <span className="badge bg-light text-secondary border text-uppercase" style={{ fontSize: '10px' }}>
                         {item.status.replace(/_/g, ' ')}
                       </span>
                     </td>
-                    <td className="text-end pe-4">
+                    <td className="text-end pe-4" data-label="Actions">
                       <Link
                         href={`/admissions/${item.id}/documents/preview`}
                         className="btn btn-sm btn-outline-secondary"
-                        style={{ borderRadius: '8px', fontSize: '12px' }}
+                        style={{ borderRadius: '8px', fontSize: '12px', padding: '4px 8px' }}
                       >
                         <i className="bi bi-eye me-1"></i> Review
                       </Link>

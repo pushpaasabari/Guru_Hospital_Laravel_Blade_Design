@@ -213,20 +213,20 @@ export default function Index({ staff, availableRoles, currentFilter }: Props) {
       {/* Staff Table */}
       <div className="card shadow-sm border-0" style={{ borderRadius: '20px' }}>
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0">
+          <table className="table table-hover align-middle mb-0 fg-fit-table fg-mobile-stack-table">
             <thead className="table-light text-muted small text-uppercase">
               <tr>
-                <th style={{ width: '28%' }}>Staff / Doctor Name</th>
-                <th style={{ width: '26%' }}>Clinical Role(s)</th>
-                <th style={{ width: '18%' }}>Department & Qualification</th>
+                <th style={{ width: '25%' }}>Staff / Doctor Name</th>
+                <th style={{ width: '24%' }}>Clinical Role(s)</th>
+                <th style={{ width: '18%' }}>Department &amp; Qualification</th>
                 <th style={{ width: '12%' }}>Doctor / Reg No</th>
-                <th style={{ width: '8%' }}>Status</th>
-                <th style={{ width: '8%' }} className="text-end">Actions</th>
+                <th style={{ width: '9%' }}>Status</th>
+                <th style={{ width: '12%' }} className="text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
               {staff.length === 0 ? (
-                <tr>
+                <tr className="fg-empty-row">
                   <td colSpan={6} className="text-center py-5 text-muted">
                     <i className="bi bi-people fs-1 d-block mb-2 text-secondary"></i>
                     No clinical staff records found matching the filter. Click "Add Clinical Staff" to register one.
@@ -235,7 +235,7 @@ export default function Index({ staff, availableRoles, currentFilter }: Props) {
               ) : (
                 staff.map((member) => (
                   <tr key={member.id}>
-                    <td>
+                    <td data-label="Staff / Doctor Name">
                       <div className="d-flex align-items-center gap-2">
                         <div
                           className="d-flex align-items-center justify-content-center text-primary fw-bold"
@@ -250,7 +250,7 @@ export default function Index({ staff, availableRoles, currentFilter }: Props) {
                         >
                           {member.name.replace(/^Dr\.\s*/i, '').charAt(0).toUpperCase()}
                         </div>
-                        <div>
+                        <div className="min-w-0 flex-grow-1">
                           <div className="fw-bold text-dark">{member.name}</div>
                           {member.phone && (
                             <div className="text-muted small">
@@ -261,7 +261,7 @@ export default function Index({ staff, availableRoles, currentFilter }: Props) {
                         </div>
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Clinical Role(s)">
                       <div className="d-flex flex-wrap gap-1">
                         {(member.roles || [member.category]).map((r) => {
                           const colors = roleBadgeColor[r] || { bg: '#f1f5f9', text: '#334155', border: '#cbd5e1' };
@@ -286,13 +286,13 @@ export default function Index({ staff, availableRoles, currentFilter }: Props) {
                         })}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Department & Qualification">
                       <div className="fw-semibold text-dark small">{member.department || '—'}</div>
                       {member.qualification && (
                         <div className="text-muted small">{member.qualification}</div>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Doctor / Reg No">
                       {member.doctor_reg_no ? (
                         <span className="font-monospace small fw-bold text-dark">
                           {member.doctor_reg_no}
@@ -301,7 +301,7 @@ export default function Index({ staff, availableRoles, currentFilter }: Props) {
                         <span className="text-muted small">—</span>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <span
                         className={`badge ${member.is_active ? 'bg-success' : 'bg-secondary'}`}
                         style={{ fontSize: '0.7rem', textTransform: 'uppercase' }}
@@ -309,11 +309,11 @@ export default function Index({ staff, availableRoles, currentFilter }: Props) {
                         {member.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="text-end">
-                      <div className="btn-group btn-group-sm">
+                    <td className="text-end" data-label="Actions">
+                      <div className="d-inline-flex flex-wrap justify-content-end gap-1">
                         <button
                           type="button"
-                          className="btn btn-outline-secondary"
+                          className="btn btn-sm btn-outline-secondary"
                           onClick={() => openEditModal(member)}
                           title="Edit Staff Member"
                         >
@@ -321,7 +321,7 @@ export default function Index({ staff, availableRoles, currentFilter }: Props) {
                         </button>
                         <button
                           type="button"
-                          className={`btn ${member.is_active ? 'btn-outline-warning' : 'btn-outline-success'}`}
+                          className={`btn btn-sm ${member.is_active ? 'btn-outline-warning' : 'btn-outline-success'}`}
                           onClick={() => handleToggleActive(member)}
                           title={member.is_active ? 'Deactivate' : 'Activate'}
                         >
@@ -329,7 +329,7 @@ export default function Index({ staff, availableRoles, currentFilter }: Props) {
                         </button>
                         <button
                           type="button"
-                          className="btn btn-outline-danger"
+                          className="btn btn-sm btn-outline-danger"
                           onClick={() => handleDelete(member)}
                           title="Delete"
                         >

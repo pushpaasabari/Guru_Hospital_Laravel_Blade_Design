@@ -172,7 +172,7 @@ function VitalsBadges({ bp, pulse, spo2, title }: { bp?: string | null; pulse?: 
 function PatientContactCell({ item }: { item: DayRecord }) {
   const mrd = item.resolved_mrd_no || item.mrd_no || (item.ip_no ? `MRD-${item.ip_no}` : '');
   return (
-    <td>
+    <td data-label="Patient, Attender & Contact">
       <div className="fw-bold text-dark">{item.patient_name}</div>
       {(item.age || item.sex) && (
         <div className="text-muted" style={{ fontSize: '11px' }}>
@@ -369,41 +369,41 @@ export default function DayReportSectionTable({ sectionKey, items, censusDate }:
       </div>
 
       <div className="table-responsive">
-        <table className="table table-hover align-top mb-0" style={{ fontSize: '12.5px' }}>
+        <table className="table table-hover align-top mb-0 fg-fit-table fg-table-compact fg-table-stack-lg" style={{ fontSize: '12px' }}>
           <thead className="table-light text-muted small text-uppercase" style={{ fontSize: '11px', letterSpacing: '0.04em' }}>
             <tr>
-              <th className="ps-3 text-center" style={{ width: '48px' }}>S.No</th>
-              <th style={{ minWidth: '195px' }}>Patient, Attender &amp; Contact</th>
+              <th className="ps-3 text-center" style={{ width: '5%' }}>S.No</th>
+              <th style={{ width: '17%' }}>Patient, Attender &amp; Contact</th>
               {sectionKey === 'admissions' && (
                 <>
-                  <th style={{ minWidth: '175px' }}>Admission, Ward &amp; Payment</th>
-                  <th style={{ minWidth: '215px' }}>Diagnosis, Vitals &amp; Intake</th>
-                  <th style={{ minWidth: '250px' }}>OT Procedure, Team &amp; Delivery</th>
-                  <th style={{ minWidth: '115px' }}>Current Status</th>
+                  <th style={{ width: '16%' }}>Admission, Ward &amp; Payment</th>
+                  <th style={{ width: '21%' }}>Diagnosis, Vitals &amp; Intake</th>
+                  <th style={{ width: '21%' }}>OT Procedure, Team &amp; Delivery</th>
+                  <th style={{ width: '11%' }}>Current Status</th>
                 </>
               )}
               {sectionKey === 'discharges' && (
                 <>
-                  <th style={{ minWidth: '175px' }}>DOA → DOD &amp; Consultant</th>
-                  <th style={{ minWidth: '245px' }}>Diagnosis, Procedure &amp; Baby</th>
-                  <th style={{ minWidth: '220px' }}>Condition, Vitals &amp; Advice</th>
-                  <th style={{ minWidth: '165px' }}>Payment &amp; MRD Sign-Off</th>
+                  <th style={{ width: '16%' }}>DOA → DOD &amp; Consultant</th>
+                  <th style={{ width: '21%' }}>Diagnosis, Procedure &amp; Baby</th>
+                  <th style={{ width: '21%' }}>Condition, Vitals &amp; Advice</th>
+                  <th style={{ width: '11%' }}>Payment &amp; MRD Sign-Off</th>
                 </>
               )}
               {sectionKey === 'inpatients' && (
                 <>
-                  <th style={{ minWidth: '175px' }}>Ward Stay, DOA &amp; Payment</th>
-                  <th style={{ minWidth: '215px' }}>Diagnosis, Vitals &amp; Course</th>
-                  <th style={{ minWidth: '250px' }}>OT Procedure, Team &amp; Delivery</th>
-                  <th style={{ minWidth: '120px' }}>Record Status</th>
+                  <th style={{ width: '16%' }}>Ward Stay, DOA &amp; Payment</th>
+                  <th style={{ width: '21%' }}>Diagnosis, Vitals &amp; Course</th>
+                  <th style={{ width: '21%' }}>OT Procedure, Team &amp; Delivery</th>
+                  <th style={{ width: '11%' }}>Record Status</th>
                 </>
               )}
-              <th className="text-end pe-3 no-print" style={{ width: '95px' }}>Action</th>
+              <th className="text-end pe-3 no-print" style={{ width: '9%' }}>Action</th>
             </tr>
           </thead>
           <tbody>
             {items.length === 0 ? (
-              <tr>
+              <tr className="fg-empty-row">
                 <td colSpan={7} className="text-center py-4 text-muted">
                   <i className="bi bi-inbox fs-3 d-block mb-1 text-muted"></i>
                   {meta.emptyText}
@@ -416,15 +416,37 @@ export default function DayReportSectionTable({ sectionKey, items, censusDate }:
                   sectionKey === 'inpatients'
                     ? `Day ${item.census_stay_days || item.stay_days || 1}`
                     : `${item.stay_days || 1} day(s) LOS`;
+                const col3Label =
+                  sectionKey === 'discharges'
+                    ? 'DOA -> DOD & Consultant'
+                    : sectionKey === 'inpatients'
+                      ? 'Ward Stay, DOA & Payment'
+                      : 'Admission, Ward & Payment';
+                const col4Label =
+                  sectionKey === 'discharges'
+                    ? 'Diagnosis, Procedure & Baby'
+                    : sectionKey === 'inpatients'
+                      ? 'Diagnosis, Vitals & Course'
+                      : 'Diagnosis, Vitals & Intake';
+                const col5Label =
+                  sectionKey === 'discharges'
+                    ? 'Condition, Vitals & Advice'
+                    : 'OT Procedure, Team & Delivery';
+                const col6Label =
+                  sectionKey === 'discharges'
+                    ? 'Payment & MRD Sign-Off'
+                    : sectionKey === 'inpatients'
+                      ? 'Record Status'
+                      : 'Current Status';
 
                 return (
                   <tr key={`${sectionKey}-${item.id}`}>
-                    <td className="ps-3 text-center fw-semibold text-muted">{idx + 1}</td>
+                    <td className="ps-3 text-center fw-semibold text-muted" data-label="S.No">{idx + 1}</td>
 
                     <PatientContactCell item={item} />
 
                     {/* Column 3: Timeline, Ward, Consultant, Format/Payment */}
-                    <td>
+                    <td data-label={col3Label}>
                       <div className="small">
                         <div>
                           <span className="text-muted fw-semibold">DOA:</span>{' '}
@@ -470,7 +492,7 @@ export default function DayReportSectionTable({ sectionKey, items, censusDate }:
 
                     {/* Column 4 */}
                     {sectionKey === 'discharges' ? (
-                      <td>
+                      <td data-label={col4Label}>
                         <div className="fw-semibold text-dark mb-1">
                           {item.diagnosis || '—'}
                           {item.icd_code && (
@@ -485,7 +507,7 @@ export default function DayReportSectionTable({ sectionKey, items, censusDate }:
                         <ProcedureAndTeamBlock item={item} />
                       </td>
                     ) : (
-                      <td>
+                      <td data-label={col4Label}>
                         <div className="mb-1">
                           <WorkflowBadge type={item.surgery_type} />
                           {item.icd_code && (
@@ -511,7 +533,7 @@ export default function DayReportSectionTable({ sectionKey, items, censusDate }:
 
                     {/* Column 5 */}
                     {sectionKey === 'discharges' ? (
-                      <td>
+                      <td data-label={col5Label}>
                         <div className="small">
                           <div className="text-dark">
                             <strong>Condition:</strong> {item.discharge_condition || 'Stable'}
@@ -551,14 +573,14 @@ export default function DayReportSectionTable({ sectionKey, items, censusDate }:
                         </div>
                       </td>
                     ) : (
-                      <td>
+                      <td data-label={col5Label}>
                         <ProcedureAndTeamBlock item={item} />
                       </td>
                     )}
 
                     {/* Column 6 */}
                     {sectionKey === 'discharges' ? (
-                      <td>
+                      <td data-label={col6Label}>
                         <div className="small d-flex flex-column gap-1">
                           <div>{payText !== '—' ? payText : <span className="text-muted">Cash / General</span>}</div>
                           {item.approved_amount && (
@@ -579,7 +601,7 @@ export default function DayReportSectionTable({ sectionKey, items, censusDate }:
                         </div>
                       </td>
                     ) : (
-                      <td>
+                      <td data-label={col6Label}>
                         <div className="d-flex flex-column gap-1">
                           {item.discharge_at ? (
                             <span className="badge bg-success-subtle text-success border border-success-subtle">
@@ -595,11 +617,11 @@ export default function DayReportSectionTable({ sectionKey, items, censusDate }:
                       </td>
                     )}
 
-                    <td className="text-end pe-3 no-print">
+                    <td className="text-end pe-3 no-print" data-label="Action">
                       <Link
                         href={`/admissions/${item.id}/documents/preview`}
                         className="btn btn-sm btn-outline-secondary"
-                        style={{ borderRadius: '8px', fontSize: '12px' }}
+                        style={{ borderRadius: '8px', fontSize: '11.5px', padding: '4px 8px' }}
                       >
                         <i className="bi bi-eye me-1"></i> Review
                       </Link>

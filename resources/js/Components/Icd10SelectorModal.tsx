@@ -150,19 +150,19 @@ export default function Icd10SelectorModal({
             </div>
 
             {/* Code List Table */}
-            <div className="table-responsive border rounded" style={{ maxHeight: '380px' }}>
-              <table className="table table-hover align-middle mb-0" style={{ fontSize: '12.5px' }}>
+            <div className="table-responsive fg-modal-table-wrap border rounded" style={{ maxHeight: '380px' }}>
+              <table className="table table-hover align-middle mb-0 fg-fit-table fg-table-compact fg-mobile-stack-table" style={{ fontSize: '12.5px' }}>
                 <thead className="table-light sticky-top">
                   <tr>
-                    <th style={{ width: '110px' }}>ICD-10 Code</th>
-                    <th>Clinical Description</th>
-                    <th style={{ width: '160px' }}>Category</th>
-                    <th style={{ width: '80px' }} className="text-end">Action</th>
+                    <th style={{ width: '18%' }}>ICD-10 Code</th>
+                    <th style={{ width: '42%' }}>Clinical Description</th>
+                    <th style={{ width: '24%' }}>Category</th>
+                    <th style={{ width: '16%' }} className="text-end">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {visibleList.length === 0 ? (
-                    <tr>
+                    <tr className="fg-empty-row">
                       <td colSpan={4} className="text-center py-4 text-muted">
                         <i className="bi bi-inbox fs-4 d-block mb-1"></i>
                         No ICD-10 diagnosis codes found matching "{searchQuery}".
@@ -181,13 +181,13 @@ export default function Icd10SelectorModal({
                             onClose();
                           }}
                         >
-                          <td>
+                          <td data-label="ICD-10 Code">
                             <span className="badge bg-primary-subtle text-primary font-monospace fw-bold px-2 py-1">
                               {item.code}
                             </span>
                           </td>
-                          <td className="fw-medium text-dark">{item.description}</td>
-                          <td>
+                          <td className="fw-medium text-dark" data-label="Clinical Description">{item.description}</td>
+                          <td data-label="Category">
                             <span
                               className="text-muted"
                               style={{ fontSize: '11px' }}
@@ -195,7 +195,7 @@ export default function Icd10SelectorModal({
                               {item.category.replace(' diagnoses', '')}
                             </span>
                           </td>
-                          <td className="text-end">
+                          <td className="text-end" data-label="Action">
                             <button
                               type="button"
                               className="btn btn-sm btn-outline-primary py-0 px-2"

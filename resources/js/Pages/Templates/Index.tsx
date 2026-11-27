@@ -110,34 +110,34 @@ export default function Index({ templates }: Props) {
 
       <div className="card shadow-sm border-0" style={{ borderRadius: '20px' }}>
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0">
+          <table className="table table-hover align-middle mb-0 fg-fit-table fg-mobile-stack-table">
             <thead className="table-light text-muted small text-uppercase">
               <tr>
-                <th>Template Code</th>
-                <th>Document Title</th>
-                <th>Version Tag</th>
-                <th>Effective Date</th>
-                <th>Approval Status</th>
-                <th className="text-end">Actions</th>
+                <th style={{ width: '15%' }}>Template Code</th>
+                <th style={{ width: '30%' }}>Document Title</th>
+                <th style={{ width: '12%' }}>Version Tag</th>
+                <th style={{ width: '13%' }}>Effective Date</th>
+                <th style={{ width: '16%' }}>Approval Status</th>
+                <th style={{ width: '14%' }} className="text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
               {templates.map((tpl) => (
                 <tr key={tpl.id}>
-                  <td>
+                  <td data-label="Template Code">
                     <span className="badge bg-secondary font-monospace">{tpl.template_code}</span>
                   </td>
-                  <td>
+                  <td data-label="Document Title">
                     <div className="fw-bold text-dark">{tpl.title}</div>
                     <div className="text-muted small">{tpl.description}</div>
                   </td>
-                  <td>
+                  <td data-label="Version Tag">
                     <span className="badge bg-light text-dark border">{tpl.version_tag}</span>
                   </td>
-                  <td>
+                  <td data-label="Effective Date">
                     <span className="small">{formatDate(tpl.effective_date)}</span>
                   </td>
-                  <td>
+                  <td data-label="Approval Status">
                     {tpl.is_approved_by_hospital ? (
                       <>
                         <span className="badge badge-approved">
@@ -158,7 +158,7 @@ export default function Index({ templates }: Props) {
                       </span>
                     )}
                   </td>
-                  <td className="text-end">
+                  <td className="text-end" data-label="Actions">
                     <button
                       type="button"
                       className="btn btn-sm btn-outline-secondary"

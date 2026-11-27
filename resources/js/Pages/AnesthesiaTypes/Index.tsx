@@ -140,20 +140,20 @@ export default function Index({ anesthesiaTypes }: Props) {
       {/* Anesthesia Types Table */}
       <div className="card shadow-sm border-0" style={{ borderRadius: '20px' }}>
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0">
+          <table className="table table-hover align-middle mb-0 fg-fit-table fg-mobile-stack-table">
             <thead className="table-light text-muted small text-uppercase">
               <tr>
                 <th style={{ width: '8%' }}>Order</th>
-                <th style={{ width: '28%' }}>Anesthesia Type Name</th>
+                <th style={{ width: '24%' }}>Anesthesia Type Name</th>
                 <th style={{ width: '12%' }}>Code / Abbr</th>
                 <th style={{ width: '32%' }}>Clinical Description / Indications</th>
-                <th style={{ width: '10%' }}>Status</th>
-                <th style={{ width: '10%' }} className="text-end">Actions</th>
+                <th style={{ width: '11%' }}>Status</th>
+                <th style={{ width: '13%' }} className="text-end">Actions</th>
               </tr>
             </thead>
             <tbody>
               {anesthesiaTypes.length === 0 ? (
-                <tr>
+                <tr className="fg-empty-row">
                   <td colSpan={6} className="text-center py-5 text-muted">
                     <i className="bi bi-capsule fs-1 d-block mb-2 text-secondary"></i>
                     No anesthesia types found. Click "Add Anesthesia Type" to register one.
@@ -162,15 +162,15 @@ export default function Index({ anesthesiaTypes }: Props) {
               ) : (
                 anesthesiaTypes.map((item) => (
                   <tr key={item.id}>
-                    <td>
+                    <td data-label="Order">
                       <span className="badge bg-light text-dark border">
                         #{item.sort_order}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Anesthesia Type Name">
                       <div className="fw-bold text-dark">{item.name}</div>
                     </td>
-                    <td>
+                    <td data-label="Code / Abbr">
                       {item.code ? (
                         <span
                           className="badge"
@@ -189,12 +189,12 @@ export default function Index({ anesthesiaTypes }: Props) {
                         <span className="text-muted small">—</span>
                       )}
                     </td>
-                    <td>
+                    <td data-label="Clinical Description / Indications">
                       <div className="text-muted small">
                         {item.description || '—'}
                       </div>
                     </td>
-                    <td>
+                    <td data-label="Status">
                       <span
                         className={`badge ${item.is_active ? 'bg-success' : 'bg-secondary'}`}
                         style={{ fontSize: '0.7rem', textTransform: 'uppercase' }}
@@ -202,11 +202,11 @@ export default function Index({ anesthesiaTypes }: Props) {
                         {item.is_active ? 'Active' : 'Inactive'}
                       </span>
                     </td>
-                    <td className="text-end">
-                      <div className="btn-group btn-group-sm">
+                    <td className="text-end" data-label="Actions">
+                      <div className="d-inline-flex flex-wrap justify-content-end gap-1">
                         <button
                           type="button"
-                          className="btn btn-outline-secondary"
+                          className="btn btn-sm btn-outline-secondary"
                           onClick={() => openEditModal(item)}
                           title="Edit Type"
                         >
@@ -214,7 +214,7 @@ export default function Index({ anesthesiaTypes }: Props) {
                         </button>
                         <button
                           type="button"
-                          className={`btn ${item.is_active ? 'btn-outline-warning' : 'btn-outline-success'}`}
+                          className={`btn btn-sm ${item.is_active ? 'btn-outline-warning' : 'btn-outline-success'}`}
                           onClick={() => handleToggleActive(item)}
                           title={item.is_active ? 'Deactivate' : 'Activate'}
                         >
@@ -222,7 +222,7 @@ export default function Index({ anesthesiaTypes }: Props) {
                         </button>
                         <button
                           type="button"
-                          className="btn btn-outline-danger"
+                          className="btn btn-sm btn-outline-danger"
                           onClick={() => handleDelete(item)}
                           title="Delete"
                         >

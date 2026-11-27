@@ -201,20 +201,20 @@ export default function Index({ auditLogs, filters = {} }: Props) {
       {/* Logs Table */}
       <div className="card shadow-sm border-0" style={{ borderRadius: '20px' }}>
         <div className="table-responsive">
-          <table className="table table-hover align-middle mb-0" style={{ fontSize: '0.9rem' }}>
+          <table className="table table-hover align-middle mb-0 fg-fit-table fg-mobile-stack-table" style={{ fontSize: '0.88rem' }}>
             <thead className="table-light text-muted small text-uppercase">
               <tr>
-                <th>Timestamp</th>
-                <th>Staff User</th>
-                <th>Action</th>
-                <th>Description</th>
-                <th>Entity</th>
-                <th>IP Address</th>
+                <th style={{ width: '15%' }}>Timestamp</th>
+                <th style={{ width: '16%' }}>Staff User</th>
+                <th style={{ width: '14%' }}>Action</th>
+                <th style={{ width: '28%' }}>Description</th>
+                <th style={{ width: '14%' }}>Entity</th>
+                <th style={{ width: '13%' }}>IP Address</th>
               </tr>
             </thead>
             <tbody>
               {!auditLogs.data || auditLogs.data.length === 0 ? (
-                <tr>
+                <tr className="fg-empty-row">
                   <td colSpan={6} className="text-center py-5 text-muted">
                     <i className="bi bi-shield-x fs-2 d-block mb-2 text-muted"></i>
                     No audit events found matching the selected parameters.
@@ -223,8 +223,8 @@ export default function Index({ auditLogs, filters = {} }: Props) {
               ) : (
                 auditLogs.data.map((log) => (
                   <tr key={log.id}>
-                    <td className="text-nowrap small text-muted">{formatDateTime(log.created_at)}</td>
-                    <td>
+                    <td className="small text-muted" data-label="Timestamp">{formatDateTime(log.created_at)}</td>
+                    <td data-label="Staff User">
                       <div className="fw-semibold text-dark">{log.user_name}</div>
                       <span
                         className="badge bg-light text-dark border text-uppercase"
@@ -233,13 +233,13 @@ export default function Index({ auditLogs, filters = {} }: Props) {
                         {log.user_role}
                       </span>
                     </td>
-                    <td>
+                    <td data-label="Action">
                       <span className="badge bg-secondary font-monospace">{log.action}</span>
                     </td>
-                    <td>
+                    <td data-label="Description">
                       <span className="small">{log.description}</span>
                     </td>
-                    <td>
+                    <td data-label="Entity">
                       {log.auditable_type ? (
                         <span className="badge bg-light text-primary border">
                           {log.auditable_type} #{log.auditable_id}
@@ -248,7 +248,7 @@ export default function Index({ auditLogs, filters = {} }: Props) {
                         <span className="text-muted small">—</span>
                       )}
                     </td>
-                    <td className="small text-muted font-monospace">{log.ip_address || '127.0.0.1'}</td>
+                    <td className="small text-muted font-monospace" data-label="IP Address">{log.ip_address || '127.0.0.1'}</td>
                   </tr>
                 ))
               )}
