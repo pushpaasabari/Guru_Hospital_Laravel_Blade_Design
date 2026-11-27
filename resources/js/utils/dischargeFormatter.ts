@@ -855,7 +855,7 @@ export function formatNewborns(admission: any): FormattedNewbornCard[] {
   newborns.forEach((baby: any, idx: number) => {
     const twinLabel = idx === 0 ? 'Twin A' : idx === 1 ? 'Twin B' : idx === 2 ? 'Twin C' : `Baby ${idx + 1}`;
     const title = isMultiple ? `Newborn #${idx + 1} - ${twinLabel}` : 'Newborn Details';
-    const sex = baby.sex ? `Alive ${baby.sex.toLowerCase()} baby` : '—';
+    const sex = baby.sex ? `Alive ${baby.sex.toUpperCase()} baby` : '—';
 
     const rawBornAt = baby.birth_at || admission.procedure_at;
     const bornTime = rawBornAt ? formatDateTime(rawBornAt, ' at ') : '—';

@@ -71,6 +71,7 @@ class PreviewAndPdfParityTest extends TestCase
             ->where('digitalSummary.procedure_at_formatted', '26.11.2026, 08:30 AM')
             ->where('digitalSummary.discharge_at_formatted', '28.11.2026, 07:45 PM')
             ->where('digitalSummary.stent_removal_date_formatted', '28.12.2026')
+            ->where('digitalSummary.newborn_cards.0.sex', 'Alive FEMALE baby')
             ->where('digitalSummary.newborn_cards.0.born', '26.11.2026 at 10:05 PM')
         );
 
@@ -79,6 +80,7 @@ class PreviewAndPdfParityTest extends TestCase
         $this->assertStringContainsString('26.11.2026, 08:30 AM', $a4Html);
         $this->assertStringContainsString('28.11.2026, 07:45 PM', $a4Html);
         $this->assertStringContainsString('28.12.2026', $a4Html);
+        $this->assertStringContainsString('Alive <strong>FEMALE</strong> baby', $a4Html);
         $this->assertStringContainsString('26.11.2026 at 10:05 PM', $a4Html);
     }
 }

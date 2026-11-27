@@ -776,7 +776,20 @@ export default function DigitalDischargeSummaryPreview({
                   <div className="a4-newborn-body">
                     <div>
                       <span className="a4-nb-lbl">Sex:</span>
-                      {card.sex}
+                      {(() => {
+                        const raw = String(card.sex || '—');
+                        const match = raw.match(/^(Alive\s+)(.+?)(\s+baby)$/i);
+                        if (!match) return raw;
+                        return (
+                          <>
+                            {match[1]}
+                            <strong style={{ textTransform: 'uppercase' }}>
+                              {match[2].toUpperCase()}
+                            </strong>
+                            {match[3]}
+                          </>
+                        );
+                      })()}
                     </div>
                     <div>
                       <span className="a4-nb-lbl">Birth Time:</span>

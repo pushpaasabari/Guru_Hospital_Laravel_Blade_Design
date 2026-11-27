@@ -1249,7 +1249,7 @@ class DischargeSummaryFormatter
 
             $title = $isMultiple ? "Newborn #" . ($idx + 1) . " - " . $twinLabel : "Newborn Details";
 
-            $sex = $baby->sex ? 'Alive ' . strtolower($baby->sex) . ' baby' : '—';
+            $sex = $baby->sex ? 'Alive ' . strtoupper($baby->sex) . ' baby' : '—';
 
             $bornTime = $baby->birth_at
                 ? $baby->birth_at->format('d.m.Y \a\t h:i A')

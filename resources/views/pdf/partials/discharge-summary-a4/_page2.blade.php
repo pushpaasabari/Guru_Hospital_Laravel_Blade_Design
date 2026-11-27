@@ -108,7 +108,14 @@
                     <div class="a4-newborn-card">
                         <div class="a4-newborn-title">{{ $card['title'] }}</div>
                         <div class="a4-newborn-body">
-                            <div class="a4-nb-line"><span class="a4-nb-lbl">Sex:</span>{{ $card['sex'] }}</div>
+                            @php
+                                $sexHighlighted = preg_replace(
+                                    '/^(Alive\s+)(.+?)(\s+baby)$/i',
+                                    '$1<strong>$2</strong>$3',
+                                    e($card['sex'])
+                                );
+                            @endphp
+                            <div class="a4-nb-line"><span class="a4-nb-lbl">Sex:</span>{!! $sexHighlighted !!}</div>
                             <div class="a4-nb-line"><span class="a4-nb-lbl">Birth Time:</span>{{ $card['born'] }}</div>
                             <div class="a4-nb-line"><span class="a4-nb-lbl">Mode:</span>{{ $card['mode'] }}</div>
                             <div class="a4-nb-line">
