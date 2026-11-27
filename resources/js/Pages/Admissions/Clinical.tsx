@@ -1,7 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import AppLayout from '@/Layouts/AppLayout';
 import AdmissionStageNav from '@/Components/AdmissionStageNav';
+import {
+  CLINICAL_EXAM_PRESET_GROUPS,
+  applyNormalExamBundle,
+  isExamPresetSelected,
+  toggleExamPreset,
+} from '@/utils/clinicalExamPresets';
 
 interface AdmissionData {
   id: number;
@@ -26,6 +32,8 @@ interface Props {
 }
 
 export default function AdmissionsClinical({ admission }: Props) {
+  const isDelivery = admission.surgery_type === 'delivery';
+  const [showObstetricPresets, setShowObstetricPresets] = useState<boolean>(isDelivery);
   const { data, setData, put, processing, errors } = useForm({
     clinical_history: admission.clinical_history || '',
     examination: admission.examination || '',
@@ -105,10 +113,95 @@ export default function AdmissionsClinical({ admission }: Props) {
 
         {/* Section 2.2: Clinical Examination */}
         <div className="card mb-4 border-0 shadow-sm">
-          <div className="card-header bg-white py-3 fw-bold text-dark">
-            <span className="badge bg-primary me-2">2.2</span> Clinical &amp; Systemic Examination
+          <div className="card-header bg-white py-3 fw-bold text-dark d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+              <span className="badge bg-primary me-2">2.2</span> Clinical &amp; Systemic Examination
+            </div>
+            <div className="d-flex flex-wrap align-items-center gap-2">
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-primary fw-semibold"
+                onClick={() => setData('examination', applyNormalExamBundle(data.examination, isDelivery))}
+              >
+                <i className="bi bi-check2-all me-1"></i>
+                {isDelivery ? 'Fill Normal Obstetric Exam' : 'Fill Normal Baseline Exam'}
+              </button>
+              {!isDelivery && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  onClick={() => setShowObstetricPresets((prev) => !prev)}
+                >
+                  <i className={`bi ${showObstetricPresets ? 'bi-chevron-up' : 'bi-plus-circle'} me-1`}></i>
+                  {showObstetricPresets ? 'Hide Obstetric Presets' : 'Obstetric Presets'}
+                </button>
+              )}
+              {data.examination.trim().length > 0 && (
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-danger"
+                  onClick={() => setData('examination', '')}
+                >
+                  <i className="bi bi-x-circle me-1"></i> Clear
+                </button>
+              )}
+            </div>
           </div>
           <div className="card-body">
+            {/* Predefined Quick Checkboxes */}
+            <div className="p-3 bg-light rounded-3 border mb-3">
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <span className="small fw-bold text-dark">
+                  <i className="bi bi-ui-checks-grid text-primary me-1"></i>
+                  Quick Predefined Findings (Check boxes to add/remove)
+                </span>
+                <span className="small text-muted" style={{ fontSize: '11.5px' }}>
+                  You can still type or edit freely below
+                </span>
+              </div>
+              <div className="row g-3">
+                {CLINICAL_EXAM_PRESET_GROUPS.filter(
+                  (grp) => grp.id !== 'obstetric' || showObstetricPresets
+                ).map((group) => (
+                  <div key={group.id} className="col-12 col-md-6">
+                    <div className="bg-white rounded-3 border p-2 h-100">
+                      <div className="small fw-bold text-secondary mb-2">
+                        <i className={`bi ${group.icon} text-primary me-1`}></i>
+                        {group.title}
+                      </div>
+                      <div className="d-flex flex-wrap gap-2">
+                        {group.items.map((preset) => {
+                          const checked = isExamPresetSelected(data.examination, preset);
+                          const inputId = `exam-preset-${preset.id}`;
+                          return (
+                            <label
+                              key={preset.id}
+                              htmlFor={inputId}
+                              className={`d-inline-flex align-items-center gap-1 px-2 py-1 rounded-pill border small ${
+                                checked
+                                  ? 'bg-primary-subtle border-primary text-primary fw-semibold'
+                                  : 'bg-light border-secondary-subtle text-dark'
+                              }`}
+                              style={{ cursor: 'pointer', fontSize: '0.8rem', userSelect: 'none' }}
+                            >
+                              <input
+                                id={inputId}
+                                type="checkbox"
+                                className="form-check-input m-0"
+                                checked={checked}
+                                onChange={() => setData('examination', toggleExamPreset(data.examination, preset))}
+                              />
+                              <span>{preset.label}</span>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
             <div className="mb-3">
               <label className="form-label fw-semibold text-secondary">
                 Clinical Examination Findings (General &amp; Systemic)
