@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { joinMultiValues, parseMultiValues } from '../utils/multiSelect';
 import { handleNormalizedInputChange, toUpperCaseValue } from '../utils/inputNormalizers';
 
@@ -37,6 +38,92 @@ export default function MultiSelectField({
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [customDraft, setCustomDraft] = useState('');
+  const [coords, setCoords] = useState<{
+    top: number;
+    left: number;
+    width: number;
+    openUp: boolean;
+    listMaxHeight: number;
+  }>({
+    top: 0,
+    left: 0,
+    width: 260,
+    openUp: false,
+    listMaxHeight: 190,
+  });
+
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const updatePosition = useCallback(() => {
+    const trigger = triggerRef.current;
+    if (!trigger) return;
+
+    const rect = trigger.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const openUp = spaceBelow < 240 && spaceAbove > spaceBelow;
+    const width = Math.min(Math.max(rect.width, 240), window.innerWidth - 16);
+    const left = Math.max(8, Math.min(rect.left, window.innerWidth - width - 8));
+    const availableHeight = openUp ? spaceAbove - 96 : spaceBelow - 96;
+    const listMaxHeight = Math.max(120, Math.min(210, availableHeight));
+
+    setCoords({
+      top: openUp ? rect.top - 4 : rect.bottom + 4,
+      left,
+      width,
+      openUp,
+      listMaxHeight,
+    });
+  }, []);
+
+  useLayoutEffect(() => {
+    if (!isOpen) return;
+    updatePosition();
+  }, [isOpen, value, updatePosition]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (triggerRef.current?.contains(target) || panelRef.current?.contains(target)) {
+        return;
+      }
+      if (target instanceof Element && target.closest('.modal')) {
+        return;
+      }
+      setIsOpen(false);
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    const handleViewportUpdate = (e: Event) => {
+      if (e.type === 'scroll' && e.target instanceof Node && panelRef.current?.contains(e.target)) {
+        return;
+      }
+      updatePosition();
+    };
+
+    document.addEventListener('mousedown', handlePointerDown);
+    document.addEventListener('touchstart', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('scroll', handleViewportUpdate, true);
+    window.addEventListener('resize', handleViewportUpdate);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown);
+      document.removeEventListener('touchstart', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('scroll', handleViewportUpdate, true);
+      window.removeEventListener('resize', handleViewportUpdate);
+    };
+  }, [isOpen, updatePosition]);
 
   const normalize = (v: string) => (uppercase ? toUpperCaseValue(v) : v.trim());
   const optionValues = options.map((o) => o.value);
@@ -144,6 +231,7 @@ export default function MultiSelectField({
 
       {/* Trigger Bar */}
       <button
+        ref={triggerRef}
         type="button"
         className="form-select text-start d-flex justify-content-between align-items-center"
         aria-expanded={isOpen}
@@ -158,102 +246,116 @@ export default function MultiSelectField({
         </span>
       </button>
 
-      {/* Inline Multiple Choice Checkbox Panel */}
-      {isOpen && (
-        <div className="border rounded bg-white shadow-sm p-2 mt-1">
-          {options.length > 5 && (
-            <input
-              type="text"
-              className="form-control form-control-sm mb-2"
-              placeholder={`Search ${label.toLowerCase()}...`}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          )}
-
-          <div style={{ maxHeight: '150px', overflowY: 'auto' }}>
-            {visibleOptions.length === 0 ? (
-              <div className="text-muted small py-1 px-2">No matching options</div>
-            ) : (
-              visibleOptions.map((opt) => {
-                const checked = isOptionSelected(opt);
-                return (
-                  <label
-                    key={opt.key}
-                    className={`d-flex align-items-start gap-2 rounded px-2 py-1 mb-0 small ${
-                      checked ? 'bg-primary-subtle text-dark fw-semibold' : 'text-dark'
-                    }`}
-                    style={{ cursor: 'pointer', fontSize: '0.82rem' }}
-                  >
-                    <input
-                      type="checkbox"
-                      className="form-check-input mt-1 flex-shrink-0"
-                      checked={checked}
-                      onChange={() => toggleValue(opt.value, opt.matchKey)}
-                    />
-                    <span>{opt.label}</span>
-                  </label>
-                );
-              })
-            )}
-          </div>
-
-          {onRequestAddNew ? (
-            <div className="d-flex justify-content-between align-items-center gap-2 mt-2 pt-2 border-top">
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-primary"
-                onClick={onRequestAddNew}
-              >
-                <i className="bi bi-plus-circle me-1"></i>
-                {addNewLabel} {label}
-              </button>
-              <button
-                type="button"
-                className="btn btn-sm btn-outline-secondary"
-                onClick={() => setIsOpen(false)}
-              >
-                Done
-              </button>
-            </div>
-          ) : (
-            <div className="input-group input-group-sm mt-2 pt-2 border-top">
+      {/* Floating Multiple Choice Checkbox Overlay (never pushes grid rows) */}
+      {isOpen &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <div
+            ref={panelRef}
+            className="border rounded-3 bg-white shadow-lg p-2"
+            style={{
+              position: 'fixed',
+              top: coords.openUp ? 'auto' : `${coords.top}px`,
+              bottom: coords.openUp ? `${window.innerHeight - coords.top}px` : 'auto',
+              left: `${coords.left}px`,
+              width: `${coords.width}px`,
+              zIndex: 1055,
+            }}
+          >
+            {options.length > 5 && (
               <input
                 type="text"
-                className="form-control"
-                style={uppercase ? { textTransform: 'uppercase' } : undefined}
-                placeholder={customPlaceholder}
-                value={customDraft}
-                onChange={(e) =>
-                  uppercase
-                    ? handleNormalizedInputChange(e, toUpperCaseValue, setCustomDraft)
-                    : setCustomDraft(e.target.value)
-                }
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddCustom();
-                  }
-                }}
+                className="form-control form-control-sm mb-2"
+                placeholder={`Search ${label.toLowerCase()}...`}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
-              <button
-                type="button"
-                className="btn btn-outline-primary"
-                onClick={handleAddCustom}
-              >
-                + Add
-              </button>
-              <button
-                type="button"
-                className="btn btn-outline-secondary"
-                onClick={() => setIsOpen(false)}
-              >
-                Done
-              </button>
+            )}
+
+            <div style={{ maxHeight: `${coords.listMaxHeight}px`, overflowY: 'auto' }}>
+              {visibleOptions.length === 0 ? (
+                <div className="text-muted small py-1 px-2">No matching options</div>
+              ) : (
+                visibleOptions.map((opt) => {
+                  const checked = isOptionSelected(opt);
+                  return (
+                    <label
+                      key={opt.key}
+                      className={`d-flex align-items-start gap-2 rounded px-2 py-1 mb-0 small ${
+                        checked ? 'bg-primary-subtle text-dark fw-semibold' : 'text-dark'
+                      }`}
+                      style={{ cursor: 'pointer', fontSize: '0.82rem' }}
+                    >
+                      <input
+                        type="checkbox"
+                        className="form-check-input mt-1 flex-shrink-0"
+                        checked={checked}
+                        onChange={() => toggleValue(opt.value, opt.matchKey)}
+                      />
+                      <span>{opt.label}</span>
+                    </label>
+                  );
+                })
+              )}
             </div>
-          )}
-        </div>
-      )}
+
+            {onRequestAddNew ? (
+              <div className="d-flex flex-wrap justify-content-between align-items-center gap-2 mt-2 pt-2 border-top">
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-primary"
+                  onClick={onRequestAddNew}
+                >
+                  <i className="bi bi-plus-circle me-1"></i>
+                  {addNewLabel} {label}
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-sm btn-outline-secondary"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Done
+                </button>
+              </div>
+            ) : (
+              <div className="input-group input-group-sm mt-2 pt-2 border-top">
+                <input
+                  type="text"
+                  className="form-control"
+                  style={uppercase ? { textTransform: 'uppercase' } : undefined}
+                  placeholder={customPlaceholder}
+                  value={customDraft}
+                  onChange={(e) =>
+                    uppercase
+                      ? handleNormalizedInputChange(e, toUpperCaseValue, setCustomDraft)
+                      : setCustomDraft(e.target.value)
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddCustom();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  className="btn btn-outline-primary"
+                  onClick={handleAddCustom}
+                >
+                  + Add
+                </button>
+                <button
+                  type="button"
+                  className="btn btn-outline-secondary"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Done
+                </button>
+              </div>
+            )}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
