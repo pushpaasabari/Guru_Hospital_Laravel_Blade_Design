@@ -117,16 +117,6 @@ export default function MultiSelectField({
               Clear
             </button>
           )}
-          {onRequestAddNew && (
-            <button
-              type="button"
-              className="btn btn-link p-0 text-decoration-none small text-primary fw-semibold"
-              style={{ fontSize: '0.75rem' }}
-              onClick={onRequestAddNew}
-            >
-              + {addNewLabel}
-            </button>
-          )}
         </div>
       </div>
 

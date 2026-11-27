@@ -646,25 +646,28 @@ export default function AdmissionsSurgery({
               </div>
 
               <div className={isDelivery ? 'col-md-4' : 'col-md-3'}>
-                <div className="d-flex justify-content-between align-items-center mb-1">
-                  <label className="form-label mb-0">ICD-10 Code</label>
+                <label className="form-label">ICD-10 Code</label>
+                <div className="input-group">
+                  <input
+                    type="text"
+                    list="icd10-quick-datalist"
+                    className="form-control border-end-0"
+                    value={data.icd_code}
+                    onChange={(e) => setData('icd_code', e.target.value)}
+                    placeholder="e.g. O82 / N20.1 / K35.80"
+                  />
                   <button
                     type="button"
-                    className="btn btn-link btn-sm p-0 text-decoration-none fw-medium"
-                    style={{ fontSize: '11.5px', color: '#0d6efd' }}
+                    className="btn bg-white border border-start-0 text-primary d-inline-flex align-items-center gap-1 px-2"
+                    style={{ fontSize: '0.78rem', borderColor: 'var(--bs-border-color, #dee2e6)' }}
                     onClick={() => setShowIcdModal(true)}
+                    title="Search ICD-10 Codes"
+                    aria-label="Search ICD-10"
                   >
-                    <i className="bi bi-search me-1"></i>Search ICD-10
+                    <i className="bi bi-search"></i>
+                    <span className="d-none d-xl-inline">Search</span>
                   </button>
                 </div>
-                <input
-                  type="text"
-                  list="icd10-quick-datalist"
-                  className="form-control"
-                  value={data.icd_code}
-                  onChange={(e) => setData('icd_code', e.target.value)}
-                  placeholder="e.g. O82 / N20.1 / K35.80"
-                />
                 <datalist id="icd10-quick-datalist">
                   {ICD10_CATALOG.filter((item) => {
                     const q = (data.icd_code || '').trim().toLowerCase();
@@ -718,7 +721,7 @@ export default function AdmissionsSurgery({
                 </div>
               )}
               <span className="badge bg-light text-muted border fw-normal" style={{ fontSize: '0.72rem' }}>
-                Multiple choice enabled &bull; Click &ldquo;+ Add New&rdquo; on any field to add via popup
+                Multiple choice enabled &bull; Open any dropdown to select or add new
               </span>
             </div>
           </div>
