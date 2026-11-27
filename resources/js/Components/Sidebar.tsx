@@ -232,8 +232,7 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
               {/* Mobile Drawer Close Button */}
               <button
                 type="button"
-                className="btn btn-sm btn-outline-secondary d-lg-none"
-                style={{ width: '32px', height: '32px', padding: 0, borderRadius: '8px' }}
+                className="btn btn-sm btn-outline-secondary fg-sidebar-close-btn"
                 onClick={closeMobile}
                 aria-label="Close navigation menu"
               >

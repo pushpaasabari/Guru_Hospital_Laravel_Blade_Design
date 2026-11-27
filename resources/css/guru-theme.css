@@ -278,7 +278,7 @@ body {
   font-weight: 500 !important;
   padding: 9px 20px !important;
   transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease !important;
-  display: inline-flex !important;
+  display: inline-flex;
   align-items: center !important;
   justify-content: center !important;
   gap: 6px !important;
@@ -1580,12 +1580,27 @@ body {
   margin: 0 auto;
 }
 
-/* Mobile topbar (only on small screens) */
-.fg-mobile-topbar {
+/* Mobile topbar & mobile drawer close button (only on small screens) */
+.fg-mobile-topbar,
+.fg-sidebar-close-btn {
   display: none;
 }
 
 @media (max-width: 991.98px) {
+  .fg-sidebar-hide-btn {
+    display: none !important;
+  }
+
+  .fg-sidebar-close-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0 !important;
+    border-radius: 8px !important;
+  }
+
   .fg-mobile-topbar {
     display: flex;
     align-items: center;
@@ -2161,6 +2176,10 @@ input[style*="text-transform: uppercase"]::placeholder {
   padding: 20px 4px;
 }
 
+.fg-responsive-select {
+  width: auto !important;
+}
+
 /* ─── Dedicated Phone & Small-Tablet Responsive Refinements (< 768px) ─────── */
 @media screen and (max-width: 767.98px) {
   html,
@@ -2217,6 +2236,12 @@ input[style*="text-transform: uppercase"]::placeholder {
     width: 100% !important;
     min-width: 0 !important;
     max-width: 100% !important;
+  }
+
+  .fg-filter-select {
+    width: auto !important;
+    flex: 1 1 130px;
+    min-width: 120px;
   }
 
   /* Responsive Document Preview: A4 Sheet + OT Notes + MRD Form */

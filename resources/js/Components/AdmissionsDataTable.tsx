@@ -406,13 +406,13 @@ export default function AdmissionsDataTable({
 
             {/* Workflow Filter */}
             <select
-              className="form-select form-select-sm shadow-none flex-grow-1 flex-sm-grow-0"
+              className="form-select form-select-sm shadow-none fg-filter-select"
               value={workflowFilter}
               onChange={(e) => {
                 setWorkflowFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              style={{ minWidth: '125px', borderRadius: '8px', fontSize: '12.5px' }}
+              style={{ width: '135px', borderRadius: '8px', fontSize: '12.5px' }}
             >
               <option value="all">All Workflows</option>
               <option value="delivery">Delivery</option>
@@ -422,13 +422,13 @@ export default function AdmissionsDataTable({
 
             {/* Format Filter */}
             <select
-              className="form-select form-select-sm shadow-none flex-grow-1 flex-sm-grow-0"
+              className="form-select form-select-sm shadow-none fg-filter-select"
               value={formatFilter}
               onChange={(e) => {
                 setFormatFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              style={{ minWidth: '120px', borderRadius: '8px', fontSize: '12.5px' }}
+              style={{ width: '130px', borderRadius: '8px', fontSize: '12.5px' }}
             >
               <option value="all">All Formats</option>
               <option value="general">General</option>
