@@ -144,6 +144,7 @@ export default function ActionDropdown({
             left: coords.left !== undefined ? `${coords.left}px` : 'auto',
             right: coords.right !== undefined ? `${coords.right}px` : 'auto',
             minWidth: `${minMenuWidth}px`,
+            maxWidth: 'calc(100vw - 24px)',
             zIndex: 1085,
             fontSize,
             borderRadius: '12px',

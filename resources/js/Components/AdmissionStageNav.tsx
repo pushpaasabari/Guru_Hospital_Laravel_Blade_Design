@@ -141,11 +141,11 @@ export default function AdmissionStageNav({ currentStage, admission }: Admission
               </div>
             </div>
 
-            <div className="d-flex gap-2">
+            <div className="d-flex gap-2 w-100 w-sm-auto justify-content-sm-end">
               <Link
                 href={`/admissions/${admission.id}/documents/preview`}
                 prefetch
-                className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center gap-1.5"
+                className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center gap-1.5 flex-grow-1 flex-sm-grow-0"
               >
                 <i className="bi bi-file-earmark-text"></i>
                 <span>Preview Document Pack</span>

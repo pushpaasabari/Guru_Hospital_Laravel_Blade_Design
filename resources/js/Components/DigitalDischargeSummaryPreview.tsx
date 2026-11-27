@@ -442,6 +442,7 @@ export default function DigitalDischargeSummaryPreview({
             </div>
           </div>
           <div
+            className="a4-patient-bottom"
             style={{
               display: 'grid',
               gridTemplateColumns: admission.attender_name
@@ -706,26 +707,28 @@ export default function DigitalDischargeSummaryPreview({
                 <span className="a4-lbl" style={{ marginBottom: '4px' }}>
                   Immediate Postoperative Orders
                 </span>
-                <table className="a4-table mb-0">
-                  <thead>
-                    <tr>
-                      <th style={{ width: '7%', textAlign: 'center' }}>#</th>
-                      <th style={{ width: hasInstructionsCol ? '63%' : '93%' }}>
-                        Clinical Order / Medication / Fluid
-                      </th>
-                      {hasInstructionsCol && <th style={{ width: '30%' }}>Route / Frequency / Timing</th>}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {postOpRows.map((row, idx) => (
-                      <tr key={idx}>
-                        <td style={{ textAlign: 'center', fontWeight: 600 }}>{row.sno}</td>
-                        <td className="a4-val-bold">{row.order}</td>
-                        {hasInstructionsCol && <td>{row.instruction || '—'}</td>}
+                <div className="table-responsive">
+                  <table className="a4-table mb-0">
+                    <thead>
+                      <tr>
+                        <th style={{ width: '7%', textAlign: 'center' }}>#</th>
+                        <th style={{ width: hasInstructionsCol ? '63%' : '93%' }}>
+                          Clinical Order / Medication / Fluid
+                        </th>
+                        {hasInstructionsCol && <th style={{ width: '30%' }}>Route / Frequency / Timing</th>}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
+                    </thead>
+                    <tbody>
+                      {postOpRows.map((row, idx) => (
+                        <tr key={idx}>
+                          <td style={{ textAlign: 'center', fontWeight: 600 }}>{row.sno}</td>
+                          <td className="a4-val-bold">{row.order}</td>
+                          {hasInstructionsCol && <td>{row.instruction || '—'}</td>}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
           </>
@@ -823,26 +826,28 @@ export default function DigitalDischargeSummaryPreview({
         {meds.length > 0 && (
           <>
             <div className="a4-section-hdr">Discharge Medication</div>
-            <table className="a4-table">
-              <thead>
-                <tr>
-                  <th style={{ width: '44%' }}>Medicine / Drug</th>
-                  <th style={{ width: '18%' }}>Frequency</th>
-                  <th style={{ width: '18%' }}>Duration / Qty</th>
-                  <th style={{ width: '20%' }}>Timing</th>
-                </tr>
-              </thead>
-              <tbody>
-                {meds.map((med, i) => (
-                  <tr key={i}>
-                    <td className="a4-val-bold">{med.medicine || '—'}</td>
-                    <td>{med.frequency || '—'}</td>
-                    <td>{med.duration || '—'}</td>
-                    <td>{med.timing || '—'}</td>
+            <div className="table-responsive">
+              <table className="a4-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: '44%' }}>Medicine / Drug</th>
+                    <th style={{ width: '18%' }}>Frequency</th>
+                    <th style={{ width: '18%' }}>Duration / Qty</th>
+                    <th style={{ width: '20%' }}>Timing</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {meds.map((med, i) => (
+                    <tr key={i}>
+                      <td className="a4-val-bold">{med.medicine || '—'}</td>
+                      <td>{med.frequency || '—'}</td>
+                      <td>{med.duration || '—'}</td>
+                      <td>{med.timing || '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </>
         )}
 
@@ -851,6 +856,7 @@ export default function DigitalDischargeSummaryPreview({
           <>
             <div className="a4-section-hdr">Condition at Discharge</div>
             <div
+              className="a4-cond-grid"
               style={{
                 display: 'grid',
                 gridTemplateColumns: `repeat(${condItems.length}, minmax(0, 1fr))`,

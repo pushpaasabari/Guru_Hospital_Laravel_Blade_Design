@@ -142,31 +142,31 @@ export default function AdmissionsSurgery({
   const initialNewborns: Newborn[] =
     admission.newborns && admission.newborns.length > 0
       ? admission.newborns.map((nb) => {
-          const selectedVax = Array.isArray(nb.birth_vaccines) ? nb.birth_vaccines : [];
-          const fallbackDate = nb.vaccine_date ? String(nb.vaccine_date).slice(0, 10) : '';
-          const perVaxDates: Record<string, string> = {};
-          if (nb.vaccine_dates && typeof nb.vaccine_dates === 'object') {
-            Object.entries(nb.vaccine_dates).forEach(([k, v]) => {
-              if (v) perVaxDates[k] = String(v).slice(0, 10);
-            });
-          }
-          selectedVax.forEach((v) => {
-            if (!perVaxDates[v] && fallbackDate) {
-              perVaxDates[v] = fallbackDate;
-            }
+        const selectedVax = Array.isArray(nb.birth_vaccines) ? nb.birth_vaccines : [];
+        const fallbackDate = nb.vaccine_date ? String(nb.vaccine_date).slice(0, 10) : '';
+        const perVaxDates: Record<string, string> = {};
+        if (nb.vaccine_dates && typeof nb.vaccine_dates === 'object') {
+          Object.entries(nb.vaccine_dates).forEach(([k, v]) => {
+            if (v) perVaxDates[k] = String(v).slice(0, 10);
           });
+        }
+        selectedVax.forEach((v) => {
+          if (!perVaxDates[v] && fallbackDate) {
+            perVaxDates[v] = fallbackDate;
+          }
+        });
 
-          return {
-            ...nb,
-            birth_at: nb.birth_at ? nb.birth_at.slice(0, 16) : '',
-            discharge_weight_kg: nb.discharge_weight_kg ?? '',
-            birth_vaccines: selectedVax,
-            vaccine_date: fallbackDate,
-            vaccine_dates: perVaxDates,
-          };
-        })
+        return {
+          ...nb,
+          birth_at: nb.birth_at ? nb.birth_at.slice(0, 16) : '',
+          discharge_weight_kg: nb.discharge_weight_kg ?? '',
+          birth_vaccines: selectedVax,
+          vaccine_date: fallbackDate,
+          vaccine_dates: perVaxDates,
+        };
+      })
       : isDelivery
-      ? [
+        ? [
           {
             sex: '',
             birth_at: '',
@@ -181,7 +181,7 @@ export default function AdmissionsSurgery({
             vaccine_dates: {},
           },
         ]
-      : [];
+        : [];
 
   const { data, setData, put, transform, processing, errors } = useForm({
     picme_no: admission.picme_no || '',
@@ -810,7 +810,7 @@ export default function AdmissionsSurgery({
               </label>
               <select
                 id="procedure-template-select"
-                className="form-select form-select-sm"
+                className="form-select form-select-sm fg-responsive-select"
                 style={{ minWidth: '270px', borderRadius: '8px' }}
                 value={selectedTemplateId}
                 onChange={(e) => handleLoadProcedureTemplate(e.target.value)}
@@ -985,7 +985,7 @@ export default function AdmissionsSurgery({
                   </label>
                   <div className="d-flex flex-wrap align-items-center gap-2">
                     <select
-                      className="form-select form-select-sm"
+                      className="form-select form-select-sm fg-responsive-select"
                       style={{ minWidth: '280px' }}
                       defaultValue=""
                       onChange={(e) => {
@@ -1034,56 +1034,56 @@ export default function AdmissionsSurgery({
                     const trimmedOrder = order.trim();
                     const isNewOrder = trimmedOrder.length > 0 && !knownOrderKeys.has(trimmedOrder.toLowerCase());
                     return (
-                    <div key={oIdx} className="input-group mb-2 shadow-xs">
-                      <span className="input-group-text bg-white fw-bold text-secondary" style={{ width: '48px', justifyContent: 'center' }}>
-                        #{oIdx + 1}
-                      </span>
-                      <input
-                        type="text"
-                        className="form-control"
-                        value={order}
-                        onChange={(e) => updateOrderRow(oIdx, e.target.value)}
-                        list="common-postop-orders-list"
-                        placeholder={`Order #${oIdx + 1} (e.g. Monitor vitals q1h x 4h, IV fluids RL @ 100ml/hr)`}
-                      />
-                      {isNewOrder && (
+                      <div key={oIdx} className="input-group mb-2 shadow-xs">
+                        <span className="input-group-text bg-white fw-bold text-secondary" style={{ width: '48px', justifyContent: 'center' }}>
+                          #{oIdx + 1}
+                        </span>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={order}
+                          onChange={(e) => updateOrderRow(oIdx, e.target.value)}
+                          list="common-postop-orders-list"
+                          placeholder={`Order #${oIdx + 1} (e.g. Monitor vitals q1h x 4h, IV fluids RL @ 100ml/hr)`}
+                        />
+                        {isNewOrder && (
+                          <button
+                            type="button"
+                            onClick={() => openQuickAddOrderModal(trimmedOrder, oIdx)}
+                            className="btn btn-outline-success"
+                            title="Save this order to the Common Orders dropdown now"
+                          >
+                            <i className="bi bi-bookmark-plus"></i>
+                          </button>
+                        )}
                         <button
                           type="button"
-                          onClick={() => openQuickAddOrderModal(trimmedOrder, oIdx)}
-                          className="btn btn-outline-success"
-                          title="Save this order to the Common Orders dropdown now"
+                          onClick={() => moveOrderRow(oIdx, 'up')}
+                          disabled={oIdx === 0}
+                          className="btn btn-outline-secondary"
+                          title="Move Up"
                         >
-                          <i className="bi bi-bookmark-plus"></i>
+                          <i className="bi bi-arrow-up"></i>
                         </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={() => moveOrderRow(oIdx, 'up')}
-                        disabled={oIdx === 0}
-                        className="btn btn-outline-secondary"
-                        title="Move Up"
-                      >
-                        <i className="bi bi-arrow-up"></i>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => moveOrderRow(oIdx, 'down')}
-                        disabled={oIdx === orderRows.length - 1}
-                        className="btn btn-outline-secondary"
-                        title="Move Down"
-                      >
-                        <i className="bi bi-arrow-down"></i>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => removeOrderRow(oIdx)}
-                        disabled={orderRows.length <= 1 && !order.trim()}
-                        className="btn btn-outline-danger"
-                        title="Remove Order Row"
-                      >
-                        <i className="bi bi-trash"></i>
-                      </button>
-                    </div>
+                        <button
+                          type="button"
+                          onClick={() => moveOrderRow(oIdx, 'down')}
+                          disabled={oIdx === orderRows.length - 1}
+                          className="btn btn-outline-secondary"
+                          title="Move Down"
+                        >
+                          <i className="bi bi-arrow-down"></i>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeOrderRow(oIdx)}
+                          disabled={orderRows.length <= 1 && !order.trim()}
+                          className="btn btn-outline-danger"
+                          title="Remove Order Row"
+                        >
+                          <i className="bi bi-trash"></i>
+                        </button>
+                      </div>
                     );
                   })}
 

@@ -513,7 +513,7 @@ export default function AdmissionsDischarge({
             <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
               <div className="d-flex flex-wrap align-items-center gap-2">
                 <select
-                  className="form-select form-select-sm"
+                  className="form-select form-select-sm fg-responsive-select"
                   style={{ minWidth: '280px', maxWidth: '380px' }}
                   defaultValue=""
                   aria-label="Select Saved Medicine to Add"
@@ -547,7 +547,7 @@ export default function AdmissionsDischarge({
 
             {/* Medications Table Repeater */}
             <div className="table-responsive mb-3">
-              <table className="table table-bordered align-middle mb-2">
+              <table className="table table-bordered align-middle mb-2" style={{ minWidth: '640px' }}>
                 <thead className="table-light">
                   <tr style={{ fontSize: '0.86rem' }}>
                     <th style={{ width: '4%' }}>#</th>

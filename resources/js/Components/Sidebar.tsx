@@ -97,6 +97,30 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [collapsed]);
 
+  // Close mobile drawer automatically on route navigation
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [currentPath]);
+
+  // Close mobile drawer on Escape key & prevent background body scroll while open
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileOpen(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [mobileOpen]);
+
   const toggleAdminMenu = () => {
     setAdminMenuOpen((prev) => {
       const next = !prev;
@@ -127,18 +151,32 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
           <img
             src="/images/guru-hospital-logo.png"
             alt="Guru Hospital"
-            style={{ height: '36px', width: 'auto', objectFit: 'contain' }}
+            style={{ height: '34px', width: 'auto', objectFit: 'contain' }}
           />
         </Link>
 
-        <button
-          className="btn btn-sm btn-outline-secondary"
-          type="button"
-          onClick={() => setMobileOpen(!mobileOpen)}
-          aria-label="Toggle navigation"
-        >
-          <i className={`bi ${mobileOpen ? 'bi-x-lg' : 'bi-list'} fs-5`}></i>
-        </button>
+        <div className="d-flex align-items-center gap-2">
+          {user?.can_edit && (
+            <Link
+              href="/admissions/create"
+              className="btn btn-sm btn-primary fw-semibold d-inline-flex align-items-center gap-1 px-2"
+              style={{ borderRadius: '8px', fontSize: '12.5px' }}
+            >
+              <i className="bi bi-plus-lg"></i>
+              <span>New</span>
+            </Link>
+          )}
+          <button
+            className="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center"
+            style={{ width: '36px', height: '34px', borderRadius: '8px' }}
+            type="button"
+            onClick={() => setMobileOpen(!mobileOpen)}
+            aria-label="Toggle navigation"
+            aria-expanded={mobileOpen}
+          >
+            <i className={`bi ${mobileOpen ? 'bi-x-lg' : 'bi-list'} fs-5`}></i>
+          </button>
+        </div>
       </div>
 
       {/* Mobile Backdrop Overlay */}
@@ -178,11 +216,11 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
               )}
             </Link>
 
-            <div className="d-flex align-items-center">
-              {/* Left Menu Hide / Expand Button */}
+            <div className="d-flex align-items-center gap-1">
+              {/* Desktop Left Menu Hide / Expand Button */}
               {onToggleCollapse && (
                 <button
-                  className="fg-sidebar-hide-btn"
+                  className="fg-sidebar-hide-btn d-none d-lg-inline-flex"
                   type="button"
                   onClick={onToggleCollapse}
                   title={collapsed ? "Expand sidebar menu" : "Collapse to icon menu"}
@@ -191,6 +229,16 @@ export default function Sidebar({ collapsed = false, onToggleCollapse }: Sidebar
                   <i className={`bi ${collapsed ? 'bi-chevron-right' : 'bi-layout-sidebar-inset'}`}></i>
                 </button>
               )}
+              {/* Mobile Drawer Close Button */}
+              <button
+                type="button"
+                className="btn btn-sm btn-outline-secondary d-lg-none"
+                style={{ width: '32px', height: '32px', padding: 0, borderRadius: '8px' }}
+                onClick={closeMobile}
+                aria-label="Close navigation menu"
+              >
+                <i className="bi bi-x-lg"></i>
+              </button>
             </div>
           </div>
 

@@ -437,11 +437,11 @@ export default function Pack({
         <div className="card-body p-3">
           <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">
             {/* Tabs for Separate Previews */}
-            <div className="d-flex flex-wrap align-items-center gap-2">
+            <div className="d-flex flex-wrap align-items-center gap-2 w-100 w-lg-auto">
               <span className="text-muted small fw-bold text-uppercase me-1" style={{ fontSize: '10.5px', letterSpacing: '0.04em' }}>
                 Preview Document:
               </span>
-              <div className="btn-group btn-group-sm" role="group">
+              <div className="btn-group btn-group-sm fg-mobile-wrap-group" role="group">
                 <button
                   type="button"
                   className={`btn py-2 px-3 fw-semibold ${activeDoc === 'all' ? 'btn-primary' : 'btn-outline-secondary'}`}
@@ -474,11 +474,11 @@ export default function Pack({
             </div>
 
             {/* View Engine Toggle: Sheet View vs Real Playwright PDF */}
-            <div className="d-flex align-items-center gap-2">
+            <div className="d-flex flex-wrap align-items-center gap-2 w-100 w-lg-auto">
               <span className="text-muted small fw-bold text-uppercase me-1" style={{ fontSize: '10.5px', letterSpacing: '0.04em' }}>
                 Engine:
               </span>
-              <div className="btn-group btn-group-sm" role="group">
+              <div className="btn-group btn-group-sm fg-mobile-wrap-group" role="group">
                 <button
                   type="button"
                   className={`btn py-2 px-3 fw-semibold ${viewMode === 'sheet' ? 'btn-dark' : 'btn-outline-secondary'}`}
@@ -536,7 +536,7 @@ export default function Pack({
           </div>
 
           <div className="card-body p-0" style={{ background: '#525659' }}>
-            <div style={{ width: '100%', height: '920px' }}>
+            <div className="fg-pdf-iframe-wrap">
               <iframe
                 src={`/admissions/${admission.id}/documents/pdf/${getPdfRouteType(activeDoc)}?inline=1`}
                 style={{ width: '100%', height: '100%', border: 'none' }}
@@ -576,7 +576,7 @@ export default function Pack({
               }}
             >
               {/* Space for Pre-printed Letterhead (First page only) */}
-              <div style={{ height: '40mm' }}></div>
+              <div className="fg-ot-letterhead-spacer"></div>
 
               <div className="text-center mb-4 pt-2">
                 <h3
@@ -897,10 +897,10 @@ export default function Pack({
               </div>
 
               {/* 9 Clean Form Fields covering the page */}
-              <table className="table table-borderless my-4" style={{ fontSize: '14pt' }}>
+              <table className="table table-borderless my-4 fg-mrd-table" style={{ fontSize: '14pt' }}>
                 <tbody>
                   <tr>
-                    <td style={{ width: '270px', fontWeight: 'bold', padding: '20px 4px' }}>Patient Name</td>
+                    <td className="fg-mrd-label-col">Patient Name</td>
                     <td style={{ width: '35px', fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
                     <td style={{ padding: '20px 4px' }}><strong>{admission.patient_name}</strong></td>
                   </tr>

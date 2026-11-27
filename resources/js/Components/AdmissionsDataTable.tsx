@@ -335,7 +335,7 @@ export default function AdmissionsDataTable({
         </div>
 
         {/* Dynamic Status Filter Tabs */}
-        <div className="d-flex flex-wrap gap-2 pt-2 border-top border-light-subtle">
+        <div className="d-flex flex-wrap fg-mobile-scroll-tabs gap-2 pt-2 border-top border-light-subtle">
           {statusTabs.map((tab) => {
             const isActive = statusFilter === tab.key;
             return (
@@ -406,13 +406,13 @@ export default function AdmissionsDataTable({
 
             {/* Workflow Filter */}
             <select
-              className="form-select form-select-sm shadow-none"
+              className="form-select form-select-sm shadow-none flex-grow-1 flex-sm-grow-0"
               value={workflowFilter}
               onChange={(e) => {
                 setWorkflowFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              style={{ width: '135px', borderRadius: '8px', fontSize: '12.5px' }}
+              style={{ minWidth: '125px', borderRadius: '8px', fontSize: '12.5px' }}
             >
               <option value="all">All Workflows</option>
               <option value="delivery">Delivery</option>
@@ -422,13 +422,13 @@ export default function AdmissionsDataTable({
 
             {/* Format Filter */}
             <select
-              className="form-select form-select-sm shadow-none"
+              className="form-select form-select-sm shadow-none flex-grow-1 flex-sm-grow-0"
               value={formatFilter}
               onChange={(e) => {
                 setFormatFilter(e.target.value);
                 setCurrentPage(1);
               }}
-              style={{ width: '130px', borderRadius: '8px', fontSize: '12.5px' }}
+              style={{ minWidth: '120px', borderRadius: '8px', fontSize: '12.5px' }}
             >
               <option value="all">All Formats</option>
               <option value="general">General</option>
@@ -469,8 +469,150 @@ export default function AdmissionsDataTable({
         </div>
       </div>
 
-      {/* 3. The Dynamic Interactive DataTable */}
-      <div className="table-responsive">
+      {/* 3A. Mobile Card View (< 768px) */}
+      <div className="d-md-none p-2 bg-light-subtle">
+        {paginatedItems.length === 0 ? (
+          <div className="text-center py-4 text-muted">
+            <i className="bi bi-search-heart text-secondary fs-1 d-block mb-2 opacity-50"></i>
+            <h6 className="fw-semibold text-dark mb-1">No matching patient records found</h6>
+            <p className="text-muted small mb-3">
+              {isFiltered
+                ? 'Try adjusting or resetting your filter criteria or search terms.'
+                : 'No inpatient admissions have been recorded yet.'}
+            </p>
+            {isFiltered && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="btn btn-sm btn-outline-primary"
+                style={{ borderRadius: '8px' }}
+              >
+                <i className="bi bi-arrow-counterclockwise me-1"></i> Reset All Filters
+              </button>
+            )}
+          </div>
+        ) : (
+          paginatedItems.map((item) => {
+            const isFemale = item.sex?.toLowerCase() === 'female';
+            const avatarBg = isFemale ? '#fce7f3' : '#e0f2fe';
+            const avatarColor = isFemale ? '#db2777' : '#0284c7';
+            const initial = item.patient_name ? item.patient_name.trim().charAt(0).toUpperCase() : 'P';
+            const stayDuration = getStayDuration(item.admission_at, item.discharge_at);
+
+            return (
+              <div key={`mob-${item.id}`} className="card border shadow-none mb-2" style={{ borderRadius: '14px' }}>
+                <div className="card-body p-3">
+                  <div className="d-flex align-items-start justify-content-between gap-2 mb-2">
+                    <div className="d-flex align-items-center gap-2 min-w-0">
+                      <div
+                        className="rounded-circle d-flex align-items-center justify-content-center fw-bold flex-shrink-0"
+                        style={{
+                          width: '36px',
+                          height: '36px',
+                          backgroundColor: avatarBg,
+                          color: avatarColor,
+                          fontSize: '13.5px',
+                        }}
+                      >
+                        {initial}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="fw-bold text-dark text-truncate" style={{ fontSize: '13.5px' }}>
+                          {item.patient_name}
+                        </div>
+                        <div className="text-muted" style={{ fontSize: '11px' }}>
+                          {item.age ? `${item.age} Yrs • ` : ''}{item.sex || 'Patient'}
+                        </div>
+                      </div>
+                    </div>
+                    <span className={`badge ${getStatusBadge(item.status)} text-uppercase flex-shrink-0`} style={{ fontSize: '9.5px' }}>
+                      {item.status.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+
+                  <div className="d-flex flex-wrap gap-1 mb-2">
+                    <span className="badge bg-light text-dark border font-monospace" style={{ fontSize: '10px' }}>
+                      UHID: {item.uhid}
+                    </span>
+                    <span className="badge bg-light text-primary border font-monospace" style={{ fontSize: '10px' }}>
+                      IP: {item.ip_no}
+                    </span>
+                    <span className="badge bg-light text-dark border text-uppercase" style={{ fontSize: '10px' }}>
+                      {item.format}
+                    </span>
+                    <span
+                      className={`badge ${
+                        item.surgery_type === 'delivery'
+                          ? 'bg-success-subtle text-success border border-success-subtle'
+                          : item.surgery_type === 'medical'
+                          ? 'bg-info-subtle text-info border border-info-subtle'
+                          : 'bg-primary-subtle text-primary border border-primary-subtle'
+                      }`}
+                      style={{ fontSize: '10px' }}
+                    >
+                      {item.surgery_type === 'delivery'
+                        ? `Delivery (${item.newborns?.length || 0})`
+                        : item.surgery_type === 'medical'
+                        ? 'Medical'
+                        : 'Surgical'}
+                    </span>
+                  </div>
+
+                  <div className="small text-muted mb-2" style={{ fontSize: '12px', lineHeight: 1.45 }}>
+                    <div className="text-truncate text-dark">
+                      <i className="bi bi-person-badge text-primary me-1"></i>
+                      {item.consultant || '—'}
+                      {item.department ? ` • ${item.department}` : ''}
+                    </div>
+                    <div className="d-flex flex-wrap align-items-center gap-1 mt-0.5">
+                      <span>DOA: {item.admission_at ? formatDate(item.admission_at) : '—'}</span>
+                      <span>→</span>
+                      <span>DOD: {item.discharge_at ? formatDate(item.discharge_at) : '—'}</span>
+                      {stayDuration && (
+                        <span className="badge bg-light text-secondary border ms-1" style={{ fontSize: '9.5px' }}>
+                          {stayDuration}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="d-flex flex-wrap gap-2 pt-2 border-top border-light-subtle">
+                    <Link
+                      href={`/admissions/${item.id}/documents/preview`}
+                      prefetch
+                      className="btn btn-sm btn-outline-secondary flex-grow-1 fw-semibold"
+                    >
+                      <i className="bi bi-eye me-1"></i> Review
+                    </Link>
+                    {auth.user?.can_edit && (item.status === 'draft' || item.status === 'returned_for_correction') && (
+                      <Link
+                        href={`/admissions/${item.id}/edit`}
+                        prefetch
+                        className="btn btn-sm btn-outline-dark fw-semibold"
+                      >
+                        <i className="bi bi-pencil me-1"></i> Edit
+                      </Link>
+                    )}
+                    {(item.status === 'approved' || item.status === 'generated') && (
+                      <a
+                        href={`/admissions/${item.id}/documents/pdf/discharge-summary`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn btn-sm btn-outline-primary fw-semibold"
+                      >
+                        <i className="bi bi-file-earmark-pdf me-1"></i> PDF
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* 3B. The Dynamic Interactive DataTable (>= 768px) */}
+      <div className="table-responsive d-none d-md-block">
         <table className="table table-hover align-middle mb-0" style={{ fontSize: '13.5px' }}>
           <thead className="table-light text-muted small text-uppercase" style={{ letterSpacing: '0.04em', fontSize: '11px' }}>
             <tr>
@@ -726,7 +868,7 @@ export default function AdmissionsDataTable({
       </div>
 
       {/* 4. Dynamic DataTable Pagination Footer */}
-      <div className="card-footer bg-white p-3 border-0 d-flex flex-wrap align-items-center justify-content-between gap-3">
+      <div className="card-footer bg-white p-3 border-0 d-flex flex-wrap align-items-center justify-content-center justify-content-md-between gap-3">
         <div className="text-muted small" style={{ fontSize: '12.5px' }}>
           {totalEntries === 0 ? (
             'Showing 0 entries'

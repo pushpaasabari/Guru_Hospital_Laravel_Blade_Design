@@ -1590,8 +1590,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 10px;
     height: 60px;
-    padding: 0 16px;
+    padding: 0 14px;
     background: #ffffff;
     border-bottom: 1px solid var(--fg-border, #e9e9e9);
     position: fixed;
@@ -1602,8 +1603,12 @@ body {
   }
 
   .fg-sidebar {
+    width: min(85vw, 290px);
+    min-width: 0;
+    height: 100dvh;
     transform: translateX(-100%);
-    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.14);
+    z-index: 1045;
   }
 
   .fg-sidebar.mobile-open {
@@ -1613,7 +1618,8 @@ body {
   .fg-sidebar-backdrop {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.42);
+    background: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(2px);
     z-index: 1035;
   }
 
@@ -1624,7 +1630,7 @@ body {
   }
 
   .fg-main-content {
-    padding: 20px 16px 48px 16px;
+    padding: 18px 14px 48px 14px;
   }
 }
 
@@ -1662,8 +1668,14 @@ body {
 @media (max-width: 991.98px) {
   .fg-stage-row-5 {
     overflow-x: auto;
-    grid-template-columns: repeat(5, minmax(180px, 1fr));
+    grid-template-columns: repeat(5, minmax(158px, 1fr));
     padding-bottom: 4px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .fg-stage-row-5 > * {
+    scroll-snap-align: start;
   }
 }
 
@@ -2133,4 +2145,267 @@ input[style*="text-transform: uppercase"]::placeholder {
   font-size: 8.4pt;
   color: #6B7B80;
 }
+
+.fg-pdf-iframe-wrap {
+  width: 100%;
+  height: 920px;
+}
+
+.fg-ot-letterhead-spacer {
+  height: 40mm;
+}
+
+.fg-mrd-label-col {
+  width: 270px;
+  font-weight: bold;
+  padding: 20px 4px;
+}
+
+/* ─── Dedicated Phone & Small-Tablet Responsive Refinements (< 768px) ─────── */
+@media screen and (max-width: 767.98px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .fg-main-content {
+    padding: 14px 12px 44px 12px;
+  }
+
+  .card-header,
+  .card-body,
+  .card-footer {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
+  }
+
+  .h3,
+  h1.h3 {
+    font-size: 1.3rem !important;
+  }
+
+  /* Prevent horizontal overflow on toolbars & select controls */
+  .fg-mobile-scroll-tabs {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+
+  .fg-mobile-scroll-tabs > * {
+    flex-shrink: 0;
+  }
+
+  .fg-mobile-wrap-group {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .fg-mobile-wrap-group > .btn,
+  .fg-mobile-wrap-group > a {
+    border-radius: 8px !important;
+    flex: 1 1 calc(50% - 6px);
+    text-align: center;
+    font-size: 12px !important;
+    padding: 7px 10px !important;
+  }
+
+  .fg-responsive-select {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+  }
+
+  /* Responsive Document Preview: A4 Sheet + OT Notes + MRD Form */
+  .document-sheet {
+    padding: 16px 14px;
+    min-height: auto;
+    max-width: 100%;
+    border-radius: 10px;
+    overflow-x: hidden;
+  }
+
+  .fg-ot-letterhead-spacer {
+    height: 16px;
+  }
+
+  .fg-pdf-iframe-wrap {
+    height: 68vh;
+    min-height: 440px;
+  }
+
+  .fg-mrd-table {
+    font-size: 10.5pt !important;
+  }
+
+  .fg-mrd-table td {
+    padding: 10px 4px !important;
+    word-break: break-word;
+  }
+
+  .fg-mrd-label-col {
+    width: 42% !important;
+    min-width: 120px;
+  }
+
+  .a4-preview-sheet {
+    padding: 14px 12px;
+    max-width: 100%;
+    font-size: 9.5pt;
+    border-radius: 10px;
+    overflow-x: hidden;
+  }
+
+  .a4-preview-sheet .a4-header-table,
+  .a4-preview-sheet .a4-header-table tbody,
+  .a4-preview-sheet .a4-header-table tr {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .a4-preview-sheet .a4-header-center {
+    order: -1;
+    width: 100%;
+    text-align: center;
+  }
+
+  .a4-preview-sheet .a4-header-left,
+  .a4-preview-sheet .a4-header-right {
+    width: auto;
+    text-align: left;
+  }
+
+  .a4-preview-sheet .a4-doc-title {
+    font-size: 13pt;
+  }
+
+  .a4-preview-sheet .a4-patient-top,
+  .a4-preview-sheet .a4-patient-bottom {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .a4-preview-sheet .a4-patient-cell {
+    border-right: none;
+    border-bottom: 0.75pt solid #D5E0E2;
+  }
+
+  .a4-preview-sheet .a4-patient-top > .a4-patient-cell:nth-child(odd),
+  .a4-preview-sheet .a4-patient-bottom > .a4-patient-cell:nth-child(odd) {
+    border-right: 0.75pt solid #D5E0E2;
+  }
+
+  .a4-preview-sheet .a4-grid-3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .a4-preview-sheet .a4-grid-3 > .a4-grid-cell {
+    border-right: none;
+    border-bottom: 0.75pt solid #D5E0E2;
+  }
+
+  .a4-preview-sheet .a4-grid-3 > .a4-grid-cell:nth-child(odd) {
+    border-right: 0.75pt solid #D5E0E2;
+  }
+
+  .a4-preview-sheet .a4-grid-3 > .a4-grid-cell:nth-last-child(-n+3) {
+    border-bottom: 0.75pt solid #D5E0E2;
+  }
+
+  .a4-preview-sheet .a4-grid-3 > .a4-grid-cell:last-child {
+    border-bottom: none;
+  }
+
+  .a4-preview-sheet .a4-clinical-row {
+    grid-template-columns: 1fr !important;
+  }
+
+  .a4-preview-sheet .a4-clinical-col + .a4-clinical-col {
+    border-left: none;
+    border-top: 0.75pt solid #D5E0E2;
+  }
+
+  .a4-preview-sheet .a4-inv-grid-5 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .a4-preview-sheet .a4-inv-card {
+    grid-column-start: auto !important;
+    min-height: 50px;
+  }
+
+  .a4-preview-sheet .a4-newborn-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .a4-preview-sheet .a4-cond-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .a4-preview-sheet .a4-cond-grid > .a4-grid-cell {
+    border-right: 0.75pt solid #D5E0E2 !important;
+    border-bottom: 0.75pt solid #D5E0E2 !important;
+  }
+
+  .a4-preview-sheet .a4-table {
+    table-layout: auto;
+    min-width: 480px;
+  }
+
+  .a4-preview-sheet .a4-sig-line {
+    min-width: 180px;
+    margin-top: 24px;
+  }
+
+  .a4-preview-sheet .a4-footer-hairline {
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .operation-theatre-document .ot-table {
+    font-size: 9.5pt !important;
+  }
+
+  .operation-theatre-document .ot-table td {
+    word-break: break-word;
+  }
+
+  .modal-dialog {
+    margin: 0.65rem;
+  }
+}
+
+@media screen and (max-width: 575.98px) {
+  input.form-control:not(.form-control-sm),
+  select.form-select:not(.form-select-sm),
+  textarea.form-control {
+    font-size: 16px !important;
+  }
+
+  .fg-merged-name-group .fg-prefix-select {
+    width: 82px !important;
+    min-width: 82px !important;
+    flex: 0 0 82px !important;
+    padding: 9px 22px 9px 10px !important;
+  }
+
+  .a4-preview-sheet .a4-grid-3,
+  .a4-preview-sheet .a4-patient-top,
+  .a4-preview-sheet .a4-patient-bottom {
+    grid-template-columns: 1fr !important;
+  }
+
+  .a4-preview-sheet .a4-patient-cell,
+  .a4-preview-sheet .a4-grid-3 > .a4-grid-cell {
+    border-right: none !important;
+    grid-column: span 1 !important;
+  }
+}
+
 
