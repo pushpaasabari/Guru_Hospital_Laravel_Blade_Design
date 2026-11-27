@@ -36,6 +36,8 @@ function resolveCsrfToken(): string {
 
 function mapDefaultRoleCategory(role?: string): string {
   if (!role || role === 'all' || role === 'other') return 'consultant_doctor';
+  if (role === 'delivery_conductor') return 'consultant_doctor';
+  if (role === 'delivery_assistant') return 'staff_nurse';
   if (STAFF_ROLE_OPTIONS.some((r) => r.value === role)) return role;
   if (role === 'nurse') return 'staff_nurse';
   if (role === 'ot_tech') return 'ot_technician';

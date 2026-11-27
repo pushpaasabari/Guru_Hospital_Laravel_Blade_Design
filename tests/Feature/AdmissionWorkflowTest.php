@@ -878,5 +878,70 @@ class AdmissionWorkflowTest extends TestCase
         $diffDateHtml = view('pdf.discharge-summary-a4', ['admission' => $admission])->render();
         $this->assertStringContainsString('Vitamin K (24.11.2026); BCG, OPV, HEP-B1 (26.11.2026)', $diffDateHtml);
     }
+
+    public function test_natural_delivery_uses_obstetric_delivery_team_labels_across_documents_and_reports(): void
+    {
+        $natural = Admission::create([
+            'patient_name' => 'KAVITHA S',
+            'sex' => 'Female',
+            'uhid' => '2026/NAT-01',
+            'ip_no' => 'IP-NAT-01',
+            'admission_at' => '2026-11-27 06:00:00',
+            'procedure_at' => '2026-11-27 07:30:00',
+            'diagnosis' => 'G2P1L1 at 39 Weeks in Active Labour',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+            'procedure_name' => 'Normal Vaginal Delivery (FTND)',
+            'procedure_done' => 'Spontaneous Vaginal Delivery with Episiotomy',
+            'incision' => 'Right mediolateral episiotomy',
+            'surgeon' => 'DR. AMBIKA M.S (O&G)',
+            'assisted_surgeon' => 'STAFF NURSE ANITHA',
+            'anaesthesia_type' => 'Local Infiltration (2% Lignocaine)',
+            'pediatrician_name' => 'DR. NITHYAPRIYA',
+            'procedure_note' => 'Delivered alive female baby smoothly via spontaneous vaginal delivery.',
+            'created_by' => $this->nurse->id,
+            'approved_by' => $this->doctor->id,
+            'status' => 'approved',
+        ]);
+
+        $lscs = Admission::create([
+            'patient_name' => 'MEENA R',
+            'sex' => 'Female',
+            'uhid' => '2026/LSCS-01',
+            'ip_no' => 'IP-LSCS-01',
+            'admission_at' => '2026-11-27 06:00:00',
+            'diagnosis' => 'Previous LSCS in Labour',
+            'format' => 'general',
+            'surgery_type' => 'delivery',
+            'procedure_name' => 'Emergency LSCS',
+            'procedure_done' => 'Emergency LSCS under SA',
+            'surgeon' => 'DR. AMBIKA M.S (O&G)',
+            'created_by' => $this->nurse->id,
+        ]);
+
+        $this->assertTrue($natural->isNaturalDelivery());
+        $this->assertFalse($lscs->isNaturalDelivery());
+
+        // A4 Discharge Summary uses Obstetric / Delivery labels instead of "Surgeon"
+        $a4Html = view('pdf.discharge-summary-a4', ['admission' => $natural])->render();
+        $this->assertStringContainsString('Delivery / Labour Details', $a4Html);
+        $this->assertStringContainsString('Delivered By / Obstetrician', $a4Html);
+        $this->assertStringContainsString('Mode of Delivery', $a4Html);
+        $this->assertStringContainsString('Labour / Delivery Note', $a4Html);
+        $this->assertStringNotContainsString('<span class="a4-lbl">Surgeon</span>', $a4Html);
+
+        // Standalone Delivery / Operation Notes PDF uses Labour / Delivery labels
+        $otHtml = view('pdf.operation-notes', ['admission' => $natural])->render();
+        $this->assertStringContainsString('LABOUR / DELIVERY NOTES', $otHtml);
+        $this->assertStringContainsString('DELIVERED BY', $otHtml);
+        $this->assertStringContainsString('OBSTETRICIAN / DOCTOR SEAL &amp; SIGNATURE', $otHtml);
+        $this->assertStringNotContainsString('OPERATION THEATRE NOTES', $otHtml);
+
+        // Day Report CSV labels conductor as "Delivered By:" for natural delivery
+        $csvResp = $this->actingAs($this->nurse)->get('/reports/day?date=2026-11-27&export=csv');
+        $csvResp->assertOk();
+        $csv = $csvResp->streamedContent();
+        $this->assertStringContainsString('Delivered By: DR. AMBIKA M.S (O&G)', $csv);
+    }
 }
 

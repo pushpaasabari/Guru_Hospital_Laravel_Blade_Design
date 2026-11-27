@@ -334,8 +334,9 @@
 {{-- Letterhead Space (First page of OT notes only) --}}
 <div style="height: 40mm;"></div>
 
+@php $isNatDel = $admission->isNaturalDelivery(); @endphp
 <div style="text-align: center; margin-top: 4px; margin-bottom: 22px;">
-    <div style="font-size: 14pt; font-weight: bold; text-decoration: underline; text-transform: uppercase; letter-spacing: 0.5px;">OPERATION THEATRE NOTES</div>
+    <div style="font-size: 14pt; font-weight: bold; text-decoration: underline; text-transform: uppercase; letter-spacing: 0.5px;">{{ $isNatDel ? 'LABOUR / DELIVERY NOTES' : 'OPERATION THEATRE NOTES' }}</div>
 </div>
 
 <table style="width: 100%; border-collapse: collapse; margin-bottom: 4px; font-size: 10pt;">
@@ -380,7 +381,7 @@
         <td style="width: 81%;">{{ $admission->address ?? '' }}</td>
     </tr>
     <tr>
-        <td style="font-weight: bold;">DATE OF SURGERY</td>
+        <td style="font-weight: bold;">{{ $isNatDel ? 'DELIVERY DATE' : 'DATE OF SURGERY' }}</td>
         <td style="font-weight: bold; text-align: center;">:</td>
         <td>{{ $admission->procedure_at?->format('d.m.Y h:i a') ?? '' }}</td>
     </tr>
@@ -393,7 +394,7 @@
         <td style="width: 81%;">{{ $admission->diagnosis }}</td>
     </tr>
     <tr>
-        <td style="font-weight: bold;">PROCEDURE DONE</td>
+        <td style="font-weight: bold;">{{ $isNatDel ? 'MODE OF DELIVERY' : 'PROCEDURE DONE' }}</td>
         <td style="font-weight: bold; text-align: center;">:</td>
         <td>{{ $admission->procedure_done ?? '' }}</td>
     </tr>
@@ -401,25 +402,25 @@
 
 <table style="width: 100%; border-collapse: collapse; margin-top: 6px; margin-bottom: 6px; font-size: 10pt;">
     <tr>
-        <td style="font-weight: bold; width: 16%;">SURGERY</td>
+        <td style="font-weight: bold; width: 16%;">{{ $isNatDel ? 'DELIVERY' : 'SURGERY' }}</td>
         <td style="font-weight: bold; width: 3%; text-align: center;">:</td>
-        <td colspan="4" style="font-weight: bold;">{{ $admission->procedure_name ?: 'ELECTIVE LSCS' }}</td>
+        <td colspan="4" style="font-weight: bold;">{{ $admission->procedure_name ?: ($isNatDel ? 'NORMAL VAGINAL DELIVERY' : 'ELECTIVE LSCS') }}</td>
     </tr>
     <tr>
-        <td style="font-weight: bold; width: 16%;">SURGEON</td>
+        <td style="font-weight: bold; width: 16%;">{{ $isNatDel ? 'DELIVERED BY' : 'SURGEON' }}</td>
         <td style="font-weight: bold; width: 3%; text-align: center;">:</td>
         <td style="width: 33%;">{{ $admission->surgeon ?: ($admission->consultant ?: '') }}</td>
-        <td style="font-weight: bold; width: 15%;">ANESTHETIST</td>
-        <td style="font-weight: bold; width: 3%; text-align: center;">:</td>
+        <td style="font-weight: bold; width: 15%;">{{ $isNatDel ? 'ANAESTHETIST' : 'ANESTHETIST' }}</td>
+        <td style="font-weight: bold; text-align: center; width: 3%;">:</td>
         <td style="width: 30%;">{{ $admission->anaesthetist ?? '' }}</td>
     </tr>
     <tr>
-        <td style="font-weight: bold;">ASSISTANT BY S/N</td>
+        <td style="font-weight: bold;">{{ $isNatDel ? 'ASSISTED BY / S/N' : 'ASSISTANT BY S/N' }}</td>
         <td style="font-weight: bold; text-align: center;">:</td>
         <td>{{ $admission->assisted_surgeon ?: ($admission->assisted_by ?: ($admission->staff_nurse ?: ($admission->assistant ?: ''))) }}</td>
-        <td style="font-weight: bold;">ANESTHESIA TYPE</td>
+        <td style="font-weight: bold;">{{ $isNatDel ? 'ANALGESIA / LA' : 'ANESTHESIA TYPE' }}</td>
         <td style="font-weight: bold; text-align: center;">:</td>
-        <td>{{ $admission->anaesthesia_type ?: 'Spinal' }}</td>
+        <td>{{ $admission->anaesthesia_type ?: ($isNatDel ? 'Local Infiltration / None' : 'Spinal') }}</td>
     </tr>
     @if($admission->ot_technician || $admission->assisted_anaesthetist || ($admission->assisted_surgeon && $admission->staff_nurse))
     <tr>
@@ -438,14 +439,14 @@
 </table>
 
 <div style="margin-top: 10px; font-size: 10pt;">
-    <div style="font-weight: bold; margin-bottom: 2px;">PROCEDURE NOTE :</div>
+    <div style="font-weight: bold; margin-bottom: 2px;">{{ $isNatDel ? 'DELIVERY NOTE :' : 'PROCEDURE NOTE :' }}</div>
     @if($admission->procedure_note)
         <div style="text-align: justify; line-height: 1.45; margin-bottom: 6px;">
             {!! nl2br(e($admission->procedure_note)) !!}
         </div>
     @endif
     <div style="font-weight: bold; margin-top: 6px; margin-bottom: 2px;">
-        INCISION : @if($admission->incision)<span style="font-weight: normal;">{!! nl2br(e($admission->incision)) !!}</span>@endif
+        {{ $isNatDel ? 'EPISIOTOMY / TEAR :' : 'INCISION :' }} @if($admission->incision)<span style="font-weight: normal;">{!! nl2br(e($admission->incision)) !!}</span>@endif
     </div>
 </div>
 
@@ -508,14 +509,14 @@
 @endif
 
 <div style="margin-top: 6px; font-size: 10pt;">
-    <div style="font-weight: bold; margin-bottom: 2px;">POST-OPERATIVE ORDERS :</div>
+    <div style="font-weight: bold; margin-bottom: 2px;">{{ $isNatDel ? 'POST-DELIVERY ORDERS :' : 'POST-OPERATIVE ORDERS :' }}</div>
     @if($admission->postoperative_orders)
         <div style="text-align: justify; margin-bottom: 6px;">{!! nl2br(e($admission->postoperative_orders)) !!}</div>
     @endif
 </div>
 
 <div style="text-align: right; margin-top: 40px; padding-top: 15px; page-break-inside: avoid;">
-    <span style="font-weight: bold; font-size: 10.5pt; letter-spacing: 0.5px;">SURGEON SEAL &amp; SIGNATURE</span>
+    <span style="font-weight: bold; font-size: 10.5pt; letter-spacing: 0.5px;">{{ $isNatDel ? 'OBSTETRICIAN / DOCTOR SEAL & SIGNATURE' : 'SURGEON SEAL & SIGNATURE' }}</span>
 </div>
 
 <!-- ========================================== -->

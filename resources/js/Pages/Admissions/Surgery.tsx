@@ -4,6 +4,7 @@ import AppLayout from '../../Layouts/AppLayout';
 import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
 import { toUpperCaseValue } from '../../utils/inputNormalizers';
 import { joinMultiValues, parseMultiValues } from '../../utils/multiSelect';
+import { getClinicalTeamLabels, isNaturalDeliveryCase } from '../../utils/deliveryMode';
 import AnesthesiaSelect, { AnesthesiaTypeItem } from '../../Components/AnesthesiaSelect';
 import QuickAddTeamModal, { QuickAddModalConfig } from '../../Components/QuickAddTeamModal';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
@@ -198,6 +199,31 @@ export default function AdmissionsSurgery({
   const [staffOptions, setStaffOptions] = useState<ClinicalStaffMember[]>(clinicalStaff);
   const [anesthesiaOptions, setAnesthesiaOptions] = useState<AnesthesiaTypeItem[]>(anesthesiaTypes);
   const [quickAddConfig, setQuickAddConfig] = useState<QuickAddModalConfig | null>(null);
+  const [deliveryMode, setDeliveryMode] = useState<'surgical' | 'natural'>(() =>
+    isNaturalDeliveryCase(admission) ? 'natural' : 'surgical'
+  );
+
+  const isNaturalDelivery =
+    isDelivery &&
+    (isNaturalDeliveryCase({
+      surgery_type: admission.surgery_type,
+      procedure_name: data.procedure_name,
+      procedure_done: data.procedure_done,
+    }) ||
+      (deliveryMode === 'natural' && !/\b(lscs|caesarean|cesarean|c-section)\b/i.test(`${data.procedure_done} ${data.procedure_name}`)));
+
+  const teamLabels = getClinicalTeamLabels(isNaturalDelivery);
+
+  const handleDeliveryModeSwitch = (mode: 'surgical' | 'natural') => {
+    setDeliveryMode(mode);
+    if (mode === 'natural' && !data.procedure_name.trim() && !data.procedure_done.trim()) {
+      setData((prev) => ({
+        ...prev,
+        procedure_name: 'Normal Vaginal Delivery (FTND)',
+        procedure_done: 'Normal Vaginal Delivery (FTND)',
+      }));
+    }
+  };
 
   type TeamFieldKey =
     | 'surgeon'
@@ -263,6 +289,18 @@ export default function AdmissionsSurgery({
 
     if (tpl.hasStent) {
       setHasStent(true);
+    }
+
+    if (isDelivery) {
+      setDeliveryMode(
+        isNaturalDeliveryCase({
+          surgery_type: admission.surgery_type,
+          procedure_name: tpl.procedureName,
+          procedure_done: tpl.procedureDone,
+        })
+          ? 'natural'
+          : 'surgical'
+      );
     }
   };
 
@@ -553,28 +591,63 @@ export default function AdmissionsSurgery({
           </div>
         </div>
 
-        {/* Section 2: Surgical Team */}
+        {/* Section 2: Surgical / Delivery Team */}
         <div className="card mb-4 border-0 shadow-sm">
           <div className="card-header bg-white py-3 fw-bold text-dark d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div>
-              <span className="badge bg-primary me-2">4.2</span> Surgical &amp; Anaesthesia Team
+              <span className="badge bg-primary me-2">4.2</span> {teamLabels.sectionTitle}
             </div>
-            <span className="badge bg-light text-muted border fw-normal" style={{ fontSize: '0.72rem' }}>
-              Multiple choice enabled &bull; Click &ldquo;+ Add New&rdquo; on any field to add via popup
-            </span>
+            <div className="d-flex flex-wrap align-items-center gap-2">
+              {isDelivery && (
+                <div className="btn-group btn-group-sm" role="group" aria-label="Delivery mode">
+                  <button
+                    type="button"
+                    className={`btn ${!isNaturalDelivery ? 'btn-primary' : 'btn-outline-secondary'}`}
+                    onClick={() => handleDeliveryModeSwitch('surgical')}
+                  >
+                    Surgical / LSCS
+                  </button>
+                  <button
+                    type="button"
+                    className={`btn ${isNaturalDelivery ? 'btn-success' : 'btn-outline-secondary'}`}
+                    onClick={() => handleDeliveryModeSwitch('natural')}
+                  >
+                    Natural / Vaginal Delivery
+                  </button>
+                </div>
+              )}
+              <span className="badge bg-light text-muted border fw-normal" style={{ fontSize: '0.72rem' }}>
+                Multiple choice enabled &bull; Click &ldquo;+ Add New&rdquo; on any field to add via popup
+              </span>
+            </div>
           </div>
           <div className="card-body">
             <div className="row g-3">
               {([
-                { key: 'surgeon', label: 'Surgeon', role: 'surgeon', placeholder: '-- Select Surgeon(s) --' },
-                { key: 'assisted_surgeon', label: 'Assisted Surgeon', role: 'assisted_surgeon', placeholder: '-- Select Assisted Surgeon(s) --' },
-                { key: 'anaesthetist', label: 'Anaesthetist', role: 'anaesthetist', placeholder: '-- Select Anaesthetist(s) --' },
-                { key: 'assisted_anaesthetist', label: 'Assisted Anaesthetist', role: 'assisted_anaesthetist', placeholder: '-- Select Assisted Anaesthetist(s) --' },
-                { key: 'anaesthesia_type', label: 'Anaesthesia Type', kind: 'anesthesia', placeholder: '-- Select Anaesthesia Type(s) --' },
-                { key: 'staff_nurse', label: 'Scrub / Staff Nurse', role: 'staff_nurse', placeholder: '-- Select Staff Nurse(s) --' },
-                { key: 'ot_technician', label: 'OT Technician', role: 'ot_technician', placeholder: '-- Select OT Technician(s) --' },
-                { key: 'pediatrician_name', label: 'Pediatrician / Neonatologist', role: 'consultant_pediatrician', placeholder: '-- Select Pediatrician(s) --' },
-                { key: 'assisted_by', label: 'Assistant / Other Clinical Help', role: 'all', placeholder: '-- Select Assistant(s) / Clinical Help --' },
+                {
+                  key: 'surgeon',
+                  label: teamLabels.primaryDoctorLabel,
+                  role: isNaturalDelivery ? 'delivery_conductor' : 'surgeon',
+                  placeholder: isNaturalDelivery ? '-- Select Delivery Doctor(s) / Midwife --' : '-- Select Surgeon(s) --',
+                },
+                {
+                  key: 'assisted_surgeon',
+                  label: teamLabels.assistantDoctorLabel,
+                  role: isNaturalDelivery ? 'delivery_assistant' : 'assisted_surgeon',
+                  placeholder: isNaturalDelivery ? '-- Select Assisted Doctor(s) / Nurse --' : '-- Select Assisted Surgeon(s) --',
+                },
+                { key: 'anaesthetist', label: teamLabels.anaesthetistLabel, role: 'anaesthetist', placeholder: '-- Select Anaesthetist(s) --' },
+                { key: 'assisted_anaesthetist', label: teamLabels.assistedAnaesthetistLabel, role: 'assisted_anaesthetist', placeholder: '-- Select Assisted Anaesthetist(s) --' },
+                {
+                  key: 'anaesthesia_type',
+                  label: teamLabels.anaesthesiaTypeLabel,
+                  kind: 'anesthesia',
+                  placeholder: isNaturalDelivery ? '-- Select Pain Relief / Local (if given) --' : '-- Select Anaesthesia Type(s) --',
+                },
+                { key: 'staff_nurse', label: teamLabels.staffNurseLabel, role: 'staff_nurse', placeholder: '-- Select Staff Nurse(s) --' },
+                { key: 'ot_technician', label: teamLabels.otTechLabel, role: 'ot_technician', placeholder: '-- Select Technician(s) / Assistant --' },
+                { key: 'pediatrician_name', label: teamLabels.pediatricianLabel, role: 'consultant_pediatrician', placeholder: '-- Select Pediatrician(s) --' },
+                { key: 'assisted_by', label: teamLabels.otherHelpLabel, role: 'all', placeholder: '-- Select Assistant(s) / Clinical Help --' },
               ] as const).map((field) => (
                 <div key={field.key} className="col-md-4">
                   {'kind' in field && field.kind === 'anesthesia' ? (

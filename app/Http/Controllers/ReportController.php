@@ -1135,16 +1135,17 @@ class ReportController extends Controller
                         $procParts[] = 'Medical Management' . ($adm->diagnosis ? ' (' . $adm->diagnosis . ')' : '');
                     }
 
+                    $isNatDel = $adm->isNaturalDelivery();
                     $teamParts = array_filter([
-                        $adm->surgeon ? 'Surgeon: ' . $adm->surgeon : null,
-                        $adm->assisted_surgeon ? 'Asst. Surgeon: ' . $adm->assisted_surgeon : null,
+                        $adm->surgeon ? ($isNatDel ? 'Delivered By: ' : 'Surgeon: ') . $adm->surgeon : null,
+                        $adm->assisted_surgeon ? ($isNatDel ? 'Assisted By: ' : 'Asst. Surgeon: ') . $adm->assisted_surgeon : null,
                         $adm->consultant ? 'Consultant: ' . $adm->consultant : null,
                         $adm->pediatrician_name ? 'Pediatrician: ' . $adm->pediatrician_name : null,
                         $adm->anaesthetist ? 'Anaesthetist: ' . $adm->anaesthetist : null,
                         $adm->assisted_anaesthetist ? 'Asst. Anaesthetist: ' . $adm->assisted_anaesthetist : null,
-                        $adm->anaesthesia_type ? 'Anaesthesia: ' . $adm->anaesthesia_type : null,
+                        $adm->anaesthesia_type ? ($isNatDel ? 'Pain Relief / LA: ' : 'Anaesthesia: ') . $adm->anaesthesia_type : null,
                         $adm->staff_nurse ? 'Staff Nurse: ' . $adm->staff_nurse : null,
-                        $adm->ot_technician ? 'OT Tech: ' . $adm->ot_technician : null,
+                        $adm->ot_technician ? ($isNatDel ? 'Labour Asst: ' : 'OT Tech: ') . $adm->ot_technician : null,
                     ]);
 
                     $isDelivery = $adm->surgery_type === 'delivery' || $adm->newborns->isNotEmpty();

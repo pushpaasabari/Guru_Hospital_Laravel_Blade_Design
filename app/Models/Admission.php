@@ -176,6 +176,28 @@ class Admission extends Model
         return $this->surgery_type === 'delivery';
     }
 
+    /**
+     * Determine whether an obstetric delivery case is a Natural / Normal Vaginal Delivery
+     * rather than a surgical Caesarean section (LSCS) or operative theatre procedure.
+     */
+    public function isNaturalDelivery(): bool
+    {
+        if (!$this->isDelivery()) {
+            return false;
+        }
+
+        $procText = trim(($this->procedure_done ?? '') . ' ' . ($this->procedure_name ?? ''));
+        if ($procText === '') {
+            return false;
+        }
+
+        if (preg_match('/\b(lscs|caesarean|cesarean|c-section|hysterectomy|laparotomy|laparoscop|myomectomy|salpingectomy|oophorectomy|cerclage)\b/i', $procText)) {
+            return false;
+        }
+
+        return (bool) preg_match('/\b(natural|normal|ftnd|vaginal|nvd|svd|spontaneous|breech|forceps|vacuum|ventouse|labour\s*natural|labor\s*natural)\b/i', $procText);
+    }
+
     public function isMedical(): bool
     {
         return $this->surgery_type === 'medical';

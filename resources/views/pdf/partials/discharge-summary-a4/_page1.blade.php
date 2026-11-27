@@ -235,33 +235,34 @@
                 }
             }
 
+            $isNatDel = $admission->isNaturalDelivery();
             $surgeryCells = [];
             $procPerf = \App\Services\DischargeSummaryFormatter::formatSurgeryPerformed($admission);
             if ($procPerf && $procPerf !== '—') {
-                $surgeryCells[] = ['lbl' => 'Procedure Performed', 'val' => $procPerf, 'bold' => true];
+                $surgeryCells[] = ['lbl' => $isNatDel ? 'Mode of Delivery' : 'Procedure Performed', 'val' => $procPerf, 'bold' => true];
             }
             $surgeonVal = $admission->surgeon ?: $admission->consultant;
             if ($surgeonVal && $surgeonVal !== '—') {
-                $surgeryCells[] = ['lbl' => 'Surgeon', 'val' => $surgeonVal, 'bold' => true];
+                $surgeryCells[] = ['lbl' => $isNatDel ? 'Delivered By / Obstetrician' : 'Surgeon', 'val' => $surgeonVal, 'bold' => true];
             }
             $anaesthVal = $admission->anaesthetist ? $admission->anaesthetist . ($admission->anaesthesia_type ? ' (' . $admission->anaesthesia_type . ')' : '') : $admission->anaesthesia_type;
             if ($anaesthVal && $anaesthVal !== '—') {
-                $surgeryCells[] = ['lbl' => 'Anaesthetist & Type', 'val' => $anaesthVal, 'bold' => false];
+                $surgeryCells[] = ['lbl' => $isNatDel ? 'Analgesia / Anaesthesia' : 'Anaesthetist & Type', 'val' => $anaesthVal, 'bold' => false];
             }
             $assistedVal = $admission->assisted_surgeon ?: ($admission->assisted_by ?: $admission->assistant);
             if ($assistedVal && $assistedVal !== '—') {
-                $surgeryCells[] = ['lbl' => 'Assisted Surgeon / Staff', 'val' => $assistedVal, 'bold' => false];
+                $surgeryCells[] = ['lbl' => $isNatDel ? 'Assisted By / Staff' : 'Assisted Surgeon / Staff', 'val' => $assistedVal, 'bold' => false];
             }
             $nurseOtVal = collect([$admission->staff_nurse, $admission->ot_technician])->filter()->implode(' / ');
             if ($nurseOtVal && $nurseOtVal !== '—') {
-                $surgeryCells[] = ['lbl' => 'Scrub Nurse / OT Tech', 'val' => $nurseOtVal, 'bold' => false];
+                $surgeryCells[] = ['lbl' => $isNatDel ? 'Labour Nurse / Assistant' : 'Scrub Nurse / OT Tech', 'val' => $nurseOtVal, 'bold' => false];
             }
             if (!empty($admission->pediatrician_name) && $admission->pediatrician_name !== '—') {
                 $surgeryCells[] = ['lbl' => 'Pediatrician', 'val' => $admission->pediatrician_name, 'bold' => false];
             }
             $incisionSpecimen = collect([$admission->incision, $admission->specimen ? 'Specimen: ' . $admission->specimen : null])->filter()->implode(' | ');
             if ($incisionSpecimen && $incisionSpecimen !== '—') {
-                $surgeryCells[] = ['lbl' => 'Incision / Specimen', 'val' => $incisionSpecimen, 'bold' => false];
+                $surgeryCells[] = ['lbl' => $isNatDel ? 'Episiotomy / Placenta' : 'Incision / Specimen', 'val' => $incisionSpecimen, 'bold' => false];
             }
             $drainBloodComp = collect([$admission->drain, $admission->blood_loss_ml ? 'EBL: ' . $admission->blood_loss_ml . ' ml' : null, $admission->complications])->filter()->implode(' | ');
             if ($drainBloodComp && $drainBloodComp !== '—') {
@@ -272,7 +273,7 @@
 
         @if($hasSurgeryDetails)
             <div class="a4-block" data-overflow-movable="page1">
-                <div class="a4-section-hdr">Surgery / Procedures</div>
+                <div class="a4-section-hdr">{{ $isNatDel ? 'Delivery / Labour Details' : 'Surgery / Procedures' }}</div>
                 <div class="a4-grid-3">
                     @foreach($surgeryCells as $cell)
                         <div class="a4-grid-cell">
@@ -282,7 +283,7 @@
                     @endforeach
                     @if(!empty($fItems))
                         <div class="a4-grid-cell" style="grid-column: span {{ (count($surgeryCells) % 3 === 2) ? 1 : ((count($surgeryCells) % 3 === 1) ? 2 : 3) }};">
-                            <span class="a4-lbl">Intra-operative Findings</span>
+                            <span class="a4-lbl">{{ $isNatDel ? 'Delivery / Clinical Findings' : 'Intra-operative Findings' }}</span>
                             <div class="a4-val">
                                 <ul class="a4-findings-list">
                                     @foreach($fItems as $item)

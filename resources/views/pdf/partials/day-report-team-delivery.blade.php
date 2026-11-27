@@ -1,8 +1,9 @@
+@php $isNatDel = $item->isNaturalDelivery(); @endphp
 @if($item->surgeon || $item->assisted_surgeon || $item->pediatrician_name || $item->anaesthetist || $item->anaesthesia_type || $item->staff_nurse || $item->ot_technician)
     <div style="margin-top: 3px;">
         @if($item->surgeon)
             <div class="team-row">
-                <span class="team-lbl">Surgeon:</span> {{ $item->surgeon }}
+                <span class="team-lbl">{{ $isNatDel ? 'Delivered By:' : 'Surgeon:' }}</span> {{ $item->surgeon }}
                 @if($item->assisted_surgeon) (Asst: {{ $item->assisted_surgeon }}) @endif
             </div>
         @endif

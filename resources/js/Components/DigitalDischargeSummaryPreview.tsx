@@ -11,6 +11,7 @@ import {
   groupInvestigationsForGrid,
 } from '../utils/dischargeFormatter';
 import { resolveMrdNo } from '../utils/inputNormalizers';
+import { isNaturalDeliveryCase } from '../utils/deliveryMode';
 
 export interface DigitalSummaryPayload {
   resolved_mrd_no?: string;
@@ -212,26 +213,39 @@ export default function DigitalDischargeSummaryPreview({
 
   const findingsItems = parseFindingsList(admission.findings);
 
+  const isNatDel = isNaturalDeliveryCase(admission);
   const surgeryCells: Array<{ lbl: string; val: string; bold: boolean }> = [];
   const procPerf = digitalSummary?.surgery_performed || formatSurgeryPerformed(admission);
-  if (isFilled(procPerf)) surgeryCells.push({ lbl: 'Procedure Performed', val: procPerf, bold: true });
+  if (isFilled(procPerf)) {
+    surgeryCells.push({ lbl: isNatDel ? 'Mode of Delivery' : 'Procedure Performed', val: procPerf, bold: true });
+  }
   const surgeonVal = admission.surgeon || admission.consultant;
-  if (isFilled(surgeonVal)) surgeryCells.push({ lbl: 'Surgeon', val: surgeonVal, bold: true });
+  if (isFilled(surgeonVal)) {
+    surgeryCells.push({ lbl: isNatDel ? 'Delivered By / Obstetrician' : 'Surgeon', val: surgeonVal, bold: true });
+  }
   const anaesthVal = admission.anaesthetist
     ? `${admission.anaesthetist}${admission.anaesthesia_type ? ` (${admission.anaesthesia_type})` : ''}`
     : admission.anaesthesia_type;
-  if (isFilled(anaesthVal)) surgeryCells.push({ lbl: 'Anaesthetist & Type', val: anaesthVal, bold: false });
+  if (isFilled(anaesthVal)) {
+    surgeryCells.push({ lbl: isNatDel ? 'Analgesia / Anaesthesia' : 'Anaesthetist & Type', val: anaesthVal, bold: false });
+  }
   const assistedVal = admission.assisted_surgeon || admission.assisted_by || admission.assistant;
-  if (isFilled(assistedVal)) surgeryCells.push({ lbl: 'Assisted Surgeon / Staff', val: assistedVal, bold: false });
+  if (isFilled(assistedVal)) {
+    surgeryCells.push({ lbl: isNatDel ? 'Assisted By / Staff' : 'Assisted Surgeon / Staff', val: assistedVal, bold: false });
+  }
   const nurseOtVal = [admission.staff_nurse, admission.ot_technician].filter(Boolean).join(' / ');
-  if (isFilled(nurseOtVal)) surgeryCells.push({ lbl: 'Scrub Nurse / OT Tech', val: nurseOtVal, bold: false });
+  if (isFilled(nurseOtVal)) {
+    surgeryCells.push({ lbl: isNatDel ? 'Labour Nurse / Assistant' : 'Scrub Nurse / OT Tech', val: nurseOtVal, bold: false });
+  }
   if (isFilled(admission.pediatrician_name)) {
     surgeryCells.push({ lbl: 'Pediatrician', val: admission.pediatrician_name, bold: false });
   }
   const incSpecVal = [admission.incision, admission.specimen ? `Specimen: ${admission.specimen}` : null]
     .filter(Boolean)
     .join(' | ');
-  if (isFilled(incSpecVal)) surgeryCells.push({ lbl: 'Incision / Specimen', val: incSpecVal, bold: false });
+  if (isFilled(incSpecVal)) {
+    surgeryCells.push({ lbl: isNatDel ? 'Episiotomy / Placenta' : 'Incision / Specimen', val: incSpecVal, bold: false });
+  }
   const drainBloodComp = [
     admission.drain,
     admission.blood_loss_ml ? `EBL: ${admission.blood_loss_ml} ml` : null,
@@ -596,10 +610,10 @@ export default function DigitalDischargeSummaryPreview({
           </>
         )}
 
-        {/* 7. Surgery / Procedures */}
+        {/* 7. Surgery / Delivery Details */}
         {hasSurgeryDetails && (
           <>
-            <div className="a4-section-hdr">Surgery / Procedures</div>
+            <div className="a4-section-hdr">{isNatDel ? 'Delivery / Labour Details' : 'Surgery / Procedures'}</div>
             <div className="a4-grid-3">
               {surgeryCells.map((cell, idx) => (
                 <div key={idx} className="a4-grid-cell">
@@ -616,7 +630,7 @@ export default function DigitalDischargeSummaryPreview({
                     }`,
                   }}
                 >
-                  <span className="a4-lbl">Intra-operative Findings</span>
+                  <span className="a4-lbl">{isNatDel ? 'Delivery / Clinical Findings' : 'Intra-operative Findings'}</span>
                   <div className="a4-val">
                     <ul className="a4-findings-list">
                       {findingsItems.map((item, idx) => (
@@ -657,12 +671,12 @@ export default function DigitalDischargeSummaryPreview({
         {(hasProcNote || hasPostOp) && (
           <>
             <div className="a4-section-hdr" style={{ marginTop: 0 }}>
-              Operative &amp; Postoperative Notes
+              {isNatDel ? 'Delivery & Post-Delivery Notes' : 'Operative & Postoperative Notes'}
             </div>
 
             {hasProcNote && (
               <div className="a4-outlined-card">
-                <span className="a4-lbl">Operative / Procedure Note</span>
+                <span className="a4-lbl">{isNatDel ? 'Labour / Delivery Note' : 'Operative / Procedure Note'}</span>
                 <div className="a4-val a4-procedure-note">
                   {renderProcedureNote(admission.procedure_note)}
                 </div>

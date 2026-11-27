@@ -35,17 +35,18 @@
 
         {{-- 8. Operative & Postoperative Notes (Part 2 of Surgery / Procedures) --}}
         @php
+            $isNatDel = $admission->isNaturalDelivery();
             $hasProcNote = $admission->procedure_note && trim($admission->procedure_note) !== '—';
             $postOpRows = $admission->formatted_postoperative_orders;
             $hasInstructionsCol = collect($postOpRows)->contains(fn ($r) => !empty($r['instruction']));
             $hasPostOp = !empty($postOpRows);
         @endphp
         @if($hasProcNote || $hasPostOp)
-            <div class="a4-section-hdr" style="margin-top: 0;">Operative &amp; Postoperative Notes</div>
+            <div class="a4-section-hdr" style="margin-top: 0;">{{ $isNatDel ? 'Delivery & Post-Delivery Notes' : 'Operative & Postoperative Notes' }}</div>
 
             @if($hasProcNote)
                 <div class="a4-outlined-card">
-                    <span class="a4-lbl">Operative / Procedure Note</span>
+                    <span class="a4-lbl">{{ $isNatDel ? 'Labour / Delivery Note' : 'Operative / Procedure Note' }}</span>
                     <div class="a4-val a4-procedure-note">
                         {!! \App\Services\DischargeSummaryFormatter::formatProcedureNoteHtml($admission->procedure_note) !!}
                     </div>

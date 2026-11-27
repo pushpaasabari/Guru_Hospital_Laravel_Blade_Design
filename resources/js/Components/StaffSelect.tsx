@@ -31,6 +31,8 @@ interface StaffSelectProps {
 const ROLE_ALIASES: Record<string, string[]> = {
   surgeon: ['surgeon'],
   assisted_surgeon: ['assisted_surgeon', 'surgeon'],
+  delivery_conductor: ['consultant_doctor', 'surgeon', 'staff_nurse'],
+  delivery_assistant: ['assisted_surgeon', 'consultant_doctor', 'staff_nurse', 'surgeon'],
   doctor: ['consultant_doctor', 'surgeon', 'assisted_surgeon', 'anaesthetist', 'consultant_pediatrician'],
   consultant_doctor: ['consultant_doctor', 'surgeon', 'consultant_pediatrician'],
   anaesthetist: ['anaesthetist'],

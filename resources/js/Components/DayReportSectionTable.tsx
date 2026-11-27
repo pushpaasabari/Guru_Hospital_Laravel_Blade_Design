@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from '@inertiajs/react';
 import { formatDate, formatDateTime } from '../utils/dateFormatter';
 import { formatBirthVaccinesText, formatPaymentSummary } from '../utils/dischargeFormatter';
+import { isNaturalDeliveryCase } from '../utils/deliveryMode';
 
 export interface NewbornItem {
   id: number;
@@ -212,6 +213,7 @@ function PatientContactCell({ item }: { item: DayRecord }) {
 
 function ProcedureAndTeamBlock({ item }: { item: DayRecord }) {
   const isDelivery = item.surgery_type === 'delivery' || (item.newborns && item.newborns.length > 0);
+  const isNatDel = isNaturalDeliveryCase(item);
   const procLabel =
     item.procedure_done ||
     item.procedure_name ||
@@ -225,7 +227,7 @@ function ProcedureAndTeamBlock({ item }: { item: DayRecord }) {
         <span className="fw-semibold text-dark">{procLabel}</span>
         {item.incision && (
           <div className="text-muted" style={{ fontSize: '11px' }}>
-            <strong>Incision:</strong> {item.incision}
+            <strong>{isNatDel ? 'Episiotomy / Note:' : 'Incision:'}</strong> {item.incision}
           </div>
         )}
       </div>
@@ -234,7 +236,7 @@ function ProcedureAndTeamBlock({ item }: { item: DayRecord }) {
         <div className="text-muted" style={{ fontSize: '11px', lineHeight: 1.35 }}>
           {item.surgeon && (
             <div>
-              <strong>Surgeon:</strong> <span className="text-dark">{item.surgeon}</span>
+              <strong>{isNatDel ? 'Delivered By:' : 'Surgeon:'}</strong> <span className="text-dark">{item.surgeon}</span>
               {item.assisted_surgeon ? ` (Asst: ${item.assisted_surgeon})` : ''}
             </div>
           )}
