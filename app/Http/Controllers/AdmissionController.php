@@ -26,19 +26,7 @@ class AdmissionController extends Controller
     {
         $this->authorize('viewAny', Admission::class);
 
-        $query = Admission::query()
-            ->summaryColumns()
-            ->filterSearch($request->input('search'))
-            ->latest('id');
-
-        if ($status = $request->input('status')) {
-            $query->where('status', $status);
-        }
-
-        $admissions = $query->paginate(20)->withQueryString();
-        $filters = $request->only(['search', 'status']);
-
-        return Inertia::render('Admissions/Index', compact('admissions', 'filters'));
+        return Inertia::render('Admissions/Index', Admission::buildDirectoryListing($request, 200));
     }
 
     public function create(): Response

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Http\Request;
 
 class Admission extends Model
 {
@@ -88,12 +89,17 @@ class Admission extends Model
             'patient_name',
             'uhid',
             'ip_no',
+            'mrd_no',
             'age',
             'sex',
             'format',
             'surgery_type',
+            'diagnosis',
+            'procedure_name',
+            'procedure_done',
             'status',
             'admission_at',
+            'procedure_at',
             'discharge_at',
             'rejection_reason',
             'consultant',
@@ -103,7 +109,7 @@ class Admission extends Model
     }
 
     /**
-     * Apply search filtering across key patient identifiers and optionally consultant.
+     * Apply search filtering across key patient identifiers and optionally clinical metadata.
      */
     public function scopeFilterSearch(Builder $query, ?string $search, bool $includeConsultant = false): Builder
     {
@@ -116,12 +122,103 @@ class Admission extends Model
             $like = "%{$term}%";
             $q->where('patient_name', 'like', $like)
                 ->orWhere('uhid', 'like', $like)
-                ->orWhere('ip_no', 'like', $like);
+                ->orWhere('ip_no', 'like', $like)
+                ->orWhere('mrd_no', 'like', $like);
 
             if ($includeConsultant) {
-                $q->orWhere('consultant', 'like', $like);
+                $q->orWhere('consultant', 'like', $like)
+                    ->orWhere('department', 'like', $like)
+                    ->orWhere('ward_room_no', 'like', $like)
+                    ->orWhere('diagnosis', 'like', $like);
             }
         });
+    }
+
+    /**
+     * Shared status counts + filtered directory pagination for Dashboard and Archive datatables.
+     *
+     * @return array{counts: array<string, int>, admissions: \Illuminate\Contracts\Pagination\LengthAwarePaginator, filters: array<string, mixed>}
+     */
+    public static function buildDirectoryListing(Request $request, int $defaultPerPage = 50): array
+    {
+        $statusCounts = static::query()
+            ->selectRaw('status, COUNT(*) as total')
+            ->groupBy('status')
+            ->pluck('total', 'status');
+
+        $inAdmissionCount = (int) static::query()
+            ->whereNull('discharge_at')
+            ->count();
+
+        $counts = [
+            'total' => (int) $statusCounts->sum(),
+            'draft' => (int) ($statusCounts['draft'] ?? 0),
+            'ready_for_review' => (int) ($statusCounts['ready_for_review'] ?? 0),
+            'returned_for_correction' => (int) ($statusCounts['returned_for_correction'] ?? 0),
+            'approved' => (int) ($statusCounts['approved'] ?? 0),
+            'generated' => (int) ($statusCounts['generated'] ?? 0),
+            'superseded' => (int) ($statusCounts['superseded'] ?? 0),
+            'in_admission' => $inAdmissionCount,
+        ];
+
+        $query = static::query()
+            ->summaryColumns()
+            ->with('newborns:id,admission_id')
+            ->filterSearch($request->input('search'), true)
+            ->latest('id');
+
+        if ($status = $request->input('status')) {
+            if ($status === 'in_admission') {
+                $query->whereNull('discharge_at');
+            } elseif ($status !== 'all') {
+                $query->where('status', $status);
+            }
+        }
+
+        if ($format = $request->input('format')) {
+            if ($format !== 'all') {
+                $query->where('format', $format);
+            }
+        }
+
+        if ($surgeryType = $request->input('surgery_type')) {
+            if ($surgeryType !== 'all') {
+                $query->where('surgery_type', $surgeryType);
+            }
+        }
+
+        if ($consultant = $request->input('consultant')) {
+            if ($consultant !== 'all') {
+                $query->where('consultant', $consultant);
+            }
+        }
+
+        if ($dateFrom = $request->input('date_from')) {
+            $query->whereDate('admission_at', '>=', $dateFrom);
+        }
+
+        if ($dateTo = $request->input('date_to')) {
+            $query->whereDate('admission_at', '<=', $dateTo);
+        }
+
+        $perPage = (int) $request->input('per_page', $defaultPerPage);
+        if ($perPage < 5 || $perPage > 250) {
+            $perPage = $defaultPerPage;
+        }
+
+        $admissions = $query->paginate($perPage)->withQueryString();
+        $filters = $request->only([
+            'search',
+            'status',
+            'format',
+            'surgery_type',
+            'consultant',
+            'date_from',
+            'date_to',
+        ]);
+        $filters['per_page'] = $perPage;
+
+        return compact('counts', 'admissions', 'filters');
     }
 
     /**
