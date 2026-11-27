@@ -1,3 +1,5 @@
+import { formatDate, formatDateTime } from './dateFormatter';
+
 export interface FormattedTreatmentRow {
   medicine: string;
   dose: string;
@@ -796,10 +798,7 @@ function formatDotDate(raw?: string | null): string {
   if (!raw) return '';
   const trimmed = String(raw).trim();
   if (!trimmed) return '';
-  const iso = trimmed.slice(0, 10);
-  const dt = new Date(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? `${iso}T00:00:00` : trimmed);
-  if (Number.isNaN(dt.getTime())) return trimmed;
-  return `${String(dt.getDate()).padStart(2, '0')}.${String(dt.getMonth() + 1).padStart(2, '0')}.${dt.getFullYear()}`;
+  return formatDate(trimmed);
 }
 
 export function formatBirthVaccinesText(
@@ -858,15 +857,8 @@ export function formatNewborns(admission: any): FormattedNewbornCard[] {
     const title = isMultiple ? `Newborn #${idx + 1} - ${twinLabel}` : 'Newborn Details';
     const sex = baby.sex ? `Alive ${baby.sex.toLowerCase()} baby` : '—';
 
-    let bornTime = '—';
-    if (baby.birth_at) {
-      const dt = new Date(baby.birth_at);
-      const day = String(dt.getDate()).padStart(2, '0');
-      const mon = String(dt.getMonth() + 1).padStart(2, '0');
-      const yr = dt.getFullYear();
-      const time = dt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-      bornTime = `${day}.${mon}.${yr} at ${time}`;
-    }
+    const rawBornAt = baby.birth_at || admission.procedure_at;
+    const bornTime = rawBornAt ? formatDateTime(rawBornAt, ' at ') : '—';
 
     const babyNotes = `${baby.notes || ''} ${baby.neonatal_care || ''}`;
     let mode = admission.procedure_done || admission.procedure_name || '—';
@@ -1207,11 +1199,7 @@ export function getInsuranceDetailsList(admission: any): InsuranceDetailItem[] {
     items.push({ label: 'Policy Holder', value: holder });
   }
   if (admission.policy_validity) {
-    const dt = new Date(admission.policy_validity);
-    const val = Number.isNaN(dt.getTime())
-      ? String(admission.policy_validity)
-      : `${String(dt.getDate()).padStart(2, '0')}.${String(dt.getMonth() + 1).padStart(2, '0')}.${dt.getFullYear()}`;
-    items.push({ label: 'Valid Till', value: val });
+    items.push({ label: 'Valid Till', value: formatDate(admission.policy_validity) });
   }
 
   return items;

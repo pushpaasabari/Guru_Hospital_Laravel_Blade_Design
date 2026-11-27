@@ -16,7 +16,7 @@ class Newborn extends Model
     ];
 
     protected $casts = [
-        'birth_at' => 'datetime',
+        'birth_at' => 'datetime:Y-m-d\TH:i:s',
         'birth_weight_kg' => 'float',
         'discharge_weight_kg' => 'float',
         'birth_vaccines' => 'array',

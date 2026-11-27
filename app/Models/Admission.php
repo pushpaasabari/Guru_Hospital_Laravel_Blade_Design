@@ -29,9 +29,9 @@ class Admission extends Model
     ];
 
     protected $casts = [
-        'admission_at' => 'datetime',
-        'procedure_at' => 'datetime',
-        'discharge_at' => 'datetime',
+        'admission_at' => 'datetime:Y-m-d\TH:i:s',
+        'procedure_at' => 'datetime:Y-m-d\TH:i:s',
+        'discharge_at' => 'datetime:Y-m-d\TH:i:s',
         'approved_at' => 'datetime',
         'policy_validity' => 'date:Y-m-d',
         'stent_removal_date' => 'date:Y-m-d',

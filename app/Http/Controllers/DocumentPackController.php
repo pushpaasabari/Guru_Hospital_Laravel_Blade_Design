@@ -26,6 +26,10 @@ class DocumentPackController extends Controller
 
         $digitalSummary = [
             'resolved_mrd_no' => $admission->resolved_mrd_no,
+            'admission_at_formatted' => $admission->admission_at?->format('d.m.Y, h:i A') ?? '—',
+            'procedure_at_formatted' => $admission->procedure_at?->format('d.m.Y, h:i A') ?? '—',
+            'discharge_at_formatted' => $admission->discharge_at?->format('d.m.Y, h:i A') ?? '—',
+            'stent_removal_date_formatted' => DischargeSummaryFormatter::resolveStentRemovalDate($admission),
             'consultant_with_degree' => $admission->consultant_with_degree,
             'doctor_stamp_details' => $admission->doctor_stamp_details,
             'insurance_details' => $admission->insurance_details_list,

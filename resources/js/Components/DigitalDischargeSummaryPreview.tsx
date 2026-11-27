@@ -12,9 +12,13 @@ import {
 } from '../utils/dischargeFormatter';
 import { resolveMrdNo } from '../utils/inputNormalizers';
 import { isNaturalDeliveryCase } from '../utils/deliveryMode';
+import { formatDate as formatWallDate, parseWallClockParts } from '../utils/dateFormatter';
 
 export interface DigitalSummaryPayload {
   resolved_mrd_no?: string;
+  admission_at_formatted?: string;
+  procedure_at_formatted?: string;
+  discharge_at_formatted?: string;
   consultant_with_degree?: string;
   doctor_stamp_details?: {
     name: string;
@@ -100,13 +104,21 @@ const isFilled = (val?: string | null): boolean => {
 
 const formatDateDot = (dateStr?: string | null): string => {
   if (!dateStr) return '';
-  const dt = new Date(dateStr);
-  if (Number.isNaN(dt.getTime())) {
-    return String(dateStr).replace(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/g, '$1.$2.$3');
+  const parts = parseWallClockParts(dateStr);
+  if (parts) {
+    return formatWallDate(dateStr);
   }
-  const d = String(dt.getDate()).padStart(2, '0');
-  const m = String(dt.getMonth() + 1).padStart(2, '0');
-  const y = dt.getFullYear();
+  return String(dateStr).replace(/(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/g, '$1.$2.$3');
+};
+
+const addCalendarDaysFormatted = (dateStr?: string | null, days = 30): string => {
+  const parts = parseWallClockParts(dateStr);
+  const utc = parts
+    ? new Date(Date.UTC(parts.year, parts.month - 1, parts.day + days))
+    : new Date(Date.now() + days * 86400000);
+  const d = String(utc.getUTCDate()).padStart(2, '0');
+  const m = String(utc.getUTCMonth() + 1).padStart(2, '0');
+  const y = utc.getUTCFullYear();
   return `${d}.${m}.${y}`;
 };
 
@@ -322,11 +334,11 @@ export default function DigitalDischargeSummaryPreview({
     }
   }
 
-  const stentDate = admission.stent_removal_date
-    ? formatDateDot(admission.stent_removal_date)
-    : admission.discharge_at
-    ? formatDateDot(new Date(new Date(admission.discharge_at).getTime() + 30 * 86400000).toISOString())
-    : formatDateDot(new Date(Date.now() + 30 * 86400000).toISOString());
+  const stentDate =
+    digitalSummary?.stent_removal_date_formatted ||
+    (admission.stent_removal_date
+      ? formatDateDot(admission.stent_removal_date)
+      : addCalendarDaysFormatted(admission.discharge_at, 30));
 
   const hasStent =
     digitalSummary?.has_stent ??
@@ -472,15 +484,21 @@ export default function DigitalDischargeSummaryPreview({
         <div className="a4-grid-3">
           <div className="a4-grid-cell">
             <span className="a4-lbl">Date of Admission</span>
-            <span className="a4-val a4-val-bold">{formatDateTime(admission.admission_at)}</span>
+            <span className="a4-val a4-val-bold">
+              {digitalSummary?.admission_at_formatted ?? formatDateTime(admission.admission_at)}
+            </span>
           </div>
           <div className="a4-grid-cell">
             <span className="a4-lbl">Date of Procedure / Surgery</span>
-            <span className="a4-val a4-val-bold">{formatDateTime(admission.procedure_at)}</span>
+            <span className="a4-val a4-val-bold">
+              {digitalSummary?.procedure_at_formatted ?? formatDateTime(admission.procedure_at)}
+            </span>
           </div>
           <div className="a4-grid-cell">
             <span className="a4-lbl">Date of Discharge</span>
-            <span className="a4-val a4-val-bold">{formatDateTime(admission.discharge_at)}</span>
+            <span className="a4-val a4-val-bold">
+              {digitalSummary?.discharge_at_formatted ?? formatDateTime(admission.discharge_at)}
+            </span>
           </div>
           <div className="a4-grid-cell">
             <span className="a4-lbl">Consultant / Treating Doctor</span>

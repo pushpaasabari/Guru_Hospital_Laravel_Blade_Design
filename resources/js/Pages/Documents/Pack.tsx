@@ -11,6 +11,14 @@ import DigitalDischargeSummaryPreview, {
 } from '../../Components/DigitalDischargeSummaryPreview';
 import { resolveMrdNo } from '../../utils/inputNormalizers';
 import { formatPaymentSummary } from '../../utils/dischargeFormatter';
+import { isNaturalDeliveryCase } from '../../utils/deliveryMode';
+import {
+  formatBabyBirthTime,
+  formatDate,
+  formatDateTime,
+  formatMrdDateTime,
+  formatOtSurgeryDateTime,
+} from '../../utils/dateFormatter';
 
 interface Newborn {
   id?: number;
@@ -223,36 +231,7 @@ export default function Pack({
     }
   };
 
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return '—';
-    try {
-      const d = new Date(dateStr);
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = d.getFullYear();
-      return `${day}.${month}.${year}`;
-    } catch {
-      return dateStr;
-    }
-  };
-
-  const formatDateTime = (dateStr?: string | null) => {
-    if (!dateStr) return '—';
-    try {
-      const d = new Date(dateStr);
-      const day = String(d.getDate()).padStart(2, '0');
-      const month = String(d.getMonth() + 1).padStart(2, '0');
-      const year = d.getFullYear();
-      const time = d.toLocaleTimeString('en-US', {
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      });
-      return `${day}.${month}.${year}, ${time}`;
-    } catch {
-      return dateStr;
-    }
-  };
+  const isNatDel = isNaturalDeliveryCase(admission);
 
   const getStatusBadgeClass = (status: string) => {
     switch (status) {
@@ -604,7 +583,7 @@ export default function Pack({
                   className="fw-bold text-decoration-underline text-uppercase mb-0"
                   style={{ letterSpacing: '0.5px', fontSize: '14pt' }}
                 >
-                  OPERATION THEATRE NOTES
+                  {isNatDel ? 'LABOUR / DELIVERY NOTES' : 'OPERATION THEATRE NOTES'}
                 </h3>
               </div>
 
@@ -629,7 +608,6 @@ export default function Pack({
                     <td style={{ textAlign: 'center', fontWeight: 'bold', padding: '2px 6px' }}>:</td>
                     <td style={{ padding: '2px 0' }}>
                       {admission.uhid}
-                      {admission.picme_no ? ` • PICME: ${admission.picme_no}` : ''}
                     </td>
                   </tr>
                   <tr>
@@ -662,9 +640,9 @@ export default function Pack({
                     <td style={{ width: '83%', padding: '2px 0' }}>{admission.address || ''}</td>
                   </tr>
                   <tr>
-                    <td style={{ fontWeight: 'bold', padding: '2px 0' }}>DATE OF SURGERY</td>
+                    <td style={{ fontWeight: 'bold', padding: '2px 0' }}>{isNatDel ? 'DELIVERY DATE' : 'DATE OF SURGERY'}</td>
                     <td style={{ textAlign: 'center', fontWeight: 'bold', padding: '2px 6px' }}>:</td>
-                    <td style={{ padding: '2px 0' }}>{formatDateTime(admission.procedure_at)}</td>
+                    <td style={{ padding: '2px 0' }}>{formatOtSurgeryDateTime(admission.procedure_at)}</td>
                   </tr>
                 </tbody>
               </table>
@@ -678,9 +656,9 @@ export default function Pack({
                     <td style={{ width: '83%', padding: '2px 0' }}>{admission.diagnosis}</td>
                   </tr>
                   <tr>
-                    <td style={{ fontWeight: 'bold', padding: '2px 0' }}>PROCEDURE DONE</td>
+                    <td style={{ fontWeight: 'bold', padding: '2px 0' }}>{isNatDel ? 'MODE OF DELIVERY' : 'PROCEDURE DONE'}</td>
                     <td style={{ textAlign: 'center', fontWeight: 'bold', padding: '2px 6px' }}>:</td>
-                    <td style={{ padding: '2px 0' }}>{admission.procedure_done || ''}</td>
+                    <td style={{ padding: '2px 0' }}>{admission.procedure_done || admission.procedure_name || ''}</td>
                   </tr>
                 </tbody>
               </table>
@@ -689,14 +667,14 @@ export default function Pack({
               <table className="ot-table mt-2" style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '4px' }}>
                 <tbody>
                   <tr>
-                    <td style={{ width: '15%', fontWeight: 'bold', padding: '2px 0' }}>SURGERY</td>
+                    <td style={{ width: '15%', fontWeight: 'bold', padding: '2px 0' }}>{isNatDel ? 'DELIVERY' : 'SURGERY'}</td>
                     <td style={{ width: '15px', textAlign: 'center', fontWeight: 'bold', padding: '2px 6px' }}>:</td>
                     <td colSpan={4} style={{ padding: '2px 0' }}>
-                      <strong>{admission.procedure_name || 'ELECTIVE LSCS'}</strong>
+                      <strong>{admission.procedure_name || (isNatDel ? 'NORMAL VAGINAL DELIVERY' : 'ELECTIVE LSCS')}</strong>
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ width: '15%', fontWeight: 'bold', padding: '2px 0' }}>SURGEON</td>
+                    <td style={{ width: '15%', fontWeight: 'bold', padding: '2px 0' }}>{isNatDel ? 'DELIVERED BY' : 'SURGEON'}</td>
                     <td style={{ width: '15px', textAlign: 'center', fontWeight: 'bold', padding: '2px 6px' }}>:</td>
                     <td style={{ width: '35%', padding: '2px 0' }}>{admission.surgeon || admission.consultant || ''}</td>
                     <td style={{ width: '15%', fontWeight: 'bold', padding: '2px 0' }}>ANESTHETIST</td>
@@ -704,12 +682,12 @@ export default function Pack({
                     <td style={{ width: '33%', padding: '2px 0' }}>{admission.anaesthetist || ''}</td>
                   </tr>
                   <tr>
-                    <td style={{ fontWeight: 'bold', padding: '2px 0' }}>ASSISTANT BY S/N</td>
+                    <td style={{ fontWeight: 'bold', padding: '2px 0' }}>{isNatDel ? 'ASSISTED BY / S/N' : 'ASSISTANT BY S/N'}</td>
                     <td style={{ textAlign: 'center', fontWeight: 'bold', padding: '2px 6px' }}>:</td>
                     <td style={{ padding: '2px 0' }}>{admission.assisted_surgeon || admission.assisted_by || admission.staff_nurse || admission.assistant || ''}</td>
-                    <td style={{ fontWeight: 'bold', padding: '2px 0' }}>ANESTHESIA TYPE</td>
+                    <td style={{ fontWeight: 'bold', padding: '2px 0' }}>{isNatDel ? 'ANALGESIA / LA' : 'ANESTHESIA TYPE'}</td>
                     <td style={{ textAlign: 'center', fontWeight: 'bold', padding: '2px 6px' }}>:</td>
-                    <td style={{ padding: '2px 0' }}>{admission.anaesthesia_type || 'Spinal'}</td>
+                    <td style={{ padding: '2px 0' }}>{admission.anaesthesia_type || (isNatDel ? 'Local Infiltration / None' : 'Spinal')}</td>
                   </tr>
                   {(admission.ot_technician || admission.assisted_anaesthetist || (admission.assisted_surgeon && admission.staff_nurse)) && (
                     <tr>
@@ -737,7 +715,7 @@ export default function Pack({
               {/* Procedure Note & Incision */}
               <div className="mt-3">
                 <div style={{ fontWeight: 'bold', fontSize: '10.5pt', marginTop: '6px', marginBottom: '2px' }}>
-                  PROCEDURE NOTE :
+                  {isNatDel ? 'DELIVERY NOTE :' : 'PROCEDURE NOTE :'}
                 </div>
                 {admission.procedure_note && (
                   <div style={{ fontSize: '10.5pt', textAlign: 'justify', marginBottom: '6px', lineHeight: 1.45, whiteSpace: 'pre-line' }}>
@@ -745,7 +723,7 @@ export default function Pack({
                   </div>
                 )}
                 <div style={{ fontWeight: 'bold', fontSize: '10.5pt', marginTop: '6px', marginBottom: '2px' }}>
-                  INCISION : {admission.incision && <span style={{ fontWeight: 'normal' }}>{admission.incision}</span>}
+                  {isNatDel ? 'EPISIOTOMY / TEAR :' : 'INCISION :'} {admission.incision && <span style={{ fontWeight: 'normal' }}>{admission.incision}</span>}
                 </div>
               </div>
 
@@ -809,7 +787,7 @@ export default function Pack({
                           admission.newborns.map((baby, i) => (
                             <div key={i} className="mb-1">
                               Alive {baby.sex || 'newborn'} baby on{' '}
-                              {formatDateTime(baby.birth_at || admission.procedure_at)}
+                              {formatBabyBirthTime(baby.birth_at || admission.procedure_at)}
                               <br />
                               Baby Weight{' '}
                               {baby.birth_weight_kg
@@ -838,7 +816,7 @@ export default function Pack({
               {admission.postoperative_orders && (
                 <div className="mt-2">
                   <div style={{ fontWeight: 'bold', fontSize: '10.5pt', marginTop: '6px', marginBottom: '2px' }}>
-                    POST-OPERATIVE ORDERS :
+                    {isNatDel ? 'POST-DELIVERY ORDERS :' : 'POST-OPERATIVE ORDERS :'}
                   </div>
                   <div style={{ fontSize: '10.5pt', textAlign: 'justify', marginBottom: '6px', lineHeight: 1.45, whiteSpace: 'pre-line' }}>
                     {admission.postoperative_orders}
@@ -849,8 +827,13 @@ export default function Pack({
               {/* Surgeon Seal & Signature */}
               <div className="text-end mt-5 pt-4" style={{ pageBreakInside: 'avoid' }}>
                 <span className="fw-bold" style={{ fontSize: '11pt', letterSpacing: '0.5px' }}>
-                  SURGEON SEAL &amp; SIGNATURE
+                  {isNatDel ? 'OBSTETRICIAN / DOCTOR SEAL & SIGNATURE' : 'SURGEON SEAL & SIGNATURE'}
                 </span>
+                {(admission.surgeon || admission.consultant) && (
+                  <div style={{ fontSize: '9pt', color: '#444', marginTop: '4px' }}>
+                    {admission.surgeon || admission.consultant}
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -925,9 +908,7 @@ export default function Pack({
                     <td style={{ fontWeight: 'bold', padding: '20px 4px' }}>Discharge Date &amp; Time</td>
                     <td style={{ fontWeight: 'bold', textAlign: 'center', padding: '20px 4px' }}>:</td>
                     <td style={{ padding: '20px 4px' }}>
-                      {admission.discharge_at
-                        ? `${formatDate(admission.discharge_at)} @ ${new Date(admission.discharge_at).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}`
-                        : '29.08.2026 @ 04.00 PM'}
+                      {formatMrdDateTime(admission.discharge_at)}
                     </td>
                   </tr>
                   <tr>
