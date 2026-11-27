@@ -440,14 +440,11 @@ export default function AdmissionsDataTable({
 
           {/* Dynamic Live Search Input */}
           <div className="col-12 col-lg-4">
-            <div className="position-relative">
-              <i
-                className="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-2 text-muted"
-                style={{ fontSize: '12px' }}
-              ></i>
+            <div className="fg-search-input-wrap">
+              <i className="bi bi-search fg-search-icon"></i>
               <input
                 type="text"
-                className="form-control form-control-sm ps-4 pe-4 shadow-none"
+                className="form-control form-control-sm shadow-none"
                 placeholder="Live search patient, UHID, IP..."
                 value={searchQuery}
                 onChange={(e) => {

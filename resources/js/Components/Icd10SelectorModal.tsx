@@ -85,14 +85,11 @@ export default function Icd10SelectorModal({
 
           <div className="modal-body p-3">
             {/* Search Input */}
-            <div className="position-relative mb-3">
-              <i
-                className="bi bi-search position-absolute text-muted"
-                style={{ left: '14px', top: '50%', transform: 'translateY(-50%)' }}
-              ></i>
+            <div className="fg-search-input-wrap mb-3">
+              <i className="bi bi-search fg-search-icon"></i>
               <input
                 type="text"
-                className="form-control form-control-lg ps-5 pe-5 fs-6"
+                className="form-control form-control-lg fs-6"
                 placeholder="Search by code (e.g. O82, N20.1) or clinical keyword (e.g. cesarean, calculus, hernia)..."
                 value={searchQuery}
                 onChange={(e) => {

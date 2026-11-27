@@ -530,6 +530,7 @@ body {
 
 .fg-search-input-wrap .form-control {
   padding-left: 36px !important;
+  padding-right: 34px !important;
 }
 
 /* ─── Merged Patient Name Input (Prefix Select + Full Name in 1 Input Box) ─── */
