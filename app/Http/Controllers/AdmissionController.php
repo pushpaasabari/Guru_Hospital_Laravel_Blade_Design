@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateTestReportsRequest;
 use App\Http\Requests\UpdateDischargeRequest;
 use App\Models\Admission;
 use App\Models\AnesthesiaType;
+use App\Models\ClinicalDropdownOption;
 use App\Models\ClinicalStaff;
 use App\Models\DocumentRevision;
 use App\Models\Newborn;
@@ -203,8 +204,14 @@ class AdmissionController extends Controller
         $admission->load('newborns');
         $clinicalStaff = ClinicalStaff::cachedActive();
         $anesthesiaTypes = AnesthesiaType::cachedActive();
+        $postopOrderGroups = ClinicalDropdownOption::groupedOptionsFor(
+            ClinicalDropdownOption::TYPE_POSTOP_ORDER
+        );
 
-        return Inertia::render('Admissions/Surgery', compact('admission', 'clinicalStaff', 'anesthesiaTypes'));
+        return Inertia::render(
+            'Admissions/Surgery',
+            compact('admission', 'clinicalStaff', 'anesthesiaTypes', 'postopOrderGroups')
+        );
     }
 
     public function updateSurgery(UpdateSurgeryRequest $request, Admission $admission): RedirectResponse
@@ -229,6 +236,14 @@ class AdmissionController extends Controller
                 $admission->toArray()
             );
         });
+
+        if (!empty($validated['postoperative_orders'])) {
+            ClinicalDropdownOption::rememberMany(
+                ClinicalDropdownOption::TYPE_POSTOP_ORDER,
+                ClinicalDropdownOption::extractPostopOrderLines($validated['postoperative_orders']),
+                $request->user()?->id
+            );
+        }
 
         $nextStep = $request->input('next_step', 'discharge');
         if ($nextStep === 'stay') {
@@ -292,7 +307,14 @@ class AdmissionController extends Controller
     {
         $this->authorize('update', $admission);
         $clinicalStaff = ClinicalStaff::cachedActive();
-        return Inertia::render('Admissions/Discharge', compact('admission', 'clinicalStaff'));
+        $medicationOptions = ClinicalDropdownOption::flatOptionsFor(
+            ClinicalDropdownOption::TYPE_MEDICATION
+        );
+
+        return Inertia::render(
+            'Admissions/Discharge',
+            compact('admission', 'clinicalStaff', 'medicationOptions')
+        );
     }
 
     public function updateDischarge(UpdateDischargeRequest $request, Admission $admission): RedirectResponse
@@ -311,6 +333,14 @@ class AdmissionController extends Controller
         }
 
         $admission->update($validated);
+
+        if (!empty($validated['medication_orders'])) {
+            ClinicalDropdownOption::rememberMany(
+                ClinicalDropdownOption::TYPE_MEDICATION,
+                ClinicalDropdownOption::extractMedicationNames($validated['medication_orders']),
+                $request->user()?->id
+            );
+        }
 
         AuditService::log(
             'admission.discharge_updated',

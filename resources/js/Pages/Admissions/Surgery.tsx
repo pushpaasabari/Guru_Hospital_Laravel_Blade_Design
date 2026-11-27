@@ -7,6 +7,10 @@ import { joinMultiValues, parseMultiValues } from '../../utils/multiSelect';
 import { getClinicalTeamLabels, isNaturalDeliveryCase } from '../../utils/deliveryMode';
 import AnesthesiaSelect, { AnesthesiaTypeItem } from '../../Components/AnesthesiaSelect';
 import QuickAddTeamModal, { QuickAddModalConfig } from '../../Components/QuickAddTeamModal';
+import QuickAddDropdownModal, {
+  QuickAddDropdownConfig,
+  SavedDropdownOption,
+} from '../../Components/QuickAddDropdownModal';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
 import { PROCEDURE_TEMPLATES } from '../../constants/procedureTemplates';
 import Icd10SelectorModal from '../../Components/Icd10SelectorModal';
@@ -14,6 +18,49 @@ import { ICD10_CATALOG } from '../../constants/icd10Catalog';
 import { formatDate } from '../../utils/dateFormatter';
 
 const BIRTH_VACCINES = ['Vitamin K', 'BCG', 'OPV', 'HEP-B1'] as const;
+
+interface PostopOrderGroup {
+  group: string;
+  is_custom?: boolean;
+  options: string[];
+}
+
+const DEFAULT_POSTOP_ORDER_GROUPS: PostopOrderGroup[] = [
+  {
+    group: 'Post-Op Medications & Injections',
+    is_custom: false,
+    options: [
+      'Inj - Cefbact 1.5g BD IV',
+      'Inj - Diclo IM (sos)',
+      'Inj - Metrogyl 100mg TDS IV',
+      'Inj - Pan 40mg IV BD',
+      'Inj. Tramadol 50mg IV SOS (severe pain)',
+      'Inj. Ondansetron 4mg IV SOS (vomiting)',
+      'Inj - Oxytocin 10 IU in 500ml RL (post-LSCS)',
+    ],
+  },
+  {
+    group: 'IV Fluids',
+    is_custom: false,
+    options: [
+      'IV Fluids: RL @ 100 ml/hr',
+      'IV Fluids: DNS @ 100 ml/hr',
+      'IV Fluids: NS 500ml @ 75 ml/hr',
+    ],
+  },
+  {
+    group: 'Nursing & Patient Care Orders',
+    is_custom: false,
+    options: [
+      'NPO for 6 hours',
+      'Sips of water after 6 hours if bowel sounds present',
+      'Monitor vitals q1h x 4h, then q4h (BP, Pulse, SpO2, Temp)',
+      'Catheter care & monitor hourly urine output',
+      'Check dressing site for soakage / bleeding',
+      'Semi-fowler position',
+    ],
+  },
+];
 
 interface Newborn {
   id?: number;
@@ -80,12 +127,14 @@ interface Props {
   admission: AdmissionData;
   clinicalStaff?: ClinicalStaffMember[];
   anesthesiaTypes?: AnesthesiaTypeItem[];
+  postopOrderGroups?: PostopOrderGroup[];
 }
 
 export default function AdmissionsSurgery({
   admission,
   clinicalStaff = [],
   anesthesiaTypes = [],
+  postopOrderGroups = [],
 }: Props) {
   const isDelivery = admission.surgery_type === 'delivery';
   const isMedical = admission.surgery_type === 'medical';
@@ -199,6 +248,14 @@ export default function AdmissionsSurgery({
   const [staffOptions, setStaffOptions] = useState<ClinicalStaffMember[]>(clinicalStaff);
   const [anesthesiaOptions, setAnesthesiaOptions] = useState<AnesthesiaTypeItem[]>(anesthesiaTypes);
   const [quickAddConfig, setQuickAddConfig] = useState<QuickAddModalConfig | null>(null);
+  const [orderDropdownGroups, setOrderDropdownGroups] = useState<PostopOrderGroup[]>(() =>
+    postopOrderGroups && postopOrderGroups.length > 0 ? postopOrderGroups : DEFAULT_POSTOP_ORDER_GROUPS
+  );
+  const [quickAddOrderModal, setQuickAddOrderModal] = useState<QuickAddDropdownConfig | null>(null);
+  const [quickAddOrderRowIdx, setQuickAddOrderRowIdx] = useState<number | null>(null);
+
+  const flatOrderOptions = orderDropdownGroups.flatMap((grp) => grp.options);
+  const knownOrderKeys = new Set(flatOrderOptions.map((item) => item.trim().toLowerCase()));
   const [deliveryMode, setDeliveryMode] = useState<'surgical' | 'natural'>(() =>
     isNaturalDeliveryCase(admission) ? 'natural' : 'surgical'
   );
@@ -316,7 +373,51 @@ export default function AdmissionsSurgery({
   };
 
   const addOrderRow = (text = '') => {
-    setOrderRows((prev) => [...prev, text]);
+    setOrderRows((prev) => {
+      if (text.trim() && prev.length === 1 && !prev[0].trim()) {
+        return [text];
+      }
+      return [...prev, text];
+    });
+  };
+
+  const openQuickAddOrderModal = (prefill = '', rowIdx: number | null = null) => {
+    setQuickAddOrderRowIdx(rowIdx);
+    setQuickAddOrderModal({
+      type: 'postop_order',
+      title: 'Add New Immediate Postoperative Order',
+      fieldLabel: 'Postoperative Order Instruction',
+      placeholder: 'e.g. Inj. Ceftriaxone 1g IV BD or Check drain output q4h',
+      helperText: 'Saves to Common Orders dropdown immediately & persists for future surgeries',
+      submitLabel: rowIdx !== null ? 'Save to Dropdown' : 'Save & Add Order Row',
+      initialValue: prefill,
+    });
+  };
+
+  const handleSavedOrderOption = (option: SavedDropdownOption) => {
+    const clean = option.label.trim();
+    if (!clean) return;
+    const key = clean.toLowerCase();
+
+    setOrderDropdownGroups((prev) => {
+      const exists = prev.some((g) => g.options.some((o) => o.trim().toLowerCase() === key));
+      if (exists) return prev;
+
+      const targetGroup = option.group_label || 'Saved Hospital Orders (Custom)';
+      const customIdx = prev.findIndex((g) => g.group === targetGroup);
+      if (customIdx >= 0) {
+        return prev.map((g, i) => (i === customIdx ? { ...g, options: [clean, ...g.options] } : g));
+      }
+      return [{ group: targetGroup, is_custom: true, options: [clean] }, ...prev];
+    });
+
+    if (quickAddOrderRowIdx !== null) {
+      updateOrderRow(quickAddOrderRowIdx, clean);
+      setQuickAddOrderRowIdx(null);
+      return;
+    }
+
+    addOrderRow(clean);
   };
 
   const removeOrderRow = (idx: number) => {
@@ -879,7 +980,7 @@ export default function AdmissionsSurgery({
                   <label className="form-label fw-bold text-dark mb-0">
                     <i className="bi bi-list-check text-primary me-1"></i> Immediate Postoperative Orders (Row by Row)
                   </label>
-                  <div className="d-flex align-items-center gap-2">
+                  <div className="d-flex flex-wrap align-items-center gap-2">
                     <select
                       className="form-select form-select-sm"
                       style={{ minWidth: '280px' }}
@@ -893,29 +994,24 @@ export default function AdmissionsSurgery({
                       aria-label="Select Common Postoperative Order to Add"
                     >
                       <option value="">-- Add Order from Common Orders Dropdown --</option>
-                      <optgroup label="Post-Op Medications &amp; Injections">
-                        <option value="Inj - Cefbact 1.5g BD IV">Inj - Cefbact 1.5g BD IV</option>
-                        <option value="Inj - Diclo IM (sos)">Inj - Diclo IM (sos)</option>
-                        <option value="Inj - Metrogyl 100mg TDS IV">Inj - Metrogyl 100mg TDS IV</option>
-                        <option value="Inj - Pan 40mg IV BD">Inj - Pan 40mg IV BD</option>
-                        <option value="Inj. Tramadol 50mg IV SOS (severe pain)">Inj. Tramadol 50mg IV SOS (severe pain)</option>
-                        <option value="Inj. Ondansetron 4mg IV SOS (vomiting)">Inj. Ondansetron 4mg IV SOS (vomiting)</option>
-                        <option value="Inj - Oxytocin 10 IU in 500ml RL (post-LSCS)">Inj - Oxytocin 10 IU in 500ml RL (post-LSCS)</option>
-                      </optgroup>
-                      <optgroup label="IV Fluids">
-                        <option value="IV Fluids: RL @ 100 ml/hr">IV Fluids: RL @ 100 ml/hr</option>
-                        <option value="IV Fluids: DNS @ 100 ml/hr">IV Fluids: DNS @ 100 ml/hr</option>
-                        <option value="IV Fluids: NS 500ml @ 75 ml/hr">IV Fluids: NS 500ml @ 75 ml/hr</option>
-                      </optgroup>
-                      <optgroup label="Nursing &amp; Patient Care Orders">
-                        <option value="NPO for 6 hours">NPO for 6 hours</option>
-                        <option value="Sips of water after 6 hours if bowel sounds present">Sips of water after 6 hours if bowel sounds present</option>
-                        <option value="Monitor vitals q1h x 4h, then q4h (BP, Pulse, SpO2, Temp)">Monitor vitals q1h x 4h, then q4h</option>
-                        <option value="Catheter care &amp; monitor hourly urine output">Catheter care &amp; monitor hourly urine output</option>
-                        <option value="Check dressing site for soakage / bleeding">Check dressing site for soakage / bleeding</option>
-                        <option value="Semi-fowler position">Semi-fowler position</option>
-                      </optgroup>
+                      {orderDropdownGroups.map((grp, gIdx) => (
+                        <optgroup key={gIdx} label={grp.group}>
+                          {grp.options.map((opt, optIdx) => (
+                            <option key={optIdx} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
                     </select>
+                    <button
+                      type="button"
+                      onClick={() => openQuickAddOrderModal('', null)}
+                      className="btn btn-sm btn-outline-success fw-semibold"
+                      title="Save a new reusable postoperative order to this dropdown"
+                    >
+                      <i className="bi bi-bookmark-plus me-1"></i> New Order
+                    </button>
                     <button
                       type="button"
                       onClick={() => addOrderRow()}
@@ -925,10 +1021,16 @@ export default function AdmissionsSurgery({
                     </button>
                   </div>
                 </div>
+                <div className="small text-muted mb-2">
+                  Tip: Any custom postoperative order you type &amp; save here will automatically appear in the Common Orders dropdown next time.
+                </div>
 
                 {/* Order Rows Repeater */}
                 <div className="bg-light p-2.5 rounded-3 border">
-                  {orderRows.map((order, oIdx) => (
+                  {orderRows.map((order, oIdx) => {
+                    const trimmedOrder = order.trim();
+                    const isNewOrder = trimmedOrder.length > 0 && !knownOrderKeys.has(trimmedOrder.toLowerCase());
+                    return (
                     <div key={oIdx} className="input-group mb-2 shadow-xs">
                       <span className="input-group-text bg-white fw-bold text-secondary" style={{ width: '48px', justifyContent: 'center' }}>
                         #{oIdx + 1}
@@ -938,8 +1040,19 @@ export default function AdmissionsSurgery({
                         className="form-control"
                         value={order}
                         onChange={(e) => updateOrderRow(oIdx, e.target.value)}
+                        list="common-postop-orders-list"
                         placeholder={`Order #${oIdx + 1} (e.g. Monitor vitals q1h x 4h, IV fluids RL @ 100ml/hr)`}
                       />
+                      {isNewOrder && (
+                        <button
+                          type="button"
+                          onClick={() => openQuickAddOrderModal(trimmedOrder, oIdx)}
+                          className="btn btn-outline-success"
+                          title="Save this order to the Common Orders dropdown now"
+                        >
+                          <i className="bi bi-bookmark-plus"></i>
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => moveOrderRow(oIdx, 'up')}
@@ -968,7 +1081,14 @@ export default function AdmissionsSurgery({
                         <i className="bi bi-trash"></i>
                       </button>
                     </div>
-                  ))}
+                    );
+                  })}
+
+                  <datalist id="common-postop-orders-list">
+                    {flatOrderOptions.map((opt, optIdx) => (
+                      <option key={optIdx} value={opt} />
+                    ))}
+                  </datalist>
 
                   <div className="mt-2 text-end">
                     <button
@@ -1264,6 +1384,15 @@ export default function AdmissionsSurgery({
         onClose={() => setQuickAddConfig(null)}
         onStaffAdded={handleStaffAdded}
         onAnesthesiaAdded={handleAnesthesiaAdded}
+      />
+
+      <QuickAddDropdownModal
+        config={quickAddOrderModal}
+        onClose={() => {
+          setQuickAddOrderModal(null);
+          setQuickAddOrderRowIdx(null);
+        }}
+        onSaved={handleSavedOrderOption}
       />
     </AppLayout>
   );

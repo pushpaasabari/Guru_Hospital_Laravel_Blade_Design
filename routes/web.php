@@ -4,6 +4,7 @@ use App\Http\Controllers\AdmissionController;
 use App\Http\Controllers\AnesthesiaTypeController;
 use App\Http\Controllers\AuditLogController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ClinicalDropdownOptionController;
 use App\Http\Controllers\ClinicalStaffController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DatabaseBackupController;
@@ -38,6 +39,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/admissions', [AdmissionController::class, 'store'])->name('admissions.store');
     Route::post('/admissions/quick-staff', [ClinicalStaffController::class, 'quickStore'])->name('admissions.quick-staff');
     Route::post('/admissions/quick-anesthesia', [AnesthesiaTypeController::class, 'quickStore'])->name('admissions.quick-anesthesia');
+    Route::post('/admissions/quick-dropdown-option', [ClinicalDropdownOptionController::class, 'quickStore'])->name('admissions.quick-dropdown-option');
     Route::get('/admissions/{admission}', [AdmissionController::class, 'show'])->name('admissions.show');
     Route::get('/admissions/{admission}/edit', [AdmissionController::class, 'edit'])->name('admissions.edit');
     Route::get('/admissions/{admission}/admission', [AdmissionController::class, 'edit'])->name('admissions.admission');

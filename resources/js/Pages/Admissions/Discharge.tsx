@@ -5,6 +5,10 @@ import StaffSelect, { ClinicalStaffMember } from '../../Components/StaffSelect';
 import AdmissionStageNav from '../../Components/AdmissionStageNav';
 import PaymentInsuranceFields, { normalizePaymentMode } from '../../Components/PaymentInsuranceFields';
 import ActionDropdown from '../../Components/ActionDropdown';
+import QuickAddDropdownModal, {
+  QuickAddDropdownConfig,
+  SavedDropdownOption,
+} from '../../Components/QuickAddDropdownModal';
 import { defaultMrdFromIp, resolveMrdNo } from '../../utils/inputNormalizers';
 
 interface AdmissionData {
@@ -58,6 +62,7 @@ interface AdmissionData {
 interface Props {
   admission: AdmissionData;
   clinicalStaff?: ClinicalStaffMember[];
+  medicationOptions?: string[];
 }
 
 interface MedicationRow {
@@ -196,9 +201,31 @@ const serializeMedications = (rows: MedicationRow[]): string => {
     .join('\n');
 };
 
-export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: Props) {
+export default function AdmissionsDischarge({
+  admission,
+  clinicalStaff = [],
+  medicationOptions = [],
+}: Props) {
   const initialMedRows = parseMedications(admission.medication_orders);
   const [medRows, setMedRows] = useState<MedicationRow[]>(initialMedRows);
+  const [savedMedications, setSavedMedications] = useState<string[]>(() => {
+    const source = medicationOptions && medicationOptions.length > 0 ? medicationOptions : COMMON_MEDICATIONS;
+    const seen = new Set<string>();
+    const merged: string[] = [];
+    for (const item of [...source, ...COMMON_MEDICATIONS]) {
+      const clean = item.trim();
+      const key = clean.toLowerCase();
+      if (clean && !seen.has(key)) {
+        seen.add(key);
+        merged.push(clean);
+      }
+    }
+    return merged;
+  });
+  const [quickAddMedModal, setQuickAddMedModal] = useState<QuickAddDropdownConfig | null>(null);
+  const [quickAddTargetRowIdx, setQuickAddTargetRowIdx] = useState<number | null>(null);
+
+  const knownMedicationKeys = new Set(savedMedications.map((m) => m.trim().toLowerCase()));
 
   const { data, setData, put, transform, processing, errors } = useForm({
     discharge_at: admission.discharge_at ? admission.discharge_at.slice(0, 16) : '',
@@ -242,7 +269,44 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
 
   const addMedRow = (row?: MedicationRow) => {
     const newRow = row || { medicine: '', frequency: '1-0-1', duration: '7 Days', timing: 'After food' };
-    setMedRows((prev) => [...prev, newRow]);
+    setMedRows((prev) => {
+      if (row?.medicine?.trim() && prev.length === 1 && !prev[0].medicine.trim()) {
+        return [{ ...prev[0], ...row }];
+      }
+      return [...prev, newRow];
+    });
+  };
+
+  const openQuickAddMedicineModal = (prefill = '', rowIdx: number | null = null) => {
+    setQuickAddTargetRowIdx(rowIdx);
+    setQuickAddMedModal({
+      type: 'medication',
+      title: 'Add New Medicine to Dropdown',
+      fieldLabel: 'Medicine Name & Strength',
+      placeholder: 'e.g. Tab. Dolo 650mg or Inj. Ceftriaxone 1g',
+      helperText: 'Saves to reusable medicine dropdown immediately & persists for future discharges',
+      submitLabel: rowIdx !== null ? 'Save to Dropdown' : 'Save & Add Medicine Row',
+      initialValue: prefill,
+    });
+  };
+
+  const handleSavedMedicationOption = (option: SavedDropdownOption) => {
+    const clean = option.label.trim();
+    if (!clean) return;
+    setSavedMedications((prev) => {
+      if (prev.some((m) => m.trim().toLowerCase() === clean.toLowerCase())) {
+        return prev;
+      }
+      return [clean, ...prev];
+    });
+
+    if (quickAddTargetRowIdx !== null) {
+      updateMedRow(quickAddTargetRowIdx, 'medicine', clean);
+      setQuickAddTargetRowIdx(null);
+      return;
+    }
+
+    addMedRow({ medicine: clean, frequency: '1-0-1', duration: '7 Days', timing: 'After food' });
   };
 
   const removeMedRow = (idx: number) => {
@@ -446,6 +510,41 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
             </div>
           </div>
           <div className="card-body">
+            <div className="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+              <div className="d-flex flex-wrap align-items-center gap-2">
+                <select
+                  className="form-select form-select-sm"
+                  style={{ minWidth: '280px', maxWidth: '380px' }}
+                  defaultValue=""
+                  aria-label="Select Saved Medicine to Add"
+                  onChange={(e) => {
+                    const selected = e.target.value;
+                    if (selected) {
+                      addMedRow({ medicine: selected, frequency: '1-0-1', duration: '7 Days', timing: 'After food' });
+                      e.target.value = '';
+                    }
+                  }}
+                >
+                  <option value="">-- Add Medicine from Saved Dropdown --</option>
+                  {savedMedications.map((medName, mIdx) => (
+                    <option key={mIdx} value={medName}>
+                      {medName}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => openQuickAddMedicineModal('', null)}
+                  className="btn btn-sm btn-outline-primary fw-semibold"
+                >
+                  <i className="bi bi-plus-circle me-1"></i> New Medicine
+                </button>
+              </div>
+              <small className="text-muted">
+                Any new medicine entered &amp; saved here is remembered automatically in the dropdown next time.
+              </small>
+            </div>
+
             {/* Medications Table Repeater */}
             <div className="table-responsive mb-3">
               <table className="table table-bordered align-middle mb-2">
@@ -460,18 +559,33 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
                   </tr>
                 </thead>
                 <tbody>
-                  {medRows.map((med, idx) => (
+                  {medRows.map((med, idx) => {
+                    const trimmedMed = med.medicine.trim();
+                    const isNewMed = trimmedMed.length > 0 && !knownMedicationKeys.has(trimmedMed.toLowerCase());
+                    return (
                     <tr key={idx}>
                       <td className="fw-bold text-secondary text-center">{idx + 1}</td>
                       <td>
-                        <input
-                          type="text"
-                          className="form-control form-control-sm"
-                          value={med.medicine}
-                          onChange={(e) => updateMedRow(idx, 'medicine', e.target.value)}
-                          placeholder="Select or enter medicine..."
-                          list="common-medications-list"
-                        />
+                        <div className="input-group input-group-sm">
+                          <input
+                            type="text"
+                            className="form-control form-control-sm"
+                            value={med.medicine}
+                            onChange={(e) => updateMedRow(idx, 'medicine', e.target.value)}
+                            placeholder="Select or enter medicine..."
+                            list="common-medications-list"
+                          />
+                          {isNewMed && (
+                            <button
+                              type="button"
+                              onClick={() => openQuickAddMedicineModal(trimmedMed, idx)}
+                              className="btn btn-outline-success"
+                              title="Save this medicine to the dropdown now"
+                            >
+                              <i className="bi bi-bookmark-plus"></i>
+                            </button>
+                          )}
+                        </div>
                       </td>
                       <td>
                         <select
@@ -532,7 +646,8 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
               <div className="text-end">
@@ -574,7 +689,7 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
                 </tbody>
               </table>
               <datalist id="common-medications-list">
-                {COMMON_MEDICATIONS.map((m, mIdx) => (
+                {savedMedications.map((m, mIdx) => (
                   <option key={mIdx} value={m} />
                 ))}
               </datalist>
@@ -819,6 +934,15 @@ export default function AdmissionsDischarge({ admission, clinicalStaff = [] }: P
           </div>
         </div>
       </form>
+
+      <QuickAddDropdownModal
+        config={quickAddMedModal}
+        onClose={() => {
+          setQuickAddMedModal(null);
+          setQuickAddTargetRowIdx(null);
+        }}
+        onSaved={handleSavedMedicationOption}
+      />
     </AppLayout>
   );
 }
